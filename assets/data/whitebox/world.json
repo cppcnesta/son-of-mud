@@ -1,0 +1,1560 @@
+{
+  "viewport": [
+    1152,
+    648
+  ],
+  "grid": 64,
+  "reserved_expansions": [
+    {
+      "id": "water_down",
+      "label": "M02下方水域",
+      "anchor": "M02",
+      "target": null
+    },
+    {
+      "id": "reed_marsh",
+      "label": "芦苇泽",
+      "anchor": null,
+      "target": null
+    },
+    {
+      "id": "high_cliff",
+      "label": "高崖",
+      "anchor": null,
+      "target": null
+    },
+    {
+      "id": "eye_temple",
+      "label": "眼之殿",
+      "anchor": null,
+      "target": null
+    }
+  ],
+  "rooms": {
+    "M01": {
+      "id": "M01",
+      "title": "苏醒",
+      "screens": [
+        1,
+        1
+      ],
+      "size": [
+        1152,
+        640
+      ],
+      "ports": [
+        {
+          "id": "M01_to_M02",
+          "target": "M02",
+          "spawn": "FromM01",
+          "requires": [],
+          "position": [
+            80,
+            552
+          ],
+          "arrival": [
+            208,
+            552
+          ]
+        }
+      ],
+      "events": [
+        {
+          "id": "awakening",
+          "title": "苏醒",
+          "position": [
+            512,
+            552
+          ],
+          "text": "——我的儿子，醒来。\n我是父亲用血和泥捏出的第一个。\n穆尔图库尔：父亲？您在哪里？"
+        },
+        {
+          "id": "block_lesson",
+          "title": "格挡",
+          "position": [
+            832,
+            552
+          ],
+          "text": "按K格挡。水形态只能挡下一击；成功后可立即反击。\n泥形态可持续防御，成功格挡会强化下一次命中。"
+        }
+      ]
+    },
+    "M02": {
+      "id": "M02",
+      "title": "坑底·两河",
+      "screens": [
+        1.2,
+        1.5
+      ],
+      "size": [
+        1408,
+        960
+      ],
+      "ports": [
+        {
+          "id": "M02_to_M01",
+          "target": "M01",
+          "spawn": "FromM02",
+          "requires": [],
+          "position": [
+            80,
+            872
+          ],
+          "arrival": [
+            208,
+            872
+          ]
+        },
+        {
+          "id": "M02_to_M03",
+          "target": "M03",
+          "spawn": "FromM02",
+          "requires": [],
+          "position": [
+            1328,
+            872
+          ],
+          "arrival": [
+            1200,
+            872
+          ]
+        }
+      ],
+      "events": [
+        {
+          "id": "tablet_sky",
+          "title": "当天还没有名字",
+          "position": [
+            448,
+            872
+          ],
+          "text": "当天还没有名字，地也还没有名字。只有海。海底有泥，祂取出泥，混上自己的血……第七夜，……落下。"
+        },
+        {
+          "id": "reflection",
+          "title": "水面倒影",
+          "position": [
+            960,
+            872
+          ],
+          "text": "穆尔图库尔：……水太浑了。"
+        }
+      ]
+    },
+    "M03": {
+      "id": "M03",
+      "title": "朝圣者之路",
+      "screens": [
+        3,
+        1
+      ],
+      "size": [
+        3456,
+        640
+      ],
+      "ports": [
+        {
+          "id": "M03_to_M02",
+          "target": "M02",
+          "spawn": "FromM03",
+          "requires": [],
+          "position": [
+            80,
+            552
+          ],
+          "arrival": [
+            208,
+            552
+          ]
+        },
+        {
+          "id": "M03_to_M04",
+          "target": "M04",
+          "spawn": "FromM03",
+          "requires": [],
+          "position": [
+            3376,
+            552
+          ],
+          "arrival": [
+            3248,
+            552
+          ]
+        }
+      ],
+      "events": [
+        {
+          "id": "pilgrims",
+          "title": "朝圣者",
+          "position": [
+            1216,
+            552
+          ],
+          "text": "路边的泥人跪着，双手交握。\n？？？：杀了他们！"
+        }
+      ]
+    },
+    "M04": {
+      "id": "M04",
+      "title": "供桌",
+      "screens": [
+        0.8,
+        1
+      ],
+      "size": [
+        896,
+        640
+      ],
+      "ports": [
+        {
+          "id": "M04_to_M03",
+          "target": "M03",
+          "spawn": "FromM04",
+          "requires": [],
+          "position": [
+            80,
+            552
+          ],
+          "arrival": [
+            208,
+            552
+          ]
+        },
+        {
+          "id": "M04_to_M05",
+          "target": "M05",
+          "spawn": "FromM04",
+          "requires": [],
+          "position": [
+            816,
+            552
+          ],
+          "arrival": [
+            688,
+            552
+          ]
+        }
+      ],
+      "events": [
+        {
+          "id": "rest",
+          "title": "供桌",
+          "position": [
+            448,
+            552
+          ],
+          "text": "石桌上放着面包和一碗清水。\n按E食用并休整。在此可按B调整泥形态跳跃。"
+        }
+      ]
+    },
+    "M05": {
+      "id": "M05",
+      "title": "守坑人",
+      "screens": [
+        1.8,
+        1.2
+      ],
+      "size": [
+        2048,
+        768
+      ],
+      "ports": [
+        {
+          "id": "M05_to_M04",
+          "target": "M04",
+          "spawn": "FromM05",
+          "requires": [],
+          "position": [
+            80,
+            680
+          ],
+          "arrival": [
+            208,
+            680
+          ]
+        },
+        {
+          "id": "M05_to_M06",
+          "target": "M06",
+          "spawn": "FromM05",
+          "requires": [
+            "boss_M05"
+          ],
+          "position": [
+            1968,
+            680
+          ],
+          "arrival": [
+            1840,
+            680
+          ]
+        }
+      ],
+      "events": [
+        {
+          "id": "arena",
+          "title": "守坑人",
+          "position": [
+            512,
+            680
+          ],
+          "text": "挡住守坑人的攻击，趁他失衡时反击。"
+        }
+      ]
+    },
+    "M06": {
+      "id": "M06",
+      "title": "七夜·两河源头",
+      "screens": [
+        1.2,
+        1.2
+      ],
+      "size": [
+        1408,
+        768
+      ],
+      "ports": [
+        {
+          "id": "M06_to_M05",
+          "target": "M05",
+          "spawn": "FromM06",
+          "requires": [],
+          "position": [
+            80,
+            680
+          ],
+          "arrival": [
+            208,
+            680
+          ]
+        },
+        {
+          "id": "M06_to_T01",
+          "target": "T01",
+          "spawn": "FromM06",
+          "requires": [],
+          "position": [
+            1328,
+            680
+          ],
+          "arrival": [
+            1200,
+            680
+          ]
+        }
+      ],
+      "events": [
+        {
+          "id": "seven_nights",
+          "title": "七夜雕像",
+          "position": [
+            704,
+            680
+          ],
+          "text": "七个夜晚，父亲用拇指按出他的身体。\n第七夜，他睁开眼，一颗星从海面上落下。\n伊姆杜：穆尔图库尔。我的儿子。"
+        },
+        {
+          "id": "song",
+          "title": "两河源头",
+          "position": [
+            1024,
+            680
+          ],
+          "text": "穆尔图库尔：有人在唱歌。\n？？？：别听。"
+        }
+      ]
+    },
+    "T01": {
+      "id": "T01",
+      "title": "工地入口",
+      "screens": [
+        1.3,
+        1.35
+      ],
+      "size": [
+        1472,
+        896
+      ],
+      "ports": [
+        {
+          "id": "T01_to_M06",
+          "target": "M06",
+          "spawn": "FromT01",
+          "requires": [],
+          "position": [
+            80,
+            808
+          ],
+          "arrival": [
+            208,
+            808
+          ]
+        },
+        {
+          "id": "T01_to_T02",
+          "target": "T02",
+          "spawn": "FromT01",
+          "requires": [
+            "ability:double_jump",
+            "tutorial_double"
+          ],
+          "position": [
+            1392,
+            616
+          ],
+          "arrival": [
+            1264,
+            616
+          ]
+        }
+      ],
+      "events": [
+        {
+          "id": "unlock_double",
+          "title": "二段跳",
+          "position": [
+            448,
+            808
+          ],
+          "text": "已习得二段跳。\n空中再次按下跳跃，登上前方高台。",
+          "ability": "double_jump"
+        }
+      ]
+    },
+    "T02": {
+      "id": "T02",
+      "title": "壁画长廊",
+      "screens": [
+        1.5,
+        1.5
+      ],
+      "size": [
+        1728,
+        960
+      ],
+      "ports": [
+        {
+          "id": "T02_to_T01",
+          "target": "T01",
+          "spawn": "FromT02",
+          "requires": [],
+          "position": [
+            80,
+            872
+          ],
+          "arrival": [
+            208,
+            872
+          ]
+        },
+        {
+          "id": "T02_to_T03",
+          "target": "T03",
+          "spawn": "FromT02",
+          "requires": [
+            "ability:wall_climb",
+            "tutorial_wall"
+          ],
+          "position": [
+            1648,
+            424
+          ],
+          "arrival": [
+            1520,
+            424
+          ]
+        }
+      ],
+      "events": [
+        {
+          "id": "mural",
+          "title": "壁画·笑容",
+          "position": [
+            512,
+            872
+          ],
+          "text": "祂把风灌进她的嘴里，海就停了。祂举起弯刃，海就分成了两半。\n泥板「笑容」：她的血溅到我身上的时候，那是他第一次为我笑。"
+        },
+        {
+          "id": "unlock_wall",
+          "title": "攀墙",
+          "position": [
+            960,
+            872
+          ],
+          "text": "已习得攀墙。\n贴近墙面，按住朝墙方向与W向上攀爬。",
+          "ability": "wall_climb"
+        }
+      ]
+    },
+    "T03": {
+      "id": "T03",
+      "title": "水闸",
+      "screens": [
+        1.4,
+        1.3
+      ],
+      "size": [
+        1600,
+        832
+      ],
+      "ports": [
+        {
+          "id": "T03_to_T02",
+          "target": "T02",
+          "spawn": "FromT03",
+          "requires": [],
+          "position": [
+            80,
+            744
+          ],
+          "arrival": [
+            208,
+            744
+          ]
+        },
+        {
+          "id": "T03_to_T04",
+          "target": "T04",
+          "spawn": "FromT03",
+          "requires": [
+            "flood_done"
+          ],
+          "position": [
+            1520,
+            744
+          ],
+          "arrival": [
+            1392,
+            744
+          ]
+        }
+      ],
+      "events": [
+        {
+          "id": "flood",
+          "title": "水闸",
+          "position": [
+            704,
+            744
+          ],
+          "text": "？？？：打开它！他们太吵了。\n洪水冲进下层工地，歌声停了。"
+        },
+        {
+          "id": "after_flood",
+          "title": "洪水之后",
+          "position": [
+            1088,
+            744
+          ],
+          "text": "神不愿听到我们的声音，降下了大洪水。我们依旧向祂祈祷。我们唱得更小声了。"
+        }
+      ]
+    },
+    "T04": {
+      "id": "T04",
+      "title": "龙蛇泥人",
+      "screens": [
+        2.2,
+        1.8
+      ],
+      "size": [
+        2560,
+        1152
+      ],
+      "ports": [
+        {
+          "id": "T04_to_T03",
+          "target": "T03",
+          "spawn": "FromT04",
+          "requires": [],
+          "position": [
+            80,
+            1064
+          ],
+          "arrival": [
+            208,
+            1064
+          ]
+        },
+        {
+          "id": "T04_to_T05",
+          "target": "T05",
+          "spawn": "FromT04",
+          "requires": [
+            "boss_T04"
+          ],
+          "position": [
+            2480,
+            1064
+          ],
+          "arrival": [
+            2352,
+            1064
+          ]
+        }
+      ],
+      "events": [
+        {
+          "id": "arena",
+          "title": "母神之兽",
+          "position": [
+            512,
+            1064
+          ],
+          "text": "借助墙面和二段跳避开落点，趁龙蛇失衡时反击。"
+        }
+      ]
+    },
+    "T05": {
+      "id": "T05",
+      "title": "工地尽头",
+      "screens": [
+        1.2,
+        2.5
+      ],
+      "size": [
+        1408,
+        1600
+      ],
+      "ports": [
+        {
+          "id": "T05_to_T04",
+          "target": "T04",
+          "spawn": "FromT05",
+          "requires": [],
+          "position": [
+            80,
+            1512
+          ],
+          "arrival": [
+            208,
+            1512
+          ]
+        },
+        {
+          "id": "T05_to_C01",
+          "target": "C01",
+          "spawn": "FromT05",
+          "requires": [],
+          "position": [
+            1328,
+            320
+          ],
+          "arrival": [
+            1200,
+            320
+          ]
+        },
+        {
+          "id": "T05_to_T06",
+          "target": "T06",
+          "spawn": "FromT05",
+          "requires": [],
+          "shortcut": "shortcut_T06_T05",
+          "break_side": false,
+          "bidirectional_after_break": true,
+          "position": [
+            704,
+            1512
+          ],
+          "arrival": [
+            576,
+            1512
+          ]
+        }
+      ],
+      "events": [
+        {
+          "id": "sea_statue",
+          "title": "塔姆图雕像",
+          "position": [
+            448,
+            1512
+          ],
+          "text": "母神张开巨大的双臂，抱住了他。\n塔姆图：你出生那夜，有一颗星落进我的水里。\n获得「命运石板」。"
+        },
+        {
+          "id": "meteor",
+          "title": "掌心深处·流星",
+          "position": [
+            960,
+            900
+          ],
+          "text": "他的手在我头上，停了一颗星从天这头落到那头那么久。\n只有那么久。"
+        }
+      ]
+    },
+    "T06": {
+      "id": "T06",
+      "title": "登塔入口",
+      "screens": [
+        1,
+        1
+      ],
+      "size": [
+        1152,
+        640
+      ],
+      "ports": [
+        {
+          "id": "T06_to_C08",
+          "target": "C08",
+          "spawn": "FromT06",
+          "requires": [],
+          "position": [
+            80,
+            552
+          ],
+          "arrival": [
+            208,
+            552
+          ]
+        },
+        {
+          "id": "T06_to_H01",
+          "target": "H01",
+          "spawn": "FromT06",
+          "requires": [
+            "districts"
+          ],
+          "position": [
+            1072,
+            552
+          ],
+          "arrival": [
+            944,
+            552
+          ]
+        },
+        {
+          "id": "T06_to_T05",
+          "target": "T05",
+          "spawn": "FromT06",
+          "requires": [],
+          "shortcut": "shortcut_T06_T05",
+          "break_side": true,
+          "bidirectional_after_break": true,
+          "position": [
+            576,
+            552
+          ],
+          "arrival": [
+            448,
+            552
+          ]
+        }
+      ],
+      "events": [
+        {
+          "id": "final_entry",
+          "title": "登塔入口",
+          "position": [
+            576,
+            552
+          ],
+          "text": "伊吉：……我只听见祂的声音。\n？？？：我的儿子！上来。我在上面等你。"
+        }
+      ]
+    },
+    "C01": {
+      "id": "C01",
+      "title": "城门",
+      "screens": [
+        1,
+        1
+      ],
+      "size": [
+        1152,
+        640
+      ],
+      "ports": [
+        {
+          "id": "C01_to_T05",
+          "target": "T05",
+          "spawn": "FromC01",
+          "requires": [],
+          "position": [
+            80,
+            552
+          ],
+          "arrival": [
+            208,
+            552
+          ]
+        },
+        {
+          "id": "C01_to_C02",
+          "target": "C02",
+          "spawn": "FromC01",
+          "requires": [],
+          "position": [
+            1072,
+            552
+          ],
+          "arrival": [
+            944,
+            552
+          ]
+        }
+      ],
+      "events": [
+        {
+          "id": "city_guard",
+          "title": "城门守卫",
+          "position": [
+            512,
+            552
+          ],
+          "text": "？？？：跪着的，是在拜我。放过他们。\n穆尔图库尔：……是，父亲。"
+        }
+      ]
+    },
+    "C02": {
+      "id": "C02",
+      "title": "跪拜街道",
+      "screens": [
+        2,
+        1
+      ],
+      "size": [
+        2304,
+        640
+      ],
+      "ports": [
+        {
+          "id": "C02_to_C01",
+          "target": "C01",
+          "spawn": "FromC02",
+          "requires": [],
+          "position": [
+            80,
+            552
+          ],
+          "arrival": [
+            208,
+            552
+          ]
+        },
+        {
+          "id": "C02_to_C03",
+          "target": "C03",
+          "spawn": "FromC02",
+          "requires": [],
+          "position": [
+            2224,
+            552
+          ],
+          "arrival": [
+            2096,
+            552
+          ]
+        }
+      ],
+      "events": [
+        {
+          "id": "relief",
+          "title": "街边浮雕",
+          "position": [
+            1024,
+            552
+          ],
+          "text": "祂睡在泥里。祂是破碎的。祂没有醒。"
+        }
+      ]
+    },
+    "C03": {
+      "id": "C03",
+      "title": "底层神殿",
+      "screens": [
+        1.8,
+        1.2
+      ],
+      "size": [
+        2048,
+        768
+      ],
+      "ports": [
+        {
+          "id": "C03_to_C02",
+          "target": "C02",
+          "spawn": "FromC03",
+          "requires": [],
+          "position": [
+            80,
+            680
+          ],
+          "arrival": [
+            208,
+            680
+          ]
+        },
+        {
+          "id": "C03_to_C04",
+          "target": "C04",
+          "spawn": "FromC03",
+          "requires": [],
+          "position": [
+            1968,
+            680
+          ],
+          "arrival": [
+            1840,
+            680
+          ]
+        },
+        {
+          "id": "C03_to_C06",
+          "target": "C06",
+          "spawn": "FromC03",
+          "requires": [],
+          "position": [
+            704,
+            680
+          ],
+          "arrival": [
+            832,
+            680
+          ]
+        },
+        {
+          "id": "C03_to_C07",
+          "target": "C07",
+          "spawn": "FromC03",
+          "requires": [
+            "districts",
+            "met_igi"
+          ],
+          "position": [
+            1344,
+            680
+          ],
+          "arrival": [
+            1216,
+            680
+          ]
+        }
+      ],
+      "events": [
+        {
+          "id": "igi",
+          "title": "伊吉",
+          "position": [
+            576,
+            680
+          ],
+          "text": "伊吉：我是伊吉，祂的伽拉。每死一个，我就唱一首。\n城里有三处征兆。找到它们，再回神殿。"
+        },
+        {
+          "id": "unlock_slam",
+          "title": "重压下砸",
+          "position": [
+            1088,
+            680
+          ],
+          "text": "已习得重压下砸。\n在空中按S+J，击碎脆弱地面。",
+          "ability": "heavy_slam"
+        },
+        {
+          "id": "rest",
+          "title": "火盆",
+          "position": [
+            1408,
+            680
+          ],
+          "text": "在火盆旁休整，恢复生命并记录进度。\n按B调整泥形态跳跃。"
+        }
+      ]
+    },
+    "C04": {
+      "id": "C04",
+      "title": "第一街区·期望的世界",
+      "screens": [
+        1.5,
+        1.3
+      ],
+      "size": [
+        1728,
+        832
+      ],
+      "ports": [
+        {
+          "id": "C04_to_C03",
+          "target": "C03",
+          "spawn": "FromC04",
+          "requires": [],
+          "position": [
+            80,
+            544
+          ],
+          "arrival": [
+            208,
+            544
+          ]
+        },
+        {
+          "id": "C04_to_C05",
+          "target": "C05",
+          "spawn": "FromC04",
+          "requires": [],
+          "position": [
+            1648,
+            544
+          ],
+          "arrival": [
+            1520,
+            544
+          ]
+        }
+      ],
+      "events": [
+        {
+          "id": "unlock_dive",
+          "title": "潜游",
+          "position": [
+            384,
+            744
+          ],
+          "text": "已习得潜游。\n以水形态入水，按W/S升降。",
+          "ability": "dive"
+        },
+        {
+          "id": "omen_1",
+          "title": "池底征兆·期望的世界",
+          "position": [
+            1024,
+            722
+          ],
+          "text": "两条河。河边有田。人会耕种，会建城，会唱歌。城里有神庙，神庙里有人记住这个世界。"
+        }
+      ]
+    },
+    "C05": {
+      "id": "C05",
+      "title": "第二街区·门",
+      "screens": [
+        1.5,
+        1.3
+      ],
+      "size": [
+        1728,
+        832
+      ],
+      "ports": [
+        {
+          "id": "C05_to_C04",
+          "target": "C04",
+          "spawn": "FromC05",
+          "requires": [],
+          "position": [
+            80,
+            744
+          ],
+          "arrival": [
+            208,
+            744
+          ]
+        },
+        {
+          "id": "C05_to_C06",
+          "target": "C06",
+          "spawn": "FromC05",
+          "requires": [],
+          "position": [
+            1648,
+            744
+          ],
+          "arrival": [
+            1520,
+            744
+          ]
+        }
+      ],
+      "events": [
+        {
+          "id": "omen_2",
+          "title": "祈祷者雕像·门",
+          "position": [
+            1024,
+            744
+          ],
+          "text": "父亲捏出第一个泥人，教它文字、耕种、占星。\n泥板「他们太软了」：泥人那么软，一碰就碎。他为什么要碰它们？"
+        }
+      ]
+    },
+    "C06": {
+      "id": "C06",
+      "title": "第三街区·诅咒",
+      "screens": [
+        1.5,
+        1.3
+      ],
+      "size": [
+        1728,
+        832
+      ],
+      "ports": [
+        {
+          "id": "C06_to_C05",
+          "target": "C05",
+          "spawn": "FromC06",
+          "requires": [],
+          "position": [
+            80,
+            744
+          ],
+          "arrival": [
+            208,
+            744
+          ]
+        },
+        {
+          "id": "C06_to_C03",
+          "target": "C03",
+          "spawn": "FromC06",
+          "requires": [],
+          "position": [
+            1648,
+            744
+          ],
+          "arrival": [
+            1520,
+            744
+          ]
+        }
+      ],
+      "events": [
+        {
+          "id": "sigil_1",
+          "title": "征兆·一",
+          "position": [
+            512,
+            744
+          ],
+          "text": "依照刻痕的先后，触碰三处征兆。"
+        },
+        {
+          "id": "sigil_2",
+          "title": "征兆·二",
+          "position": [
+            896,
+            744
+          ],
+          "text": ""
+        },
+        {
+          "id": "sigil_3",
+          "title": "征兆·三",
+          "position": [
+            1216,
+            744
+          ],
+          "text": "弑亲者，命落其子。第七夜，（缺）……"
+        }
+      ]
+    },
+    "C07": {
+      "id": "C07",
+      "title": "档案室",
+      "screens": [
+        1.2,
+        1
+      ],
+      "size": [
+        1408,
+        640
+      ],
+      "ports": [
+        {
+          "id": "C07_to_C03",
+          "target": "C03",
+          "spawn": "FromC07",
+          "requires": [],
+          "position": [
+            80,
+            552
+          ],
+          "arrival": [
+            208,
+            552
+          ]
+        },
+        {
+          "id": "C07_to_C08",
+          "target": "C08",
+          "spawn": "FromC07",
+          "requires": [],
+          "position": [
+            1328,
+            552
+          ],
+          "arrival": [
+            1200,
+            552
+          ]
+        }
+      ],
+      "events": [
+        {
+          "id": "archive",
+          "title": "年记",
+          "position": [
+            704,
+            552
+          ],
+          "text": "第一年，祂碎在泥里。我们捧来河泥，一点一点把祂补好。第三年，祂没有醒。第四十年，塔庙建到了第七层。第两百年，……"
+        }
+      ]
+    },
+    "C08": {
+      "id": "C08",
+      "title": "祭道",
+      "screens": [
+        0.8,
+        1
+      ],
+      "size": [
+        896,
+        640
+      ],
+      "ports": [
+        {
+          "id": "C08_to_C07",
+          "target": "C07",
+          "spawn": "FromC08",
+          "requires": [],
+          "position": [
+            80,
+            552
+          ],
+          "arrival": [
+            208,
+            552
+          ]
+        },
+        {
+          "id": "C08_to_T06",
+          "target": "T06",
+          "spawn": "FromC08",
+          "requires": [],
+          "position": [
+            816,
+            552
+          ],
+          "arrival": [
+            688,
+            552
+          ]
+        }
+      ],
+      "events": [
+        {
+          "id": "processional",
+          "title": "伊吉的疑问",
+          "position": [
+            448,
+            552
+          ],
+          "text": "伊吉：祂在跟谁说话？\n穆尔图库尔：跟父亲。你听不见吗？"
+        }
+      ]
+    },
+    "H01": {
+      "id": "H01",
+      "title": "七道门·登塔",
+      "screens": [
+        1.8,
+        4.5
+      ],
+      "size": [
+        2048,
+        2944
+      ],
+      "ports": [
+        {
+          "id": "H01_to_T06",
+          "target": "T06",
+          "spawn": "FromH01",
+          "requires": [],
+          "position": [
+            80,
+            2856
+          ],
+          "arrival": [
+            208,
+            2856
+          ]
+        },
+        {
+          "id": "H01_to_H02",
+          "target": "H02",
+          "spawn": "FromH01",
+          "requires": [
+            "seven_gates"
+          ],
+          "position": [
+            1968,
+            320
+          ],
+          "arrival": [
+            1840,
+            320
+          ]
+        }
+      ],
+      "events": [
+        {
+          "id": "gate_1",
+          "title": "第一道门·留下角冠",
+          "position": [
+            704,
+            2824
+          ],
+          "text": "留下角冠。泥板「一」：我来到他的身边，他戴着众神的角冠，创造新的世界。"
+        },
+        {
+          "id": "gate_2",
+          "title": "第二道门·留下金耳环",
+          "position": [
+            1344,
+            2440
+          ],
+          "text": "留下金耳环。泥板「二」：他没有抬头。我只听见一句话：穆尔图库尔，回去吧。"
+        },
+        {
+          "id": "gate_3",
+          "title": "第三道门·留下项链",
+          "position": [
+            704,
+            2056
+          ],
+          "text": "留下项链。泥板「三」：我有很多话想对他说，可喉咙里只有泥。"
+        },
+        {
+          "id": "gate_4",
+          "title": "第四道门·留下胸饰",
+          "position": [
+            1344,
+            1672
+          ],
+          "text": "留下胸饰。泥板「四」：他终于抬头看我，很久以来他第一次看我。我也知晓了自己的命运。"
+        },
+        {
+          "id": "gate_5",
+          "title": "第五道门·留下腰带",
+          "position": [
+            704,
+            1288
+          ],
+          "text": "留下腰带。泥板「五」：我从腰间拔出弯刃。他教会我的，只有这一件事。"
+        },
+        {
+          "id": "gate_6",
+          "title": "第六道门·留下手镯",
+          "position": [
+            1344,
+            904
+          ],
+          "text": "留下手镯。泥板「六」：他抓住了我的手，那只手曾在我的头颅上停留过一颗星落下的时间。"
+        },
+        {
+          "id": "gate_7",
+          "title": "第七道门·留下长袍",
+          "position": [
+            704,
+            520
+          ],
+          "text": "留下长袍。泥板「七」：刀进去的时候，他的血浸透了我的长袍。他叫我：我的儿子。"
+        }
+      ]
+    },
+    "H02": {
+      "id": "H02",
+      "title": "塔顶前厅",
+      "screens": [
+        1.5,
+        1
+      ],
+      "size": [
+        1728,
+        640
+      ],
+      "ports": [
+        {
+          "id": "H02_to_H01",
+          "target": "H01",
+          "spawn": "FromH02",
+          "requires": [],
+          "position": [
+            80,
+            552
+          ],
+          "arrival": [
+            208,
+            552
+          ]
+        },
+        {
+          "id": "H02_to_H03",
+          "target": "H03",
+          "spawn": "FromH02",
+          "requires": [],
+          "position": [
+            1648,
+            552
+          ],
+          "arrival": [
+            1520,
+            552
+          ]
+        }
+      ],
+      "events": [
+        {
+          "id": "rest",
+          "title": "最后休整",
+          "position": [
+            448,
+            552
+          ],
+          "text": "七件器物留在门前。父亲的心脏就在眼前。\n在此休整，准备登上塔顶。"
+        }
+      ]
+    },
+    "H03": {
+      "id": "H03",
+      "title": "塔顶心脏",
+      "screens": [
+        2.5,
+        1.8
+      ],
+      "size": [
+        2880,
+        1152
+      ],
+      "ports": [
+        {
+          "id": "H03_to_H02",
+          "target": "H02",
+          "spawn": "FromH03",
+          "requires": [],
+          "position": [
+            80,
+            1064
+          ],
+          "arrival": [
+            208,
+            1064
+          ]
+        }
+      ],
+      "events": [
+        {
+          "id": "arena",
+          "title": "心脏",
+          "position": [
+            512,
+            1064
+          ],
+          "text": "塔姆图从心脏里升起，张开巨大的双臂。"
+        },
+        {
+          "id": "truth",
+          "title": "真相·名字",
+          "position": [
+            1984,
+            1064
+          ],
+          "text": "他用父亲的骨头堆成山，用血管引出两条河。\n他走回泥坑，躺进那个人形的凹痕。\n穆尔图库尔——星落之时造成的武器。"
+        },
+        {
+          "id": "ending_awake",
+          "title": "结局：醒来",
+          "position": [
+            2304,
+            1064
+          ],
+          "text": "心脏停了。塔庙里第一次这么安静。\n穆尔图库尔：父亲？……\n泥板「星」：他爱我。可是只有一颗星落下那么久。"
+        },
+        {
+          "id": "ending_sleep",
+          "title": "结局：回去睡",
+          "position": [
+            2560,
+            1064
+          ],
+          "text": "伊吉跪在坑边唱歌。\n——我的儿子，醒来。"
+        }
+      ]
+    },
+    "TEST": {
+      "id": "TEST",
+      "title": "训练场",
+      "screens": [
+        3,
+        1.5
+      ],
+      "size": [
+        3456,
+        960
+      ],
+      "ports": [],
+      "events": [
+        {
+          "id": "rest",
+          "title": "休整",
+          "position": [
+            256,
+            872
+          ],
+          "text": "生命已恢复。"
+        },
+        {
+          "id": "test_all",
+          "title": "开放训练能力",
+          "position": [
+            576,
+            872
+          ],
+          "text": "训练能力已开放。"
+        },
+        {
+          "id": "test_clear",
+          "title": "基础能力训练",
+          "position": [
+            896,
+            872
+          ],
+          "text": "训练能力已恢复为基础状态。"
+        },
+        {
+          "id": "test_source",
+          "title": "格挡训练",
+          "position": [
+            1472,
+            872
+          ],
+          "text": "攻击源已切换。"
+        },
+        {
+          "id": "test_target",
+          "title": "重置训练靶",
+          "position": [
+            1920,
+            872
+          ],
+          "text": "训练靶已复位。"
+        },
+        {
+          "id": "test_exit",
+          "title": "离开训练场",
+          "position": [
+            3264,
+            872
+          ],
+          "text": ""
+        }
+      ]
+    }
+  }
+}

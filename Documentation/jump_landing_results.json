@@ -1,0 +1,32 @@
+{
+	"checks": 24,
+	"failures": 0,
+	"metrics": {},
+	"rendering": "gl_compatibility",
+	"results": [
+		"Tests: PASS 实际Godot版本4.7.2",
+		"Tests: PASS 实际图形运行：Windows / gl_compatibility",
+		"Tests: PASS 23主线场景+1测试场，无旧版多余房间",
+		"Tests: PASS 水/泥模组1下落贴地前接受起跳请求",
+		"Tests: PASS 水/泥模组1前摇中落地：仅清旧轨迹，保留待起跳配置",
+		"Tests: PASS 水/泥模组1落地后按冻结配置正常起跳，只消耗一次跳跃",
+		"Tests: PASS 水/泥模组1前摇中普通落地不误触范围攻击",
+		"Tests: PASS 水/泥模组1下一跳的范围攻击资格独立且不重复",
+		"Tests: PASS 泥/泥模组1下落贴地前接受起跳请求",
+		"Tests: PASS 泥/泥模组1前摇中落地：仅清旧轨迹，保留待起跳配置",
+		"Tests: PASS 泥/泥模组1落地后按冻结配置正常起跳，只消耗一次跳跃",
+		"Tests: PASS 泥/泥模组1前摇中普通落地不误触范围攻击",
+		"Tests: PASS 泥/泥模组1下一跳的范围攻击资格独立且不重复",
+		"Tests: PASS 泥/泥模组2下落贴地前接受起跳请求",
+		"Tests: PASS 泥/泥模组2前摇中落地：仅清旧轨迹，保留待起跳配置",
+		"Tests: PASS 泥/泥模组2落地后按冻结配置正常起跳，只消耗一次跳跃",
+		"Tests: PASS 泥/泥模组2前摇中普通落地不误触范围攻击",
+		"Tests: PASS 泥/泥模组2下一跳的范围攻击资格独立且不重复",
+		"Tests: PASS 待起跳配置为空时安全取消，不读取Nil或增加跳数",
+		"Tests: PASS 受伤分支：接受泥起跳前摇",
+		"Tests: PASS 受伤立即取消待起跳请求",
+		"Tests: PASS 受伤前摇结束后没有幽灵起跳",
+		"Tests: PASS 换场分支：接受泥起跳前摇",
+		"Tests: PASS 实际过门取消待起跳、空中轨迹与落地伤害资格"
+	]
+}

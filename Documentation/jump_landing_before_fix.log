@@ -1,0 +1,11 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+OpenGL API 3.3.0 NVIDIA 591.74 - Compatibility - Using Device: NVIDIA - NVIDIA GeForce RTX 4060 Laptop GPU
+
+Tests: PASS 实际Godot版本4.7.2
+Tests: PASS 实际图形运行：Windows / gl_compatibility
+Tests: PASS 23主线场景+1测试场，无旧版多余房间
+Tests: PASS 房间载入 form_lab.tscn / Start
+Tests: PASS 复现前置：泥形态处于下落阶段
+Tests: PASS 复现前置：下落时接受二段跳起跳前摇
+Tests: FAIL 下落中起跳前摇遇到落地后，待起跳配置仍有效
+Tests: FAIL 总计6项，失败1项；仅报告实际执行项目

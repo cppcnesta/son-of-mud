@@ -1,0 +1,12 @@
+Godot Engine v4.7.2.stable.official.ed1daf0bf - https://godotengine.org
+OpenGL API 3.3.0 NVIDIA 591.74 - Compatibility - Using Device: NVIDIA - NVIDIA GeForce RTX 4060 Laptop GPU
+
+Tests: PASS 实际Godot版本4.7.2
+Tests: PASS 实际图形运行：Windows / gl_compatibility
+Tests: PASS 23主线场景+1测试场，无旧版多余房间
+Tests: PASS 房间载入 form_lab.tscn / Start
+Tests: PASS 真实攻击判定：水10伤害，泥24伤害，同一攻击不多帧重复伤害
+Tests: PASS 实际攻击三阶段：泥前摇更长，后摇显著增加
+Tests: PASS 泥模组1向下攻击实际伤害43.2，模组1强化互斥
+Tests: PASS 泥模组2向下攻击实际伤害24.0，模组1强化互斥
+Tests: PASS 总计7项，失败0项；仅报告实际执行项目
