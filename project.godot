@@ -12,14 +12,14 @@ config_version=5
 
 config/name="泥之子 Whitebox V1.0"
 run/main_scene="res://assets/scenes/ui/main_menu.tscn"
-config/features=PackedStringArray("4.7", "GL Compatibility")
+config/features=PackedStringArray("4.7", "C#", "GL Compatibility")
 config/icon="res://icon.svg"
 
 [autoload]
 
-InputDefaults="*res://assets/scripts/core/input_defaults.gd"
-Progress="*res://assets/scripts/progression/progress.gd"
-RoomTravel="*res://assets/scripts/world/room_travel.gd"
+InputDefaults="*res://assets/scripts/core/MudInputDefaults.cs"
+Progress="*res://assets/scripts/progression/MudProgress.cs"
+RoomTravel="*res://assets/scripts/world/MudRoomTravel.cs"
 
 [display]
 
@@ -126,3 +126,7 @@ menu={
 rendering_device/driver.windows="d3d12"
 renderer/rendering_method="gl_compatibility"
 renderer/rendering_method.mobile="gl_compatibility"
+
+[dotnet]
+
+project/assembly_name="SonOfMud"

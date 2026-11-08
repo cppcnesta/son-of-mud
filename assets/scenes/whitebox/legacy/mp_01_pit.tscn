@@ -2,7 +2,7 @@
 
 [ext_resource type="TileSet" path="res://assets/data/whitebox/whitebox_tileset.tres" id="1_1yjet"]
 [ext_resource type="PackedScene" path="res://assets/scenes/player/player.tscn" id="2_vascc"]
-[ext_resource type="Script" path="res://assets/scripts/world/room_portal.gd" id="3_i1ngh"]
+[ext_resource type="Script" path="res://assets/scripts/world/MudRoomPortal.cs" id="3_i1ngh"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_4uiy8"]
 size = Vector2(64, 192)
@@ -77,8 +77,8 @@ position = Vector2(960, 544)
 position = Vector2(1088, 480)
 collision_layer = 0
 script = ExtResource("3_i1ngh")
-target_room = "uid://3bvo2beooro8"
-target_spawn = &"FromMP01"
+TargetRoom = "uid://3bvo2beooro8"
+TargetSpawn = &"FromMP01"
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="ToMP02" unique_id=1791178312]
 shape = SubResource("RectangleShape2D_4uiy8")

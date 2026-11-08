@@ -1,0 +1,1043 @@
+{
+  "scope": "C# migration of the current D:/GAMEOFF/son-of-mud snapshot",
+  "runtime_scripts_migrated": 20,
+  "test_scripts_migrated": 3,
+  "new_shared_support_files": 1,
+  "csharp_source_files": 24,
+  "csharp12_syntax": {
+    "status": "passed",
+    "files": 24,
+    "compiler": "Roslyn from installed .NET 10.0.203"
+  },
+  "compiled_pure_csharp_checks": {
+    "status": "passed",
+    "checks": 8,
+    "classes": [
+      "MudActionState",
+      "MudAttackLedger"
+    ]
+  },
+  "static_checks": {
+    "status": "passed",
+    "count": 248,
+    "resource_references": 51,
+    "results": [
+      {
+        "passed": true,
+        "message": "Exact 23-room manifest plus TEST, with no deprecated room IDs"
+      },
+      {
+        "passed": true,
+        "message": "No active GDScript files remain"
+      },
+      {
+        "passed": true,
+        "message": "No obsolete GDScript reference: tests/runtime_suite.tscn"
+      },
+      {
+        "passed": true,
+        "message": "Resource exists: res://tests/MudRuntimeSuite.cs"
+      },
+      {
+        "passed": true,
+        "message": "No obsolete GDScript reference: assets/scenes/player/player.tscn"
+      },
+      {
+        "passed": true,
+        "message": "Resource exists: res://assets/scripts/player/MudPlayer.cs"
+      },
+      {
+        "passed": true,
+        "message": "Resource exists: res://icon.svg"
+      },
+      {
+        "passed": true,
+        "message": "Script UID matches converted file: assets/scripts/player/MudPlayer.cs"
+      },
+      {
+        "passed": true,
+        "message": "No obsolete GDScript reference: assets/scenes/ui/main_menu.tscn"
+      },
+      {
+        "passed": true,
+        "message": "Resource exists: res://assets/scripts/ui/MudMainMenu.cs"
+      },
+      {
+        "passed": true,
+        "message": "No obsolete GDScript reference: assets/scenes/whitebox/mp_01_pit.tscn"
+      },
+      {
+        "passed": true,
+        "message": "Resource exists: res://assets/scenes/whitebox/legacy/mp_01_pit.tscn"
+      },
+      {
+        "passed": true,
+        "message": "No obsolete GDScript reference: assets/scenes/whitebox/mp_02_pilgrim_path.tscn"
+      },
+      {
+        "passed": true,
+        "message": "Resource exists: res://assets/scenes/whitebox/legacy/mp_02_pilgrim_path.tscn"
+      },
+      {
+        "passed": true,
+        "message": "No obsolete GDScript reference: assets/scenes/whitebox/mp_03_altar.tscn"
+      },
+      {
+        "passed": true,
+        "message": "Resource exists: res://assets/scenes/whitebox/legacy/mp_03_altar.tscn"
+      },
+      {
+        "passed": true,
+        "message": "No obsolete GDScript reference: assets/scenes/whitebox/legacy/mp_01_pit.tscn"
+      },
+      {
+        "passed": true,
+        "message": "Resource exists: res://assets/data/whitebox/whitebox_tileset.tres"
+      },
+      {
+        "passed": true,
+        "message": "Resource exists: res://assets/scenes/player/player.tscn"
+      },
+      {
+        "passed": true,
+        "message": "Resource exists: res://assets/scripts/world/MudRoomPortal.cs"
+      },
+      {
+        "passed": true,
+        "message": "No obsolete GDScript reference: assets/scenes/whitebox/legacy/mp_02_pilgrim_path.tscn"
+      },
+      {
+        "passed": true,
+        "message": "Resource exists: res://assets/data/whitebox/whitebox_tileset.tres"
+      },
+      {
+        "passed": true,
+        "message": "Resource exists: res://assets/scenes/player/player.tscn"
+      },
+      {
+        "passed": true,
+        "message": "Resource exists: res://assets/scripts/world/MudRoomPortal.cs"
+      },
+      {
+        "passed": true,
+        "message": "Script UID matches converted file: assets/scripts/world/MudRoomPortal.cs"
+      },
+      {
+        "passed": true,
+        "message": "No obsolete GDScript reference: assets/scenes/whitebox/legacy/mp_03_altar.tscn"
+      },
+      {
+        "passed": true,
+        "message": "Resource exists: res://assets/data/whitebox/whitebox_tileset.tres"
+      },
+      {
+        "passed": true,
+        "message": "Resource exists: res://assets/scenes/player/player.tscn"
+      },
+      {
+        "passed": true,
+        "message": "Resource exists: res://assets/scripts/world/MudRoomPortal.cs"
+      },
+      {
+        "passed": true,
+        "message": "No obsolete GDScript reference: assets/scenes/whitebox/legacy/Room01.tscn"
+      },
+      {
+        "passed": true,
+        "message": "Resource exists: res://assets/textures/whitebox/kenney_platformer.webp"
+      },
+      {
+        "passed": true,
+        "message": "Resource exists: res://assets/scenes/player/player.tscn"
+      },
+      {
+        "passed": true,
+        "message": "No obsolete GDScript reference: assets/scenes/whitebox/levels/C01.tscn"
+      },
+      {
+        "passed": true,
+        "message": "Resource exists: res://assets/scripts/whitebox/MudWhiteboxRoom.cs"
+      },
+      {
+        "passed": true,
+        "message": "No obsolete GDScript reference: assets/scenes/whitebox/levels/C02.tscn"
+      },
+      {
+        "passed": true,
+        "message": "Resource exists: res://assets/scripts/whitebox/MudWhiteboxRoom.cs"
+      },
+      {
+        "passed": true,
+        "message": "No obsolete GDScript reference: assets/scenes/whitebox/levels/C03.tscn"
+      },
+      {
+        "passed": true,
+        "message": "Resource exists: res://assets/scripts/whitebox/MudWhiteboxRoom.cs"
+      },
+      {
+        "passed": true,
+        "message": "No obsolete GDScript reference: assets/scenes/whitebox/levels/C04.tscn"
+      },
+      {
+        "passed": true,
+        "message": "Resource exists: res://assets/scripts/whitebox/MudWhiteboxRoom.cs"
+      },
+      {
+        "passed": true,
+        "message": "No obsolete GDScript reference: assets/scenes/whitebox/levels/C05.tscn"
+      },
+      {
+        "passed": true,
+        "message": "Resource exists: res://assets/scripts/whitebox/MudWhiteboxRoom.cs"
+      },
+      {
+        "passed": true,
+        "message": "No obsolete GDScript reference: assets/scenes/whitebox/levels/C06.tscn"
+      },
+      {
+        "passed": true,
+        "message": "Resource exists: res://assets/scripts/whitebox/MudWhiteboxRoom.cs"
+      },
+      {
+        "passed": true,
+        "message": "No obsolete GDScript reference: assets/scenes/whitebox/levels/C07.tscn"
+      },
+      {
+        "passed": true,
+        "message": "Resource exists: res://assets/scripts/whitebox/MudWhiteboxRoom.cs"
+      },
+      {
+        "passed": true,
+        "message": "No obsolete GDScript reference: assets/scenes/whitebox/levels/C08.tscn"
+      },
+      {
+        "passed": true,
+        "message": "Resource exists: res://assets/scripts/whitebox/MudWhiteboxRoom.cs"
+      },
+      {
+        "passed": true,
+        "message": "No obsolete GDScript reference: assets/scenes/whitebox/levels/H01.tscn"
+      },
+      {
+        "passed": true,
+        "message": "Resource exists: res://assets/scripts/whitebox/MudWhiteboxRoom.cs"
+      },
+      {
+        "passed": true,
+        "message": "No obsolete GDScript reference: assets/scenes/whitebox/levels/H02.tscn"
+      },
+      {
+        "passed": true,
+        "message": "Resource exists: res://assets/scripts/whitebox/MudWhiteboxRoom.cs"
+      },
+      {
+        "passed": true,
+        "message": "No obsolete GDScript reference: assets/scenes/whitebox/levels/H03.tscn"
+      },
+      {
+        "passed": true,
+        "message": "Resource exists: res://assets/scripts/whitebox/MudWhiteboxRoom.cs"
+      },
+      {
+        "passed": true,
+        "message": "No obsolete GDScript reference: assets/scenes/whitebox/levels/M01.tscn"
+      },
+      {
+        "passed": true,
+        "message": "Resource exists: res://assets/scripts/whitebox/MudWhiteboxRoom.cs"
+      },
+      {
+        "passed": true,
+        "message": "No obsolete GDScript reference: assets/scenes/whitebox/levels/M02.tscn"
+      },
+      {
+        "passed": true,
+        "message": "Resource exists: res://assets/scripts/whitebox/MudWhiteboxRoom.cs"
+      },
+      {
+        "passed": true,
+        "message": "No obsolete GDScript reference: assets/scenes/whitebox/levels/M03.tscn"
+      },
+      {
+        "passed": true,
+        "message": "Resource exists: res://assets/scripts/whitebox/MudWhiteboxRoom.cs"
+      },
+      {
+        "passed": true,
+        "message": "No obsolete GDScript reference: assets/scenes/whitebox/levels/M04.tscn"
+      },
+      {
+        "passed": true,
+        "message": "Resource exists: res://assets/scripts/whitebox/MudWhiteboxRoom.cs"
+      },
+      {
+        "passed": true,
+        "message": "No obsolete GDScript reference: assets/scenes/whitebox/levels/M05.tscn"
+      },
+      {
+        "passed": true,
+        "message": "Resource exists: res://assets/scripts/whitebox/MudWhiteboxRoom.cs"
+      },
+      {
+        "passed": true,
+        "message": "No obsolete GDScript reference: assets/scenes/whitebox/levels/M06.tscn"
+      },
+      {
+        "passed": true,
+        "message": "Resource exists: res://assets/scripts/whitebox/MudWhiteboxRoom.cs"
+      },
+      {
+        "passed": true,
+        "message": "No obsolete GDScript reference: assets/scenes/whitebox/levels/T01.tscn"
+      },
+      {
+        "passed": true,
+        "message": "Resource exists: res://assets/scripts/whitebox/MudWhiteboxRoom.cs"
+      },
+      {
+        "passed": true,
+        "message": "No obsolete GDScript reference: assets/scenes/whitebox/levels/T02.tscn"
+      },
+      {
+        "passed": true,
+        "message": "Resource exists: res://assets/scripts/whitebox/MudWhiteboxRoom.cs"
+      },
+      {
+        "passed": true,
+        "message": "No obsolete GDScript reference: assets/scenes/whitebox/levels/T03.tscn"
+      },
+      {
+        "passed": true,
+        "message": "Resource exists: res://assets/scripts/whitebox/MudWhiteboxRoom.cs"
+      },
+      {
+        "passed": true,
+        "message": "No obsolete GDScript reference: assets/scenes/whitebox/levels/T04.tscn"
+      },
+      {
+        "passed": true,
+        "message": "Resource exists: res://assets/scripts/whitebox/MudWhiteboxRoom.cs"
+      },
+      {
+        "passed": true,
+        "message": "No obsolete GDScript reference: assets/scenes/whitebox/levels/T05.tscn"
+      },
+      {
+        "passed": true,
+        "message": "Resource exists: res://assets/scripts/whitebox/MudWhiteboxRoom.cs"
+      },
+      {
+        "passed": true,
+        "message": "No obsolete GDScript reference: assets/scenes/whitebox/levels/T06.tscn"
+      },
+      {
+        "passed": true,
+        "message": "Resource exists: res://assets/scripts/whitebox/MudWhiteboxRoom.cs"
+      },
+      {
+        "passed": true,
+        "message": "No obsolete GDScript reference: assets/scenes/whitebox/tests/form_lab.tscn"
+      },
+      {
+        "passed": true,
+        "message": "Resource exists: res://assets/scripts/whitebox/MudWhiteboxRoom.cs"
+      },
+      {
+        "passed": true,
+        "message": "No obsolete GDScript reference: assets/data/player/mud.tres"
+      },
+      {
+        "passed": true,
+        "message": "Resource exists: res://assets/scripts/player/components/MudFormConfig.cs"
+      },
+      {
+        "passed": true,
+        "message": "No obsolete GDScript reference: assets/data/player/prototype_rules.tres"
+      },
+      {
+        "passed": true,
+        "message": "Resource exists: res://assets/scripts/player/components/MudPrototypeRules.cs"
+      },
+      {
+        "passed": true,
+        "message": "No obsolete GDScript reference: assets/data/player/water.tres"
+      },
+      {
+        "passed": true,
+        "message": "Resource exists: res://assets/scripts/player/components/MudFormConfig.cs"
+      },
+      {
+        "passed": true,
+        "message": "No obsolete GDScript reference: assets/data/whitebox/whitebox_tileset.tres"
+      },
+      {
+        "passed": true,
+        "message": "Resource exists: res://assets/textures/whitebox/kenney_platformer.webp"
+      },
+      {
+        "passed": true,
+        "message": "No obsolete GDScript reference: assets/data/player/curves/recovery_ease_out.tres"
+      },
+      {
+        "passed": true,
+        "message": "No obsolete GDScript reference: project.godot"
+      },
+      {
+        "passed": true,
+        "message": "Resource exists: res://assets/scenes/ui/main_menu.tscn"
+      },
+      {
+        "passed": true,
+        "message": "Resource exists: res://icon.svg"
+      },
+      {
+        "passed": true,
+        "message": "Resource exists: res://assets/scripts/core/MudInputDefaults.cs"
+      },
+      {
+        "passed": true,
+        "message": "Resource exists: res://assets/scripts/progression/MudProgress.cs"
+      },
+      {
+        "passed": true,
+        "message": "Resource exists: res://assets/scripts/world/MudRoomTravel.cs"
+      },
+      {
+        "passed": true,
+        "message": "Original script UID retained: assets/scripts/core/MudInputDefaults.cs"
+      },
+      {
+        "passed": true,
+        "message": "Export preserved: assets/scripts/player/MudPlayer.cs::WaterConfig"
+      },
+      {
+        "passed": true,
+        "message": "Export preserved: assets/scripts/player/MudPlayer.cs::MudConfig"
+      },
+      {
+        "passed": true,
+        "message": "Export preserved: assets/scripts/player/MudPlayer.cs::Rules"
+      },
+      {
+        "passed": true,
+        "message": "Export preserved: assets/scripts/player/MudPlayer.cs::InspectionSpeed"
+      },
+      {
+        "passed": true,
+        "message": "Float default preserved: assets/scripts/player/MudPlayer.cs::InspectionSpeed=500.0"
+      },
+      {
+        "passed": true,
+        "message": "Original script UID retained: assets/scripts/player/MudPlayer.cs"
+      },
+      {
+        "passed": true,
+        "message": "Original script UID retained: assets/scripts/player/components/MudActionState.cs"
+      },
+      {
+        "passed": true,
+        "message": "Export preserved: assets/scripts/player/components/MudFormConfig.cs::DisplayName"
+      },
+      {
+        "passed": true,
+        "message": "Export preserved: assets/scripts/player/components/MudFormConfig.cs::Tint"
+      },
+      {
+        "passed": true,
+        "message": "Export preserved: assets/scripts/player/components/MudFormConfig.cs::MoveSpeed"
+      },
+      {
+        "passed": true,
+        "message": "Export preserved: assets/scripts/player/components/MudFormConfig.cs::DodgeSpeed"
+      },
+      {
+        "passed": true,
+        "message": "Export preserved: assets/scripts/player/components/MudFormConfig.cs::DodgeDuration"
+      },
+      {
+        "passed": true,
+        "message": "Export preserved: assets/scripts/player/components/MudFormConfig.cs::DodgeCooldown"
+      },
+      {
+        "passed": true,
+        "message": "Export preserved: assets/scripts/player/components/MudFormConfig.cs::PenaltyDuration"
+      },
+      {
+        "passed": true,
+        "message": "Export preserved: assets/scripts/player/components/MudFormConfig.cs::PenaltyInitialMultiplier"
+      },
+      {
+        "passed": true,
+        "message": "Export preserved: assets/scripts/player/components/MudFormConfig.cs::RecoveryCurve"
+      },
+      {
+        "passed": true,
+        "message": "Export preserved: assets/scripts/player/components/MudFormConfig.cs::BlockDuration"
+      },
+      {
+        "passed": true,
+        "message": "Export preserved: assets/scripts/player/components/MudFormConfig.cs::BlockSingleHit"
+      },
+      {
+        "passed": true,
+        "message": "Export preserved: assets/scripts/player/components/MudFormConfig.cs::GrantsBlockBonus"
+      },
+      {
+        "passed": true,
+        "message": "Export preserved: assets/scripts/player/components/MudFormConfig.cs::BlockBonusMultiplier"
+      },
+      {
+        "passed": true,
+        "message": "Export preserved: assets/scripts/player/components/MudFormConfig.cs::BlockCooldown"
+      },
+      {
+        "passed": true,
+        "message": "Export preserved: assets/scripts/player/components/MudFormConfig.cs::ResetBlockCooldownOnSuccess"
+      },
+      {
+        "passed": true,
+        "message": "Export preserved: assets/scripts/player/components/MudFormConfig.cs::ResetAttackIntervalOnBlock"
+      },
+      {
+        "passed": true,
+        "message": "Export preserved: assets/scripts/player/components/MudFormConfig.cs::Damage"
+      },
+      {
+        "passed": true,
+        "message": "Export preserved: assets/scripts/player/components/MudFormConfig.cs::AttackWindup"
+      },
+      {
+        "passed": true,
+        "message": "Export preserved: assets/scripts/player/components/MudFormConfig.cs::AttackActive"
+      },
+      {
+        "passed": true,
+        "message": "Export preserved: assets/scripts/player/components/MudFormConfig.cs::AttackRecovery"
+      },
+      {
+        "passed": true,
+        "message": "Export preserved: assets/scripts/player/components/MudFormConfig.cs::AttackReach"
+      },
+      {
+        "passed": true,
+        "message": "Export preserved: assets/scripts/player/components/MudFormConfig.cs::DownAttackMultiplier"
+      },
+      {
+        "passed": true,
+        "message": "Export preserved: assets/scripts/player/components/MudFormConfig.cs::SoftAttackRecovery"
+      },
+      {
+        "passed": true,
+        "message": "Export preserved: assets/scripts/player/components/MudFormConfig.cs::BlockCancelWindow"
+      },
+      {
+        "passed": true,
+        "message": "Export preserved: assets/scripts/player/components/MudFormConfig.cs::DodgeCancelRecovery"
+      },
+      {
+        "passed": true,
+        "message": "Export preserved: assets/scripts/player/components/MudFormConfig.cs::JumpWindup"
+      },
+      {
+        "passed": true,
+        "message": "Export preserved: assets/scripts/player/components/MudFormConfig.cs::JumpSpeed"
+      },
+      {
+        "passed": true,
+        "message": "Export preserved: assets/scripts/player/components/MudFormConfig.cs::Gravity"
+      },
+      {
+        "passed": true,
+        "message": "Export preserved: assets/scripts/player/components/MudFormConfig.cs::ConstantDescent"
+      },
+      {
+        "passed": true,
+        "message": "Export preserved: assets/scripts/player/components/MudFormConfig.cs::DescentSpeed"
+      },
+      {
+        "passed": true,
+        "message": "Export preserved: assets/scripts/player/components/MudFormConfig.cs::TerminalSpeed"
+      },
+      {
+        "passed": true,
+        "message": "Export preserved: assets/scripts/player/components/MudFormConfig.cs::HoldAcceleration"
+      },
+      {
+        "passed": true,
+        "message": "Export preserved: assets/scripts/player/components/MudFormConfig.cs::HoldMaxTime"
+      },
+      {
+        "passed": true,
+        "message": "Export preserved: assets/scripts/player/components/MudFormConfig.cs::HoldHeightCap"
+      },
+      {
+        "passed": true,
+        "message": "Float default preserved: assets/scripts/player/components/MudFormConfig.cs::MoveSpeed=360.0"
+      },
+      {
+        "passed": true,
+        "message": "Float default preserved: assets/scripts/player/components/MudFormConfig.cs::DodgeSpeed=760.0"
+      },
+      {
+        "passed": true,
+        "message": "Float default preserved: assets/scripts/player/components/MudFormConfig.cs::DodgeDuration=0.28"
+      },
+      {
+        "passed": true,
+        "message": "Float default preserved: assets/scripts/player/components/MudFormConfig.cs::DodgeCooldown=0.65"
+      },
+      {
+        "passed": true,
+        "message": "Float default preserved: assets/scripts/player/components/MudFormConfig.cs::PenaltyDuration=0.0"
+      },
+      {
+        "passed": true,
+        "message": "Float default preserved: assets/scripts/player/components/MudFormConfig.cs::PenaltyInitialMultiplier=0.2"
+      },
+      {
+        "passed": true,
+        "message": "Float default preserved: assets/scripts/player/components/MudFormConfig.cs::BlockDuration=0.5"
+      },
+      {
+        "passed": true,
+        "message": "Float default preserved: assets/scripts/player/components/MudFormConfig.cs::BlockBonusMultiplier=1.6"
+      },
+      {
+        "passed": true,
+        "message": "Float default preserved: assets/scripts/player/components/MudFormConfig.cs::BlockCooldown=3.0"
+      },
+      {
+        "passed": true,
+        "message": "Float default preserved: assets/scripts/player/components/MudFormConfig.cs::Damage=10.0"
+      },
+      {
+        "passed": true,
+        "message": "Float default preserved: assets/scripts/player/components/MudFormConfig.cs::AttackWindup=0.08"
+      },
+      {
+        "passed": true,
+        "message": "Float default preserved: assets/scripts/player/components/MudFormConfig.cs::AttackActive=0.10"
+      },
+      {
+        "passed": true,
+        "message": "Float default preserved: assets/scripts/player/components/MudFormConfig.cs::AttackRecovery=0.16"
+      },
+      {
+        "passed": true,
+        "message": "Float default preserved: assets/scripts/player/components/MudFormConfig.cs::AttackReach=90.0"
+      },
+      {
+        "passed": true,
+        "message": "Float default preserved: assets/scripts/player/components/MudFormConfig.cs::DownAttackMultiplier=1.0"
+      },
+      {
+        "passed": true,
+        "message": "Float default preserved: assets/scripts/player/components/MudFormConfig.cs::BlockCancelWindow=0.0"
+      },
+      {
+        "passed": true,
+        "message": "Float default preserved: assets/scripts/player/components/MudFormConfig.cs::JumpWindup=0.05"
+      },
+      {
+        "passed": true,
+        "message": "Float default preserved: assets/scripts/player/components/MudFormConfig.cs::JumpSpeed=600.0"
+      },
+      {
+        "passed": true,
+        "message": "Float default preserved: assets/scripts/player/components/MudFormConfig.cs::Gravity=1600.0"
+      },
+      {
+        "passed": true,
+        "message": "Float default preserved: assets/scripts/player/components/MudFormConfig.cs::DescentSpeed=300.0"
+      },
+      {
+        "passed": true,
+        "message": "Float default preserved: assets/scripts/player/components/MudFormConfig.cs::TerminalSpeed=880.0"
+      },
+      {
+        "passed": true,
+        "message": "Float default preserved: assets/scripts/player/components/MudFormConfig.cs::HoldAcceleration=850.0"
+      },
+      {
+        "passed": true,
+        "message": "Float default preserved: assets/scripts/player/components/MudFormConfig.cs::HoldMaxTime=0.24"
+      },
+      {
+        "passed": true,
+        "message": "Float default preserved: assets/scripts/player/components/MudFormConfig.cs::HoldHeightCap=176.0"
+      },
+      {
+        "passed": true,
+        "message": "Original script UID retained: assets/scripts/player/components/MudFormConfig.cs"
+      },
+      {
+        "passed": true,
+        "message": "Original script UID retained: assets/scripts/player/components/MudMovementRecovery.cs"
+      },
+      {
+        "passed": true,
+        "message": "Original script UID retained: assets/scripts/player/components/MudPlayerCombat.cs"
+      },
+      {
+        "passed": true,
+        "message": "Original script UID retained: assets/scripts/player/components/MudPlayerGuard.cs"
+      },
+      {
+        "passed": true,
+        "message": "Export preserved: assets/scripts/player/components/MudPrototypeRules.cs::InitialForm"
+      },
+      {
+        "passed": true,
+        "message": "Export preserved: assets/scripts/player/components/MudPrototypeRules.cs::InitialAbilities"
+      },
+      {
+        "passed": true,
+        "message": "Export preserved: assets/scripts/player/components/MudPrototypeRules.cs::TestFastSwitch"
+      },
+      {
+        "passed": true,
+        "message": "Export preserved: assets/scripts/player/components/MudPrototypeRules.cs::SwitchCooldown"
+      },
+      {
+        "passed": true,
+        "message": "Export preserved: assets/scripts/player/components/MudPrototypeRules.cs::AllowAirSwitch"
+      },
+      {
+        "passed": true,
+        "message": "Export preserved: assets/scripts/player/components/MudPrototypeRules.cs::AllowActionCancel"
+      },
+      {
+        "passed": true,
+        "message": "Export preserved: assets/scripts/player/components/MudPrototypeRules.cs::OmnidirectionalBlock"
+      },
+      {
+        "passed": true,
+        "message": "Export preserved: assets/scripts/player/components/MudPrototypeRules.cs::DodgeInvulnerability"
+      },
+      {
+        "passed": true,
+        "message": "Export preserved: assets/scripts/player/components/MudPrototypeRules.cs::HurtDuration"
+      },
+      {
+        "passed": true,
+        "message": "Export preserved: assets/scripts/player/components/MudPrototypeRules.cs::MudJumpModule"
+      },
+      {
+        "passed": true,
+        "message": "Export preserved: assets/scripts/player/components/MudPrototypeRules.cs::UpgradedHoldHeight"
+      },
+      {
+        "passed": true,
+        "message": "Export preserved: assets/scripts/player/components/MudPrototypeRules.cs::LandingRadius"
+      },
+      {
+        "passed": true,
+        "message": "Export preserved: assets/scripts/player/components/MudPrototypeRules.cs::LandingDamage"
+      },
+      {
+        "passed": true,
+        "message": "Export preserved: assets/scripts/player/components/MudPrototypeRules.cs::SlamSpeed"
+      },
+      {
+        "passed": true,
+        "message": "Export preserved: assets/scripts/player/components/MudPrototypeRules.cs::SlamDamage"
+      },
+      {
+        "passed": true,
+        "message": "Export preserved: assets/scripts/player/components/MudPrototypeRules.cs::PlayerHealth"
+      },
+      {
+        "passed": true,
+        "message": "Export preserved: assets/scripts/player/components/MudPrototypeRules.cs::BossStaggerDuration"
+      },
+      {
+        "passed": true,
+        "message": "Export preserved: assets/scripts/player/components/MudPrototypeRules.cs::BossVulnerability"
+      },
+      {
+        "passed": true,
+        "message": "Float default preserved: assets/scripts/player/components/MudPrototypeRules.cs::SwitchCooldown=0.15"
+      },
+      {
+        "passed": true,
+        "message": "Float default preserved: assets/scripts/player/components/MudPrototypeRules.cs::DodgeInvulnerability=0.0"
+      },
+      {
+        "passed": true,
+        "message": "Float default preserved: assets/scripts/player/components/MudPrototypeRules.cs::HurtDuration=0.18"
+      },
+      {
+        "passed": true,
+        "message": "Float default preserved: assets/scripts/player/components/MudPrototypeRules.cs::UpgradedHoldHeight=224.0"
+      },
+      {
+        "passed": true,
+        "message": "Float default preserved: assets/scripts/player/components/MudPrototypeRules.cs::LandingRadius=150.0"
+      },
+      {
+        "passed": true,
+        "message": "Float default preserved: assets/scripts/player/components/MudPrototypeRules.cs::LandingDamage=30.0"
+      },
+      {
+        "passed": true,
+        "message": "Float default preserved: assets/scripts/player/components/MudPrototypeRules.cs::SlamSpeed=1000.0"
+      },
+      {
+        "passed": true,
+        "message": "Float default preserved: assets/scripts/player/components/MudPrototypeRules.cs::SlamDamage=44.0"
+      },
+      {
+        "passed": true,
+        "message": "Float default preserved: assets/scripts/player/components/MudPrototypeRules.cs::PlayerHealth=120.0"
+      },
+      {
+        "passed": true,
+        "message": "Float default preserved: assets/scripts/player/components/MudPrototypeRules.cs::BossStaggerDuration=1.6"
+      },
+      {
+        "passed": true,
+        "message": "Float default preserved: assets/scripts/player/components/MudPrototypeRules.cs::BossVulnerability=2.0"
+      },
+      {
+        "passed": true,
+        "message": "Original script UID retained: assets/scripts/player/components/MudPrototypeRules.cs"
+      },
+      {
+        "passed": true,
+        "message": "Original script UID retained: assets/scripts/combat/MudAttackLedger.cs"
+      },
+      {
+        "passed": true,
+        "message": "Export preserved: assets/scripts/combat/MudBreakable.cs::RequiresHeavy"
+      },
+      {
+        "passed": true,
+        "message": "Export preserved: assets/scripts/combat/MudBreakable.cs::FlagKey"
+      },
+      {
+        "passed": true,
+        "message": "Export preserved: assets/scripts/combat/MudBreakable.cs::Dimensions"
+      },
+      {
+        "passed": true,
+        "message": "Original script UID retained: assets/scripts/combat/MudBreakable.cs"
+      },
+      {
+        "passed": true,
+        "message": "Original script UID retained: assets/scripts/progression/MudProgress.cs"
+      },
+      {
+        "passed": true,
+        "message": "Original script UID retained: assets/scripts/ui/MudDebugHud.cs"
+      },
+      {
+        "passed": true,
+        "message": "Original script UID retained: assets/scripts/ui/MudMainMenu.cs"
+      },
+      {
+        "passed": true,
+        "message": "Original script UID retained: assets/scripts/whitebox/MudRoomEvent.cs"
+      },
+      {
+        "passed": true,
+        "message": "Export preserved: assets/scripts/whitebox/MudWhiteboxEnemy.cs::DisplayName"
+      },
+      {
+        "passed": true,
+        "message": "Export preserved: assets/scripts/whitebox/MudWhiteboxEnemy.cs::MaxHealth"
+      },
+      {
+        "passed": true,
+        "message": "Export preserved: assets/scripts/whitebox/MudWhiteboxEnemy.cs::Damage"
+      },
+      {
+        "passed": true,
+        "message": "Export preserved: assets/scripts/whitebox/MudWhiteboxEnemy.cs::TelegraphTime"
+      },
+      {
+        "passed": true,
+        "message": "Export preserved: assets/scripts/whitebox/MudWhiteboxEnemy.cs::AttackTime"
+      },
+      {
+        "passed": true,
+        "message": "Export preserved: assets/scripts/whitebox/MudWhiteboxEnemy.cs::RecoveryTime"
+      },
+      {
+        "passed": true,
+        "message": "Export preserved: assets/scripts/whitebox/MudWhiteboxEnemy.cs::AttackRange"
+      },
+      {
+        "passed": true,
+        "message": "Export preserved: assets/scripts/whitebox/MudWhiteboxEnemy.cs::VulnerabilityMultiplier"
+      },
+      {
+        "passed": true,
+        "message": "Export preserved: assets/scripts/whitebox/MudWhiteboxEnemy.cs::BossKind"
+      },
+      {
+        "passed": true,
+        "message": "Export preserved: assets/scripts/whitebox/MudWhiteboxEnemy.cs::Passive"
+      },
+      {
+        "passed": true,
+        "message": "Float default preserved: assets/scripts/whitebox/MudWhiteboxEnemy.cs::MaxHealth=60.0"
+      },
+      {
+        "passed": true,
+        "message": "Float default preserved: assets/scripts/whitebox/MudWhiteboxEnemy.cs::Damage=12.0"
+      },
+      {
+        "passed": true,
+        "message": "Float default preserved: assets/scripts/whitebox/MudWhiteboxEnemy.cs::TelegraphTime=0.8"
+      },
+      {
+        "passed": true,
+        "message": "Float default preserved: assets/scripts/whitebox/MudWhiteboxEnemy.cs::AttackTime=0.18"
+      },
+      {
+        "passed": true,
+        "message": "Float default preserved: assets/scripts/whitebox/MudWhiteboxEnemy.cs::RecoveryTime=1.15"
+      },
+      {
+        "passed": true,
+        "message": "Float default preserved: assets/scripts/whitebox/MudWhiteboxEnemy.cs::AttackRange=135.0"
+      },
+      {
+        "passed": true,
+        "message": "Float default preserved: assets/scripts/whitebox/MudWhiteboxEnemy.cs::VulnerabilityMultiplier=2.0"
+      },
+      {
+        "passed": true,
+        "message": "Original script UID retained: assets/scripts/whitebox/MudWhiteboxEnemy.cs"
+      },
+      {
+        "passed": true,
+        "message": "Original script UID retained: assets/scripts/whitebox/MudWhiteboxEvents.cs"
+      },
+      {
+        "passed": true,
+        "message": "Original script UID retained: assets/scripts/whitebox/MudWhiteboxGeometry.cs"
+      },
+      {
+        "passed": true,
+        "message": "Export preserved: assets/scripts/whitebox/MudWhiteboxRoom.cs::RoomId"
+      },
+      {
+        "passed": true,
+        "message": "Original script UID retained: assets/scripts/whitebox/MudWhiteboxRoom.cs"
+      },
+      {
+        "passed": true,
+        "message": "Export preserved: assets/scripts/world/MudRoomPortal.cs::InterfaceId"
+      },
+      {
+        "passed": true,
+        "message": "Export preserved: assets/scripts/world/MudRoomPortal.cs::TargetRoom"
+      },
+      {
+        "passed": true,
+        "message": "Export preserved: assets/scripts/world/MudRoomPortal.cs::TargetSpawn"
+      },
+      {
+        "passed": true,
+        "message": "Export preserved: assets/scripts/world/MudRoomPortal.cs::Requirements"
+      },
+      {
+        "passed": true,
+        "message": "Export preserved: assets/scripts/world/MudRoomPortal.cs::BreakFromThisSide"
+      },
+      {
+        "passed": true,
+        "message": "Export preserved: assets/scripts/world/MudRoomPortal.cs::BidirectionalAfterBreak"
+      },
+      {
+        "passed": true,
+        "message": "Export preserved: assets/scripts/world/MudRoomPortal.cs::ShortcutFlag"
+      },
+      {
+        "passed": true,
+        "message": "Export preserved: assets/scripts/world/MudRoomPortal.cs::Managed"
+      },
+      {
+        "passed": true,
+        "message": "Export preserved: assets/scripts/world/MudRoomPortal.cs::DebugOutput"
+      },
+      {
+        "passed": true,
+        "message": "Original script UID retained: assets/scripts/world/MudRoomPortal.cs"
+      },
+      {
+        "passed": true,
+        "message": "Original script UID retained: assets/scripts/world/MudRoomTravel.cs"
+      },
+      {
+        "passed": true,
+        "message": "Original script UID retained: tests/MudRuntimeSuite.cs"
+      },
+      {
+        "passed": true,
+        "message": "Original script UID retained: tests/MudCombatFeelChecks.cs"
+      },
+      {
+        "passed": true,
+        "message": "Original script UID retained: tests/MudSceneMigrationChecks.cs"
+      },
+      {
+        "passed": true,
+        "message": "Unchanged asset bytes: assets/art/README.md"
+      },
+      {
+        "passed": true,
+        "message": "Unchanged asset bytes: assets/textures/whitebox/kenney_platformer.webp"
+      },
+      {
+        "passed": true,
+        "message": "Unchanged asset bytes: assets/textures/whitebox/kenney_platformer.webp.import"
+      },
+      {
+        "passed": true,
+        "message": "Unchanged asset bytes: assets/reference/whitebox/Muddson.ai"
+      },
+      {
+        "passed": true,
+        "message": "Unchanged asset bytes: assets/data/whitebox/scene_copy.json"
+      },
+      {
+        "passed": true,
+        "message": "Unchanged asset bytes: assets/data/whitebox/world.json"
+      },
+      {
+        "passed": true,
+        "message": "Existing InputMap block preserved exactly"
+      },
+      {
+        "passed": true,
+        "message": "Application name and resulting user save directory preserved"
+      }
+    ]
+  },
+  "powershell_syntax": "passed for all 3 launch/test/apply scripts",
+  "godot_project_build": {
+    "status": "blocked_before_csharp_compilation",
+    "reason": "Godot.NET.Sdk/4.7.2 is absent locally; NuGet endpoint could not be reached. Installed Godot is the standard edition."
+  },
+  "godot_runtime_regression": {
+    "status": "not_run",
+    "reason": "Godot .NET executable is not installed; the migrated C# test suites are included for execution after setup."
+  },
+  "original_project_modified": false,
+  "original_project_write_blocker": "D:/GAMEOFF/son-of-mud is outside the current session's writable roots",
+  "installer_regression": {
+    "status": "passed",
+    "file_operations_verified": 134,
+    "checks": [
+      "apply on pristine snapshot",
+      "backup contains exact original file bytes",
+      "repeat apply is idempotent",
+      "concurrent edit blocked before writes",
+      "original D project passes read-only WhatIf preflight",
+      "injected file lock triggers rollback",
+      "rollback restores every original checksum and removes created files"
+    ]
+  }
+}
