@@ -1,0 +1,28 @@
+[gd_resource type="Resource" script_class="MudFormConfig" load_steps=2 format=3]
+[ext_resource type="Script" path="res://assets/scripts/player/components/form_config.gd" id="1"]
+[resource]
+script = ExtResource("1")
+display_name = "泥"
+tint = Color(0.78, 0.56, 0.35, 1)
+move_speed = 280.0
+dodge_speed = 520.0
+dodge_duration = 0.24
+dodge_cooldown = 4.0
+penalty_duration = 1.0
+block_duration = 2.0
+block_single_hit = false
+grants_block_bonus = true
+block_cooldown = 3.0
+reset_block_cooldown_on_success = false
+reset_attack_interval_on_block = false
+damage = 24.0
+attack_windup = 0.14
+attack_active = 0.12
+attack_recovery = 1.5
+soft_attack_recovery = true
+block_cancel_window = 0.5
+dodge_cancel_recovery = true
+down_attack_multiplier = 1.8
+jump_windup = 0.24
+jump_speed = 600.0
+constant_descent = false

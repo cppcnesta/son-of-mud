@@ -1,0 +1,14 @@
+{
+  "files": [
+    "D:\\GAMEOFF\\mud-child-map-practice\\Documentation\\Design\\MudChild_Level_Combat_Design_V1_0.docx",
+    "D:\\GAMEOFF\\mud-child-map-practice\\Documentation\\Design\\MudChild_Master_Design_V1_0.docx"
+  ],
+  "rooms": 23,
+  "interfaces": 48,
+  "original_text_characters_preserved": 8168,
+  "source_pdf_pages": 19,
+  "sha256": {
+    "MudChild_Level_Combat_Design_V1_0.docx": "fe1ede1808cb1461e0baf6903fcd0549161b71c884c0348aa101a3f26b040340",
+    "MudChild_Master_Design_V1_0.docx": "b821ac4a7927712e3300ebce9ba3c729e5416ced7122b6c619001ab57ca13afb"
+  }
+}

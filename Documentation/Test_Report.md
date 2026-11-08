@@ -1,0 +1,420 @@
+# 实际运行验证报告
+
+本次场景迁移回归：**Tests: PASS，72项，失败0项**。
+
+上一轮完整玩法图形检查：Tests: PASS，305项，失败0项。动作代码未改，本次未重复执行这组完整检查。
+
+实际Godot4.7.2、Windows图形窗口、OpenGL兼容渲染、RTX4060 Laptop GPU。以60Hz物理步进执行；使用真实Godot输入与碰撞判定，未使用无头解析代替玩法运行。
+
+导入/解析日志：import.log；完整运行：runtime_suite.log；机器可读结果：runtime_results.json。其他回归日志保留用于追溯。
+
+## 测量结果（当前白盒建议值）
+
+|项目|水|泥模组1|泥模组2|
+|---|---|---|---|
+|1秒水平移动|360.0px|280.0px|同泥基础移动|
+|一次闪避实际距离|202.7px|121.3px|同泥基础闪避|
+|最大单跳高度|117.6px|117.6px|176.0px|
+|单跳水平移动距离|294.0px|224.0px|252.0px|
+|模组2短按跳高度|—|—|24.1px|
+
+实测距离随60Hz离散帧取整，故与速度×配置时长的连续计算值略有差别。192px高台高于所有未升级单跳实测上限；正反形态的空中切换+长闪避组合实际测试均未绕过，二段跳解锁后实际可跃上。
+
+## 运行范围
+
+- 23个主线场景全部实际实例化运行；48条有向接口全部实际切换、校验目标Marker位置及无传送循环。
+- 动作：两形态移动/闪避、真实攻击伤害与三阶段、格挡窗口与CD、命中去重、增伤打空保留/命中消费、1秒/1.5秒曲线恢复、后摇衔接、两泥跳模组互斥与合格落地资格。
+- 能力：二段跳高台、攀墙出口、潜游水面及池底征兆、重压下砸破障碍，均包含未解锁阻挡与解锁后实际通行/命中。
+- 进度：三街区条件、征兆顺序、七门顺序、T06侧破门与永久双向、Boss锁门/死亡重试/击败开门、最终两阶段、真相和醒来结局、实际磁盘存读与测试能力隔离。
+- 纵向路线：T05/H01实际由移动和跳跃登阶梯并抵达顶部出口；主菜单实际运行；A/Q物理键事件通过InputMap驱动。
+
+- 新增空引用回归：水、泥两模组的起跳前摇中先落地、待起跳资源冻结、跳数消费、受伤取消、真实过门取消及落地范围攻击资格。修复前失败记录另见jump_landing_before_fix.log；当前结果见jump_landing_suite.log及完整运行日志。
+
+## 未验证与尚未制作
+
+未验证从M01开始由真人连续操作到两个结局的完整手感；回去睡的二次交互回环代码存在，未将其计为真人通关验证。未验证手柄、其他硬件/帧率、独立exe导出。桌面自动化短按键未可靠传入，未计为人工键盘验证。
+
+角色/敌人/Boss均为色块。龙蛇当前为位置锁定下砸与换位失衡占位，正式冲拳/合掌/抓握动画和完整招式集、CG、配音、音效、经济掉落和最终平衡尚未制作。
+
+## 本次场景迁移断言
+
+- Tests: PASS 实际Godot版本4.7.2
+- Tests: PASS 实际图形运行：Windows / gl_compatibility
+- Tests: PASS 23主线场景+1测试场，无旧版多余房间
+- Tests: PASS 主线仍为23场景，兼容入口不加入主线
+- Tests: PASS 场景依赖加载 res://assets/scenes/whitebox/mp_01_pit.tscn
+- Tests: PASS 实际运行 res://assets/scenes/whitebox/mp_01_pit.tscn
+- Tests: PASS 兼容入口继承完整地形和出生点 mp_01_pit.tscn
+- Tests: PASS 场景依赖加载 res://assets/scenes/whitebox/mp_02_pilgrim_path.tscn
+- Tests: PASS 实际运行 res://assets/scenes/whitebox/mp_02_pilgrim_path.tscn
+- Tests: PASS 兼容入口继承完整地形和出生点 mp_02_pilgrim_path.tscn
+- Tests: PASS 场景依赖加载 res://assets/scenes/whitebox/mp_03_altar.tscn
+- Tests: PASS 实际运行 res://assets/scenes/whitebox/mp_03_altar.tscn
+- Tests: PASS 兼容入口继承完整地形和出生点 mp_03_altar.tscn
+- Tests: PASS 场景依赖加载 res://assets/scenes/whitebox/legacy/mp_01_pit.tscn
+- Tests: PASS 实际运行 res://assets/scenes/whitebox/legacy/mp_01_pit.tscn
+- Tests: PASS 场景依赖加载 res://assets/scenes/whitebox/legacy/mp_02_pilgrim_path.tscn
+- Tests: PASS 实际运行 res://assets/scenes/whitebox/legacy/mp_02_pilgrim_path.tscn
+- Tests: PASS 场景依赖加载 res://assets/scenes/whitebox/legacy/mp_03_altar.tscn
+- Tests: PASS 实际运行 res://assets/scenes/whitebox/legacy/mp_03_altar.tscn
+- Tests: PASS 场景依赖加载 res://assets/scenes/whitebox/legacy/Room01.tscn
+- Tests: PASS 实际运行 res://assets/scenes/whitebox/legacy/Room01.tscn
+- Tests: PASS 场景依赖加载 res://assets/scenes/whitebox/tests/form_lab.tscn
+- Tests: PASS 实际运行 res://assets/scenes/whitebox/tests/form_lab.tscn
+- Tests: PASS 场景依赖加载 res://assets/scenes/ui/main_menu.tscn
+- Tests: PASS 实际运行 res://assets/scenes/ui/main_menu.tscn
+- Tests: PASS 场景依赖加载 res://assets/scenes/whitebox/levels/C01.tscn
+- Tests: PASS 实际运行 res://assets/scenes/whitebox/levels/C01.tscn
+- Tests: PASS 场景依赖加载 res://assets/scenes/whitebox/levels/C02.tscn
+- Tests: PASS 实际运行 res://assets/scenes/whitebox/levels/C02.tscn
+- Tests: PASS 场景依赖加载 res://assets/scenes/whitebox/levels/C03.tscn
+- Tests: PASS 实际运行 res://assets/scenes/whitebox/levels/C03.tscn
+- Tests: PASS 场景依赖加载 res://assets/scenes/whitebox/levels/C04.tscn
+- Tests: PASS 实际运行 res://assets/scenes/whitebox/levels/C04.tscn
+- Tests: PASS 场景依赖加载 res://assets/scenes/whitebox/levels/C05.tscn
+- Tests: PASS 实际运行 res://assets/scenes/whitebox/levels/C05.tscn
+- Tests: PASS 场景依赖加载 res://assets/scenes/whitebox/levels/C06.tscn
+- Tests: PASS 实际运行 res://assets/scenes/whitebox/levels/C06.tscn
+- Tests: PASS 场景依赖加载 res://assets/scenes/whitebox/levels/C07.tscn
+- Tests: PASS 实际运行 res://assets/scenes/whitebox/levels/C07.tscn
+- Tests: PASS 场景依赖加载 res://assets/scenes/whitebox/levels/C08.tscn
+- Tests: PASS 实际运行 res://assets/scenes/whitebox/levels/C08.tscn
+- Tests: PASS 场景依赖加载 res://assets/scenes/whitebox/levels/H01.tscn
+- Tests: PASS 实际运行 res://assets/scenes/whitebox/levels/H01.tscn
+- Tests: PASS 场景依赖加载 res://assets/scenes/whitebox/levels/H02.tscn
+- Tests: PASS 实际运行 res://assets/scenes/whitebox/levels/H02.tscn
+- Tests: PASS 场景依赖加载 res://assets/scenes/whitebox/levels/H03.tscn
+- Tests: PASS 实际运行 res://assets/scenes/whitebox/levels/H03.tscn
+- Tests: PASS 场景依赖加载 res://assets/scenes/whitebox/levels/M01.tscn
+- Tests: PASS 实际运行 res://assets/scenes/whitebox/levels/M01.tscn
+- Tests: PASS 场景依赖加载 res://assets/scenes/whitebox/levels/M02.tscn
+- Tests: PASS 实际运行 res://assets/scenes/whitebox/levels/M02.tscn
+- Tests: PASS 场景依赖加载 res://assets/scenes/whitebox/levels/M03.tscn
+- Tests: PASS 实际运行 res://assets/scenes/whitebox/levels/M03.tscn
+- Tests: PASS 场景依赖加载 res://assets/scenes/whitebox/levels/M04.tscn
+- Tests: PASS 实际运行 res://assets/scenes/whitebox/levels/M04.tscn
+- Tests: PASS 场景依赖加载 res://assets/scenes/whitebox/levels/M05.tscn
+- Tests: PASS 实际运行 res://assets/scenes/whitebox/levels/M05.tscn
+- Tests: PASS 场景依赖加载 res://assets/scenes/whitebox/levels/M06.tscn
+- Tests: PASS 实际运行 res://assets/scenes/whitebox/levels/M06.tscn
+- Tests: PASS 场景依赖加载 res://assets/scenes/whitebox/levels/T01.tscn
+- Tests: PASS 实际运行 res://assets/scenes/whitebox/levels/T01.tscn
+- Tests: PASS 场景依赖加载 res://assets/scenes/whitebox/levels/T02.tscn
+- Tests: PASS 实际运行 res://assets/scenes/whitebox/levels/T02.tscn
+- Tests: PASS 场景依赖加载 res://assets/scenes/whitebox/levels/T03.tscn
+- Tests: PASS 实际运行 res://assets/scenes/whitebox/levels/T03.tscn
+- Tests: PASS 场景依赖加载 res://assets/scenes/whitebox/levels/T04.tscn
+- Tests: PASS 实际运行 res://assets/scenes/whitebox/levels/T04.tscn
+- Tests: PASS 场景依赖加载 res://assets/scenes/whitebox/levels/T05.tscn
+- Tests: PASS 实际运行 res://assets/scenes/whitebox/levels/T05.tscn
+- Tests: PASS 场景依赖加载 res://assets/scenes/whitebox/levels/T06.tscn
+- Tests: PASS 实际运行 res://assets/scenes/whitebox/levels/T06.tscn
+- Tests: PASS 场景迁移与旧入口回归完整执行
+
+## 上一轮完整玩法断言
+
+- Tests: PASS 实际Godot版本4.7.2
+- Tests: PASS 实际图形运行：Windows / gl_compatibility
+- Tests: PASS 23主线场景+1测试场，无旧版多余房间
+- Tests: PASS 物理键Q通过InputMap触发形态切换
+- Tests: PASS 两形态配置相对关系
+- Tests: PASS 真实移动1秒：水360.0px，泥280.0px
+- Tests: PASS 泥闪避结束：1秒曲线减速，初始移动倍率0.2
+- Tests: PASS 切换不刷新冷却、不取消泥减速
+- Tests: PASS 泥减速0.5秒：曲线恢复至约0.8
+- Tests: PASS 泥减速1秒后恢复1.0，不反向
+- Tests: PASS 实际闪避距离：水202.7px，泥121.3px
+- Tests: PASS 水按下K进入格挡
+- Tests: PASS 水成功格挡一次
+- Tests: PASS 同一攻击重复信号不重复计伤/格挡
+- Tests: PASS 水格挡成功即结束，第二个不同攻击可造成伤害
+- Tests: PASS 持续按住水格挡不自动续挡
+- Tests: PASS 水0.5秒窗口：第27帧仍处于末段格挡
+- Tests: PASS 水0.5秒窗口：第34帧已结束，无按住续挡
+- Tests: PASS 泥可格挡不同有效攻击
+- Tests: PASS 泥成功格挡发放不叠加的增伤资格
+- Tests: PASS 泥格挡最长2秒，持续按住不无限防御
+- Tests: PASS 攻击挥空保留格挡增伤
+- Tests: PASS 实际攻击命中测试靶后消费增伤
+- Tests: PASS 普通落地与模组1普通跳不产生范围攻击
+- Tests: PASS 模组2长按更高，单跳硬上限176px
+- Tests: PASS 模组2仅达到上限的落地产生一次范围伤害
+- Tests: PASS 普通跌落不获得长按跳跃上限资格
+- Tests: PASS 过门重置空中上下文，不误触落地范围攻击
+- Tests: PASS 空中切换保留跳跃次数和起跳纵向配置
+- Tests: PASS 主线场景运行 M01
+- Tests: PASS 接口有独立目标出生点 M01_to_M02
+- Tests: PASS 主线场景运行 M02
+- Tests: PASS 接口有独立目标出生点 M02_to_M01
+- Tests: PASS 接口有独立目标出生点 M02_to_M03
+- Tests: PASS 主线场景运行 M03
+- Tests: PASS 接口有独立目标出生点 M03_to_M02
+- Tests: PASS 接口有独立目标出生点 M03_to_M04
+- Tests: PASS 主线场景运行 M04
+- Tests: PASS 接口有独立目标出生点 M04_to_M03
+- Tests: PASS 接口有独立目标出生点 M04_to_M05
+- Tests: PASS 主线场景运行 M05
+- Tests: PASS 接口有独立目标出生点 M05_to_M04
+- Tests: PASS 接口有独立目标出生点 M05_to_M06
+- Tests: PASS 主线场景运行 M06
+- Tests: PASS 接口有独立目标出生点 M06_to_M05
+- Tests: PASS 接口有独立目标出生点 M06_to_T01
+- Tests: PASS 主线场景运行 T01
+- Tests: PASS 接口有独立目标出生点 T01_to_M06
+- Tests: PASS 接口有独立目标出生点 T01_to_T02
+- Tests: PASS 主线场景运行 T02
+- Tests: PASS 接口有独立目标出生点 T02_to_T01
+- Tests: PASS 接口有独立目标出生点 T02_to_T03
+- Tests: PASS 主线场景运行 T03
+- Tests: PASS 接口有独立目标出生点 T03_to_T02
+- Tests: PASS 接口有独立目标出生点 T03_to_T04
+- Tests: PASS 主线场景运行 T04
+- Tests: PASS 接口有独立目标出生点 T04_to_T03
+- Tests: PASS 接口有独立目标出生点 T04_to_T05
+- Tests: PASS 主线场景运行 T05
+- Tests: PASS 接口有独立目标出生点 T05_to_T04
+- Tests: PASS 接口有独立目标出生点 T05_to_C01
+- Tests: PASS 接口有独立目标出生点 T05_to_T06
+- Tests: PASS 主线场景运行 T06
+- Tests: PASS 接口有独立目标出生点 T06_to_C08
+- Tests: PASS 接口有独立目标出生点 T06_to_H01
+- Tests: PASS 接口有独立目标出生点 T06_to_T05
+- Tests: PASS 主线场景运行 C01
+- Tests: PASS 接口有独立目标出生点 C01_to_T05
+- Tests: PASS 接口有独立目标出生点 C01_to_C02
+- Tests: PASS 主线场景运行 C02
+- Tests: PASS 接口有独立目标出生点 C02_to_C01
+- Tests: PASS 接口有独立目标出生点 C02_to_C03
+- Tests: PASS 主线场景运行 C03
+- Tests: PASS 接口有独立目标出生点 C03_to_C02
+- Tests: PASS 接口有独立目标出生点 C03_to_C04
+- Tests: PASS 接口有独立目标出生点 C03_to_C06
+- Tests: PASS 接口有独立目标出生点 C03_to_C07
+- Tests: PASS 主线场景运行 C04
+- Tests: PASS 接口有独立目标出生点 C04_to_C03
+- Tests: PASS 接口有独立目标出生点 C04_to_C05
+- Tests: PASS 主线场景运行 C05
+- Tests: PASS 接口有独立目标出生点 C05_to_C04
+- Tests: PASS 接口有独立目标出生点 C05_to_C06
+- Tests: PASS 主线场景运行 C06
+- Tests: PASS 接口有独立目标出生点 C06_to_C05
+- Tests: PASS 接口有独立目标出生点 C06_to_C03
+- Tests: PASS 主线场景运行 C07
+- Tests: PASS 接口有独立目标出生点 C07_to_C03
+- Tests: PASS 接口有独立目标出生点 C07_to_C08
+- Tests: PASS 主线场景运行 C08
+- Tests: PASS 接口有独立目标出生点 C08_to_C07
+- Tests: PASS 接口有独立目标出生点 C08_to_T06
+- Tests: PASS 主线场景运行 H01
+- Tests: PASS 接口有独立目标出生点 H01_to_T06
+- Tests: PASS 接口有独立目标出生点 H01_to_H02
+- Tests: PASS 主线场景运行 H02
+- Tests: PASS 接口有独立目标出生点 H02_to_H01
+- Tests: PASS 接口有独立目标出生点 H02_to_H03
+- Tests: PASS 主线场景运行 H03
+- Tests: PASS 接口有独立目标出生点 H03_to_H02
+- Tests: PASS 实际传送/出生 M01_to_M02
+- Tests: PASS 抵达后无传送循环 M01_to_M02
+- Tests: PASS 实际传送/出生 M02_to_M01
+- Tests: PASS 抵达后无传送循环 M02_to_M01
+- Tests: PASS 实际传送/出生 M02_to_M03
+- Tests: PASS 抵达后无传送循环 M02_to_M03
+- Tests: PASS 实际传送/出生 M03_to_M02
+- Tests: PASS 抵达后无传送循环 M03_to_M02
+- Tests: PASS 实际传送/出生 M03_to_M04
+- Tests: PASS 抵达后无传送循环 M03_to_M04
+- Tests: PASS 实际传送/出生 M04_to_M03
+- Tests: PASS 抵达后无传送循环 M04_to_M03
+- Tests: PASS 实际传送/出生 M04_to_M05
+- Tests: PASS 抵达后无传送循环 M04_to_M05
+- Tests: PASS 实际传送/出生 M05_to_M04
+- Tests: PASS 抵达后无传送循环 M05_to_M04
+- Tests: PASS 实际传送/出生 M05_to_M06
+- Tests: PASS 抵达后无传送循环 M05_to_M06
+- Tests: PASS 实际传送/出生 M06_to_M05
+- Tests: PASS 抵达后无传送循环 M06_to_M05
+- Tests: PASS 实际传送/出生 M06_to_T01
+- Tests: PASS 抵达后无传送循环 M06_to_T01
+- Tests: PASS 实际传送/出生 T01_to_M06
+- Tests: PASS 抵达后无传送循环 T01_to_M06
+- Tests: PASS 实际传送/出生 T01_to_T02
+- Tests: PASS 抵达后无传送循环 T01_to_T02
+- Tests: PASS 实际传送/出生 T02_to_T01
+- Tests: PASS 抵达后无传送循环 T02_to_T01
+- Tests: PASS 实际传送/出生 T02_to_T03
+- Tests: PASS 抵达后无传送循环 T02_to_T03
+- Tests: PASS 实际传送/出生 T03_to_T02
+- Tests: PASS 抵达后无传送循环 T03_to_T02
+- Tests: PASS 实际传送/出生 T03_to_T04
+- Tests: PASS 抵达后无传送循环 T03_to_T04
+- Tests: PASS 实际传送/出生 T04_to_T03
+- Tests: PASS 抵达后无传送循环 T04_to_T03
+- Tests: PASS 实际传送/出生 T04_to_T05
+- Tests: PASS 抵达后无传送循环 T04_to_T05
+- Tests: PASS 实际传送/出生 T05_to_T04
+- Tests: PASS 抵达后无传送循环 T05_to_T04
+- Tests: PASS 实际传送/出生 T05_to_C01
+- Tests: PASS 抵达后无传送循环 T05_to_C01
+- Tests: PASS 实际传送/出生 T05_to_T06
+- Tests: PASS 抵达后无传送循环 T05_to_T06
+- Tests: PASS 实际传送/出生 T06_to_C08
+- Tests: PASS 抵达后无传送循环 T06_to_C08
+- Tests: PASS 实际传送/出生 T06_to_H01
+- Tests: PASS 抵达后无传送循环 T06_to_H01
+- Tests: PASS 实际传送/出生 T06_to_T05
+- Tests: PASS 抵达后无传送循环 T06_to_T05
+- Tests: PASS 实际传送/出生 C01_to_T05
+- Tests: PASS 抵达后无传送循环 C01_to_T05
+- Tests: PASS 实际传送/出生 C01_to_C02
+- Tests: PASS 抵达后无传送循环 C01_to_C02
+- Tests: PASS 实际传送/出生 C02_to_C01
+- Tests: PASS 抵达后无传送循环 C02_to_C01
+- Tests: PASS 实际传送/出生 C02_to_C03
+- Tests: PASS 抵达后无传送循环 C02_to_C03
+- Tests: PASS 实际传送/出生 C03_to_C02
+- Tests: PASS 抵达后无传送循环 C03_to_C02
+- Tests: PASS 实际传送/出生 C03_to_C04
+- Tests: PASS 抵达后无传送循环 C03_to_C04
+- Tests: PASS 实际传送/出生 C03_to_C06
+- Tests: PASS 抵达后无传送循环 C03_to_C06
+- Tests: PASS 实际传送/出生 C03_to_C07
+- Tests: PASS 抵达后无传送循环 C03_to_C07
+- Tests: PASS 实际传送/出生 C04_to_C03
+- Tests: PASS 抵达后无传送循环 C04_to_C03
+- Tests: PASS 实际传送/出生 C04_to_C05
+- Tests: PASS 抵达后无传送循环 C04_to_C05
+- Tests: PASS 实际传送/出生 C05_to_C04
+- Tests: PASS 抵达后无传送循环 C05_to_C04
+- Tests: PASS 实际传送/出生 C05_to_C06
+- Tests: PASS 抵达后无传送循环 C05_to_C06
+- Tests: PASS 实际传送/出生 C06_to_C05
+- Tests: PASS 抵达后无传送循环 C06_to_C05
+- Tests: PASS 实际传送/出生 C06_to_C03
+- Tests: PASS 抵达后无传送循环 C06_to_C03
+- Tests: PASS 实际传送/出生 C07_to_C03
+- Tests: PASS 抵达后无传送循环 C07_to_C03
+- Tests: PASS 实际传送/出生 C07_to_C08
+- Tests: PASS 抵达后无传送循环 C07_to_C08
+- Tests: PASS 实际传送/出生 C08_to_C07
+- Tests: PASS 抵达后无传送循环 C08_to_C07
+- Tests: PASS 实际传送/出生 C08_to_T06
+- Tests: PASS 抵达后无传送循环 C08_to_T06
+- Tests: PASS 实际传送/出生 H01_to_T06
+- Tests: PASS 抵达后无传送循环 H01_to_T06
+- Tests: PASS 实际传送/出生 H01_to_H02
+- Tests: PASS 抵达后无传送循环 H01_to_H02
+- Tests: PASS 实际传送/出生 H02_to_H01
+- Tests: PASS 抵达后无传送循环 H02_to_H01
+- Tests: PASS 实际传送/出生 H02_to_H03
+- Tests: PASS 抵达后无传送循环 H02_to_H03
+- Tests: PASS 实际传送/出生 H03_to_H02
+- Tests: PASS 抵达后无传送循环 H03_to_H02
+- Tests: PASS 首次T05不可提前进入最终区域
+- Tests: PASS T06侧破门永久标记
+- Tests: PASS 破门后T05侧可双向返回
+- Tests: PASS 三街区未完成时档案室关闭
+- Tests: PASS 只完成两个街区仍关闭
+- Tests: PASS 三街区完成后档案室可通行
+- Tests: PASS 街区征兆乱序不完成
+- Tests: PASS 街区征兆正确顺序完成
+- Tests: PASS H01不能跳过前六道门
+- Tests: PASS H01七道门顺序完成后开放H02
+- Tests: PASS 未解锁二段跳：形态0单跳/长闪避/空中切换不可绕过高台
+- Tests: PASS 未解锁二段跳：形态1单跳/长闪避/空中切换不可绕过高台
+- Tests: PASS 二段跳解锁后实际跃上192px高台并完成教学
+- Tests: PASS 攀墙解锁后实际爬上T02出口
+- Tests: PASS 水形态未解锁潜游时被水面门槛阻挡
+- Tests: PASS 潜游解锁后实际抵达池底
+- Tests: PASS 池底征兆完成第一街区
+- Tests: PASS 普通攻击不能打破下砸障碍
+- Tests: PASS 重压下砸实际命中、破坏障碍并永久记录
+- Tests: PASS 破坏后第二街区征兆可完成
+- Tests: PASS Boss开战封锁两侧门
+- Tests: PASS 实际格挡守坑人攻击触发僵直/增伤
+- Tests: PASS 死亡状态正确
+- Tests: PASS 死亡回到Boss入口，战斗完整重置
+- Tests: PASS Boss击败后开门且状态持久
+- Tests: PASS 塔姆图第一阶段后进入伊姆杜，门仍封锁
+- Tests: PASS 伊姆杜第二阶段击败后开放真相/结局
+- Tests: PASS 真相与醒来结局可触发
+- Tests: PASS 实际磁盘保存成功
+- Tests: PASS 实际磁盘读回Boss/街区/捷径进度
+- Tests: PASS 重开正式流程不残留测试能力
+- Tests: PASS T05实际输入登阶梯：12/12级，最高y=337.7
+- Tests: PASS T05顶部出口实际可达且避开HUD，最近距离73.4px
+- Tests: PASS H01实际输入登阶梯：26/26级，最高y=338.4
+- Tests: PASS H01顶部出口实际可达且避开HUD，最近距离77.5px
+- Tests: PASS 朝圣者按PDF保持不主动攻击
+- Tests: PASS 城门复用普通敌人白盒守卫，未新增城市Boss
+- Tests: PASS 原有物理键A绑定保留且实际驱动移动
+- Tests: PASS F5主入口菜单实际运行
+- Tests: PASS 真实攻击判定：水10伤害，泥24伤害，同一攻击不多帧重复伤害
+- Tests: PASS 实际攻击三阶段：泥前摇更长，后摇显著增加
+- Tests: PASS 泥模组1向下攻击实际伤害43.2，模组1强化互斥
+- Tests: PASS 泥模组2向下攻击实际伤害24.0，模组1强化互斥
+- Tests: PASS 水/泥模组1下落贴地前接受起跳请求
+- Tests: PASS 水/泥模组1前摇中落地：仅清旧轨迹，保留待起跳配置
+- Tests: PASS 水/泥模组1落地后按冻结配置正常起跳，只消耗一次跳跃
+- Tests: PASS 水/泥模组1前摇中普通落地不误触范围攻击
+- Tests: PASS 水/泥模组1下一跳的范围攻击资格独立且不重复
+- Tests: PASS 泥/泥模组1下落贴地前接受起跳请求
+- Tests: PASS 泥/泥模组1前摇中落地：仅清旧轨迹，保留待起跳配置
+- Tests: PASS 泥/泥模组1落地后按冻结配置正常起跳，只消耗一次跳跃
+- Tests: PASS 泥/泥模组1前摇中普通落地不误触范围攻击
+- Tests: PASS 泥/泥模组1下一跳的范围攻击资格独立且不重复
+- Tests: PASS 泥/泥模组2下落贴地前接受起跳请求
+- Tests: PASS 泥/泥模组2前摇中落地：仅清旧轨迹，保留待起跳配置
+- Tests: PASS 泥/泥模组2落地后按冻结配置正常起跳，只消耗一次跳跃
+- Tests: PASS 泥/泥模组2前摇中普通落地不误触范围攻击
+- Tests: PASS 泥/泥模组2下一跳的范围攻击资格独立且不重复
+- Tests: PASS 待起跳配置为空时安全取消，不读取Nil或增加跳数
+- Tests: PASS 受伤分支：接受泥起跳前摇
+- Tests: PASS 受伤立即取消待起跳请求
+- Tests: PASS 受伤前摇结束后没有幽灵起跳
+- Tests: PASS 换场分支：接受泥起跳前摇
+- Tests: PASS 实际过门取消待起跳、空中轨迹与落地伤害资格
+- Tests: PASS 1.0秒后摇从80%减速开始
+- Tests: PASS 1.0秒曲线：20%→55%→80%→95%→100%，无反向或超速
+- Tests: PASS 1.5秒后摇从80%减速开始
+- Tests: PASS 1.5秒曲线：20%→55%→80%→95%→100%，无反向或超速
+- Tests: PASS 泥普通攻击进入独立前摇
+- Tests: PASS 有效判定后进入1.5秒移动减速后摇
+- Tests: PASS 泥攻击后摇期间实际可移动，受到高额减速
+- Tests: PASS 泥攻击后摇不能连点重开攻击
+- Tests: PASS 泥攻击后摇前1秒拒绝格挡，失败不消耗CD
+- Tests: PASS 泥攻击后摇最后0.5秒允许格挡
+- Tests: PASS 泥成功格挡保留增伤，不获得水形态的CD/攻击间隔刷新
+- Tests: PASS 提前松开泥格挡，不绕过尚未结束的攻击间隔
+- Tests: PASS 原攻击收势到期后正常恢复攻击
+- Tests: PASS 泥攻击后摇第0帧允许Shift衔接
+- Tests: PASS Shift清除攻击收势及隐藏计时，不叠加后摇
+- Tests: PASS Shift结束后由1秒曲线减速完整覆盖攻击减速
+- Tests: PASS 实际物理帧：闪避后0.5秒恢复至约80%移速
+- Tests: PASS Shift收势结束后没有残留攻击后摇
+- Tests: PASS 泥攻击后摇第35帧允许Shift衔接
+- Tests: PASS Shift清除攻击收势及隐藏计时，不叠加后摇
+- Tests: PASS Shift结束后由1秒曲线减速完整覆盖攻击减速
+- Tests: PASS 实际物理帧：闪避后0.5秒恢复至约80%移速
+- Tests: PASS Shift收势结束后没有残留攻击后摇
+- Tests: PASS 泥攻击后摇第65帧允许Shift衔接
+- Tests: PASS Shift清除攻击收势及隐藏计时，不叠加后摇
+- Tests: PASS Shift结束后由1秒曲线减速完整覆盖攻击减速
+- Tests: PASS 实际物理帧：闪避后0.5秒恢复至约80%移速
+- Tests: PASS Shift收势结束后没有残留攻击后摇
+- Tests: PASS 水格挡开始时启动3秒CD
+- Tests: PASS 水格挡未成功时不能提前再次格挡
+- Tests: PASS 切换泥形态不清除水格挡CD
+- Tests: PASS 格挡CD到期自然恢复
+- Tests: PASS 水格挡成功处理有效攻击
+- Tests: PASS 水成功格挡清零格挡CD与攻击间隔
+- Tests: PASS 水成功格挡后持续按住不会自动再次格挡
+- Tests: PASS 水成功格挡后可立即发起反击
+- Tests: PASS 泥重压下砸落地后使用同一1.5秒可移动攻击收势
+- Tests: PASS 泥下砸攻击收势也可由Shift覆盖
+- Tests: PASS 泥下砸后的Shift最终只保留1秒闪避收势
+- Tests: PASS 实际换场保留格挡CD与攻击间隔
+- Tests: PASS 实际换场保留曲线来源、剩余时间与总时长
+- Tests: PASS 23关卡与测试场仅存在于whitebox目录，旧位置已移除
+- Tests: PASS 23关卡文案已清理开发说明，H01七门事件全部保留
+- Tests: PASS 正式角色、环境、音频资源目录已预留
+- Tests: PASS 手感与目录回归完整执行

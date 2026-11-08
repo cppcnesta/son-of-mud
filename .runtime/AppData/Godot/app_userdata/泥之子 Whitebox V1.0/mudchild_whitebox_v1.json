@@ -1,0 +1,14 @@
+{
+	"abilities": {
+		"block": true,
+		"form_switch": true
+	},
+	"checkpoint_room": "M01",
+	"checkpoint_spawn": "Start",
+	"flags": {
+		"TEST:test_exit": true
+	},
+	"last_room": "M01",
+	"last_spawn": "Start",
+	"version": 1
+}

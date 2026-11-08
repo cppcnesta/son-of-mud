@@ -1,0 +1,5 @@
+[gd_scene load_steps=2 format=3 uid="uid://qmkm1f7v07ea"]
+
+[ext_resource type="PackedScene" path="res://assets/scenes/whitebox/legacy/mp_03_altar.tscn" id="1_canonical"]
+
+[node name="MP03Altar" instance=ExtResource("1_canonical")]
