@@ -6,8 +6,6 @@ signal attack_blocked(attack_id: String)
 @export var water_config: MudFormConfig = preload("res://assets/data/player/water.tres")
 @export var mud_config: MudFormConfig = preload("res://assets/data/player/mud.tres")
 @export var rules: MudPrototypeRules = preload("res://assets/data/player/prototype_rules.tres")
-@export_group("调试")
-@export var inspection_speed: float = 500.0
 var action := MudActionState.new()
 var combat := MudPlayerCombat.new()
 var recovery := MudMovementRecovery.new()

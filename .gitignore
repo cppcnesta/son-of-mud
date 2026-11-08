@@ -1,3 +1,19 @@
 # Godot 4+ specific ignores
 .godot/
 /android/
+
+# 本地运行数据：编辑器缓存、测试用 APPDATA、存档
+.runtime/
+
+# 打包产物与导出
+Delivery/
+export/
+*.zip
+
+# 测试输出（截图、日志、结果 json），由 Run_Tests.ps1 生成
+tests/output/
+
+# 个人工具配置
+.codex/
+.vscode/
+.idea/
