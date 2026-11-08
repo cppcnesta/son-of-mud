@@ -1,5 +1,0 @@
-[gd_scene load_steps=2 format=3 uid="uid://dlsfd853cx1ho"]
-
-[ext_resource type="PackedScene" path="res://assets/scenes/whitebox/legacy/mp_01_pit.tscn" id="1_canonical"]
-
-[node name="MP01Pit" instance=ExtResource("1_canonical")]

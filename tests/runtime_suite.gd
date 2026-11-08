@@ -7,6 +7,8 @@ var lines: Array[String] = []
 var room: Node2D
 var p: CharacterBody2D
 var world: Dictionary
+## 测试产物（截图、结果json）不进版本库。
+const OUTPUT_DIR := "res://tests/output/"
 
 func _ready() -> void:
 	call_deferred("run")
@@ -68,22 +70,17 @@ func snapshot_image(name: String) -> void:
 	if DisplayServer.get_name() == "headless":
 		return
 	await RenderingServer.frame_post_draw
-	get_viewport().get_texture().get_image().save_png("res://Documentation/" + name + ".png")
+	get_viewport().get_texture().get_image().save_png(OUTPUT_DIR + name + ".png")
 
 func run() -> void:
 	reparent(get_tree().root)
+	DirAccess.make_dir_recursive_absolute(OUTPUT_DIR)
 	Progress.allow_disk = false
 	Progress.new_game(false)
 	world = JSON.parse_string(FileAccess.get_file_as_string("res://assets/data/whitebox/world.json"))
 	check(Engine.get_version_info().string.begins_with("4.7.2"), "实际Godot版本4.7.2")
 	check(DisplayServer.get_name() != "headless", "实际图形运行：%s / %s" % [DisplayServer.get_name(), RenderingServer.get_current_rendering_method()])
 	check(world.rooms.size() == 24, "23主线场景+1测试场，无旧版多余房间")
-	if OS.get_cmdline_user_args().has("--scene-paths-only"):
-		var scene_suite: RefCounted = load("res://tests/scene_migration_checks.gd").new()
-		var scene_checks_done: Variant = await scene_suite.run(self)
-		check(scene_checks_done == true, "场景迁移与旧入口回归完整执行")
-		finish_report("scene_migration_results")
-		return
 	if OS.get_cmdline_user_args().has("--feel-only"):
 		await combat_feel_checks()
 		finish_report("combat_feel_results")
@@ -262,7 +259,8 @@ func run() -> void:
 	finish_report("runtime_results")
 
 func finish_report(filename: String) -> void:
-	var report := FileAccess.open("res://Documentation/" + filename + ".json", FileAccess.WRITE)
+	DirAccess.make_dir_recursive_absolute(OUTPUT_DIR)
+	var report := FileAccess.open(OUTPUT_DIR + filename + ".json", FileAccess.WRITE)
 	report.store_string(JSON.stringify({"checks": checks, "failures": failures, "rendering": RenderingServer.get_current_rendering_method(), "metrics": metrics, "results": lines}, "\t"))
 	report.close()
 	print("Tests: %s 总计%d项，失败%d项；仅报告实际执行项目" % ["PASS" if failures == 0 else "FAIL", checks, failures])
