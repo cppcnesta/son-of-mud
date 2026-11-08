@@ -17,3 +17,8 @@ tests/output/
 .codex/
 .vscode/
 .idea/
+
+# C# build and IDE output
+bin/
+obj/
+.vs/

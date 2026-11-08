@@ -1,9 +1,11 @@
 # 泥之子Godot白盒V1.0交付说明
 
+当前源码为C#，需要Godot 4.7.2 .NET版及.NET SDK。打开和构建方法见 `CSharp_Migration_V1_0.md`。合并main后运行输出统一写入 `tests/output/`。
+
 当前动作规则：泥闪避后1秒、攻击后1.5秒曲线减速，攻击后摇最后0.5秒允许格挡；水格挡CD3秒，成功重置格挡CD和攻击间隔。旧版2秒线性闪避减速已停用。
 
 
-已直接修改工程：`D:/GAMEOFF/mud-child-map-practice`。实际引擎为Godot4.7.2.stable.official.ed1daf0bf，渲染器为Compatibility，运行日志显示OpenGL3.3 / NVIDIA RTX4060 Laptop GPU。
+已直接修改工程：`D:/GAMEOFF/son-of-mud`。实际引擎为Godot4.7.2.stable.official.ed1daf0bf，渲染器为Compatibility，运行日志显示OpenGL3.3 / NVIDIA RTX4060 Laptop GPU。
 
 ## 运行入口
 
@@ -11,7 +13,7 @@
 - 主菜单：`res://assets/scenes/ui/main_menu.tscn`。
 - 形态测试场：`res://assets/scenes/whitebox/tests/form_lab.tscn`，也可在流程中按F2进入。
 - 主线场景：`res://assets/scenes/whitebox/levels/M01.tscn`至H03，共23个。没有T07、T08或H04～H08。
-- 唯一玩家控制器：`assets/scripts/player/player.gd`。
+- 唯一玩家控制器：`assets/scripts/player/MudPlayer.cs`。
 
 ## 操作
 
@@ -121,7 +123,9 @@ Inspector中打开下列`.tres`；导出组名和文档说明为中文，字段�
 - action_state管理动作互斥；player_combat管理攻击形状、命中去重和增伤消费；attack_ledger管理敌人攻击ID去重；form_config、prototype_rules管理资源；whitebox_room调度房间数据，whitebox_geometry搭建地形，whitebox_events执行交互事件。
 - 旧控制器已被唯一状态控制器替换，玩家场景路径仍是`res://assets/scenes/player/player.tscn`。未引用不存在的`res://scenes/player.tscn`。
 
-## 验证范围与证据
+## 原GDScript版的验证范围与证据
+
+以下图形运行记录对应迁移前的GDScript版本。当前C#版的完整Godot构建与运行检查尚未完成，验证范围见 `CSharp_Verification_Report.json`。
 
 已修复“下落时发起跳跃，前摇尚未结束就落地”导致的jump_speed空引用。待起跳配置与当前空中轨迹已分开；受伤和传送会取消待起跳请求。
 
@@ -136,4 +140,4 @@ Inspector中打开下列`.tres`；导出组名和文档说明为中文，字段�
 
 见`Room_Manifest.md`，列出23个房间的W/H建议、64px网格取整尺寸、每个接口ID、目标房间、目标出生点、本侧门/Marker坐标与条件。1152×648沿用工程未覆盖时的Godot默认基础分辨率。Boss尺寸优先满足战斗与镜头，均为可修改的白盒建议值。
 
-注意：运行中的房间内容由whitebox_room构建，编辑器打开单个.tscn只显示房间根及room_id；运行后可在Remote树查看Player、Spawns、接口和白盒内容。直接修改world.json即可调整尺寸与接口；无需运行Python生成器。`tools/build_world.py`用于从当前基线重新生成，运行它会覆盖world.json与主线.tscn，编辑数据后请先保存副本。
+注意：运行中的房间内容由whitebox_room构建，编辑器打开单个.tscn只显示房间根及RoomId；运行后可在Remote树查看Player、Spawns、接口和白盒内容。直接修改world.json即可调整尺寸与接口；无需运行Python生成器。`tools/build_world.py`用于从当前基线重新生成，运行它会覆盖world.json与主线.tscn，编辑数据后请先保存副本。

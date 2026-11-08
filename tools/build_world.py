@@ -117,10 +117,10 @@ reserved = [dict(id='water_down',label='M02下方水域',anchor='M02',target=Non
 for rid in rooms:
     path=ROOT/('assets/scenes/whitebox/tests/form_lab.tscn' if rid=='TEST' else f'assets/scenes/whitebox/levels/{rid}.tscn')
     path.write_text(f'''[gd_scene load_steps=2 format=3]
-[ext_resource type="Script" path="res://assets/scripts/whitebox/whitebox_room.gd" id="1"]
+[ext_resource type="Script" path="res://assets/scripts/whitebox/MudWhiteboxRoom.cs" id="1"]
 [node name="{rid}" type="Node2D"]
 script = ExtResource("1")
-room_id = "{rid}"
+RoomId = "{rid}"
 ''',encoding='utf-8')
 
 lines=['# 23场景白盒尺寸与接口清单','', 'W=1152px，H=648px，沿用64px网格。尺寸为白盒建议值，四舍五入至64px。', '', '|房间|用途|建议W×H|实际像素|', '|---|---|---|---|']
