@@ -11,8 +11,6 @@ public partial class MudPlayer : CharacterBody2D
     [Export] public MudFormConfig WaterConfig { get; set; } = GD.Load<MudFormConfig>("res://assets/data/player/water.tres");
     [Export] public MudFormConfig MudConfig { get; set; } = GD.Load<MudFormConfig>("res://assets/data/player/mud.tres");
     [Export] public MudPrototypeRules Rules { get; set; } = GD.Load<MudPrototypeRules>("res://assets/data/player/prototype_rules.tres");
-    [ExportGroup("调试")]
-    [Export] public float InspectionSpeed { get; set; } = 500f;
 
     public MudActionState Action { get; } = new();
     public MudPlayerCombat Combat { get; } = new();

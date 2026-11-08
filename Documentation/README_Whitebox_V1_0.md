@@ -1,10 +1,11 @@
 # 泥之子Godot白盒V1.0交付说明
 
-当前动作规则以Combat_Feel_Update.md为准：泥闪避后1秒、攻击后1.5秒曲线减速，攻击后摇最后0.5秒允许格挡；水格挡CD3秒，成功重置格挡CD和攻击间隔。旧版2秒线性闪避减速已停用。
+当前源码为C#，需要Godot 4.7.2 .NET版及.NET SDK。打开和构建方法见 `CSharp_Migration_V1_0.md`。合并main后运行输出统一写入 `tests/output/`。
 
-旧编辑器路径中的mp_01、mp_02、mp_03现为兼容入口，内容统一继承whitebox/legacy场景。若看到迁移前生成的依赖错误弹窗，关闭弹窗并重新打开工程；本次路径修复与验证见Scene_Path_Repair.md。
+当前动作规则：泥闪避后1秒、攻击后1.5秒曲线减速，攻击后摇最后0.5秒允许格挡；水格挡CD3秒，成功重置格挡CD和攻击间隔。旧版2秒线性闪避减速已停用。
 
-已直接修改工程：`D:/GAMEOFF/mud-child-map-practice`。实际引擎为Godot4.7.2.stable.official.ed1daf0bf，渲染器为Compatibility，运行日志显示OpenGL3.3 / NVIDIA RTX4060 Laptop GPU。
+
+已直接修改工程：`D:/GAMEOFF/son-of-mud`。实际引擎为Godot4.7.2.stable.official.ed1daf0bf，渲染器为Compatibility，运行日志显示OpenGL3.3 / NVIDIA RTX4060 Laptop GPU。
 
 ## 运行入口
 
@@ -12,8 +13,7 @@
 - 主菜单：`res://assets/scenes/ui/main_menu.tscn`。
 - 形态测试场：`res://assets/scenes/whitebox/tests/form_lab.tscn`，也可在流程中按F2进入。
 - 主线场景：`res://assets/scenes/whitebox/levels/M01.tscn`至H03，共23个。没有T07、T08或H04～H08。
-- 旧的`assets/scenes/whitebox/legacy/mp_*.tscn`和Room01保留为历史练习场景，不在新主线连接图中；全部复用唯一`assets/scripts/player/player.gd`，没有第二套玩家控制器。
-- 修改前的项目备份：`Documentation/Original_Project_20261105.zip`。
+- 唯一玩家控制器：`assets/scripts/player/MudPlayer.cs`。
 
 ## 操作
 
@@ -123,11 +123,12 @@ Inspector中打开下列`.tres`；导出组名和文档说明为中文，字段�
 - action_state管理动作互斥；player_combat管理攻击形状、命中去重和增伤消费；attack_ledger管理敌人攻击ID去重；form_config、prototype_rules管理资源；whitebox_room调度房间数据，whitebox_geometry搭建地形，whitebox_events执行交互事件。
 - 旧控制器已被唯一状态控制器替换，玩家场景路径仍是`res://assets/scenes/player/player.tscn`。未引用不存在的`res://scenes/player.tscn`。
 
-## 验证范围与证据
+## 原GDScript版的验证范围与证据
 
-已修复“下落时发起跳跃，前摇尚未结束就落地”导致的jump_speed空引用，详见`Jump_Landing_Fix.md`。待起跳配置与当前空中轨迹已分开；受伤和传送会取消待起跳请求。
+以下图形运行记录对应迁移前的GDScript版本。当前C#版的完整Godot构建与运行检查尚未完成，验证范围见 `CSharp_Verification_Report.json`。
 
-资源导入日志见`import.log`；完整图形运行检查见`runtime_suite.log`与`runtime_results.json`，后续回归见`focused_suite.log`/`focused_results.json`及`final_patch_suite.log`/`final_patch_results.json`。详细结果以`Test_Report.md`为准。
+已修复“下落时发起跳跃，前摇尚未结束就落地”导致的jump_speed空引用。待起跳配置与当前空中轨迹已分开；受伤和传送会取消待起跳请求。
+
 
 这些检查是在实际Windows图形窗口、OpenGL兼容渲染器和真实Godot物理帧中执行，通过输入动作/物理键事件驱动，并非只做无头解析。主线接口检查会逐条真实换场并校验目标Marker位置；能力门槛另外从未解锁与已解锁两种状态实际移动/跳跃测试。
 
@@ -139,4 +140,4 @@ Inspector中打开下列`.tres`；导出组名和文档说明为中文，字段�
 
 见`Room_Manifest.md`，列出23个房间的W/H建议、64px网格取整尺寸、每个接口ID、目标房间、目标出生点、本侧门/Marker坐标与条件。1152×648沿用工程未覆盖时的Godot默认基础分辨率。Boss尺寸优先满足战斗与镜头，均为可修改的白盒建议值。
 
-注意：运行中的房间内容由whitebox_room构建，编辑器打开单个.tscn只显示房间根及room_id；运行后可在Remote树查看Player、Spawns、接口和白盒内容。直接修改world.json即可调整尺寸与接口；无需运行Python生成器。`tests/build_world.py`用于从当前基线重新生成，运行它会覆盖world.json与主线.tscn，编辑数据后请先保存副本。
+注意：运行中的房间内容由whitebox_room构建，编辑器打开单个.tscn只显示房间根及RoomId；运行后可在Remote树查看Player、Spawns、接口和白盒内容。直接修改world.json即可调整尺寸与接口；无需运行Python生成器。`tools/build_world.py`用于从当前基线重新生成，运行它会覆盖world.json与主线.tscn，编辑数据后请先保存副本。

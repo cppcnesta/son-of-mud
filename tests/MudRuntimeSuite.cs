@@ -8,6 +8,7 @@ using Kind = MudActionState.Kind;
 /// <summary>Real Godot input, physics, scene, combat and save regression tests.</summary>
 public partial class MudRuntimeSuite : Node
 {
+    public const string OutputDirectory = "res://tests/output/";
     public int Failures { get; private set; }
     public int Checks { get; private set; }
     public GDictionary Metrics { get; } = new();
@@ -77,12 +78,13 @@ public partial class MudRuntimeSuite : Node
     {
         if (DisplayServer.GetName() == "headless") return;
         await ToSignal(RenderingServer.Singleton, RenderingServer.SignalName.FramePostDraw);
-        GetViewport().GetTexture().GetImage().SavePng("res://Documentation/" + name + ".png");
+        GetViewport().GetTexture().GetImage().SavePng(OutputDirectory + name + ".png");
     }
     private async void Run()
     {
         try
         {
+            DirAccess.MakeDirRecursiveAbsolute(OutputDirectory);
             // Keep the driver alive while replacing CurrentScene.
             if (GetParent() != GetTree().Root) Reparent(GetTree().Root);
             if (GetTree().CurrentScene == this) GetTree().CurrentScene = null;
@@ -119,7 +121,7 @@ public partial class MudRuntimeSuite : Node
     private void FinishReport(string filename)
     {
         ReleaseInputs();
-        using var report = FileAccess.Open("res://Documentation/" + filename + ".json", FileAccess.ModeFlags.Write);
+        using var report = FileAccess.Open(OutputDirectory + filename + ".json", FileAccess.ModeFlags.Write);
         var data = new GDictionary
         {
             ["checks"] = Checks, ["failures"] = Failures, ["display"] = DisplayServer.GetName(),

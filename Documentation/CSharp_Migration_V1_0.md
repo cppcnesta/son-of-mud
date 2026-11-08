@@ -9,7 +9,7 @@
 - 水格挡3秒冷却；成功格挡清零格挡CD和攻击间隔。泥格挡的增伤、持续窗口与刷新规则沿用实际工程配置。
 - 待起跳请求与当前空中轨迹分开保存，保留前摇落地、受伤取消和换场取消修复。
 - 进度、测试能力覆盖层、检查点、存档、菜单、HUD、白盒地形、敌人、交互和房间传送。
-- 23个主线房间、测试场及现有兼容入口。场景和 `.tres` 的导出字段改为对应C#属性名，脚本UID沿用原值。
+- 23个主线房间及测试场。合并main后沿用旧练习场景/兼容入口的删除。场景和 `.tres` 的导出字段改为对应C#属性名，脚本UID沿用原值。
 - `SonOfMud.csproj`、`SonOfMud.sln`、C#入口、启动脚本及测试脚本。
 
 `world.json`、现有贴图、TileSet和房间连接数据保持原字节。现有数值作为迁移依据；本次没有将讨论中的新Boss方案额外接入工程。
@@ -57,6 +57,10 @@ Autoload节点名称仍为 `InputDefaults`、`Progress`、`RoomTravel`。C#直�
 .\Run_Tests.ps1 -GodotPath '你的Godot.NET控制台程序完整路径' -Suite feel
 ```
 
-支持 `all`、`feel`、`scene-paths`、`jump-landing`、`attacks`、`stairs`、`focused`。启动器隔离APPDATA后运行，磁盘测试不会覆盖玩家正式存档。测试失败会返回非零退出码；实际结果写入 `Documentation/csharp_*_results.json`。
+支持 `all`、`feel`、`scene-paths`、`jump-landing`、`attacks`、`stairs`、`focused`。启动器隔离APPDATA后运行，磁盘测试不会覆盖玩家正式存档。测试失败会返回非零退出码；实际结果写入 `tests/output/csharp_*_results.json`。
 
 本次已执行的检查与未完成的引擎检查见 `CSharp_Verification_Report.json`。C#回归套件已提供；本机缺Godot .NET与Godot.NET.Sdk包、无法联网取得依赖，因此没有宣称完成整个Godot工程的编译或运行验证。
+
+## PR #3 合并冲突处理
+
+沿用main的旧练习场景删除及仓库清理；保留C#迁移和23个主线房间。日志、截图与运行结果改到被忽略的 `tests/output/`。生成器位于 `tools/build_world.py`，生成的场景使用 `MudWhiteboxRoom.cs` 与 `RoomId`。当前C#版的完整Godot构建与运行验证仍未完成。
