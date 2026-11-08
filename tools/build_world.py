@@ -1,4 +1,4 @@
-"""Reproducible whitebox data/scenes. Runtime reads world.json; no editor plugin required."""
+"""Reproducible whitebox data/scenes (run from repo root: python tools/build_world.py). Runtime reads world.json; no editor plugin required."""
 from pathlib import Path
 import json
 
