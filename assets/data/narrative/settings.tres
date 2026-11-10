@@ -1,0 +1,25 @@
+[gd_resource type="Resource" script_class="NarrativeSettings" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://assets/scripts/narrative/data/NarrativeSettings.cs" id="1_settings"]
+[ext_resource type="Resource" path="res://assets/data/narrative/characters.tres" id="2_chars"]
+
+[resource]
+script = ExtResource("1_settings")
+CharsPerSecond = 30.0
+LineGap = 0.5
+PauseAtBlankLines = true
+SubtitleBaseSeconds = 1.2
+SubtitleSecondsPerChar = 0.12
+MaxStepsPerFrame = 200
+MaxStepsWithoutWaiting = 5000
+Characters = ExtResource("2_chars")
+StoryDirectory = "res://assets/story"
+TabletDirectory = "res://assets/data/narrative/tablets"
+InscriptionDirectory = "res://assets/data/narrative/inscriptions"
+CgDirectory = "res://assets/data/narrative/cg"
+SfxDirectory = "res://assets/audio/sfx"
+OpeningRoom = "S1_01"
+OpeningScript = "m_pit"
+OpeningLabel = "开场"
+OpeningSeenVar = &"seen.opening"
+CanvasLayer = 90

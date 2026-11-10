@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="TabletData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://assets/scripts/narrative/data/TabletData.cs" id="1_tablet"]
+
+[resource]
+script = ExtResource("1_tablet")
+Id = "gate_4"
+Title = "四"
+Room = "S4_02"
+PartialText = "他终于抬头看我，很久以来他第一次看我。我也知晓了自己的命运。"

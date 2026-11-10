@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="TabletData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://assets/scripts/narrative/data/TabletData.cs" id="1_tablet"]
+
+[resource]
+script = ExtResource("1_tablet")
+Id = "hand_blade"
+Title = "手与刃"
+Room = "S1_08"
+PartialText = "父亲说：你是我的手。\n父亲说：你是我的刃。我身上流过的每一滴血都曾在父亲的心口跳过。我是祂用自己的血和泥捏出的第一个造物，一把（…？），一位万人之上的神子。"
+FullText = "父亲说：你是我的手。\n父亲说：你是我的刃。我身上流过的每一滴血都曾在父亲的心口跳过。我是祂用自己的血和泥捏出的第一个造物，一把锋利无匹的武器，一位万人之上的神子。"

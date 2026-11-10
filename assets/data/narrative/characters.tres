@@ -1,0 +1,90 @@
+[gd_resource type="Resource" script_class="CharacterDatabase" load_steps=12 format=3]
+
+[ext_resource type="Script" path="res://assets/scripts/narrative/data/CharacterDatabase.cs" id="1_db"]
+[ext_resource type="Script" path="res://assets/scripts/narrative/data/CharacterData.cs" id="2_char"]
+
+[sub_resource type="Resource" id="char_mul_tukul"]
+script = ExtResource("2_char")
+Id = "mul_tukul"
+DisplayName = "穆尔图库尔"
+Aliases = PackedStringArray("图库尔", "图穆尔")
+NameColor = Color(0.95, 0.82, 0.55, 1)
+HasPortrait = true
+PortraitColor = Color(0.45, 0.33, 0.22, 1)
+
+[sub_resource type="Resource" id="char_unknown"]
+script = ExtResource("2_char")
+Id = "unknown"
+DisplayName = "？？？"
+Aliases = PackedStringArray("???")
+NameColor = Color(0.85, 0.35, 0.3, 1)
+HasPortrait = false
+PortraitColor = Color(0.2, 0.1, 0.1, 1)
+
+[sub_resource type="Resource" id="char_imdu"]
+script = ExtResource("2_char")
+Id = "imdu"
+DisplayName = "伊姆杜"
+Aliases = PackedStringArray()
+NameColor = Color(0.9, 0.75, 0.4, 1)
+HasPortrait = false
+PortraitColor = Color(0.4, 0.3, 0.15, 1)
+
+[sub_resource type="Resource" id="char_tamtu"]
+script = ExtResource("2_char")
+Id = "tamtu"
+DisplayName = "塔姆图"
+Aliases = PackedStringArray()
+NameColor = Color(0.45, 0.7, 0.85, 1)
+HasPortrait = false
+PortraitColor = Color(0.15, 0.3, 0.4, 1)
+
+[sub_resource type="Resource" id="char_igi"]
+script = ExtResource("2_char")
+Id = "igi"
+DisplayName = "伊吉"
+Aliases = PackedStringArray()
+NameColor = Color(0.8, 0.8, 0.7, 1)
+HasPortrait = true
+PortraitColor = Color(0.38, 0.36, 0.3, 1)
+
+[sub_resource type="Resource" id="char_keeper"]
+script = ExtResource("2_char")
+Id = "keeper"
+DisplayName = "守坑人"
+Aliases = PackedStringArray()
+NameColor = Color(0.75, 0.7, 0.55, 1)
+HasPortrait = true
+PortraitColor = Color(0.32, 0.28, 0.2, 1)
+
+[sub_resource type="Resource" id="char_qi"]
+script = ExtResource("2_char")
+Id = "qi"
+DisplayName = "齐"
+Aliases = PackedStringArray()
+NameColor = Color(0.8, 0.7, 0.6, 1)
+HasPortrait = false
+PortraitColor = Color(0.35, 0.3, 0.25, 1)
+
+[sub_resource type="Resource" id="char_mudfolk"]
+script = ExtResource("2_char")
+Id = "mudfolk"
+DisplayName = "泥人"
+Aliases = PackedStringArray()
+NameColor = Color(0.7, 0.62, 0.5, 1)
+HasPortrait = false
+PortraitColor = Color(0.3, 0.25, 0.2, 1)
+
+[sub_resource type="Resource" id="char_craftsmen"]
+script = ExtResource("2_char")
+Id = "craftsmen"
+DisplayName = "工匠们"
+Aliases = PackedStringArray()
+NameColor = Color(0.7, 0.62, 0.5, 1)
+HasPortrait = false
+PortraitColor = Color(0.3, 0.25, 0.2, 1)
+
+[resource]
+script = ExtResource("1_db")
+Characters = Array[ExtResource("2_char")]([SubResource("char_mul_tukul"), SubResource("char_unknown"), SubResource("char_imdu"), SubResource("char_tamtu"), SubResource("char_igi"), SubResource("char_keeper"), SubResource("char_qi"), SubResource("char_mudfolk"), SubResource("char_craftsmen")])
+HiddenNames = PackedStringArray("旁白")

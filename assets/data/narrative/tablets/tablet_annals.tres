@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="TabletData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://assets/scripts/narrative/data/TabletData.cs" id="1_tablet"]
+
+[resource]
+script = ExtResource("1_tablet")
+Id = "annals"
+Title = "年记"
+Room = "S3_07"
+PartialText = "第一年，祂碎在泥里。我们捧来河泥，一点一点把祂补好。\n第三年，祂没有醒。我们为祂编了一首颂歌。\n第四十年，塔庙建到了第七层。\n第两百年，……"

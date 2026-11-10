@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="TabletData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://assets/scripts/narrative/data/TabletData.cs" id="1_tablet"]
+
+[resource]
+script = ExtResource("1_tablet")
+Id = "gate_2"
+Title = "二"
+Room = "S4_02"
+PartialText = "他没有抬头。我只听见一句话：穆尔图库尔，回去吧。"

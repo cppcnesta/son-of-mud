@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="TabletData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://assets/scripts/narrative/data/TabletData.cs" id="1_tablet"]
+
+[resource]
+script = ExtResource("1_tablet")
+Id = "hoped_world"
+Title = "期望的世界"
+Room = "S3_04"
+PartialText = "两条河。河边有田。人会耕种，会建城，会唱歌。城里有神庙，神庙里有人记住这个世界。"

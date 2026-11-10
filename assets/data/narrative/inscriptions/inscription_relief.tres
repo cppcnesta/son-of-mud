@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="TabletData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://assets/scripts/narrative/data/TabletData.cs" id="1_tablet"]
+
+[resource]
+script = ExtResource("1_tablet")
+Id = "relief"
+Title = "浮雕铭文"
+Room = "S3_02"
+PartialText = "祂睡在泥里。祂是破碎的。祂没有醒。"
