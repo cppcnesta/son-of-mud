@@ -10,11 +10,13 @@ namespace SonOfMud.Save;
 /// - LoadFromDisk(slot)：清空内存 → 读盘 → 恢复 MetSys 和进度 → 进入存档点所在房间。
 /// - RespawnAtCheckpoint()：玩家死亡（D4）。不读盘，保留内存里的进度，回到最近存档点。
 /// 只依赖 Core：换房通过 Events.TravelRequested 交给 World，当前房间从 Events.RoomEntered 得知。
+/// 开局结果（新游戏、读档）用 Events.GameStartFinished 报告：等 World 回执“已到达”之后才报成功；
+/// 读不出存档、版本不支持、目标房间不存在、换房失败都报失败并带原因。新游戏和失败的读档都不碰存档文件。
 /// </summary>
 [GlobalClass]
 public partial class SaveService : Node
 {
-    [Export] public string SaveDirectory { get; set; } = "user://";
+    [Export] public string SaveDirectory { get; set; } = SavePaths.DefaultDirectory;
     /// <summary>新游戏起点，也是第一个存档点之前的复活点。</summary>
     [Export] public string NewGameRoom { get; set; } = "S1_01";
     [Export] public StringName NewGameSpawn { get; set; } = "Default";
@@ -32,10 +34,12 @@ public partial class SaveService : Node
     public int PendingRespawnId { get; private set; } = -1;
     /// <summary>正在进行的读档换房请求编号；-1 表示没有。</summary>
     public int PendingLoadId { get; private set; } = -1;
+    /// <summary>正在进行的新游戏换房请求编号；-1 表示没有。</summary>
+    public int PendingNewGameId { get; private set; } = -1;
 
     public StringName CheckpointSpawn => string.IsNullOrEmpty(CheckpointSavePoint) ? NewGameSpawn : SavePointSpawn;
 
-    public string SlotPath(int slot) => SaveDirectory.PathJoin($"save_{slot}.sav");
+    public string SlotPath(int slot) => SavePaths.SlotPath(SaveDirectory, slot);
 
     public override void _EnterTree()
     {
@@ -77,7 +81,9 @@ public partial class SaveService : Node
         CheckpointSavePoint = "";
         PendingRespawnId = -1;
         PendingLoadId = -1;
-        Events.Instance?.EmitSignal(Events.SignalName.TravelRequested, Events.NewRequestId(), NewGameRoom, NewGameSpawn);
+        // GameStartFinished 等 World 回执“已到达”之后才发（见 OnTravelFinished）。
+        PendingNewGameId = Events.NewRequestId();
+        Events.Instance?.EmitSignal(Events.SignalName.TravelRequested, PendingNewGameId, NewGameRoom, NewGameSpawn);
     }
 
     public bool SaveToDisk(StringName savePointId, int slot = 0)
@@ -107,7 +113,7 @@ public partial class SaveService : Node
     public bool LoadFromDisk(int slot)
     {
         SaveData data = SaveData.ReadFrom(SlotPath(slot), out string error);
-        if (data == null) return Fail(error);
+        if (data == null) return FailStart("读档失败：" + error);
 
         GameSession.Reset(InitialAbilities);
         if (MetSysApi.Available)
@@ -120,6 +126,7 @@ public partial class SaveService : Node
         CheckpointSavePoint = data.SavePoint;
         LastError = "";
         // GameLoaded 等 World 回执“已到达”之后才发（见 OnTravelFinished）。
+        PendingNewGameId = -1;
         PendingLoadId = Events.NewRequestId();
         Events.Instance?.EmitSignal(Events.SignalName.TravelRequested, PendingLoadId, CheckpointRoom, CheckpointSpawn);
         return true;
@@ -152,9 +159,33 @@ public partial class SaveService : Node
         else if (requestId == PendingLoadId)
         {
             PendingLoadId = -1;
-            if (success) Events.Instance?.EmitSignal(Events.SignalName.GameLoaded, roomId);
-            else Fail($"读档后没能进入房间 {roomId}。");
+            if (success && roomId == CheckpointRoom)
+            {
+                Events.Instance?.EmitSignal(Events.SignalName.GameLoaded, roomId);
+                FinishStart();
+            }
+            else FailStart($"读档后没能进入房间 {CheckpointRoom}（房间不存在或换房失败；回执房间 {roomId}，success={success}）。");
         }
+        else if (requestId == PendingNewGameId)
+        {
+            PendingNewGameId = -1;
+            if (success && roomId == NewGameRoom) FinishStart();
+            else FailStart($"新游戏没能进入起点房间 {NewGameRoom}（房间不存在或换房失败；回执房间 {roomId}，success={success}）。");
+        }
+    }
+
+    private void FinishStart()
+    {
+        LastError = "";
+        Events.Instance?.EmitSignal(Events.SignalName.GameStartFinished, true, "");
+    }
+
+    /// <summary>开局失败：记录错误并报告 GameStartFinished(false)。不写盘，存档文件保持原样。</summary>
+    private bool FailStart(string error)
+    {
+        Fail(error);
+        Events.Instance?.EmitSignal(Events.SignalName.GameStartFinished, false, error);
+        return false;
     }
 
     private bool Fail(string error)
