@@ -87,7 +87,7 @@ public partial class HurtBox : Area2D
         int amount = DamageMath.Final(hit.Damage, hit.Multiplier, Stats?.IncomingMultiplier ?? 1f);
         int dealt = Stats?.TakeDamage(amount) ?? amount;
         hit.Dealt = dealt;
-        bool killed = Stats != null && Stats.IsDepleted;
+        bool killed = Stats != null && Stats.LastHitDepleted;
         EmitSignal(SignalName.Damaged, hit, dealt);
         if (!killed) return HitOutcome.Damaged;
         EmitSignal(SignalName.Killed, hit);

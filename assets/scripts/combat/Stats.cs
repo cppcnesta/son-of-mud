@@ -51,6 +51,9 @@ public partial class Stats : Node
         else _incoming[source] = multiplier;
     }
 
+    /// <summary>最近一次 TakeDamage 是否把血量扣到了 0（在发信号之前确定）。</summary>
+    public bool LastHitDepleted { get; private set; }
+
     /// <summary>扣血，返回实际扣掉的量。</summary>
     public int TakeDamage(int amount)
     {
@@ -58,9 +61,12 @@ public partial class Stats : Node
         if (amount <= 0 || _health <= 0) return 0;
         int old = _health;
         _health = Mathf.Max(0, _health - amount);
+        // 先算好结果再发信号：信号的接收方即使改了血量，也不影响这次结算的返回值。
+        int dealt = old - _health;
+        LastHitDepleted = _health == 0;
         EmitSignal(SignalName.HealthChanged, old, _health);
-        if (_health == 0) EmitSignal(SignalName.Depleted);
-        return old - _health;
+        if (LastHitDepleted) EmitSignal(SignalName.Depleted);
+        return dealt;
     }
 
     public void Heal(int amount)

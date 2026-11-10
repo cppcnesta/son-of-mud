@@ -28,6 +28,10 @@ public partial class SaveService : Node
     public string CheckpointSavePoint { get; private set; } = "";
     public string CurrentRoom { get; private set; } = "";
     public string LastError { get; private set; } = "";
+    /// <summary>正在进行的复活换房请求编号；-1 表示没有。</summary>
+    public int PendingRespawnId { get; private set; } = -1;
+    /// <summary>正在进行的读档换房请求编号；-1 表示没有。</summary>
+    public int PendingLoadId { get; private set; } = -1;
 
     public StringName CheckpointSpawn => string.IsNullOrEmpty(CheckpointSavePoint) ? NewGameSpawn : SavePointSpawn;
 
@@ -42,6 +46,7 @@ public partial class SaveService : Node
         Events.Instance.RoomEntered += OnRoomEntered;
         Events.Instance.NewGameRequested += StartNewGame;
         Events.Instance.ContinueRequested += OnContinueRequested;
+        Events.Instance.TravelFinished += OnTravelFinished;
     }
 
     public override void _ExitTree()
@@ -52,6 +57,7 @@ public partial class SaveService : Node
         Events.Instance.RoomEntered -= OnRoomEntered;
         Events.Instance.NewGameRequested -= StartNewGame;
         Events.Instance.ContinueRequested -= OnContinueRequested;
+        Events.Instance.TravelFinished -= OnTravelFinished;
     }
 
     private void OnRoomEntered(string roomId) => CurrentRoom = roomId;
@@ -69,7 +75,9 @@ public partial class SaveService : Node
         }
         CheckpointRoom = NewGameRoom;
         CheckpointSavePoint = "";
-        Events.Instance?.EmitSignal(Events.SignalName.TravelRequested, NewGameRoom, NewGameSpawn);
+        PendingRespawnId = -1;
+        PendingLoadId = -1;
+        Events.Instance?.EmitSignal(Events.SignalName.TravelRequested, Events.NewRequestId(), NewGameRoom, NewGameSpawn);
     }
 
     public bool SaveToDisk(StringName savePointId, int slot = 0)
@@ -111,16 +119,42 @@ public partial class SaveService : Node
         CheckpointRoom = data.Room;
         CheckpointSavePoint = data.SavePoint;
         LastError = "";
-        Events.Instance?.EmitSignal(Events.SignalName.TravelRequested, CheckpointRoom, CheckpointSpawn);
-        Events.Instance?.EmitSignal(Events.SignalName.GameLoaded, CheckpointRoom);
+        // GameLoaded 等 World 回执“已到达”之后才发（见 OnTravelFinished）。
+        PendingLoadId = Events.NewRequestId();
+        Events.Instance?.EmitSignal(Events.SignalName.TravelRequested, PendingLoadId, CheckpointRoom, CheckpointSpawn);
         return true;
     }
 
-    /// <summary>死亡复活：不读盘，进度原样保留（D4）。Player 收到 CheckpointRespawned 后回满血、回 Idle。</summary>
+    /// <summary>
+    /// 死亡复活：不读盘，进度原样保留（D4）。
+    /// 只发换房请求；等 World 回执“玩家已放到检查点”之后才发 CheckpointRespawned（Player 收到后回满血、回 Idle）。
+    /// 换房失败或被拒绝时不发 CheckpointRespawned，只记录错误。复活进行中再次死亡不重复请求。
+    /// </summary>
     public void RespawnAtCheckpoint()
     {
-        Events.Instance?.EmitSignal(Events.SignalName.TravelRequested, CheckpointRoom, CheckpointSpawn);
-        Events.Instance?.EmitSignal(Events.SignalName.CheckpointRespawned);
+        if (PendingRespawnId >= 0) return;
+        PendingRespawnId = Events.NewRequestId();
+        Events.Instance?.EmitSignal(Events.SignalName.TravelRequested, PendingRespawnId, CheckpointRoom, CheckpointSpawn);
+    }
+
+    private void OnTravelFinished(int requestId, string roomId, bool success)
+    {
+        if (requestId == PendingRespawnId)
+        {
+            PendingRespawnId = -1;
+            if (success && roomId == CheckpointRoom)
+            {
+                LastError = "";
+                Events.Instance?.EmitSignal(Events.SignalName.CheckpointRespawned);
+            }
+            else Fail($"复活失败：没能到达检查点 {CheckpointRoom}（回执房间 {roomId}，success={success}）。");
+        }
+        else if (requestId == PendingLoadId)
+        {
+            PendingLoadId = -1;
+            if (success) Events.Instance?.EmitSignal(Events.SignalName.GameLoaded, roomId);
+            else Fail($"读档后没能进入房间 {roomId}。");
+        }
     }
 
     private bool Fail(string error)

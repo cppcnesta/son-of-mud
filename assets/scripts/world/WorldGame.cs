@@ -110,12 +110,47 @@ public partial class WorldGame : Node
 
     // ---------- 过门 / 传送 ----------
 
-    private void OnTravelRequested(string roomPath, StringName spawnId) => _ = TeleportAsync(roomPath, spawnId);
+    private readonly System.Collections.Generic.Queue<(int id, string room, StringName spawn)> _travelQueue = new();
+
+    /// <summary>
+    /// 经 Events 发来的换房请求（读档、复活、新游戏）。正在换房时不丢弃，排队等当前换房结束再执行；
+    /// 每个请求都会收到一次 TravelFinished 回执。按键过门直接调 TeleportAsync，重复按键仍然被拒绝。
+    /// </summary>
+    private void OnTravelRequested(int requestId, string roomIdOrPath, StringName spawnId)
+    {
+        _travelQueue.Enqueue((requestId, roomIdOrPath, spawnId));
+        ProcessTravelQueue();
+    }
+
+    private void ProcessTravelQueue()
+    {
+        if (IsTransitioning || _travelQueue.Count == 0 || !IsInsideTree()) return;
+        var (id, room, spawn) = _travelQueue.Dequeue();
+        _ = RunQueuedTravel(id, room, spawn);
+    }
+
+    private async Task RunQueuedTravel(int requestId, string roomIdOrPath, StringName spawnId)
+    {
+        bool reported = false;
+        void Report(bool success, string roomId)
+        {
+            if (reported) return;
+            reported = true;
+            Events.Instance?.EmitSignal(Events.SignalName.TravelFinished, requestId, roomId ?? roomIdOrPath, success);
+        }
+        bool started = await TeleportAsync(roomIdOrPath, spawnId, Report);
+        if (!started)
+        {
+            Report(false, roomIdOrPath);
+            if (IsInstanceValid(this)) Callable.From(ProcessTravelQueue).CallDeferred();
+        }
+    }
 
     /// <summary>
     /// 过门、读档、复活共用的传送流程。正在换房时直接返回 false（重复按键不会启动第二次传送）。
     /// </summary>
-    public async Task<bool> TeleportAsync(string roomIdOrPath, StringName spawnId)
+    /// <param name="onArrived">玩家被放到目标出生点之后（或换房失败时）调用一次：(是否成功, 房间编号)。</param>
+    public async Task<bool> TeleportAsync(string roomIdOrPath, StringName spawnId, System.Action<bool, string> onArrived = null)
     {
         if (IsTransitioning) return false;
         RoomDef def = Layout?.Resolve(roomIdOrPath);
@@ -130,14 +165,24 @@ public partial class WorldGame : Node
         try
         {
             await Fade(true);
-            if (!IsInstanceValid(this) || !IsInsideTree()) return false;
-            SwapRoom(def, spawnId);
+            if (!IsInstanceValid(this) || !IsInsideTree())
+            {
+                onArrived?.Invoke(false, def.Id);
+                return false;
+            }
+            bool swapped = SwapRoom(def, spawnId);
+            onArrived?.Invoke(swapped, def.Id);
             await Fade(false);
         }
         finally
         {
             InputLock.Request(InputLock.RoomTransition, false);
-            if (IsInstanceValid(this)) IsTransitioning = false;
+            if (IsInstanceValid(this))
+            {
+                IsTransitioning = false;
+                // 换房期间排队的请求（例如过门途中死亡触发的复活），等这一次结束后再执行。
+                Callable.From(ProcessTravelQueue).CallDeferred();
+            }
         }
         return true;
     }

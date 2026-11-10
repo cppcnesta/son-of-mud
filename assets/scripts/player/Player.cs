@@ -235,7 +235,16 @@ public partial class Player : CharacterBody2D
     private void OnHealthChanged(int oldHealth, int newHealth) =>
         Events.Instance?.EmitSignal(Events.SignalName.PlayerHealthChanged, newHealth, Stats.MaxHealth);
 
-    private void OnDepleted() => Events.Instance?.EmitSignal(Events.SignalName.PlayerDied);
+    /// <summary>
+    /// 血量归零时不立刻通知：延到本帧的伤害结算全部结束之后再发 PlayerDied，
+    /// 避免复活流程在 HurtBox.Receive 还没返回时就重入（审查 M5）。
+    /// </summary>
+    private void OnDepleted() => Callable.From(EmitDied).CallDeferred();
+
+    private void EmitDied()
+    {
+        if (IsInstanceValid(this) && Stats.IsDepleted) Events.Instance?.EmitSignal(Events.SignalName.PlayerDied);
+    }
 
     private void OnFormChanged(int form) => Events.Instance?.EmitSignal(Events.SignalName.PlayerFormChanged, form);
 

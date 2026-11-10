@@ -11,6 +11,11 @@ public partial class Events : Node
     /// <summary>autoload 实例。测试场景里没有 autoload 时为 null，发送方要用 ?. 调用。</summary>
     public static Events Instance { get; private set; }
 
+    private static int _lastRequestId;
+
+    /// <summary>换房等“请求 + 回执”类事件用的编号，全局递增，不会重复。</summary>
+    public static int NewRequestId() => System.Threading.Interlocked.Increment(ref _lastRequestId);
+
     public override void _EnterTree()
     {
         if (Instance != null && Instance != this)
@@ -30,7 +35,10 @@ public partial class Events : Node
     [Signal] public delegate void RoomEnteredEventHandler(string roomId);
     [Signal] public delegate void RoomExitingEventHandler(string roomId);
     [Signal] public delegate void CellChangedEventHandler(Vector3I cell);
-    [Signal] public delegate void TravelRequestedEventHandler(string roomPath, StringName spawnId);
+    // 换房请求与回执：requestId 由发请求的一方用 NewRequestId() 取得。
+    // TravelFinished 在玩家已被放到目标出生点之后发出（淡入可能还没结束）；被拒绝或失败时 success=false。
+    [Signal] public delegate void TravelRequestedEventHandler(int requestId, string roomIdOrPath, StringName spawnId);
+    [Signal] public delegate void TravelFinishedEventHandler(int requestId, string roomId, bool success);
     [Signal] public delegate void MessageRequestedEventHandler(string text);
 
     // Save / 菜单流程
