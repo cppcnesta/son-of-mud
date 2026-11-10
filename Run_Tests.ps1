@@ -1,6 +1,6 @@
 param(
     [string]$GodotPath = $env:GODOT_DOTNET,
-    [ValidateSet('all','core','world','player','combat','player-feel','flow','new','feel','scene-paths','jump-landing','attacks','stairs','focused')][string]$Suite = 'all',
+    [ValidateSet('all','core','world','player','combat','player-feel','flow','ui','new','feel','scene-paths','jump-landing','attacks','stairs','focused')][string]$Suite = 'all',
     [switch]$Headless
 )
 $ErrorActionPreference = 'Stop'
@@ -32,7 +32,7 @@ try {
     & $GodotPath --headless --path $projectPath --editor --import --quit --log-file (Join-Path $outputPath 'csharp_import.log')
     if ($LASTEXITCODE -ne 0) { throw "Godot import failed ($LASTEXITCODE)." }
     $legacyCode = 0
-    $newSuites = @('world','player','combat','player-feel','flow','new')
+    $newSuites = @('world','player','combat','player-feel','flow','ui','new')
     if ($Suite -ne 'core' -and $newSuites -notcontains $Suite) {
         $arguments = @('--path', $projectPath, '--scene', 'res://tests/runtime_suite.tscn', '--rendering-method', 'gl_compatibility', '--audio-driver', 'Dummy', '--fixed-fps', '60', '--max-fps', '240', '--log-file', (Join-Path $outputPath 'csharp_runtime_suite.log'))
         if ($Headless) { $arguments += '--headless' }
@@ -88,7 +88,19 @@ try {
             if ($LASTEXITCODE -ne 0 -and $flowCode -eq 0) { $flowCode = $LASTEXITCODE }
         }
     }
-    $resultCode = if ($legacyCode -ne 0) { $legacyCode } elseif ($coreCode -ne 0) { $coreCode } elseif ($worldCode -ne 0) { $worldCode } elseif ($flowCode -ne 0) { $flowCode } else { $newCode }
+    # UI 测试（HUD 假事件、暂停菜单 / 地图、新主菜单流程、读档失败、真实玩家集成）：结果写到 tests/output/ui_<名字>_results.json
+    $uiCode = 0
+    if ($Suite -eq 'all' -or $Suite -eq 'ui' -or $Suite -eq 'new') {
+        $uiScenes = @('tests/ui/ui_hud_test.tscn', 'tests/ui/ui_pause_map_test.tscn', 'tests/ui/title_menu_test.tscn', 'tests/ui/title_menu_failure_test.tscn', 'tests/ui/ui_integration_test.tscn')
+        foreach ($uiScene in $uiScenes) {
+            $uiName = [System.IO.Path]::GetFileNameWithoutExtension($uiScene)
+            $uiArguments = @('--path', $projectPath, '--scene', "res://$uiScene", '--audio-driver', 'Dummy', '--fixed-fps', '60', '--log-file', (Join-Path $outputPath "ui_$uiName.log"))
+            if ($Headless) { $uiArguments += '--headless' }
+            & $GodotPath @uiArguments
+            if ($LASTEXITCODE -ne 0 -and $uiCode -eq 0) { $uiCode = $LASTEXITCODE }
+        }
+    }
+    $resultCode = if ($legacyCode -ne 0) { $legacyCode } elseif ($coreCode -ne 0) { $coreCode } elseif ($worldCode -ne 0) { $worldCode } elseif ($flowCode -ne 0) { $flowCode } elseif ($uiCode -ne 0) { $uiCode } else { $newCode }
 }
 finally {
     foreach ($variableName in $variableNames) { [Environment]::SetEnvironmentVariable($variableName, $previousValues[$variableName], 'Process') }
