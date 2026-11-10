@@ -1,0 +1,64 @@
+[gd_scene format=4 uid="uid://dqerl3tvgrkbh"]
+
+[ext_resource type="Script" path="res://assets/scripts/world/RoomRoot.cs" id="1_b2e0d"]
+[ext_resource type="PackedScene" path="res://addons/MetroidvaniaSystem/Nodes/RoomInstance.tscn" id="2_ptoy5"]
+[ext_resource type="Script" path="res://addons/MetroidvaniaSystem/Scripts/RoomInstance.gd" id="3_ev6l3"]
+[ext_resource type="TileSet" path="res://assets/data/world/world_tileset.tres" id="4_daa41"]
+[ext_resource type="Script" path="res://assets/scripts/world/SpawnPoint.cs" id="5_5lsj6"]
+[ext_resource type="Script" path="res://assets/scripts/world/GateBarrier.cs" id="6_7b1fm"]
+[ext_resource type="Script" path="res://assets/scripts/core/GateRequirement.cs" id="7_q3r6a"]
+
+[sub_resource type="Resource" id="Gate_S2_03_1"]
+script = ExtResource("7_q3r6a")
+Flags = Array[StringName]([&"flood_done"])
+LockedText = "水闸还没打开。"
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_l1wpq"]
+size = Vector2(64, 312)
+
+[node name="S2_03" type="Node2D" unique_id=1254036274]
+script = ExtResource("1_b2e0d")
+RoomId = "S2_03"
+DisplayName = "水闸"
+
+[node name="RoomInstance" type="Node2D" parent="." unique_id=1246059462 instance=ExtResource("2_ptoy5")]
+script = ExtResource("3_ev6l3")
+
+[node name="Geometry" type="TileMapLayer" parent="." unique_id=2134621114]
+position = Vector2(0, -8)
+tile_map_data = PackedByteArray("AAAAAA4AAAAAAAAAAAABAA4AAAAAAAAAAAACAA4AAAAAAAAAAAADAA4AAAAAAAAAAAAEAA4AAAAAAAAAAAAFAA4AAAAAAAAAAAAGAA4AAAAAAAAAAAAHAA4AAAAAAAAAAAAIAA4AAAAAAAAAAAAJAA4AAAAAAAAAAAAKAA4AAAAAAAAAAAALAA4AAAAAAAAAAAAMAA4AAAAAAAAAAAANAA4AAAAAAAAAAAAOAA4AAAAAAAAAAAAPAA4AAAAAAAAAAAAQAA4AAAAAAAAAAAARAA4AAAAAAAAAAAASAA4AAAAAAAAAAAATAA4AAAAAAAAAAAAUAA4AAAAAAAAAAAAVAA4AAAAAAAAAAAAWAA4AAAAAAAAAAAAXAA4AAAAAAAAAAAAYAA4AAAAAAAAAAAAZAA4AAAAAAAAAAAAaAA4AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAXAAQAAAAAAAAAAAAAAAIAAAAAAAAAAAAYAAQAAAAAAAAAAAAAAAMAAAAAAAAAAAAZAAQAAAAAAAAAAAAAAAQAAAAAAAAAAAAaAAQAAAAAAAAAAAAAAAUAAAAAAAAAAAAaAAUAAAAAAAAAAAAAAAYAAAAAAAAAAAAaAAYAAAAAAAAAAAAAAAcAAAAAAAAAAAAaAAcAAAAAAAAAAAAAAAgAAAAAAAAAAAAaAAgAAAAAAAAAAAAAAAkAAAAAAAAAAAAaAAkAAAAAAAAAAAAAAAoAAAAAAAAAAAAaAAoAAAAAAAAAAAAAAAsAAAAAAAAAAAAaAAsAAAAAAAAAAAAAAAwAAAAAAAAAAAAaAAwAAAAAAAAAAAAAAA0AAAAAAAAAAAAaAA0AAAAAAAAAAAA=")
+tile_set = ExtResource("4_daa41")
+
+[node name="Spawns" type="Node2D" parent="." unique_id=1735206816]
+
+[node name="Default" type="Marker2D" parent="Spawns" unique_id=48844493]
+position = Vector2(864, 887)
+script = ExtResource("5_5lsj6")
+
+[node name="From_S2_02" type="Marker2D" parent="Spawns" unique_id=143727982]
+position = Vector2(864, 887)
+script = ExtResource("5_5lsj6")
+SpawnId = &"From_S2_02"
+
+[node name="From_S2_04" type="Marker2D" parent="Spawns" unique_id=1552439462]
+position = Vector2(1632, 247)
+script = ExtResource("5_5lsj6")
+SpawnId = &"From_S2_04"
+
+[node name="Objects" type="Node2D" parent="." unique_id=527736520]
+
+[node name="GateToS2_04" type="StaticBody2D" parent="Objects" unique_id=1967839826]
+position = Vector2(1696, 248)
+script = ExtResource("6_7b1fm")
+Requirement = SubResource("Gate_S2_03_1")
+
+[node name="Shape" type="CollisionShape2D" parent="Objects/GateToS2_04" unique_id=645525983]
+position = Vector2(0, -156)
+shape = SubResource("RectangleShape2D_l1wpq")
+
+[node name="Placeholder" type="ColorRect" parent="Objects/GateToS2_04" unique_id=1426480239]
+offset_left = -32.0
+offset_top = -312.0
+offset_right = 32.0
+mouse_filter = 2
+color = Color(0.75, 0.2, 0.2, 0.85)

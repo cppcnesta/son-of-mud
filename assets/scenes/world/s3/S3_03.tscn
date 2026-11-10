@@ -1,0 +1,63 @@
+[gd_scene format=4 uid="uid://dbpwyn7vlru"]
+
+[ext_resource type="Script" path="res://assets/scripts/world/RoomRoot.cs" id="1_qebgk"]
+[ext_resource type="PackedScene" path="res://addons/MetroidvaniaSystem/Nodes/RoomInstance.tscn" id="2_tmg5i"]
+[ext_resource type="Script" path="res://addons/MetroidvaniaSystem/Scripts/RoomInstance.gd" id="3_lvm87"]
+[ext_resource type="TileSet" path="res://assets/data/world/world_tileset.tres" id="4_v60f4"]
+[ext_resource type="Script" path="res://assets/scripts/world/SpawnPoint.cs" id="5_q508u"]
+[ext_resource type="Script" path="res://assets/scripts/save/SavePoint.cs" id="6_bdiqw"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_dq6j5"]
+size = Vector2(96, 128)
+
+[node name="S3_03" type="Node2D" unique_id=155772347]
+script = ExtResource("1_qebgk")
+RoomId = "S3_03"
+DisplayName = "塔庙底层神殿"
+
+[node name="RoomInstance" type="Node2D" parent="." unique_id=1246059462 instance=ExtResource("2_tmg5i")]
+script = ExtResource("3_lvm87")
+
+[node name="Geometry" type="TileMapLayer" parent="." unique_id=797461726]
+position = Vector2(0, -56)
+tile_map_data = PackedByteArray("AAAAAA8AAAAAAAAAAAABAA8AAAAAAAAAAAACAA8AAAAAAAAAAAADAA8AAAAAAAAAAAAEAA8AAAAAAAAAAAAFAA8AAAAAAAAAAAAGAA8AAAAAAAAAAAAHAA8AAAAAAAAAAAAIAA8AAAAAAAAAAAAJAA8AAAAAAAAAAAAKAA8AAAAAAAAAAAAQAA8AAAAAAAAAAAARAA8AAAAAAAAAAAASAA8AAAAAAAAAAAATAA8AAAAAAAAAAAAUAA8AAAAAAAAAAAAVAA8AAAAAAAAAAAAWAA8AAAAAAAAAAAAXAA8AAAAAAAAAAAAYAA8AAAAAAAAAAAAZAA8AAAAAAAAAAAAaAA8AAAAAAAAAAAAbAA8AAAAAAAAAAAAcAA8AAAAAAAAAAAAdAA8AAAAAAAAAAAAeAA8AAAAAAAAAAAAfAA8AAAAAAAAAAAAgAA8AAAAAAAAAAAAhAA8AAAAAAAAAAAAiAA8AAAAAAAAAAAAjAA8AAAAAAAAAAAAAAAAAAAAAAAAAAAAjAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAjAAEAAAAAAAAAAAAAAAIAAAAAAAAAAAAjAAIAAAAAAAAAAAAAAAMAAAAAAAAAAAAjAAMAAAAAAAAAAAAAAAQAAAAAAAAAAAAjAAQAAAAAAAAAAAAAAAUAAAAAAAAAAAAjAAUAAAAAAAAAAAAAAAYAAAAAAAAAAAAjAAYAAAAAAAAAAAAAAAcAAAAAAAAAAAAjAAcAAAAAAAAAAAAAAAgAAAAAAAAAAAAjAAgAAAAAAAAAAAAAAAkAAAAAAAAAAAAjAAkAAAAAAAAAAAAAAAoAAAAAAAAAAAAjAAoAAAAAAAAAAAAAAAsAAAAAAAAAAAAAAAwAAAAAAAAAAAAAAA0AAAAAAAAAAAAAAA4AAAAAAAAAAAA=")
+tile_set = ExtResource("4_v60f4")
+
+[node name="Spawns" type="Node2D" parent="." unique_id=2135867304]
+
+[node name="Default" type="Marker2D" parent="Spawns" unique_id=2100600957]
+position = Vector2(1152, 903)
+script = ExtResource("5_q508u")
+
+[node name="From_S3_02" type="Marker2D" parent="Spawns" unique_id=736470147]
+position = Vector2(640, 903)
+script = ExtResource("5_q508u")
+SpawnId = &"From_S3_02"
+
+[node name="From_S3_04" type="Marker2D" parent="Spawns" unique_id=924285587]
+position = Vector2(2208, 903)
+script = ExtResource("5_q508u")
+SpawnId = &"From_S3_04"
+
+[node name="Save" type="Marker2D" parent="Spawns" unique_id=2002388794]
+position = Vector2(1344, 903)
+script = ExtResource("5_q508u")
+SpawnId = &"Save"
+
+[node name="Objects" type="Node2D" parent="." unique_id=846225222]
+
+[node name="SavePoint" type="Area2D" parent="Objects" unique_id=1192808625]
+position = Vector2(1344, 904)
+script = ExtResource("6_bdiqw")
+SavePointId = &"S3_03"
+
+[node name="Shape" type="CollisionShape2D" parent="Objects/SavePoint" unique_id=676116612]
+position = Vector2(0, -64)
+shape = SubResource("RectangleShape2D_dq6j5")
+
+[node name="Placeholder" type="ColorRect" parent="Objects/SavePoint" unique_id=2077954903]
+offset_left = -24.0
+offset_top = -96.0
+offset_right = 24.0
+mouse_filter = 2
+color = Color(0.85, 0.7, 0.25, 1)

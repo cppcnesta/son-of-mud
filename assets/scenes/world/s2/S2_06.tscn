@@ -1,0 +1,38 @@
+[gd_scene format=4 uid="uid://c8j54qgtwkljw"]
+
+[ext_resource type="Script" path="res://assets/scripts/world/RoomRoot.cs" id="1_mh5ct"]
+[ext_resource type="PackedScene" path="res://addons/MetroidvaniaSystem/Nodes/RoomInstance.tscn" id="2_4hr23"]
+[ext_resource type="Script" path="res://addons/MetroidvaniaSystem/Scripts/RoomInstance.gd" id="3_8yleo"]
+[ext_resource type="TileSet" path="res://assets/data/world/world_tileset.tres" id="4_cup0l"]
+[ext_resource type="Script" path="res://assets/scripts/world/SpawnPoint.cs" id="5_r822a"]
+
+[node name="S2_06" type="Node2D" unique_id=1912174684]
+script = ExtResource("1_mh5ct")
+RoomId = "S2_06"
+DisplayName = "工地尽头"
+
+[node name="RoomInstance" type="Node2D" parent="." unique_id=1246059462 instance=ExtResource("2_4hr23")]
+script = ExtResource("3_8yleo")
+
+[node name="Geometry" type="TileMapLayer" parent="." unique_id=1260796816]
+position = Vector2(0, -56)
+tile_map_data = PackedByteArray("AAAAABkAAAAAAAAAAAABABkAAAAAAAAAAAACABkAAAAAAAAAAAADABkAAAAAAAAAAAAEABkAAAAAAAAAAAAFABkAAAAAAAAAAAAGABkAAAAAAAAAAAAHABkAAAAAAAAAAAAIABkAAAAAAAAAAAAJABkAAAAAAAAAAAAKABkAAAAAAAAAAAALABkAAAAAAAAAAAAMABkAAAAAAAAAAAANABkAAAAAAAAAAAAOABkAAAAAAAAAAAAPABkAAAAAAAAAAAAQABkAAAAAAAAAAAARABkAAAAAAAAAAAASABkAAAAAAAAAAAATABkAAAAAAAAAAAAUABkAAAAAAAAAAAAVABkAAAAAAAAAAAAWABkAAAAAAAAAAAAXABkAAAAAAAAAAAAYABkAAAAAAAAAAAAZABkAAAAAAAAAAAAaABkAAAAAAAAAAAAAAAAAAAAAAAAAAAAaAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAaAAEAAAAAAAAAAAAAAAIAAAAAAAAAAAAaAAIAAAAAAAAAAAAAAAMAAAAAAAAAAAAaAAMAAAAAAAAAAAAAAAQAAAAAAAAAAAAaAAQAAAAAAAAAAAAAAAUAAAAAAAAAAAAaAAUAAAAAAAAAAAAAAAYAAAAAAAAAAAAaAAYAAAAAAAAAAAAAAAcAAAAAAAAAAAAaAAcAAAAAAAAAAAAAAAgAAAAAAAAAAAAaAAgAAAAAAAAAAAAAAAkAAAAAAAAAAAAaAAkAAAAAAAAAAAAAAAoAAAAAAAAAAAAaAAoAAAAAAAAAAAAAAAsAAAAAAAAAAAAaAAsAAAAAAAAAAAAAAAwAAAAAAAAAAAAaAAwAAAAAAAAAAAAAAA0AAAAAAAAAAAAaAA0AAAAAAAAAAAAAAA4AAAAAAAAAAAAaAA4AAAAAAAAAAAAAAA8AAAAAAAAAAAAaAA8AAAAAAAAAAAAAABAAAAAAAAAAAAAaABAAAAAAAAAAAAAAABEAAAAAAAAAAAAaABEAAAAAAAAAAAAAABIAAAAAAAAAAAAaABIAAAAAAAAAAAAAABMAAAAAAAAAAAAaABMAAAAAAAAAAAAAABQAAAAAAAAAAAAaABQAAAAAAAAAAAA=")
+tile_set = ExtResource("4_cup0l")
+
+[node name="Spawns" type="Node2D" parent="." unique_id=1894464934]
+
+[node name="Default" type="Marker2D" parent="Spawns" unique_id=2082638459]
+position = Vector2(864, 1543)
+script = ExtResource("5_r822a")
+
+[node name="From_S2_04" type="Marker2D" parent="Spawns" unique_id=1559021967]
+position = Vector2(96, 1543)
+script = ExtResource("5_r822a")
+SpawnId = &"From_S2_04"
+
+[node name="From_S3_01" type="Marker2D" parent="Spawns" unique_id=226519975]
+position = Vector2(1632, 1543)
+script = ExtResource("5_r822a")
+SpawnId = &"From_S3_01"
+
+[node name="Objects" type="Node2D" parent="." unique_id=462112129]

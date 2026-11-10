@@ -1,0 +1,38 @@
+[gd_scene format=4 uid="uid://ewaauas245yj"]
+
+[ext_resource type="Script" path="res://assets/scripts/world/RoomRoot.cs" id="1_c8p43"]
+[ext_resource type="PackedScene" path="res://addons/MetroidvaniaSystem/Nodes/RoomInstance.tscn" id="2_fdt01"]
+[ext_resource type="Script" path="res://addons/MetroidvaniaSystem/Scripts/RoomInstance.gd" id="3_w8u3j"]
+[ext_resource type="TileSet" path="res://assets/data/world/world_tileset.tres" id="4_ff071"]
+[ext_resource type="Script" path="res://assets/scripts/world/SpawnPoint.cs" id="5_s0nap"]
+
+[node name="S3_05" type="Node2D" unique_id=1332515171]
+script = ExtResource("1_c8p43")
+RoomId = "S3_05"
+DisplayName = "第二街区"
+
+[node name="RoomInstance" type="Node2D" parent="." unique_id=1246059462 instance=ExtResource("2_fdt01")]
+script = ExtResource("3_w8u3j")
+
+[node name="Geometry" type="TileMapLayer" parent="." unique_id=730097777]
+position = Vector2(0, -56)
+tile_map_data = PackedByteArray("AAAAAA8AAAAAAAAAAAABAA8AAAAAAAAAAAACAA8AAAAAAAAAAAADAA8AAAAAAAAAAAAEAA8AAAAAAAAAAAAFAA8AAAAAAAAAAAAGAA8AAAAAAAAAAAAHAA8AAAAAAAAAAAAIAA8AAAAAAAAAAAAJAA8AAAAAAAAAAAAKAA8AAAAAAAAAAAALAA8AAAAAAAAAAAAMAA8AAAAAAAAAAAANAA8AAAAAAAAAAAAOAA8AAAAAAAAAAAAPAA8AAAAAAAAAAAAQAA8AAAAAAAAAAAARAA8AAAAAAAAAAAASAA8AAAAAAAAAAAATAA8AAAAAAAAAAAAUAA8AAAAAAAAAAAAVAA8AAAAAAAAAAAAWAA8AAAAAAAAAAAAXAA8AAAAAAAAAAAAYAA8AAAAAAAAAAAAZAA8AAAAAAAAAAAAaAA8AAAAAAAAAAAAAAAAAAAAAAAAAAAAaAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAaAAEAAAAAAAAAAAAAAAIAAAAAAAAAAAAaAAIAAAAAAAAAAAAAAAMAAAAAAAAAAAAaAAMAAAAAAAAAAAAAAAQAAAAAAAAAAAAaAAQAAAAAAAAAAAAAAAUAAAAAAAAAAAAAAAYAAAAAAAAAAAAAAAcAAAAAAAAAAAAXAAoAAAAAAAAAAAAAAAgAAAAAAAAAAAAYAAoAAAAAAAAAAAAAAAkAAAAAAAAAAAAZAAoAAAAAAAAAAAAAAAoAAAAAAAAAAAAaAAoAAAAAAAAAAAAaAAsAAAAAAAAAAAAaAAwAAAAAAAAAAAAaAA0AAAAAAAAAAAAaAA4AAAAAAAAAAAA=")
+tile_set = ExtResource("4_ff071")
+
+[node name="Spawns" type="Node2D" parent="." unique_id=1708875978]
+
+[node name="Default" type="Marker2D" parent="Spawns" unique_id=2004282968]
+position = Vector2(864, 903)
+script = ExtResource("5_s0nap")
+
+[node name="From_S3_04" type="Marker2D" parent="Spawns" unique_id=1553182453]
+position = Vector2(96, 903)
+script = ExtResource("5_s0nap")
+SpawnId = &"From_S3_04"
+
+[node name="From_S3_06" type="Marker2D" parent="Spawns" unique_id=830783343]
+position = Vector2(1632, 583)
+script = ExtResource("5_s0nap")
+SpawnId = &"From_S3_06"
+
+[node name="Objects" type="Node2D" parent="." unique_id=327962916]

@@ -1,0 +1,64 @@
+[gd_scene format=4 uid="uid://bo236w2jeu4oa"]
+
+[ext_resource type="Script" path="res://assets/scripts/world/RoomRoot.cs" id="1_mkov6"]
+[ext_resource type="PackedScene" path="res://addons/MetroidvaniaSystem/Nodes/RoomInstance.tscn" id="2_0hv2t"]
+[ext_resource type="Script" path="res://addons/MetroidvaniaSystem/Scripts/RoomInstance.gd" id="3_4sfkx"]
+[ext_resource type="TileSet" path="res://assets/data/world/world_tileset.tres" id="4_1ekku"]
+[ext_resource type="Script" path="res://assets/scripts/world/SpawnPoint.cs" id="5_6i0ms"]
+[ext_resource type="Script" path="res://assets/scripts/world/GateBarrier.cs" id="6_rwoas"]
+[ext_resource type="Script" path="res://assets/scripts/core/GateRequirement.cs" id="7_ecvil"]
+
+[sub_resource type="Resource" id="Gate_S3_06_1"]
+script = ExtResource("7_ecvil")
+Flags = Array[StringName]([&"districts_done"])
+LockedText = "三个街区还没有解开。"
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_papn0"]
+size = Vector2(64, 268)
+
+[node name="S3_06" type="Node2D" unique_id=2124898385]
+script = ExtResource("1_mkov6")
+RoomId = "S3_06"
+DisplayName = "第三街区"
+
+[node name="RoomInstance" type="Node2D" parent="." unique_id=1246059462 instance=ExtResource("2_0hv2t")]
+script = ExtResource("3_4sfkx")
+
+[node name="Geometry" type="TileMapLayer" parent="." unique_id=493521740]
+position = Vector2(0, -52)
+tile_map_data = PackedByteArray("AAAAAA8AAAAAAAAAAAABAA8AAAAAAAAAAAACAA8AAAAAAAAAAAADAA8AAAAAAAAAAAAEAA8AAAAAAAAAAAAFAA8AAAAAAAAAAAAGAA8AAAAAAAAAAAAHAA8AAAAAAAAAAAAIAA8AAAAAAAAAAAAJAA8AAAAAAAAAAAAKAA8AAAAAAAAAAAALAA8AAAAAAAAAAAAMAA8AAAAAAAAAAAANAA8AAAAAAAAAAAAOAA8AAAAAAAAAAAAPAA8AAAAAAAAAAAAQAA8AAAAAAAAAAAARAA8AAAAAAAAAAAASAA8AAAAAAAAAAAATAA8AAAAAAAAAAAAUAA8AAAAAAAAAAAAVAA8AAAAAAAAAAAAWAA8AAAAAAAAAAAAXAA8AAAAAAAAAAAAYAA8AAAAAAAAAAAAZAA8AAAAAAAAAAAAaAA8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAXAAQAAAAAAAAAAAAAAAIAAAAAAAAAAAAYAAQAAAAAAAAAAAAAAAMAAAAAAAAAAAAZAAQAAAAAAAAAAAAAAAQAAAAAAAAAAAAaAAQAAAAAAAAAAAAAAAUAAAAAAAAAAAAaAAUAAAAAAAAAAAAAAAYAAAAAAAAAAAAaAAYAAAAAAAAAAAAAAAcAAAAAAAAAAAAaAAcAAAAAAAAAAAAAAAgAAAAAAAAAAAAaAAgAAAAAAAAAAAAAAAkAAAAAAAAAAAAaAAkAAAAAAAAAAAAaAAoAAAAAAAAAAAAaAAsAAAAAAAAAAAAaAAwAAAAAAAAAAAAaAA0AAAAAAAAAAAAaAA4AAAAAAAAAAAA=")
+tile_set = ExtResource("4_1ekku")
+
+[node name="Spawns" type="Node2D" parent="." unique_id=1349120010]
+
+[node name="Default" type="Marker2D" parent="Spawns" unique_id=656190]
+position = Vector2(864, 907)
+script = ExtResource("5_6i0ms")
+
+[node name="From_S3_05" type="Marker2D" parent="Spawns" unique_id=1459078399]
+position = Vector2(96, 907)
+script = ExtResource("5_6i0ms")
+SpawnId = &"From_S3_05"
+
+[node name="From_S3_07" type="Marker2D" parent="Spawns" unique_id=58284047]
+position = Vector2(1632, 203)
+script = ExtResource("5_6i0ms")
+SpawnId = &"From_S3_07"
+
+[node name="Objects" type="Node2D" parent="." unique_id=1108425645]
+
+[node name="GateToS3_07" type="StaticBody2D" parent="Objects" unique_id=258491418]
+position = Vector2(1696, 204)
+script = ExtResource("6_rwoas")
+Requirement = SubResource("Gate_S3_06_1")
+
+[node name="Shape" type="CollisionShape2D" parent="Objects/GateToS3_07" unique_id=585854178]
+position = Vector2(0, -134)
+shape = SubResource("RectangleShape2D_papn0")
+
+[node name="Placeholder" type="ColorRect" parent="Objects/GateToS3_07" unique_id=169693059]
+offset_left = -32.0
+offset_top = -268.0
+offset_right = 32.0
+mouse_filter = 2
+color = Color(0.75, 0.2, 0.2, 0.85)
