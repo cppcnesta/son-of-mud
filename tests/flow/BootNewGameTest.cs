@@ -3,7 +3,6 @@ using System.Threading.Tasks;
 using Godot;
 using SonOfMud.Core;
 using SonOfMud.Player;
-using SonOfMud.UI;
 using SonOfMud.World;
 
 /// <summary>
@@ -60,7 +59,7 @@ public partial class BootNewGameTest : FlowTestBase
         PauseService.Request(PauseService.PauseMenu, true);
         InputLock.Request(InputLock.Narrative, true);
         Events.Instance.EmitSignal(Events.SignalName.QuitToMenuRequested);
-        bool inMenu = await WaitUntil(() => GetTree().CurrentScene is MudMainMenu, 120);
+        bool inMenu = await WaitUntil(() => GetTree().CurrentScene?.SceneFilePath == MenuScene, 120);
         await Frames(5);
         Check(inMenu && GetTree().CurrentScene?.SceneFilePath == MenuScene, $"QuitToMenuRequested：回到主菜单场景（当前 {GetTree().CurrentScene?.SceneFilePath}）");
         Check(NoPauseOrLock(), "QuitToMenuRequested：暂停和输入锁都已清掉");
