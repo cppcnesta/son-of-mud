@@ -44,7 +44,9 @@ public partial class StateMachine : Node
 
     private void Start()
     {
-        if (Started) return;
+        if (Owner != null && IsInstanceValid(Owner)) Owner.Ready -= Start;
+        // 拥有者就绪之前整个场景可能已经被移出树（例如开局失败立刻切场景），这时不再进初始状态。
+        if (Started || !IsInsideTree()) return;
         State first = Initial ?? FirstState();
         if (first == null)
         {

@@ -40,15 +40,26 @@ public partial class PlayerAnimator : Node
         _player = player;
         Sprite ??= player.GetNodeOrNull<AnimatedSprite2D>("AnimatedSprite2D");
         if (Sprite != null && Sprite.SpriteFrames == null) Sprite.SpriteFrames = BuildPlaceholderFrames(player);
-        player.Machine.StateChanged += (_, _) => Refresh();
-        player.Forms.FormChanged += _ => Refresh();
+        player.Machine.StateChanged += OnStateChanged;
+        player.Forms.FormChanged += OnFormChanged;
         Refresh();
+    }
+
+    private void OnStateChanged(StringName from, StringName to) => Refresh();
+    private void OnFormChanged(int form) => Refresh();
+
+    public override void _ExitTree()
+    {
+        if (_player == null || !IsInstanceValid(_player)) return;
+        if (_player.Machine != null && IsInstanceValid(_player.Machine)) _player.Machine.StateChanged -= OnStateChanged;
+        if (_player.Forms != null && IsInstanceValid(_player.Forms)) _player.Forms.FormChanged -= OnFormChanged;
     }
 
     /// <summary>按当前状态和形态选动画并设置播放速度。</summary>
     public void Refresh()
     {
-        if (_player == null || Sprite?.SpriteFrames == null) return;
+        if (!IsInsideTree() || _player == null || !IsInstanceValid(_player) || _player.Forms?.Current == null
+            || Sprite == null || !IsInstanceValid(Sprite) || Sprite.SpriteFrames == null) return;
         if (_player.Machine.Current is not PlayerState state) return;
         string name = state.AnimName;
         if (string.IsNullOrEmpty(name)) return;

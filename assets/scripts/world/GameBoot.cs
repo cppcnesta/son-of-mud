@@ -115,7 +115,13 @@ public partial class GameBoot : Node
         AwaitingStart = false;
         PauseService.Reset();
         InputLock.Reset();
-        Error result = GetTree().ChangeSceneToFile(scenePath);
-        if (result != Error.Ok) GD.PushError($"GameBoot：切换到 {scenePath} 失败：{result}");
+        // 不在当前调用栈里切场景：开局失败可能在开局的同一帧、同步地一路传回到这里，
+        // 这时场景里还有排队中的初始化（玩家状态机进初始状态等）。等这一帧结束再离开，避免拆到一半的节点被继续调用。
+        SceneTree tree = GetTree();
+        Callable.From(() =>
+        {
+            Error result = tree.ChangeSceneToFile(scenePath);
+            if (result != Error.Ok) GD.PushError($"GameBoot：切换到 {scenePath} 失败：{result}");
+        }).CallDeferred();
     }
 }
