@@ -1,0 +1,33 @@
+[gd_resource type="Resource" script_class="AbilityTable" load_steps=7 format=3]
+
+[ext_resource type="Script" uid="uid://bysc0kiog71ip" path="res://assets/scripts/core/AbilityTable.cs" id="1_table"]
+[ext_resource type="Script" uid="uid://bn0vv7o000knc" path="res://assets/scripts/core/AbilityDef.cs" id="2_def"]
+
+[sub_resource type="Resource" id="ability_block"]
+script = ExtResource("2_def")
+Id = &"block"
+DisplayName = "格挡"
+Description = "开局就有。水形态格挡后重置攻击间隔；泥形态格挡成功后下一刀增伤。"
+
+[sub_resource type="Resource" id="ability_switch_form"]
+script = ExtResource("2_def")
+Id = &"switch_form"
+DisplayName = "切换形态"
+Description = "开局就有。在水形态和泥形态之间切换。"
+
+[sub_resource type="Resource" id="ability_wall_climb"]
+script = ExtResource("2_def")
+Id = &"wall_climb"
+DisplayName = "攀墙"
+Description = "在 S2_02 获得。贴墙按住上可以向上爬。"
+
+[sub_resource type="Resource" id="ability_heavy_slam"]
+script = ExtResource("2_def")
+Id = &"heavy_slam"
+DisplayName = "重压下砸"
+Description = "在 S3_03 获得。空中按住下再攻击，向下重砸并造成落地范围伤害。"
+
+[resource]
+script = ExtResource("1_table")
+All = Array[ExtResource("2_def")]([SubResource("ability_block"), SubResource("ability_switch_form"), SubResource("ability_wall_climb"), SubResource("ability_heavy_slam")])
+Initial = Array[StringName]([&"block", &"switch_form"])
