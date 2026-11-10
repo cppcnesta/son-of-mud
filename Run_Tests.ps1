@@ -1,6 +1,6 @@
 param(
     [string]$GodotPath = $env:GODOT_DOTNET,
-    [ValidateSet('all','core','feel','scene-paths','jump-landing','attacks','stairs','focused')][string]$Suite = 'all',
+    [ValidateSet('all','core','world','feel','scene-paths','jump-landing','attacks','stairs','focused')][string]$Suite = 'all',
     [switch]$Headless
 )
 $ErrorActionPreference = 'Stop'
@@ -32,7 +32,7 @@ try {
     & $GodotPath --headless --path $projectPath --editor --import --quit --log-file (Join-Path $outputPath 'csharp_import.log')
     if ($LASTEXITCODE -ne 0) { throw "Godot import failed ($LASTEXITCODE)." }
     $legacyCode = 0
-    if ($Suite -ne 'core') {
+    if ($Suite -ne 'core' -and $Suite -ne 'world') {
         $arguments = @('--path', $projectPath, '--scene', 'res://tests/runtime_suite.tscn', '--rendering-method', 'gl_compatibility', '--audio-driver', 'Dummy', '--fixed-fps', '60', '--max-fps', '240', '--log-file', (Join-Path $outputPath 'csharp_runtime_suite.log'))
         if ($Headless) { $arguments += '--headless' }
         if ($Suite -eq 'focused') { $arguments += @('--', '--focused') }
@@ -48,7 +48,19 @@ try {
         & $GodotPath @coreArguments
         $coreCode = $LASTEXITCODE
     }
-    $resultCode = if ($legacyCode -ne 0) { $legacyCode } else { $coreCode }
+    $worldCode = 0
+    if ($Suite -eq 'all' -or $Suite -eq 'world') {
+        # World / Save / Camera 测试：每个场景单独运行，结果写到 tests/output/world_<名字>_results.json
+        $worldScenes = @('tests/world/map_check.tscn', 'tests/world/slice_test.tscn', 'tests/world/door_test.tscn', 'tests/world/gate_test.tscn', 'tests/save/save_roundtrip.tscn', 'tests/save/respawn_test.tscn')
+        foreach ($worldScene in $worldScenes) {
+            $worldName = [System.IO.Path]::GetFileNameWithoutExtension($worldScene)
+            $worldArguments = @('--path', $projectPath, '--scene', "res://$worldScene", '--audio-driver', 'Dummy', '--fixed-fps', '60', '--log-file', (Join-Path $outputPath "world_$worldName.log"))
+            if ($Headless) { $worldArguments += '--headless' }
+            & $GodotPath @worldArguments
+            if ($LASTEXITCODE -ne 0 -and $worldCode -eq 0) { $worldCode = $LASTEXITCODE }
+        }
+    }
+    $resultCode = if ($legacyCode -ne 0) { $legacyCode } elseif ($coreCode -ne 0) { $coreCode } else { $worldCode }
 }
 finally {
     foreach ($variableName in $variableNames) { [Environment]::SetEnvironmentVariable($variableName, $previousValues[$variableName], 'Process') }
