@@ -15,7 +15,7 @@ metroidvania_system/settings_file="res://assets/data/metsys/MetSysSettings.tres"
 [application]
 
 config/name="泥之子 Whitebox V1.0"
-run/main_scene="res://assets/scenes/ui/main_menu.tscn"
+run/main_scene="res://assets/scenes/ui/title_menu.tscn"
 config/features=PackedStringArray("4.7", "C#", "GL Compatibility")
 config/icon="res://icon.svg"
 

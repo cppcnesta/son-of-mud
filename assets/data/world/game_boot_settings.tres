@@ -4,5 +4,5 @@
 
 [resource]
 script = ExtResource("1_boot")
-MenuScene = "res://assets/scenes/ui/main_menu.tscn"
+MenuScene = "res://assets/scenes/ui/title_menu.tscn"
 GameScene = "res://assets/scenes/world/main_game.tscn"
