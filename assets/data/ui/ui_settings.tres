@@ -1,0 +1,31 @@
+[gd_resource type="Resource" script_class="UiSettings" format=3]
+
+[ext_resource type="Script" path="res://assets/scripts/ui/UiSettings.cs" id="1_ui"]
+
+[resource]
+script = ExtResource("1_ui")
+BeadHp = 20
+BeadSize = Vector2(32, 32)
+BeadSpacing = 4
+BeadDrainSeconds = 0.25
+BeadBreakSeconds = 0.3
+BeadBreakFrames = 6
+InitialArtifactMask = 127
+BossBarDrainSeconds = 0.15
+BossBarDelaySeconds = 0.4
+BossBarDelayDrainSeconds = 0.5
+BossBarFadeSeconds = 0.3
+BossPhaseNameFormat = "{0}（第{1}阶段）"
+InteractKeyLabel = "E"
+PromptFormat = "{0} {1}"
+ToastSeconds = 2.0
+ToastFadeSeconds = 0.3
+SavedText = "已存档"
+TabletFormat = "获得泥板「{0}」"
+HudFadeSeconds = 0.3
+HudNarrativeAlpha = 0.0
+MapPanCellsPerSecond = 10.0
+GameScene = "res://assets/scenes/world/main_game.tscn"
+LegacyMenuScene = "res://assets/scenes/ui/main_menu.tscn"
+SaveSlot = 0
+StartErrorTitle = "无法开始旅程"
