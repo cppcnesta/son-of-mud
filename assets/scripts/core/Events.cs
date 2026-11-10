@@ -50,7 +50,16 @@ public partial class Events : Node
     [Signal] public delegate void PlayerHealthChangedEventHandler(int current, int max);
     [Signal] public delegate void PlayerFormChangedEventHandler(int form);
     [Signal] public delegate void PlayerDiedEventHandler();
-    [Signal] public delegate void PlayerEnteredWaterEventHandler(bool inWater);
+
+    // 换房契约（规格第 4 节）
+    // RoomExiting：每次换房（走边缘、过门都算）在卸载旧房间之前发出 → Player 关掉正在生效的 HitBox。
+    // PlayerTeleported：只在过门和复活后发出 → Player 做完整清理（回 Idle、速度清零、清空缓冲……）。
+    [Signal] public delegate void PlayerTeleportedEventHandler(StringName spawnId);
+    [Signal] public delegate void CheckpointRespawnedEventHandler();
+
+    // 淡入淡出契约：请求和完成用 requestId 配对，发请求的一方必须等到同一 id 的完成通知再继续。
+    [Signal] public delegate void FadeRequestedEventHandler(int requestId, bool fadeOut);
+    [Signal] public delegate void FadeCompletedEventHandler(int requestId, bool fadeOut);
 
     // 战斗反馈
     [Signal] public delegate void HitStopRequestedEventHandler(float seconds);
