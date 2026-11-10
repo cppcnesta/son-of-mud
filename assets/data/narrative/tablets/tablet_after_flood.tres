@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="TabletData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://assets/scripts/narrative/data/TabletData.cs" id="1_tablet"]
+
+[resource]
+script = ExtResource("1_tablet")
+Id = "after_flood"
+Title = "洪水之后"
+Room = "S2_03"
+PartialText = "神不愿听到我们的声音，降下了大洪水。我们依旧向祂祈祷。我们唱得更小声了。"

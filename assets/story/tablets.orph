@@ -1,0 +1,92 @@
+*泥板拾取：每块泥板一个标签，标签名就是泥板编号。TabletPickup 默认播放和自己 TabletId 同名的标签。*
+*拾取时只显示泥板，文字在 assets/data/narrative/tablets/tablet_<编号>.tres。*
+
+### nameless_day
+*泥板「当天还没有名字」（S1_02）*
+[泥板 nameless_day]
+[结束]
+
+### hand_blade
+*泥板「手与刃」（S1_08）*
+[泥板 hand_blade]
+[结束]
+
+### smile
+*泥板「笑容」（S2_02）*
+[泥板 smile]
+[结束]
+
+### after_flood
+*泥板「洪水之后」（S2_03）*
+[泥板 after_flood]
+[结束]
+
+### destiny
+*泥板「命运石板」（S2_04）*
+[泥板 destiny]
+[结束]
+
+### hoped_world
+*泥板「期望的世界」（S3_04）*
+[泥板 hoped_world]
+[结束]
+
+### too_soft
+*泥板「他们太软了」（S3_05）*
+[泥板 too_soft]
+[结束]
+
+### curse
+*泥板「诅咒」（S3_06）*
+[泥板 curse]
+[结束]
+
+### annals
+*泥板「年记」（S3_07）*
+[泥板 annals]
+[结束]
+
+### gate_1
+*泥板「一」（S4_02）*
+[泥板 gate_1]
+[结束]
+
+### gate_2
+*泥板「二」（S4_02）*
+[泥板 gate_2]
+[结束]
+
+### gate_3
+*泥板「三」（S4_02）*
+[泥板 gate_3]
+[结束]
+
+### gate_4
+*泥板「四」（S4_02）*
+[泥板 gate_4]
+[结束]
+
+### gate_5
+*泥板「五」（S4_02）*
+[泥板 gate_5]
+[结束]
+
+### gate_6
+*泥板「六」（S4_02）*
+[泥板 gate_6]
+[结束]
+
+### gate_7
+*泥板「七」（S4_02）*
+[泥板 gate_7]
+[结束]
+
+### name
+*泥板「名字」（S4_05）*
+[泥板 name]
+[结束]
+
+### star
+*泥板「星𒀭」（S4_05）*
+[泥板 star]
+[结束]

@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="TabletData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://assets/scripts/narrative/data/TabletData.cs" id="1_tablet"]
+
+[resource]
+script = ExtResource("1_tablet")
+Id = "gate_6"
+Title = "六"
+Room = "S4_02"
+PartialText = "他抓住了我的手，那只手曾在我的头颅上停留过一颗星落下的时间。"

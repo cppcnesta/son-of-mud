@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="TabletData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://assets/scripts/narrative/data/TabletData.cs" id="1_tablet"]
+
+[resource]
+script = ExtResource("1_tablet")
+Id = "destiny"
+Title = "命运石板"
+Room = "S2_04"
+PartialText = "谁握着它，谁就写下众神的命运。……（缺）……落在握着它的人身上。"
+FullText = "谁握着它，谁就写下众神的命运。可它改不了弑亲者的命运。那命运终将落在握着它的人身上。"

@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="TabletData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://assets/scripts/narrative/data/TabletData.cs" id="1_tablet"]
+
+[resource]
+script = ExtResource("1_tablet")
+Id = "star"
+Title = "星𒀭"
+Room = "S4_05"
+PartialText = "……（…?）……"
+FullText = "他爱我。可是只有一颗星落下那么久。"

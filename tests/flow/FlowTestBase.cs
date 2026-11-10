@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Godot;
 using SonOfMud.Camera;
 using SonOfMud.Core;
+using SonOfMud.Narrative;
 using SonOfMud.Player;
 using SonOfMud.Save;
 using SonOfMud.World;
@@ -27,6 +28,9 @@ public abstract partial class FlowTestBase : Node
     protected abstract string SuiteName { get; }
     /// <summary>结果文件名前缀：tests/output/&lt;前缀&gt;_&lt;名字&gt;_results.json。</summary>
     protected virtual string ResultPrefix => "flow";
+
+    /// <summary>进入 S1_01 时让剧情层自动播开场。默认关掉：开场会暂停游戏、吃掉按键，不测剧情的流程测试不需要它。</summary>
+    protected virtual bool NarrativeOpening => false;
     protected abstract Task RunChecks();
 
     private int _checks;
@@ -54,6 +58,7 @@ public abstract partial class FlowTestBase : Node
         {
             if (GetParent() != GetTree().Root) Reparent(GetTree().Root);
             if (GetTree().CurrentScene == this) GetTree().CurrentScene = null;
+            NarrativeDirector.AutoOpeningEnabled = NarrativeOpening;
             BackupSave();
             Check(Events.Instance != null && MetSysApi.Available, "前提：Events 和 MetSys autoload 都在");
             Events.Instance.GameStartFinished += OnGameStartFinished;

@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="TabletData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://assets/scripts/narrative/data/TabletData.cs" id="1_tablet"]
+
+[resource]
+script = ExtResource("1_tablet")
+Id = "name"
+Title = "名字"
+Room = "S4_05"
+PartialText = "在旧世界持续七天的夜里，他第一次睁开眼睛的那一刻，父亲称呼他为“我的儿子”的那一刻，天上落下一颗星。伊姆杜按习惯用出生时的天象给造物取名，穆尔图库尔意为：“星落之时造成的武器”"

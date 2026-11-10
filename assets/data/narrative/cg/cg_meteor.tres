@@ -1,0 +1,9 @@
+[gd_resource type="Resource" script_class="CgData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://assets/scripts/narrative/data/CgData.cs" id="1_cg"]
+
+[resource]
+script = ExtResource("1_cg")
+Id = "meteor"
+Title = "CG4「流星」"
+PlaceholderColor = Color(0.06, 0.06, 0.14, 1)
