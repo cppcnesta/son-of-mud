@@ -5,6 +5,14 @@
 [ext_resource type="Script" path="res://addons/MetroidvaniaSystem/Scripts/RoomInstance.gd" id="3_uobwc"]
 [ext_resource type="TileSet" path="res://assets/data/world/world_tileset.tres" id="4_tffhd"]
 [ext_resource type="Script" path="res://assets/scripts/world/SpawnPoint.cs" id="5_o6d4f"]
+[ext_resource type="Script" path="res://assets/scripts/narrative/world/StoryTrigger.cs" id="n_story"]
+[ext_resource type="Script" path="res://assets/scripts/narrative/world/TabletPickup.cs" id="n_tablet"]
+
+[sub_resource type="RectangleShape2D" id="Shape_Story_Reshape"]
+size = Vector2(96, 160)
+
+[sub_resource type="RectangleShape2D" id="Shape_Tablet_hand_blade"]
+size = Vector2(80, 96)
 
 [node name="S1_08" type="Node2D" unique_id=938166667]
 script = ExtResource("1_o5rf0")
@@ -31,3 +39,37 @@ script = ExtResource("5_o6d4f")
 SpawnId = &"From_S1_04"
 
 [node name="Objects" type="Node2D" parent="." unique_id=1918532018]
+
+[node name="Story_Reshape" type="Area2D" parent="Objects"]
+position = Vector2(760, 571)
+script = ExtResource("n_story")
+ScriptId = "m_pit"
+Label = "重塑"
+PromptText = "触碰雕像"
+
+[node name="Shape" type="CollisionShape2D" parent="Objects/Story_Reshape"]
+position = Vector2(0, -80)
+shape = SubResource("Shape_Story_Reshape")
+
+[node name="Placeholder" type="ColorRect" parent="Objects/Story_Reshape"]
+offset_left = -29
+offset_top = -128
+offset_right = 29
+mouse_filter = 2
+color = Color(0.45, 0.38, 0.3, 1)
+
+[node name="Tablet_hand_blade" type="Area2D" parent="Objects"]
+position = Vector2(950, 571)
+script = ExtResource("n_tablet")
+TabletId = "hand_blade"
+
+[node name="Shape" type="CollisionShape2D" parent="Objects/Tablet_hand_blade"]
+position = Vector2(0, -48)
+shape = SubResource("Shape_Tablet_hand_blade")
+
+[node name="Placeholder" type="ColorRect" parent="Objects/Tablet_hand_blade"]
+offset_left = -24
+offset_top = -77
+offset_right = 24
+mouse_filter = 2
+color = Color(0.75, 0.6, 0.4, 1)

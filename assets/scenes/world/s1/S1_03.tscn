@@ -5,6 +5,10 @@
 [ext_resource type="Script" path="res://addons/MetroidvaniaSystem/Scripts/RoomInstance.gd" id="3_qtlvq"]
 [ext_resource type="TileSet" path="res://assets/data/world/world_tileset.tres" id="4_eivtb"]
 [ext_resource type="Script" path="res://assets/scripts/world/SpawnPoint.cs" id="5_5sw5w"]
+[ext_resource type="Script" path="res://assets/scripts/narrative/world/StoryTrigger.cs" id="n_story"]
+
+[sub_resource type="RectangleShape2D" id="Shape_Story_Pilgrims"]
+size = Vector2(128, 256)
 
 [node name="S1_03" type="Node2D" unique_id=727550247]
 script = ExtResource("1_0vlwq")
@@ -36,3 +40,15 @@ script = ExtResource("5_5sw5w")
 SpawnId = &"From_S1_04"
 
 [node name="Objects" type="Node2D" parent="." unique_id=150542893]
+
+[node name="Story_Pilgrims" type="Area2D" parent="Objects"]
+position = Vector2(480, 879)
+script = ExtResource("n_story")
+ScriptId = "m_pit"
+Label = "朝圣者之路"
+Mode = 1
+Once = true
+
+[node name="Shape" type="CollisionShape2D" parent="Objects/Story_Pilgrims"]
+position = Vector2(0, -128)
+shape = SubResource("Shape_Story_Pilgrims")

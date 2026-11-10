@@ -5,6 +5,10 @@
 [ext_resource type="Script" path="res://addons/MetroidvaniaSystem/Scripts/RoomInstance.gd" id="3_ikatt"]
 [ext_resource type="TileSet" path="res://assets/data/world/world_tileset.tres" id="4_dttu2"]
 [ext_resource type="Script" path="res://assets/scripts/world/SpawnPoint.cs" id="5_q23yk"]
+[ext_resource type="Script" path="res://assets/scripts/narrative/world/StoryTrigger.cs" id="n_story"]
+
+[sub_resource type="RectangleShape2D" id="Shape_Story_Song"]
+size = Vector2(128, 256)
 
 [node name="S1_07" type="Node2D" unique_id=910528071]
 script = ExtResource("1_bx4pe")
@@ -35,3 +39,15 @@ script = ExtResource("5_q23yk")
 SpawnId = &"From_S2_01"
 
 [node name="Objects" type="Node2D" parent="." unique_id=2070517381]
+
+[node name="Story_Song" type="Area2D" parent="Objects"]
+position = Vector2(320, 575)
+script = ExtResource("n_story")
+ScriptId = "m_pit"
+Label = "两河源头"
+Mode = 1
+Once = true
+
+[node name="Shape" type="CollisionShape2D" parent="Objects/Story_Song"]
+position = Vector2(0, -128)
+shape = SubResource("Shape_Story_Song")
