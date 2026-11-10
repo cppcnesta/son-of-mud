@@ -26,6 +26,7 @@ public partial class CombatSuite : LabSuiteBase
     private readonly List<(int current, int max)> _health = new();
     private int _died;
     private int _shakes;
+    private int _hitStops;
     private HitSpec _plain;
     private HitSpec _tail;
 
@@ -34,6 +35,7 @@ public partial class CombatSuite : LabSuiteBase
         Events.Instance.PlayerHealthChanged += (c, m) => _health.Add((c, m));
         Events.Instance.PlayerDied += () => _died++;
         Events.Instance.CameraShakeRequested += (_, _) => _shakes++;
+        Events.Instance.HitStopRequested += _ => _hitStops++;
         _plain = GD.Load<HitSpec>("res://assets/data/combat/lab/plain_strike.tres");
         _tail = GD.Load<HitSpec>("res://assets/data/combat/lab/tail_strike.tres");
 
@@ -127,7 +129,9 @@ public partial class CombatSuite : LabSuiteBase
     private async Task DamageAndDedupChecks()
     {
         await Arrange(Near, Far, 0);
+        int hitStops = _hitStops;
         int dealt = await SwingAt(_a, 0);
+        Check(_hitStops == hitStops + 1, "命中造成伤害时发出一次 Events.HitStopRequested");
         Check(dealt == 10 && _a.DamageEvents == 1, $"水形态打假人扣 10，一次挥击跨 6 个有效帧只扣一次（实际 {dealt}，扣血 {_a.DamageEvents} 次）");
         Check(_playerOutcomes.Count == 1 && _playerOutcomes[0] == HitOutcome.Damaged, $"命中回调只有一次，结果 Damaged（{string.Join(",", _playerOutcomes)}）");
 
@@ -149,6 +153,12 @@ public partial class CombatSuite : LabSuiteBase
         Check(first == HitOutcome.Damaged && second == HitOutcome.Duplicate && again == HitOutcome.Duplicate,
             $"跨 HurtBox 去重：同一 AttackId 打同一实体的第二个 HurtBox 返回 Duplicate（{first},{second},{again}）");
         Check(_a.HurtBoxes[0].Receive(hit) == HitOutcome.Damaged, "去重按实体：同一 AttackId 打另一个实体照常结算");
+
+        _a.HurtBoxes[0].SetInvulnerable("test", true);
+        HitOutcome invulnerable = _a.HurtBoxes[0].Receive(MakeHit("invulnerable_test", 10f, Player.GlobalPosition));
+        _a.HurtBoxes[0].SetInvulnerable("test", false);
+        Check(invulnerable == HitOutcome.Invulnerable && _a.HurtBoxes[0].Receive(MakeHit("invulnerable_test_2", 10f, Player.GlobalPosition)) == HitOutcome.Damaged,
+            "无敌：按来源开启时返回 Invulnerable，关闭后照常结算");
 
         var wrongLayer = new HurtBox { Name = "PlayerLayerBox", CollisionLayer = Layers.PlayerHurt, CollisionMask = 0 };
         wrongLayer.AddChild(new CollisionShape2D { Shape = new RectangleShape2D { Size = new Vector2(48, 96) } });

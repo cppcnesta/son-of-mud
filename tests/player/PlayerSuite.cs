@@ -52,6 +52,17 @@ public partial class PlayerSuite : LabSuiteBase
         Check(Player.HasAbility(PlayerAbilities.Block) && Player.HasAbility(PlayerAbilities.SwitchForm) &&
               !Player.HasAbility(PlayerAbilities.WallClimb) && !Player.HasAbility(PlayerAbilities.HeavySlam),
               "能力：开局只有 block 和 switch_form");
+
+        var timers = new PlayerTimers { DodgeCooldown = 1.25f, BlockCooldown = 2f, AttackInterval = 0.5f, SwitchCooldown = 0.1f };
+        timers.Recovery.Start(MovementRecovery.Source.Dodge, 1f, 0.2f, Player.Forms.MudConfig.RecoveryCurve);
+        timers.Recovery.Remaining = 0.6f;
+        timers.Bonus.Grant(1.6f);
+        var restored = new PlayerTimers();
+        restored.Restore(GD.StrToVar(GD.VarToStr(timers.Snapshot())).AsGodotDictionary(), Player.Forms.MudConfig.RecoveryCurve);
+        Check(restored.DodgeCooldown == 1.25f && restored.BlockCooldown == 2f && restored.AttackInterval == 0.5f && restored.SwitchCooldown == 0.1f &&
+              restored.Recovery.RecoverySource == MovementRecovery.Source.Dodge && Mathf.Abs(restored.Recovery.Remaining - 0.6f) < 0.0001f &&
+              restored.Recovery.Duration == 1f && restored.Bonus.Ready && Mathf.Abs(restored.Bonus.Multiplier - 1.6f) < 0.0001f,
+            "PlayerTimers.Snapshot / Restore：冷却、减速、增伤经 VarToStr 往返后不变（留给存档用）");
     }
 
     // ---------- 第 1 步：土狼时间、跳跃缓冲、下落、前摇、切形态 ----------
