@@ -194,7 +194,8 @@ public partial class NarrativeDirector : CanvasLayer
         ReleasePending = false;
         MainScript = script.Id;
         MainLabel = label;
-        if (!HoldsPause)
+        // 用 PauseService 的实际状态判断：开新游戏 / 读档时 GameSession.Reset 会清空所有暂停来源。
+        if (!HoldsPause || !PauseService.IsRequestedBy(PauseService.Narrative))
         {
             HoldsPause = true;
             PauseService.Request(PauseService.Narrative, true);
