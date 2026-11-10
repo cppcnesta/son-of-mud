@@ -287,6 +287,7 @@ public partial class Player : CharacterBody2D
 
     private void OnDebugFlyToggled()
     {
+        if (State is DeadState) return;
         if (State is DebugFlyState) Machine.TransitionTo<FallState>();
         else Machine.TransitionTo<DebugFlyState>();
     }
