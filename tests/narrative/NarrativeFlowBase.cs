@@ -53,6 +53,9 @@ public abstract partial class NarrativeFlowBase : FlowTestBase
         Events.Instance.RestartRunRequested -= OnRestart;
         Events.Instance.NewGameRequested -= OnNewGame;
         if (Errors != null) OS.RemoveLogger(Errors);
+        // 临时的 Godot 数组 / 字典在引擎还在的时候回收，免得退出后由终结器释放时崩溃。
+        GC.Collect();
+        GC.WaitForPendingFinalizers();
     }
 
     private void OnStarted(string script, string label) => Started.Add($"{script}:{label}");

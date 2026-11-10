@@ -74,6 +74,11 @@ public partial class NarrativeUnitTest : Node
             report?.StoreString(Json.Stringify(data, "\t"));
         }
         GD.Print($"Tests: {(_failures == 0 ? "PASS" : "FAIL")} narrative_unit 总计{_checks}项，失败{_failures}项");
+        // 测试里临时建的 Godot 数组 / 字典（存档往返等）在退出前回收掉：
+        // 留到引擎关闭之后再由终结器释放，会在 godotsharp_array_destroy 里崩溃（退出码 139）。
+        GC.Collect();
+        GC.WaitForPendingFinalizers();
+        GC.Collect();
         GetTree().Quit(_failures == 0 ? 0 : 1);
     }
 
