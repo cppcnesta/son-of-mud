@@ -32,8 +32,13 @@ public partial class UiPauseMapTest : UiTestBase
         _ui = Ui;
         Check(_ui != null && _ui.Hud != null && _ui.Map != null && _ui.Menu != null, "main_game.tscn 下有 GameUi（HUD、地图、暂停菜单）");
         if (_ui == null) return;
-        string children = string.Join(",", MainGame.GetChildren().Select(c => c.Name.ToString()));
-        Check(children == "Game,Player,GameBoot,GameUi", $"main_game.tscn 只多了一个子节点 GameUi（{children}）");
+        // 第 3 轮合并后 main_game.tscn 还会有 Narrative 的 NarrativeLayer；这里只检查 UI 自己的约定：
+        // 原有的 Game、Player、GameBoot 都在，UI 只加了一个 GameUi。
+        var names = MainGame.GetChildren().Select(c => c.Name.ToString()).ToList();
+        string children = string.Join(",", names);
+        bool baseIntact = names.Take(3).SequenceEqual(new[] { "Game", "Player", "GameBoot" });
+        int uiNodes = MainGame.GetChildren().Count(c => c is GameUi);
+        Check(baseIntact && uiNodes == 1 && names.Contains("GameUi"), $"main_game.tscn 原有节点不变，UI 只加了一个 GameUi（{children}）");
         Check(FindChild<GameUi>(MainGame.GetNode("Game")) == null && FindChild<Hud>(MainGame.GetNode("Game")) == null, "测试容器 game.tscn 里没有加 UI");
 
         Events.Instance.PauseChanged += OnPauseChanged;
