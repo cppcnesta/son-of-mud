@@ -1,0 +1,44 @@
+[gd_resource type="Resource" script_class="FormConfig" load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://assets/scripts/player/FormConfig.cs" id="1"]
+[ext_resource type="Resource" path="res://assets/data/player_v2/mud_attack.tres" id="2"]
+[ext_resource type="Curve" path="res://assets/data/player_v2/curves/recovery_ease_out.tres" id="3"]
+
+[resource]
+script = ExtResource("1")
+DisplayName = "泥"
+AnimPrefix = "mud"
+Tint = Color(0.78, 0.56, 0.35, 1)
+MoveSpeed = 280.0
+DodgeSpeed = 520.0
+DodgeDuration = 0.24
+DodgeCooldown = 4.0
+PenaltyDuration = 1.0
+PenaltyInitialMultiplier = 0.2
+RecoveryCurve = ExtResource("3")
+BlockDuration = 2.0
+BlockSingleHit = false
+GrantsBlockBonus = true
+BlockBonusMultiplier = 1.6
+BlockCooldown = 3.0
+ResetBlockCooldownOnSuccess = false
+ResetAttackIntervalOnBlock = false
+AttackSpec = ExtResource("2")
+AttackWindup = 0.14
+AttackActive = 0.12
+AttackRecovery = 1.5
+AttackReach = 90.0
+AttackHeight = 70.0
+AttackForwardOffset = 16.0
+DownAttackWidth = 72.0
+DownAttackMultiplier = 1.8
+SoftAttackRecovery = true
+BlockCancelWindow = 0.5
+DodgeCancelRecovery = true
+JumpStyle = 1
+JumpWindup = 0.24
+JumpSpeed = 600.0
+Gravity = 1600.0
+DescentSpeed = 300.0
+TerminalSpeed = 880.0
+WallClimbSpeed = 180.0

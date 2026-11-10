@@ -1,6 +1,6 @@
 param(
     [string]$GodotPath = $env:GODOT_DOTNET,
-    [ValidateSet('all','core','world','feel','scene-paths','jump-landing','attacks','stairs','focused')][string]$Suite = 'all',
+    [ValidateSet('all','core','world','player','combat','player-feel','new','feel','scene-paths','jump-landing','attacks','stairs','focused')][string]$Suite = 'all',
     [switch]$Headless
 )
 $ErrorActionPreference = 'Stop'
@@ -32,7 +32,8 @@ try {
     & $GodotPath --headless --path $projectPath --editor --import --quit --log-file (Join-Path $outputPath 'csharp_import.log')
     if ($LASTEXITCODE -ne 0) { throw "Godot import failed ($LASTEXITCODE)." }
     $legacyCode = 0
-    if ($Suite -ne 'core' -and $Suite -ne 'world') {
+    $newSuites = @('world','player','combat','player-feel','new')
+    if ($Suite -ne 'core' -and $newSuites -notcontains $Suite) {
         $arguments = @('--path', $projectPath, '--scene', 'res://tests/runtime_suite.tscn', '--rendering-method', 'gl_compatibility', '--audio-driver', 'Dummy', '--fixed-fps', '60', '--max-fps', '240', '--log-file', (Join-Path $outputPath 'csharp_runtime_suite.log'))
         if ($Headless) { $arguments += '--headless' }
         if ($Suite -eq 'focused') { $arguments += @('--', '--focused') }
@@ -49,7 +50,7 @@ try {
         $coreCode = $LASTEXITCODE
     }
     $worldCode = 0
-    if ($Suite -eq 'all' -or $Suite -eq 'world') {
+    if ($Suite -eq 'all' -or $Suite -eq 'world' -or $Suite -eq 'new') {
         # World / Save / Camera 测试：每个场景单独运行，结果写到 tests/output/world_<名字>_results.json
         $worldScenes = @('tests/world/map_check.tscn', 'tests/world/slice_test.tscn', 'tests/world/door_test.tscn', 'tests/world/gate_test.tscn', 'tests/save/save_roundtrip.tscn', 'tests/save/respawn_test.tscn')
         foreach ($worldScene in $worldScenes) {
@@ -60,7 +61,22 @@ try {
             if ($LASTEXITCODE -ne 0 -and $worldCode -eq 0) { $worldCode = $LASTEXITCODE }
         }
     }
-    $resultCode = if ($legacyCode -ne 0) { $legacyCode } elseif ($coreCode -ne 0) { $coreCode } else { $worldCode }
+    # 新玩家 / 战斗验收测试：结果写到 tests/output/player_results.json、combat_results.json、player_feel_results.json
+    $newCode = 0
+    $newScenes = [ordered]@{
+        'player' = 'res://tests/player/player_suite.tscn'
+        'combat' = 'res://tests/combat/combat_suite.tscn'
+        'player-feel' = 'res://tests/player/feel_checks.tscn'
+    }
+    foreach ($name in $newScenes.Keys) {
+        if ($Suite -ne 'all' -and $Suite -ne 'new' -and $Suite -ne $name) { continue }
+        $logName = ($name -replace '-', '_') + '_suite.log'
+        $newArguments = @('--path', $projectPath, '--scene', $newScenes[$name], '--rendering-method', 'gl_compatibility', '--audio-driver', 'Dummy', '--fixed-fps', '60', '--log-file', (Join-Path $outputPath $logName))
+        if ($Headless) { $newArguments += '--headless' }
+        & $GodotPath @newArguments
+        if ($LASTEXITCODE -ne 0) { $newCode = $LASTEXITCODE }
+    }
+    $resultCode = if ($legacyCode -ne 0) { $legacyCode } elseif ($coreCode -ne 0) { $coreCode } elseif ($worldCode -ne 0) { $worldCode } else { $newCode }
 }
 finally {
     foreach ($variableName in $variableNames) { [Environment]::SetEnvironmentVariable($variableName, $previousValues[$variableName], 'Process') }
