@@ -1,6 +1,6 @@
 param(
     [string]$GodotPath = $env:GODOT_DOTNET,
-    [ValidateSet('all','core','world','player','combat','player-feel','flow','new','feel','scene-paths','jump-landing','attacks','stairs','focused')][string]$Suite = 'all',
+    [ValidateSet('all','core','world','player','combat','player-feel','flow','narrative','new','feel','scene-paths','jump-landing','attacks','stairs','focused')][string]$Suite = 'all',
     [switch]$Headless
 )
 $ErrorActionPreference = 'Stop'
@@ -32,7 +32,7 @@ try {
     & $GodotPath --headless --path $projectPath --editor --import --quit --log-file (Join-Path $outputPath 'csharp_import.log')
     if ($LASTEXITCODE -ne 0) { throw "Godot import failed ($LASTEXITCODE)." }
     $legacyCode = 0
-    $newSuites = @('world','player','combat','player-feel','flow','new')
+    $newSuites = @('world','player','combat','player-feel','flow','narrative','new')
     if ($Suite -ne 'core' -and $newSuites -notcontains $Suite) {
         $arguments = @('--path', $projectPath, '--scene', 'res://tests/runtime_suite.tscn', '--rendering-method', 'gl_compatibility', '--audio-driver', 'Dummy', '--fixed-fps', '60', '--max-fps', '240', '--log-file', (Join-Path $outputPath 'csharp_runtime_suite.log'))
         if ($Headless) { $arguments += '--headless' }
@@ -88,7 +88,20 @@ try {
             if ($LASTEXITCODE -ne 0 -and $flowCode -eq 0) { $flowCode = $LASTEXITCODE }
         }
     }
-    $resultCode = if ($legacyCode -ne 0) { $legacyCode } elseif ($coreCode -ne 0) { $coreCode } elseif ($worldCode -ne 0) { $worldCode } elseif ($flowCode -ne 0) { $flowCode } else { $newCode }
+    # 剧情测试：narrative_unit 不需要游戏场景；其余从正式入口 main_game.tscn 启动、用真实玩家。
+    # 结果写到 tests/output/narrative_unit_results.json 和 flow_narrative_<名字>_results.json
+    $narrativeCode = 0
+    if ($Suite -eq 'all' -or $Suite -eq 'narrative' -or $Suite -eq 'new') {
+        $narrativeScenes = @('tests/narrative/narrative_unit.tscn', 'tests/narrative/narrative_dialog.tscn', 'tests/narrative/narrative_choice.tscn', 'tests/narrative/narrative_map1.tscn', 'tests/narrative/narrative_restart.tscn')
+        foreach ($narrativeScene in $narrativeScenes) {
+            $narrativeName = [System.IO.Path]::GetFileNameWithoutExtension($narrativeScene)
+            $narrativeArguments = @('--path', $projectPath, '--scene', "res://$narrativeScene", '--audio-driver', 'Dummy', '--fixed-fps', '60', '--log-file', (Join-Path $outputPath "$narrativeName.log"))
+            if ($Headless) { $narrativeArguments += '--headless' }
+            & $GodotPath @narrativeArguments
+            if ($LASTEXITCODE -ne 0 -and $narrativeCode -eq 0) { $narrativeCode = $LASTEXITCODE }
+        }
+    }
+    $resultCode = if ($legacyCode -ne 0) { $legacyCode } elseif ($coreCode -ne 0) { $coreCode } elseif ($worldCode -ne 0) { $worldCode } elseif ($flowCode -ne 0) { $flowCode } elseif ($narrativeCode -ne 0) { $narrativeCode } else { $newCode }
 }
 finally {
     foreach ($variableName in $variableNames) { [Environment]::SetEnvironmentVariable($variableName, $previousValues[$variableName], 'Process') }
