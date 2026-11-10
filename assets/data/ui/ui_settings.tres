@@ -9,7 +9,6 @@ BeadSize = Vector2(32, 32)
 BeadSpacing = 4
 BeadDrainSeconds = 0.25
 BeadBreakSeconds = 0.3
-BeadBreakFrames = 6
 InitialArtifactMask = 127
 BossBarDrainSeconds = 0.15
 BossBarDelaySeconds = 0.4

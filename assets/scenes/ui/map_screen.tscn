@@ -1,7 +1,6 @@
 [gd_scene format=3]
 
 [ext_resource type="Script" path="res://assets/scripts/ui/MapScreen.cs" id="1_map"]
-[ext_resource type="Resource" path="res://assets/data/ui/ui_settings.tres" id="2_set"]
 [ext_resource type="Theme" path="res://assets/data/ui/ui_theme.tres" id="3_theme"]
 [ext_resource type="PackedScene" path="res://addons/MetroidvaniaSystem/Template/Nodes/Minimap.tscn" id="4_minimap"]
 
@@ -16,7 +15,6 @@ grow_horizontal = 2
 grow_vertical = 2
 theme = ExtResource("3_theme")
 script = ExtResource("1_map")
-Settings = ExtResource("2_set")
 MapView = NodePath("Center/Panel/Map")
 
 [node name="Dim" type="ColorRect" parent="."]

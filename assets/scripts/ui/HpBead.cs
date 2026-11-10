@@ -3,10 +3,9 @@ using Godot;
 namespace SonOfMud.UI;
 
 /// <summary>
-/// 一颗泥珠：按比例从下往上填充（Amount / Capacity）。从有血掉到空时播放碎裂效果
-/// （碎裂贴图横排 N 帧，在 _Draw 里按帧画在珠子上面）。
-/// 由 HpBeadBar 创建和设置，不自己订阅事件。
-/// 注意：这里不在 C# 里 new 任何 RefCounted 资源（如 AtlasTexture），避免 C# 终结器和引擎释放之间的竞争。
+/// 一颗泥珠：按比例从下往上填充（Amount / Capacity）。从有血掉到空时播放碎裂效果。
+/// 贴图、填充方向都在 hud.tscn 的模板珠子 BeadTemplate 上设置好；碎裂是它的子节点 Break（Sprite2D，横排 N 帧）。
+/// 由 HpBeadBar 复制模板创建并设置，不自己订阅事件。C# 里不引用任何贴图资源（原因见 UiSettings.Shared）。
 /// </summary>
 public partial class HpBead : TextureProgressBar
 {
@@ -20,29 +19,24 @@ public partial class HpBead : TextureProgressBar
     public float DisplayedFill => MaxValue > 0 ? (float)(Value / MaxValue) : 0f;
     /// <summary>播放过几次碎裂效果。</summary>
     public int BreakCount { get; private set; }
-    public bool BreakPlaying { get; private set; }
+    public bool BreakPlaying => _break != null && _break.Visible;
 
-    private Texture2D _breakSheet;
-    private int _breakFrames = 1;
-    private int _breakFrame;
+    private Sprite2D _break;
     private Tween _fillTween;
     private Tween _breakTween;
 
-    public void Setup(int capacity, int amount, Texture2D full, Texture2D empty, Texture2D breakSheet, int breakFrames, Vector2 size)
+    public void Setup(int capacity, Vector2 size)
     {
         Step = 0;
         MinValue = 0;
-        FillMode = (int)FillModeEnum.BottomToTop;
-        TextureProgress = full;
-        TextureUnder = empty;
         CustomMinimumSize = size;
         MouseFilter = MouseFilterEnum.Ignore;
         Capacity = Mathf.Max(1, capacity);
         MaxValue = Capacity;
-        Amount = Mathf.Clamp(amount, 0, Capacity);
-        Value = Amount;
-        _breakSheet = breakSheet;
-        _breakFrames = Mathf.Max(1, breakFrames);
+        Amount = 0;
+        Value = 0;
+        _break = GetNodeOrNull<Sprite2D>("Break");
+        if (_break != null) _break.Visible = false;
     }
 
     /// <summary>设置目标血量。animate=false 时立刻到位；animate=true 且从有血掉到空时播放碎裂。</summary>
@@ -67,32 +61,13 @@ public partial class HpBead : TextureProgressBar
     private void PlayBreak(float seconds)
     {
         BreakCount++;
-        if (!IsInsideTree()) return;
+        if (_break == null || !IsInsideTree()) return;
         _breakTween?.Kill();
-        BreakPlaying = true;
-        SetBreakFrame(0);
+        _break.Frame = 0;
+        _break.Visible = true;
+        int last = Mathf.Max(1, _break.Hframes) - 1;
         _breakTween = CreateTween();
-        _breakTween.TweenMethod(Callable.From<int>(SetBreakFrame), 0, _breakFrames - 1, Mathf.Max(seconds, 0.01f));
-        _breakTween.TweenCallback(Callable.From(EndBreak));
-    }
-
-    private void EndBreak()
-    {
-        BreakPlaying = false;
-        QueueRedraw();
-    }
-
-    private void SetBreakFrame(int frame)
-    {
-        _breakFrame = Mathf.Clamp(frame, 0, _breakFrames - 1);
-        QueueRedraw();
-    }
-
-    public override void _Draw()
-    {
-        if (!BreakPlaying || _breakSheet == null) return;
-        float frameWidth = _breakSheet.GetWidth() / (float)_breakFrames;
-        var source = new Rect2(frameWidth * _breakFrame, 0, frameWidth, _breakSheet.GetHeight());
-        DrawTextureRectRegion(_breakSheet, new Rect2(Vector2.Zero, Size), source);
+        _breakTween.TweenProperty(_break, "frame", last, Mathf.Max(seconds, 0.01f));
+        _breakTween.TweenCallback(Callable.From(() => _break.Visible = false));
     }
 }

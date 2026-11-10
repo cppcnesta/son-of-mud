@@ -10,7 +10,8 @@ namespace SonOfMud.UI;
 /// </summary>
 public partial class Hud : CanvasLayer
 {
-    [Export] public UiSettings Settings { get; set; }
+    /// <summary>可调数值；不导出，统一用 UiSettings.Shared（原因见那里）。测试可以替换。</summary>
+    public UiSettings Settings { get; set; }
     [Export] public Control Root { get; set; }
     [Export] public HpBeadBar Beads { get; set; }
     [Export] public ArtifactRing Artifacts { get; set; }
@@ -28,7 +29,7 @@ public partial class Hud : CanvasLayer
 
     public override void _EnterTree()
     {
-        Settings ??= UiSettings.LoadDefault();
+        Settings ??= UiSettings.Shared;
         if (Events.Instance == null) return;
         Events.Instance.NarrativeStarted += OnNarrativeStarted;
         Events.Instance.NarrativeFinished += OnNarrativeFinished;

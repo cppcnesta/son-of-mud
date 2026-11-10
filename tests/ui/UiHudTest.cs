@@ -226,12 +226,13 @@ public partial class UiHudTest : UiTestBase
             foreach (ArtifactSlot slot in ring.Slots)
             {
                 bool worn = (mask & (1 << slot.Index)) != 0;
-                ok &= slot.IsWorn == worn && ring.IsWorn(slot.Index) == worn && slot.Texture == (worn ? slot.Worn : slot.Removed) && slot.Texture != null;
+                ok &= slot.IsWorn == worn && ring.IsWorn(slot.Index) == worn && (worn ? slot.ShowsWorn : slot.ShowsRemoved);
             }
             if (!ok) wrong.Add(mask);
         }
         Check(wrong.Count == 0, $"器物环：mask 0..127 共 128 种都显示正确（错误 {wrong.Count} 种{(wrong.Count > 0 ? "：" + string.Join(",", wrong.Take(10)) : "")}）");
-        Check(ring.Slots.All(s => s.Worn != s.Removed), "器物环：“戴着”和“已放下”是两张不同的图");
+        Check(ring.Slots.All(s => s.GetNode<TextureRect>("Worn").Texture is { } w && s.GetNode<TextureRect>("Removed").Texture is { } r && w != r),
+            "器物环：每个槽“戴着”和“已放下”是两张不同的图");
 
         Emit(Events.SignalName.ArtifactsChanged, 0b1111_1010);
         Check(ring.Mask == 0b111_1010 && !ring.IsWorn(0) && ring.IsWorn(1), "器物环：超出 7 位的部分被忽略");

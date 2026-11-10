@@ -13,7 +13,8 @@ public partial class ArtifactRing : Control
     public const int SlotCount = 7;
     public const int FullMask = (1 << SlotCount) - 1;
 
-    [Export] public UiSettings Settings { get; set; }
+    /// <summary>可调数值；不导出，统一用 UiSettings.Shared（原因见那里）。测试可以替换。</summary>
+    public UiSettings Settings { get; set; }
 
     public int Mask { get; private set; } = FullMask;
     public IReadOnlyList<ArtifactSlot> Slots => _slots;
@@ -22,7 +23,7 @@ public partial class ArtifactRing : Control
 
     public override void _EnterTree()
     {
-        Settings ??= UiSettings.LoadDefault();
+        Settings ??= UiSettings.Shared;
         if (Events.Instance != null) Events.Instance.ArtifactsChanged += Apply;
     }
 

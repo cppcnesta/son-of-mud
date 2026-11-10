@@ -1,7 +1,6 @@
 [gd_scene format=3]
 
 [ext_resource type="Script" path="res://assets/scripts/ui/TitleMenu.cs" id="1_title"]
-[ext_resource type="Resource" path="res://assets/data/ui/ui_settings.tres" id="2_set"]
 [ext_resource type="Theme" path="res://assets/data/ui/ui_theme.tres" id="3_theme"]
 [ext_resource type="Texture2D" path="res://assets/art/ui/tex_ui_menu_bg.png" id="4_bg"]
 [ext_resource type="Texture2D" path="res://assets/art/ui/tex_ui_title_logo.png" id="5_logo"]
@@ -15,7 +14,6 @@ grow_horizontal = 2
 grow_vertical = 2
 theme = ExtResource("3_theme")
 script = ExtResource("1_title")
-Settings = ExtResource("2_set")
 NewGameButton = NodePath("Buttons/NewGame")
 ContinueButton = NodePath("Buttons/Continue")
 LegacyButton = NodePath("Buttons/Legacy")

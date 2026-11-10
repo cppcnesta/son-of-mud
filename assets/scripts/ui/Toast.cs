@@ -9,7 +9,8 @@ namespace SonOfMud.UI;
 /// </summary>
 public partial class Toast : Label
 {
-    [Export] public UiSettings Settings { get; set; }
+    /// <summary>可调数值；不导出，统一用 UiSettings.Shared（原因见那里）。测试可以替换。</summary>
+    public UiSettings Settings { get; set; }
 
     public bool IsShowing => Visible;
     /// <summary>一共显示过几条消息。</summary>
@@ -19,7 +20,7 @@ public partial class Toast : Label
 
     public override void _EnterTree()
     {
-        Settings ??= UiSettings.LoadDefault();
+        Settings ??= UiSettings.Shared;
         if (Events.Instance == null) return;
         Events.Instance.MessageRequested += ShowMessage;
         Events.Instance.GameSaved += OnGameSaved;

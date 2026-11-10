@@ -1,7 +1,7 @@
 [gd_scene format=3]
 
 [ext_resource type="Script" path="res://assets/scripts/ui/Hud.cs" id="1_hud"]
-[ext_resource type="Resource" path="res://assets/data/ui/ui_settings.tres" id="2_set"]
+[ext_resource type="Script" path="res://assets/scripts/ui/HpBead.cs" id="2_bead"]
 [ext_resource type="Theme" path="res://assets/data/ui/ui_theme.tres" id="3_theme"]
 [ext_resource type="Script" path="res://assets/scripts/ui/HpBeadBar.cs" id="4_beads"]
 [ext_resource type="Texture2D" path="res://assets/art/ui/tex_ui_bead_full.png" id="5_bfull"]
@@ -36,7 +36,6 @@
 process_mode = 3
 layer = 10
 script = ExtResource("1_hud")
-Settings = ExtResource("2_set")
 Root = NodePath("Root")
 Beads = NodePath("Root/HpBeadBar")
 Artifacts = NodePath("Root/ArtifactRing")
@@ -55,7 +54,7 @@ grow_vertical = 2
 mouse_filter = 2
 theme = ExtResource("3_theme")
 
-[node name="HpBeadBar" type="HBoxContainer" parent="Root"]
+[node name="HpBeadBar" type="HBoxContainer" parent="Root" node_paths=PackedStringArray("Template")]
 layout_mode = 0
 offset_left = 24.0
 offset_top = 20.0
@@ -63,10 +62,24 @@ offset_right = 324.0
 offset_bottom = 52.0
 mouse_filter = 2
 script = ExtResource("4_beads")
-Settings = ExtResource("2_set")
-BeadFull = ExtResource("5_bfull")
-BeadEmpty = ExtResource("6_bempty")
-BeadBreak = ExtResource("7_bbreak")
+Template = NodePath("BeadTemplate")
+
+[node name="BeadTemplate" type="TextureProgressBar" parent="Root/HpBeadBar"]
+visible = false
+custom_minimum_size = Vector2(32, 32)
+layout_mode = 2
+mouse_filter = 2
+step = 0.0
+fill_mode = 3
+texture_under = ExtResource("6_bempty")
+texture_progress = ExtResource("5_bfull")
+script = ExtResource("2_bead")
+
+[node name="Break" type="Sprite2D" parent="Root/HpBeadBar/BeadTemplate"]
+visible = false
+texture = ExtResource("7_bbreak")
+centered = false
+hframes = 6
 
 [node name="ArtifactRing" type="Control" parent="Root"]
 layout_mode = 1
@@ -80,7 +93,6 @@ offset_bottom = -16.0
 grow_vertical = 0
 mouse_filter = 2
 script = ExtResource("8_ring")
-Settings = ExtResource("2_set")
 
 [node name="Ring" type="TextureRect" parent="Root/ArtifactRing"]
 layout_mode = 0
@@ -89,96 +101,180 @@ offset_bottom = 192.0
 mouse_filter = 2
 texture = ExtResource("9_ringtex")
 
-[node name="Slot0" type="TextureRect" parent="Root/ArtifactRing"]
+[node name="Slot0" type="Control" parent="Root/ArtifactRing"]
 layout_mode = 0
 offset_left = 76.0
 offset_top = 6.0
 offset_right = 116.0
 offset_bottom = 46.0
 mouse_filter = 2
-texture = ExtResource("20_crown_w")
 script = ExtResource("10_slot")
 Index = 0
-Worn = ExtResource("20_crown_w")
-Removed = ExtResource("21_crown_r")
 
-[node name="Slot1" type="TextureRect" parent="Root/ArtifactRing"]
+[node name="Worn" type="TextureRect" parent="Root/ArtifactRing/Slot0"]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
+mouse_filter = 2
+texture = ExtResource("20_crown_w")
+
+[node name="Removed" type="TextureRect" parent="Root/ArtifactRing/Slot0"]
+visible = false
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
+mouse_filter = 2
+texture = ExtResource("21_crown_r")
+
+[node name="Slot1" type="Control" parent="Root/ArtifactRing"]
 layout_mode = 0
 offset_left = 130.7
 offset_top = 32.4
 offset_right = 170.7
 offset_bottom = 72.4
 mouse_filter = 2
-texture = ExtResource("22_earring_w")
 script = ExtResource("10_slot")
 Index = 1
-Worn = ExtResource("22_earring_w")
-Removed = ExtResource("23_earring_r")
 
-[node name="Slot2" type="TextureRect" parent="Root/ArtifactRing"]
+[node name="Worn" type="TextureRect" parent="Root/ArtifactRing/Slot1"]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
+mouse_filter = 2
+texture = ExtResource("22_earring_w")
+
+[node name="Removed" type="TextureRect" parent="Root/ArtifactRing/Slot1"]
+visible = false
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
+mouse_filter = 2
+texture = ExtResource("23_earring_r")
+
+[node name="Slot2" type="Control" parent="Root/ArtifactRing"]
 layout_mode = 0
 offset_left = 144.2
 offset_top = 91.6
 offset_right = 184.2
 offset_bottom = 131.6
 mouse_filter = 2
-texture = ExtResource("24_necklace_w")
 script = ExtResource("10_slot")
 Index = 2
-Worn = ExtResource("24_necklace_w")
-Removed = ExtResource("25_necklace_r")
 
-[node name="Slot3" type="TextureRect" parent="Root/ArtifactRing"]
+[node name="Worn" type="TextureRect" parent="Root/ArtifactRing/Slot2"]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
+mouse_filter = 2
+texture = ExtResource("24_necklace_w")
+
+[node name="Removed" type="TextureRect" parent="Root/ArtifactRing/Slot2"]
+visible = false
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
+mouse_filter = 2
+texture = ExtResource("25_necklace_r")
+
+[node name="Slot3" type="Control" parent="Root/ArtifactRing"]
 layout_mode = 0
 offset_left = 106.4
 offset_top = 139.1
 offset_right = 146.4
 offset_bottom = 179.1
 mouse_filter = 2
-texture = ExtResource("26_pectoral_w")
 script = ExtResource("10_slot")
 Index = 3
-Worn = ExtResource("26_pectoral_w")
-Removed = ExtResource("27_pectoral_r")
 
-[node name="Slot4" type="TextureRect" parent="Root/ArtifactRing"]
+[node name="Worn" type="TextureRect" parent="Root/ArtifactRing/Slot3"]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
+mouse_filter = 2
+texture = ExtResource("26_pectoral_w")
+
+[node name="Removed" type="TextureRect" parent="Root/ArtifactRing/Slot3"]
+visible = false
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
+mouse_filter = 2
+texture = ExtResource("27_pectoral_r")
+
+[node name="Slot4" type="Control" parent="Root/ArtifactRing"]
 layout_mode = 0
 offset_left = 45.6
 offset_top = 139.1
 offset_right = 85.6
 offset_bottom = 179.1
 mouse_filter = 2
-texture = ExtResource("28_belt_w")
 script = ExtResource("10_slot")
 Index = 4
-Worn = ExtResource("28_belt_w")
-Removed = ExtResource("29_belt_r")
 
-[node name="Slot5" type="TextureRect" parent="Root/ArtifactRing"]
+[node name="Worn" type="TextureRect" parent="Root/ArtifactRing/Slot4"]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
+mouse_filter = 2
+texture = ExtResource("28_belt_w")
+
+[node name="Removed" type="TextureRect" parent="Root/ArtifactRing/Slot4"]
+visible = false
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
+mouse_filter = 2
+texture = ExtResource("29_belt_r")
+
+[node name="Slot5" type="Control" parent="Root/ArtifactRing"]
 layout_mode = 0
 offset_left = 7.8
 offset_top = 91.6
 offset_right = 47.8
 offset_bottom = 131.6
 mouse_filter = 2
-texture = ExtResource("30_bracelet_w")
 script = ExtResource("10_slot")
 Index = 5
-Worn = ExtResource("30_bracelet_w")
-Removed = ExtResource("31_bracelet_r")
 
-[node name="Slot6" type="TextureRect" parent="Root/ArtifactRing"]
+[node name="Worn" type="TextureRect" parent="Root/ArtifactRing/Slot5"]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
+mouse_filter = 2
+texture = ExtResource("30_bracelet_w")
+
+[node name="Removed" type="TextureRect" parent="Root/ArtifactRing/Slot5"]
+visible = false
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
+mouse_filter = 2
+texture = ExtResource("31_bracelet_r")
+
+[node name="Slot6" type="Control" parent="Root/ArtifactRing"]
 layout_mode = 0
 offset_left = 21.3
 offset_top = 32.4
 offset_right = 61.3
 offset_bottom = 72.4
 mouse_filter = 2
-texture = ExtResource("32_robe_w")
 script = ExtResource("10_slot")
 Index = 6
-Worn = ExtResource("32_robe_w")
-Removed = ExtResource("33_robe_r")
+
+[node name="Worn" type="TextureRect" parent="Root/ArtifactRing/Slot6"]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
+mouse_filter = 2
+texture = ExtResource("32_robe_w")
+
+[node name="Removed" type="TextureRect" parent="Root/ArtifactRing/Slot6"]
+visible = false
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
+mouse_filter = 2
+texture = ExtResource("33_robe_r")
 
 [node name="BossBar" type="Control" parent="Root" node_paths=PackedStringArray("NameLabel", "Fill", "Delay")]
 visible = false
@@ -196,7 +292,6 @@ grow_horizontal = 2
 grow_vertical = 0
 mouse_filter = 2
 script = ExtResource("11_boss")
-Settings = ExtResource("2_set")
 NameLabel = NodePath("Name")
 Fill = NodePath("Fill")
 Delay = NodePath("Delay")
@@ -251,7 +346,6 @@ grow_vertical = 0
 horizontal_alignment = 1
 vertical_alignment = 1
 script = ExtResource("15_prompt")
-Settings = ExtResource("2_set")
 
 [node name="Toast" type="Label" parent="Root"]
 visible = false
@@ -267,7 +361,6 @@ grow_horizontal = 2
 horizontal_alignment = 1
 vertical_alignment = 1
 script = ExtResource("16_toast")
-Settings = ExtResource("2_set")
 
 [node name="Minimap" parent="Root" instance=ExtResource("17_minimap")]
 layout_mode = 1

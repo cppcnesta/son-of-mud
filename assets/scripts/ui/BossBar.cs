@@ -9,7 +9,8 @@ namespace SonOfMud.UI;
 /// </summary>
 public partial class BossBar : Control
 {
-    [Export] public UiSettings Settings { get; set; }
+    /// <summary>可调数值；不导出，统一用 UiSettings.Shared（原因见那里）。测试可以替换。</summary>
+    public UiSettings Settings { get; set; }
     [Export] public Label NameLabel { get; set; }
     [Export] public TextureProgressBar Fill { get; set; }
     [Export] public TextureProgressBar Delay { get; set; }
@@ -28,7 +29,7 @@ public partial class BossBar : Control
 
     public override void _EnterTree()
     {
-        Settings ??= UiSettings.LoadDefault();
+        Settings ??= UiSettings.Shared;
         if (Events.Instance == null) return;
         Events.Instance.BossEncounterStarted += OnEncounterStarted;
         Events.Instance.BossHealthChanged += OnHealthChanged;

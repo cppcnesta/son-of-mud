@@ -17,8 +17,6 @@ public partial class UiSettings : Resource
     [Export] public float BeadDrainSeconds { get; set; } = 0.25f;
     /// <summary>珠子掉空时碎裂效果的时长。</summary>
     [Export] public float BeadBreakSeconds { get; set; } = 0.3f;
-    /// <summary>碎裂贴图 tex_ui_bead_break 横排的帧数。</summary>
-    [Export] public int BeadBreakFrames { get; set; } = 6;
 
     // ---- 器物环（D6：只做显示） ----
     /// <summary>还没收到 ArtifactsChanged 时显示的状态（bit i = 第 i 件戴着）。</summary>
@@ -68,6 +66,16 @@ public partial class UiSettings : Resource
 
     public string TabletName(string tabletId) =>
         TabletNames != null && TabletNames.TryGetValue(tabletId, out string name) && !string.IsNullOrEmpty(name) ? name : tabletId;
+
+    private static UiSettings _shared;
+
+    /// <summary>
+    /// 整个进程共用的一份设置，第一次用到时载入，之后一直持有。
+    /// UI 节点不再用 [Export] 引用资源（贴图也都写在场景里）：节点里导出的 RefCounted 资源会生成 C# 包装对象，
+    /// 场景释放后这些包装对象等着被 GC 终结，下一次进入同一场景又拿到同一个资源时，偶尔触发引擎的
+    /// FATAL（gchandle.is_released）。一直持有的对象不会被终结，也就没有这个竞争。
+    /// </summary>
+    public static UiSettings Shared => _shared ??= LoadDefault();
 
     public static UiSettings LoadDefault() =>
         ResourceLoader.Exists(DefaultPath) ? GD.Load<UiSettings>(DefaultPath) : new UiSettings();
