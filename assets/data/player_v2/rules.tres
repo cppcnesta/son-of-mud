@@ -1,0 +1,9 @@
+[gd_resource type="Resource" script_class="PlayerRules" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://assets/scripts/player/PlayerRules.cs" id="1"]
+[ext_resource type="Resource" path="res://assets/data/player_v2/slam.tres" id="2"]
+
+[resource]
+script = ExtResource("1")
+MaxHealth = 140
+SlamSpec = ExtResource("2")
