@@ -119,6 +119,29 @@ public static class MetSysApi
     public static int GetGroupByName(string group) => Require().Call(M.GetGroupByName, group).AsInt32();
     public static void DiscoverCellGroup(int groupId) => Require().Call(M.DiscoverCellGroup, groupId);
 
+    // ---- 地图控件（MetSys 模板 Template/Nodes/Minimap.tscn 的实例） ----
+    // UI 的大地图要自己决定显示哪一格、哪一层（小地图则由控件自己跟随玩家，不需要这里）。
+
+    private static class V
+    {
+        public static readonly StringName Center = "center";
+        public static readonly StringName Layer = "layer";
+    }
+
+    /// <summary>把地图控件（track_position=false 的 Minimap 实例）的中心格设成 center、图层设成 layer。先设图层再设中心。</summary>
+    public static void ConfigureMapView(Control view, Vector2I center, int layer)
+    {
+        if (view == null) throw new ArgumentNullException(nameof(view));
+        view.Set(V.Layer, layer);
+        view.Set(V.Center, center);
+    }
+
+    /// <summary>地图控件当前显示的中心格。</summary>
+    public static Vector2I GetMapViewCenter(Control view) => view.Get(V.Center).AsVector2I();
+
+    /// <summary>地图控件当前显示的图层。</summary>
+    public static int GetMapViewLayer(Control view) => view.Get(V.Layer).AsInt32();
+
     // ---- 信号桥接：第一次订阅时连接 MetSys 的 GDScript 信号，转成 C# 事件 ----
 
     private static Action<Vector3I> _cellChanged;
