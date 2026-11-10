@@ -4,6 +4,7 @@ namespace SonOfMud.Player.States;
 public abstract partial class AirState : PlayerState
 {
     public override bool CanSwitchForm => true;
+    public override bool AllowsInteract => true;
 
     public override void PhysicsUpdate(double delta)
     {

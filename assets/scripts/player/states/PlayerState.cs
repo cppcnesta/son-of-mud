@@ -15,6 +15,11 @@ public partial class PlayerState : State
     public virtual bool CanSwitchForm => false;
     /// <summary>为 false 时 HurtBox 一律返回 Ignored（死亡、锁定、调试飞行）。</summary>
     public virtual bool AcceptsHits => true;
+    /// <summary>
+    /// 这个状态里按交互键能不能触发交互（PlayerInteractor 读取）。默认不能：攻击、后摇、闪避、格挡、
+    /// 受伤、眩晕、死亡、锁定、调试飞行都不触发；只有自由状态（地面 Idle / Run、空中 Rise / Fall）可以。
+    /// </summary>
+    public virtual bool AllowsInteract => false;
     /// <summary>输入锁生效时会不会被打断进 Locked。</summary>
     public virtual bool Lockable => true;
     /// <summary>动画的目标时长（秒），用来算 SpeedScale；0 表示按动画原速播放。</summary>

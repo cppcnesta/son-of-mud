@@ -1,4 +1,4 @@
-[gd_scene load_steps=31 format=3]
+[gd_scene load_steps=33 format=3]
 
 [ext_resource type="Script" path="res://assets/scripts/player/PlayerCharacter.cs" id="1"]
 [ext_resource type="Script" path="res://assets/scripts/player/FormController.cs" id="2"]
@@ -26,6 +26,7 @@
 [ext_resource type="Script" path="res://assets/scripts/player/states/DeadState.cs" id="24"]
 [ext_resource type="Script" path="res://assets/scripts/player/states/LockedState.cs" id="25"]
 [ext_resource type="Script" path="res://assets/scripts/player/states/DebugFlyState.cs" id="26"]
+[ext_resource type="Script" path="res://assets/scripts/player/PlayerInteractor.cs" id="27"]
 
 [sub_resource type="RectangleShape2D" id="body_shape"]
 size = Vector2(48, 48)
@@ -40,6 +41,9 @@ size = Vector2(90, 70)
 [sub_resource type="CircleShape2D" id="slam_shape"]
 resource_local_to_scene = true
 radius = 150.0
+
+[sub_resource type="RectangleShape2D" id="interact_shape"]
+size = Vector2(64, 48)
 
 [node name="Player" type="CharacterBody2D"]
 collision_layer = 2
@@ -145,3 +149,12 @@ shape = SubResource("slam_shape")
 [node name="PlayerAnimator" type="Node" parent="."]
 script = ExtResource("10")
 Sprite = NodePath("../AnimatedSprite2D")
+
+[node name="Interactor" type="Area2D" parent="."]
+collision_layer = 0
+collision_mask = 128
+monitorable = false
+script = ExtResource("27")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Interactor"]
+shape = SubResource("interact_shape")

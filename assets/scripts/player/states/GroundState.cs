@@ -6,6 +6,7 @@ namespace SonOfMud.Player.States;
 public abstract partial class GroundState : PlayerState
 {
     public override bool CanSwitchForm => true;
+    public override bool AllowsInteract => true;
 
     public override void Enter(StateMsg msg)
     {

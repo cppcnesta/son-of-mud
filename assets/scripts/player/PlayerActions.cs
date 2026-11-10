@@ -14,6 +14,7 @@ public static class PlayerActions
     public static readonly StringName Block = "block";
     public static readonly StringName Dodge = "dodge";
     public static readonly StringName SwitchForm = "switch_form";
+    public static readonly StringName Interact = "interact";
 
     /// <summary>进输入缓冲的动作。</summary>
     public static readonly StringName[] Buffered = { Jump, Attack, Block, Dodge };
