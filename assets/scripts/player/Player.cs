@@ -302,6 +302,7 @@ public partial class Player : CharacterBody2D
         Timers.Recovery.Clear();
         Timers.Bonus.Clear();
         Forms.SetForm(form);
+        Facing = 1f;
         GlobalPosition = position;
         Velocity = Vector2.Zero;
         Stats.Refill();
