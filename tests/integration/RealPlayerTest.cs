@@ -24,7 +24,7 @@ public partial class RealPlayerTest : WorldTestBase
     private const string PlayerScene = "res://assets/scenes/player/player_v2.tscn";
     private const string CombatLab = "res://assets/scenes/tests/combat_lab.tscn";
 
-    private Player _player;
+    private PlayerCharacter _player;
 
     protected override async Task RunChecks()
     {
@@ -53,7 +53,7 @@ public partial class RealPlayerTest : WorldTestBase
         World = Game.GetNode<WorldGame>("WorldGame");
         Saves = Game.GetNode<SonOfMud.Save.SaveService>("SaveService");
         Cam = Game.GetNode<SonOfMud.Camera.RoomCamera>("RoomCamera");
-        _player = GD.Load<PackedScene>(PlayerScene).Instantiate<Player>();
+        _player = GD.Load<PackedScene>(PlayerScene).Instantiate<PlayerCharacter>();
         _player.Name = "Player";
         Game.AddChild(_player);
         await Frames(2);

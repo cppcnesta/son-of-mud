@@ -1,6 +1,6 @@
 [gd_scene load_steps=31 format=3]
 
-[ext_resource type="Script" path="res://assets/scripts/player/Player.cs" id="1"]
+[ext_resource type="Script" path="res://assets/scripts/player/PlayerCharacter.cs" id="1"]
 [ext_resource type="Script" path="res://assets/scripts/player/FormController.cs" id="2"]
 [ext_resource type="Resource" path="res://assets/data/player_v2/water.tres" id="3"]
 [ext_resource type="Resource" path="res://assets/data/player_v2/mud.tres" id="4"]

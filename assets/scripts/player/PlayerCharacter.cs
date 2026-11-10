@@ -13,7 +13,7 @@ namespace SonOfMud.Player;
 /// → MoveAndSlide → 当前状态 AfterMove（落地、离地、贴墙判断）。HitBox 是子节点，在这之后查询。
 /// </summary>
 [GlobalClass]
-public partial class Player : CharacterBody2D
+public partial class PlayerCharacter : CharacterBody2D
 {
     [Export] public PlayerRules Rules { get; set; }
     [Export] public FormController Forms { get; set; }

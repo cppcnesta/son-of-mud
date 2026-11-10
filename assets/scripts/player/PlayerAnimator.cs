@@ -27,7 +27,7 @@ public partial class PlayerAnimator : Node
         ["hurt"] = (2, 2, false), ["stunned"] = (4, 4, true), ["death"] = (8, 8, false),
     };
 
-    private Player _player;
+    private PlayerCharacter _player;
 
     public string CurrentAnimation => Sprite?.Animation.ToString() ?? "";
     public float CurrentSpeedScale => Sprite?.SpeedScale ?? 1f;
@@ -35,7 +35,7 @@ public partial class PlayerAnimator : Node
     public static float SpeedScaleFor(int frames, float baseFps, float seconds) =>
         frames <= 0 || baseFps <= 0f || seconds <= 0f ? 1f : frames / (baseFps * seconds);
 
-    public void Bind(Player player)
+    public void Bind(PlayerCharacter player)
     {
         _player = player;
         Sprite ??= player.GetNodeOrNull<AnimatedSprite2D>("AnimatedSprite2D");
@@ -62,7 +62,7 @@ public partial class PlayerAnimator : Node
         Sprite.Modulate = _player.Forms.Current.Tint;
     }
 
-    private SpriteFrames BuildPlaceholderFrames(Player player)
+    private SpriteFrames BuildPlaceholderFrames(PlayerCharacter player)
     {
         var frames = new SpriteFrames();
         if (frames.HasAnimation("default")) frames.RemoveAnimation("default");

@@ -31,7 +31,7 @@ public partial class FormController : Node
     }
 
     /// <summary>按规则尝试切换。stateAllows 由当前状态给出。</summary>
-    public bool TrySwitch(Player player, bool stateAllows)
+    public bool TrySwitch(PlayerCharacter player, bool stateAllows)
     {
         if (!stateAllows || !player.HasAbility(PlayerAbilities.SwitchForm)) return false;
         if (!player.Timers.SwitchReady) return false;

@@ -21,7 +21,7 @@ public abstract partial class LabSuiteBase : Node
     private readonly GDictionary _metrics = new();
 
     protected Node Lab { get; private set; }
-    protected Player Player { get; private set; }
+    protected PlayerCharacter Player { get; private set; }
 
     protected abstract string ReportName { get; }
     protected abstract Task RunChecks();
@@ -91,7 +91,7 @@ public abstract partial class LabSuiteBase : Node
         ReleaseInputs();
         Lab = GD.Load<PackedScene>(path).Instantiate();
         AddChild(Lab);
-        Player = Lab.GetNode<Player>("Player");
+        Player = Lab.GetNode<PlayerCharacter>("Player");
         await Frames(4);
     }
 

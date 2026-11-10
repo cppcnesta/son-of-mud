@@ -8,8 +8,8 @@ namespace SonOfMud.Player.States;
 /// </summary>
 public partial class PlayerState : State
 {
-    private Player _player;
-    protected Player P => _player ??= Machine.GetParent<Player>();
+    private PlayerCharacter _player;
+    protected PlayerCharacter P => _player ??= Machine.GetParent<PlayerCharacter>();
 
     /// <summary>这个状态里能不能切形态。</summary>
     public virtual bool CanSwitchForm => false;
