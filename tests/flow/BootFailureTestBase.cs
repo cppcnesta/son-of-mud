@@ -1,7 +1,6 @@
 using System.Threading.Tasks;
 using Godot;
 using SonOfMud.Core;
-using SonOfMud.UI;
 
 /// <summary>
 /// 读档失败的公共流程：子类往存档槽写一个坏存档 → PendingStart = Continue → 切到 main_game.tscn：
@@ -30,7 +29,7 @@ public abstract partial class BootFailureTestBase : FlowTestBase
         int startsBefore = Starts.Count;
         bool finished = await EnterMainGame(StartMode.Continue);
         // 失败后 GameBoot 切回主菜单：等主菜单真正成为当前场景
-        bool inMenu = await WaitUntil(() => GetTree().CurrentScene is MudMainMenu, 120);
+        bool inMenu = await WaitUntil(() => GetTree().CurrentScene?.SceneFilePath == MenuScene, 120);
         await Frames(10);
         Node scene = GetTree().CurrentScene;
 

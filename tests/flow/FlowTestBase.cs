@@ -15,15 +15,18 @@ using GDictionary = Godot.Collections.Dictionary;
 /// 开局流程测试的公共底座：一律从正式入口 main_game.tscn 启动，测试里不手动创建玩家、不手动解锁能力。
 /// 驱动节点先把自己挂到 root 下、从 CurrentScene 摘掉（和旧 MudRuntimeSuite 一样），所以切场景时它不会被释放。
 /// 存档槽 0 的原有文件在开始时备份、结束时恢复；测试自己产生的存档在结束时删除。
-/// 结果写到 tests/output/flow_&lt;名字&gt;_results.json，失败时退出码为 1。
+/// 结果写到 tests/output/flow_&lt;名字&gt;_results.json（UI 测试用 ui_ 前缀），失败时退出码为 1。
 /// </summary>
 public abstract partial class FlowTestBase : Node
 {
     public const string MainGameScene = "res://assets/scenes/world/main_game.tscn";
-    public const string MenuScene = "res://assets/scenes/ui/main_menu.tscn";
+    /// <summary>主菜单场景：以 GameBoot 的设置为准（回主菜单、开局失败都切到这里）。</summary>
+    public static string MenuScene => GD.Load<GameBootSettings>(GameBootSettings.DefaultPath).MenuScene;
     public const int Slot = 0;
 
     protected abstract string SuiteName { get; }
+    /// <summary>结果文件名前缀：tests/output/&lt;前缀&gt;_&lt;名字&gt;_results.json。</summary>
+    protected virtual string ResultPrefix => "flow";
     protected abstract Task RunChecks();
 
     private int _checks;
@@ -81,12 +84,12 @@ public abstract partial class FlowTestBase : Node
     {
         string dir = "res://tests/output";
         DirAccess.MakeDirRecursiveAbsolute(ProjectSettings.GlobalizePath(dir));
-        using (FileAccess report = FileAccess.Open($"{dir}/flow_{SuiteName}_results.json", FileAccess.ModeFlags.Write))
+        using (FileAccess report = FileAccess.Open($"{dir}/{ResultPrefix}_{SuiteName}_results.json", FileAccess.ModeFlags.Write))
         {
             var data = new GDictionary { ["suite"] = SuiteName, ["checks"] = _checks, ["failures"] = _failures, ["results"] = _lines };
             report?.StoreString(Json.Stringify(data, "\t"));
         }
-        GD.Print($"Tests: {(_failures == 0 ? "PASS" : "FAIL")} flow_{SuiteName} 总计{_checks}项，失败{_failures}项");
+        GD.Print($"Tests: {(_failures == 0 ? "PASS" : "FAIL")} {ResultPrefix}_{SuiteName} 总计{_checks}项，失败{_failures}项");
         GetTree().Quit(_failures == 0 ? 0 : 1);
     }
 
