@@ -97,13 +97,13 @@ public partial class AttackState : PlayerState
             float reach = _profile.AttackReach;
             if (_down)
             {
-                rect.Size = new Vector2(72f, reach);
+                rect.Size = new Vector2(_profile.DownAttackWidth, reach);
                 shapeNode.Position = new Vector2(0f, reach * 0.5f);
             }
             else
             {
-                rect.Size = new Vector2(reach, 70f);
-                shapeNode.Position = new Vector2(P.Facing * (reach * 0.5f + 16f), 0f);
+                rect.Size = new Vector2(reach, _profile.AttackHeight);
+                shapeNode.Position = new Vector2(P.Facing * (reach * 0.5f + _profile.AttackForwardOffset), 0f);
             }
         }
         // 倍率只取最大的一个（D2）：泥格挡增伤、下落中的下劈强化。

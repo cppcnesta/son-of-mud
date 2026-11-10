@@ -21,9 +21,10 @@ public partial class PlayerRules : Resource
     [ExportGroup("生命与受击")]
     /// <summary>7 颗泥珠 × 20（D1、D10）。</summary>
     [Export] public int MaxHealth { get; set; } = 140;
+    /// <summary>受伤硬直。没有受伤无敌帧（规格第 9 节候选：不给，靠按实体去重防止同一次攻击连续扣血）。</summary>
     [Export] public float HurtDuration { get; set; } = 0.18f;
-    /// <summary>受伤后的无敌时间：候选为 0，靠按实体去重防止同一次攻击连续扣血。</summary>
-    [Export] public float HurtInvulnerability { get; set; }
+    /// <summary>受伤 / 眩晕时击退速度每秒衰减的比例。</summary>
+    [Export] public float KnockbackDamping { get; set; } = 4f;
 
     [ExportGroup("重压下砸")]
     [Export] public float SlamSpeed { get; set; } = 1000f;

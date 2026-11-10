@@ -6,4 +6,13 @@
 [resource]
 script = ExtResource("1")
 MaxHealth = 140
+HurtDuration = 0.18
+KnockbackDamping = 4.0
+CoyoteTime = 0.1
+JumpBuffer = 0.12
+ActionBuffer = 0.15
+SwitchCooldown = 0.15
+SlamSpeed = 1000.0
+SlamRadius = 150.0
+HardSlamRecovery = 0.25
 SlamSpec = ExtResource("2")

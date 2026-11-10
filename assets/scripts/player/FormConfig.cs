@@ -42,6 +42,11 @@ public partial class FormConfig : Resource
     [Export] public float AttackActive { get; set; } = 0.10f;
     [Export] public float AttackRecovery { get; set; } = 0.16f;
     [Export] public float AttackReach { get; set; } = 90f;
+    /// <summary>横向攻击框的高度，以及攻击框离身体中心的额外前移距离（白盒 70 / 16）。</summary>
+    [Export] public float AttackHeight { get; set; } = 70f;
+    [Export] public float AttackForwardOffset { get; set; } = 16f;
+    /// <summary>下劈攻击框的宽度（白盒 72），高度用 AttackReach。</summary>
+    [Export] public float DownAttackWidth { get; set; } = 72f;
     /// <summary>空中下劈、下落中命中时的倍率（泥 1.8，水 1）。</summary>
     [Export] public float DownAttackMultiplier { get; set; } = 1f;
 

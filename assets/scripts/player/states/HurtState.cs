@@ -22,7 +22,7 @@ public partial class HurtState : PlayerState
     public override void PhysicsUpdate(double delta)
     {
         float dt = (float)delta;
-        P.Velocity = new Vector2(Mathf.MoveToward(P.Velocity.X, 0f, Mathf.Abs(P.Velocity.X) * 4f * dt + 1f), P.Velocity.Y);
+        P.Velocity = new Vector2(Mathf.MoveToward(P.Velocity.X, 0f, Mathf.Abs(P.Velocity.X) * P.Rules.KnockbackDamping * dt + 1f), P.Velocity.Y);
         P.ApplyGravity(dt);
         Remaining -= dt;
         if (Remaining <= 0.000001f) P.ToFreeState();
