@@ -1,0 +1,18 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="PackedScene" path="res://assets/scenes/world/game.tscn" id="1_game"]
+[ext_resource type="PackedScene" path="res://assets/scenes/player/player_v2.tscn" id="2_player"]
+[ext_resource type="Script" path="res://assets/scripts/world/GameBoot.cs" id="3_boot"]
+[ext_resource type="Resource" path="res://assets/data/world/game_boot_settings.tres" id="4_bootset"]
+
+[node name="MainGame" type="Node"]
+
+[node name="Game" parent="." instance=ExtResource("1_game")]
+
+[node name="Player" parent="." instance=ExtResource("2_player")]
+
+[node name="GameBoot" type="Node" parent="." node_paths=PackedStringArray("World", "SaveService")]
+script = ExtResource("3_boot")
+Settings = ExtResource("4_bootset")
+World = NodePath("../Game/WorldGame")
+SaveService = NodePath("../Game/SaveService")
