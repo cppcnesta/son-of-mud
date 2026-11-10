@@ -52,7 +52,7 @@ try {
     $worldCode = 0
     if ($Suite -eq 'all' -or $Suite -eq 'world' -or $Suite -eq 'new') {
         # World / Save / Camera 测试：每个场景单独运行，结果写到 tests/output/world_<名字>_results.json
-        $worldScenes = @('tests/world/map_check.tscn', 'tests/world/slice_test.tscn', 'tests/world/door_test.tscn', 'tests/world/gate_test.tscn', 'tests/save/save_roundtrip.tscn', 'tests/save/respawn_test.tscn')
+        $worldScenes = @('tests/world/map_check.tscn', 'tests/world/slice_test.tscn', 'tests/world/door_test.tscn', 'tests/world/gate_test.tscn', 'tests/save/save_roundtrip.tscn', 'tests/save/respawn_test.tscn', 'tests/integration/real_player_test.tscn')
         foreach ($worldScene in $worldScenes) {
             $worldName = [System.IO.Path]::GetFileNameWithoutExtension($worldScene)
             $worldArguments = @('--path', $projectPath, '--scene', "res://$worldScene", '--audio-driver', 'Dummy', '--fixed-fps', '60', '--log-file', (Join-Path $outputPath "world_$worldName.log"))

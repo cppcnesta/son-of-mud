@@ -74,12 +74,14 @@ public partial class SaveRoundtrip : WorldTestBase
         Check(!MetSysApi.IsCellDiscovered(visited, false), "重置后 MetSys 的探索记录已清空");
 
         string loadedRoom = null;
-        void OnLoaded(string room) => loadedRoom = room;
+        string roomWhenLoaded = null;
+        void OnLoaded(string room) { loadedRoom = room; roomWhenLoaded = World.CurrentRoomDef?.Id; }
         Events.Instance.GameLoaded += OnLoaded;
         bool ok = Saves.LoadFromDisk(0);
-        Events.Instance.GameLoaded -= OnLoaded;
-        Check(ok && loadedRoom == "S1_04", "LoadFromDisk(0) 成功并发 GameLoaded(S1_04)");
+        Check(ok && loadedRoom == null, "LoadFromDisk(0) 发出请求后不立刻发 GameLoaded（要等 World 回执）");
         bool arrived = await WaitUntil(() => !World.IsTransitioning && World.CurrentRoomDef?.Id == "S1_04", 240);
+        Events.Instance.GameLoaded -= OnLoaded;
+        Check(loadedRoom == "S1_04" && roomWhenLoaded == "S1_04", $"GameLoaded(S1_04) 在已经进入 S1_04 之后才发（发出时所在房间 {roomWhenLoaded}）");
         Check(arrived && World.FadeTimeouts == 0, "读档后经淡入淡出进入 S1_04，没有超时");
 
         SpawnPoint saveSpawn = World.CurrentRoom.FindSpawn(SpawnPoint.SaveId);
