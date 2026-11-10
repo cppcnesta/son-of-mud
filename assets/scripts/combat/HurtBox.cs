@@ -17,8 +17,12 @@ public partial class HurtBox : Area2D
 
     /// <summary>所属实体的根节点；同一实体的多个 HurtBox 共用一份去重记录。没填就用 Owner，再没有就用父节点。</summary>
     [Export] public Node EntityRoot { get; set; }
-    /// <summary>没填就在实体根节点的子节点里找第一个 Stats。</summary>
-    [Export] public Stats Stats { get; set; }
+    /// <summary>没填就在实体根节点（再找不到就在父节点）的子节点里找第一个 Stats；第一次用到时才找。</summary>
+    [Export] public Stats Stats
+    {
+        get => _stats ??= FindStats();
+        set => _stats = value;
+    }
     /// <summary>只吃重击（脆弱地面）。</summary>
     [Export] public bool HeavyOnly { get; set; }
     /// <summary>全方向格挡；关掉时只挡 GuardFacing 一侧来的攻击。</summary>
@@ -30,6 +34,7 @@ public partial class HurtBox : Area2D
     public bool Receiving { get; set; } = true;
 
     private readonly HashSet<StringName> _invulnerableSources = new();
+    private Stats _stats;
 
     public bool IsInvulnerable => _invulnerableSources.Count > 0;
     public Node Entity => EntityRoot ?? Owner ?? GetParent();
@@ -39,15 +44,16 @@ public partial class HurtBox : Area2D
     {
         Monitoring = false;
         Monitorable = true;
-        Stats ??= FindStats();
     }
 
     private Stats FindStats()
     {
-        Node entity = Entity;
-        if (entity == null) return null;
-        foreach (Node child in entity.GetChildren())
-            if (child is Stats s) return s;
+        foreach (Node node in new[] { Entity, GetParent() })
+        {
+            if (node == null || !IsInstanceValid(node)) continue;
+            foreach (Node child in node.GetChildren())
+                if (child is Stats s) return s;
+        }
         return null;
     }
 

@@ -20,7 +20,7 @@ public partial class StaggerWindow : Node
     [Export] public Stats Stats { get; set; }
 
     public float Remaining { get; private set; }
-    public bool Active => Remaining > 0f;
+    public bool Active { get; private set; }
 
     public override void _Ready()
     {
@@ -34,6 +34,7 @@ public partial class StaggerWindow : Node
     public void Begin()
     {
         bool was = Active;
+        Active = true;
         Remaining = Config.Duration;
         Stats?.SetIncomingMultiplier(Source, Config.DamageMultiplier);
         if (!was) EmitSignal(SignalName.Started);
@@ -42,6 +43,7 @@ public partial class StaggerWindow : Node
     public void End()
     {
         if (!Active) return;
+        Active = false;
         Remaining = 0f;
         Stats?.SetIncomingMultiplier(Source, 1f);
         EmitSignal(SignalName.Ended);
