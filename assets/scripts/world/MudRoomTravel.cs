@@ -1,5 +1,10 @@
 using Godot;
+using SonOfMud.Core;
+using SonOfMud.Player;
+using SonOfMud.Tools;
 using GDictionary = Godot.Collections.Dictionary;
+
+namespace SonOfMud.World;
 
 public partial class MudRoomTravel : Node
 {

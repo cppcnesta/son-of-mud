@@ -1,6 +1,9 @@
 using Godot;
+using SonOfMud.Player;
 using GDictionary = Godot.Collections.Dictionary;
 using GArray = Godot.Collections.Array;
+
+namespace SonOfMud.Core;
 
 /// <summary>Typed access to existing world JSON and version 1 save dictionaries.</summary>
 public static class MudData

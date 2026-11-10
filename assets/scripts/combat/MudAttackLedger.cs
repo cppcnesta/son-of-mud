@@ -1,5 +1,7 @@
 using System.Collections.Generic;
 
+namespace SonOfMud.Combat;
+
 /// <summary>Deduplicate each incoming attack for its entire lifetime.</summary>
 public sealed class MudAttackLedger
 {

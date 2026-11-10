@@ -1,6 +1,10 @@
 using Godot;
+using SonOfMud.Combat;
+using SonOfMud.Core;
 using GDictionary = Godot.Collections.Dictionary;
-using Kind = MudActionState.Kind;
+using Kind = SonOfMud.Player.MudActionState.Kind;
+
+namespace SonOfMud.Player;
 
 public partial class MudPlayer : CharacterBody2D
 {

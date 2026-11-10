@@ -1,0 +1,10 @@
+[gd_resource type="Resource" format=3]
+
+[ext_resource type="Script" uid="uid://orxlanqpgccv" path="res://addons/MetroidvaniaSystem/Scripts/Settings.gd" id="1_settings"]
+[ext_resource type="Resource" uid="uid://bt6s3nd8xo6b" path="res://addons/MetroidvaniaSystem/Themes/Exquisite/Theme.tres" id="2_theme"]
+
+[resource]
+script = ExtResource("1_settings")
+theme = ExtResource("2_theme")
+map_data_file = "res://assets/data/metsys/MapData.txt"
+in_game_cell_size = Vector2(576, 324)

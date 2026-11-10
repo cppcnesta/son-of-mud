@@ -1,6 +1,6 @@
 param(
     [string]$GodotPath = $env:GODOT_DOTNET,
-    [ValidateSet('all','feel','scene-paths','jump-landing','attacks','stairs','focused')][string]$Suite = 'all',
+    [ValidateSet('all','core','feel','scene-paths','jump-landing','attacks','stairs','focused')][string]$Suite = 'all',
     [switch]$Headless
 )
 $ErrorActionPreference = 'Stop'
@@ -31,12 +31,24 @@ try {
     $env:MUDCHILD_TEST_ISOLATED = '1'
     & $GodotPath --headless --path $projectPath --editor --import --quit --log-file (Join-Path $outputPath 'csharp_import.log')
     if ($LASTEXITCODE -ne 0) { throw "Godot import failed ($LASTEXITCODE)." }
-    $arguments = @('--path', $projectPath, '--scene', 'res://tests/runtime_suite.tscn', '--rendering-method', 'gl_compatibility', '--audio-driver', 'Dummy', '--fixed-fps', '60', '--max-fps', '240', '--log-file', (Join-Path $outputPath 'csharp_runtime_suite.log'))
-    if ($Headless) { $arguments += '--headless' }
-    if ($Suite -eq 'focused') { $arguments += @('--', '--focused') }
-    elseif ($Suite -ne 'all') { $arguments += @('--', "--$Suite-only") }
-    & $GodotPath @arguments
-    $resultCode = $LASTEXITCODE
+    $legacyCode = 0
+    if ($Suite -ne 'core') {
+        $arguments = @('--path', $projectPath, '--scene', 'res://tests/runtime_suite.tscn', '--rendering-method', 'gl_compatibility', '--audio-driver', 'Dummy', '--fixed-fps', '60', '--max-fps', '240', '--log-file', (Join-Path $outputPath 'csharp_runtime_suite.log'))
+        if ($Headless) { $arguments += '--headless' }
+        if ($Suite -eq 'focused') { $arguments += @('--', '--focused') }
+        elseif ($Suite -ne 'all') { $arguments += @('--', "--$Suite-only") }
+        & $GodotPath @arguments
+        $legacyCode = $LASTEXITCODE
+    }
+    $coreCode = 0
+    if ($Suite -eq 'all' -or $Suite -eq 'core') {
+        # Core 验收测试：结果写到 tests/output/core_results.json
+        $coreArguments = @('--path', $projectPath, '--scene', 'res://tests/core/core_suite.tscn', '--audio-driver', 'Dummy', '--log-file', (Join-Path $outputPath 'core_suite.log'))
+        if ($Headless) { $coreArguments += '--headless' }
+        & $GodotPath @coreArguments
+        $coreCode = $LASTEXITCODE
+    }
+    $resultCode = if ($legacyCode -ne 0) { $legacyCode } else { $coreCode }
 }
 finally {
     foreach ($variableName in $variableNames) { [Environment]::SetEnvironmentVariable($variableName, $previousValues[$variableName], 'Process') }

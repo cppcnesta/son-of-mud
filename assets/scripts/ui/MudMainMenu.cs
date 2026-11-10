@@ -1,5 +1,9 @@
 using Godot;
 using System;
+using SonOfMud.Core;
+using SonOfMud.World;
+
+namespace SonOfMud.UI;
 
 public partial class MudMainMenu : Control
 {
