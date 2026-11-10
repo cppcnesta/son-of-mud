@@ -48,6 +48,12 @@ public partial class Events : Node
     [Signal] public delegate void NewGameRequestedEventHandler();
     [Signal] public delegate void ContinueRequestedEventHandler();
     [Signal] public delegate void QuitToMenuRequestedEventHandler();
+    // 开局结果：SaveService 在新游戏 / 读档真正到达房间之后发 success=true；
+    // 存档损坏、版本不支持、目标房间不存在、换房失败时发 success=false 并带上原因（失败时不改动存档文件）。
+    [Signal] public delegate void GameStartFinishedEventHandler(bool success, string error);
+    // 重开一局：一律重建整个游戏实例（World 的 GameBoot 负责切回正式入口场景），不在当前实例里重置。
+    // NewGameRequested 只能由 GameBoot 发；其他系统要重开一局，发这个事件。
+    [Signal] public delegate void RestartRunRequestedEventHandler();
 
     // 进度（ProgressStore 发出）
     [Signal] public delegate void AbilityUnlockedEventHandler(StringName abilityId);
@@ -58,6 +64,8 @@ public partial class Events : Node
     [Signal] public delegate void PlayerHealthChangedEventHandler(int current, int max);
     [Signal] public delegate void PlayerFormChangedEventHandler(int form);
     [Signal] public delegate void PlayerDiedEventHandler();
+    // 玩家附近最近的可交互对象的提示文字变了；空字符串表示附近没有可交互的东西。
+    [Signal] public delegate void InteractPromptChangedEventHandler(string prompt);
 
     // 换房契约（规格第 4 节）
     // RoomExiting：每次换房（走边缘、过门都算）在卸载旧房间之前发出 → Player 关掉正在生效的 HitBox。
