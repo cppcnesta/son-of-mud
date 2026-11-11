@@ -59,6 +59,10 @@ public partial class NarrativeChoiceTest : NarrativeFlowBase
         if (!opened) return;
         Check(Narr.Choice.Options.SequenceEqual(new[] { "离开", "吃下" }) && Narr.Choice.Focus == 0 && Narr.Dialog.IsOpen,
             "供桌：台词打完字直接出现选项 离开 / 吃下（不用再按一次），台词留在框里，默认选第一项");
+        Check(OnScreen(Narr.Choice.GetNodeOrNull<Control>("List/Option0"), out string opt0) && OnScreen(Narr.Choice.GetNodeOrNull<Control>("List/Option1"), out _),
+            $"供桌：两个选项按钮真的显示在屏幕内（{opt0}）");
+        var choiceLayout = LayoutProblems(Narr);
+        Check(choiceLayout.Count == 0, "供桌：剧情层所有可见控件都在屏幕内" + Join(choiceLayout));
         await Tap(PlayerActions.Down);
         int afterDown = Narr.Choice.Focus;
         await Tap(PlayerActions.Down);
@@ -104,6 +108,8 @@ public partial class NarrativeChoiceTest : NarrativeFlowBase
             "泥板：拾取后发 TabletCollected(nameless_day) 一次，写 tablet.nameless_day");
         Check(Narr.Tablet.IsOpen && Narr.Tablet.CurrentTitle == "当天还没有名字" && !Narr.Tablet.ShowingFull && Narr.Tablet.CurrentText.EndsWith("第七夜，……落下。") && NarrativePaused,
             $"泥板：显示残缺版，游戏暂停（{Narr.Tablet.CurrentTitle}）");
+        Check(OnScreen(Narr.Tablet.GetNodeOrNull<Control>("Panel"), out string tabletInfo) && CoversScreen(Narr.Tablet.GetNodeOrNull<Control>("Dim"), out _),
+            $"泥板：泥板面板显示在屏幕内，背后的压暗铺满屏幕（{tabletInfo}）");
         await Frames(10);
         Check(Narr.Tablet.IsOpen, "泥板：拾取的那一下 E 不会直接关掉泥板");
         await KeyTap(Key.E);

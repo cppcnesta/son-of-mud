@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Godot;
 using SonOfMud.Core;
@@ -25,6 +26,54 @@ public abstract partial class NarrativeFlowBase : FlowTestBase
     protected int Restarts;
     protected int NewGames;
     protected ErrorCatcher Errors;
+
+    // =================================================================
+    // 屏幕布局（玩家实测发现：剧情界面根节点大小为 0，对话框被算到屏幕外，逻辑测试全过却看不见）
+    // =================================================================
+
+    /// <summary>屏幕矩形（容 1 像素的取整误差）。</summary>
+    protected Rect2 ScreenRect => GetViewport().GetVisibleRect().Grow(1f);
+
+    /// <summary>控件真的显示在屏幕上：在树里可见、有面积、整个矩形落在屏幕内。</summary>
+    protected bool OnScreen(Control control, out string info)
+    {
+        if (control == null) { info = "控件不存在"; return false; }
+        Rect2 r = control.GetGlobalRect();
+        info = $"{control.Name} 位置 {r.Position} 大小 {r.Size}，屏幕 {GetViewport().GetVisibleRect().Size}";
+        return control.IsVisibleInTree() && r.Size.X >= 1f && r.Size.Y >= 1f && ScreenRect.Encloses(r);
+    }
+
+    /// <summary>控件铺满整个屏幕（CG、淡入淡出用）。</summary>
+    protected bool CoversScreen(Control control, out string info)
+    {
+        if (control == null) { info = "控件不存在"; return false; }
+        Rect2 r = control.GetGlobalRect();
+        Rect2 screen = GetViewport().GetVisibleRect();
+        info = $"{control.Name} 位置 {r.Position} 大小 {r.Size}，屏幕 {screen.Size}";
+        return r.Grow(1f).Encloses(screen) && ScreenRect.Encloses(r);
+    }
+
+    /// <summary>扫一遍 root 下所有可见控件：有面积的不能超出屏幕；有可见子控件的不能是 0 大小。返回问题列表。</summary>
+    protected List<string> LayoutProblems(Node root)
+    {
+        var problems = new List<string>();
+        void Walk(Node node)
+        {
+            if (node is CanvasItem item && !item.Visible) return;
+            if (node is Control control)
+            {
+                Rect2 r = control.GetGlobalRect();
+                bool hasArea = r.Size.X >= 1f && r.Size.Y >= 1f;
+                if (hasArea && !ScreenRect.Encloses(r)) problems.Add($"{root.GetPathTo(control)} 超出屏幕（{r.Position} / {r.Size}）");
+                if (!hasArea && control.GetChildren().OfType<Control>().Any(c => c.Visible)) problems.Add($"{root.GetPathTo(control)} 大小为 0 却有可见子控件");
+            }
+            foreach (Node child in node.GetChildren()) Walk(child);
+        }
+        Walk(root);
+        return problems;
+    }
+
+    protected static string Join(List<string> problems) => problems.Count == 0 ? "" : "：" + string.Join(" | ", problems.Take(5));
 
     protected void BindNarrative()
     {
