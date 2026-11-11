@@ -6,6 +6,7 @@ namespace SonOfMud.UI;
 /// <summary>
 /// Boss 血条。BossEncounterStarted 显示名字和满血条；BossHealthChanged 主血条快速扣、延迟条稍后追上（平滑扣血）；
 /// BossPhaseChanged 换名字（UiSettings.BossPhaseNames）；BossDefeated 收起。只认当前这场战斗的 bossId。
+/// 玩家死亡（PlayerDied）或离开当前房间（RoomExiting，复活传送也会触发）时，这场战斗视为中断，血条收起。
 /// </summary>
 public partial class BossBar : Control
 {
@@ -35,6 +36,8 @@ public partial class BossBar : Control
         Events.Instance.BossHealthChanged += OnHealthChanged;
         Events.Instance.BossPhaseChanged += OnPhaseChanged;
         Events.Instance.BossDefeated += OnDefeated;
+        Events.Instance.PlayerDied += OnEncounterInterrupted;
+        Events.Instance.RoomExiting += OnRoomExiting;
     }
 
     public override void _ExitTree()
@@ -44,6 +47,8 @@ public partial class BossBar : Control
         Events.Instance.BossHealthChanged -= OnHealthChanged;
         Events.Instance.BossPhaseChanged -= OnPhaseChanged;
         Events.Instance.BossDefeated -= OnDefeated;
+        Events.Instance.PlayerDied -= OnEncounterInterrupted;
+        Events.Instance.RoomExiting -= OnRoomExiting;
     }
 
     public override void _Ready()
@@ -117,6 +122,19 @@ public partial class BossBar : Control
         _delayTween?.Kill();
         if (Fill != null) Fill.Value = 0;
         if (Delay != null) Delay.Value = 0;
+        FadeTo(0f, () => Visible = false);
+    }
+
+    private void OnRoomExiting(string roomId) => OnEncounterInterrupted();
+
+    /// <summary>战斗中断（玩家死亡或离开房间）：收起血条，清掉这场战斗的 bossId，之后的同名事件不再理会，直到下一次开战。</summary>
+    private void OnEncounterInterrupted()
+    {
+        if (!Showing) return;
+        Showing = false;
+        BossId = "";
+        _fillTween?.Kill();
+        _delayTween?.Kill();
         FadeTo(0f, () => Visible = false);
     }
 

@@ -36,6 +36,7 @@ public partial class CoreSuite : Node
             PauseChecks();
             InputLockChecks();
             PauseWriteScan();
+            StaticGodotRefScan();
             StoryValueChecks();
             ProgressChecks();
             await StateMachineChecks();
@@ -125,6 +126,42 @@ public partial class CoreSuite : Node
     /// <summary>去掉字符串和注释后，检查是否有对 .Paused 的赋值。</summary>
     private static bool WritesPaused(string source) =>
         PausedWrite.IsMatch(StringsAndComments.Replace(source, ""));
+
+    // ---------- 静态字段持有 Godot 对象 ----------
+
+    // 类型：Godot 的引用计数 / 资源 / 节点类型，以及本项目按命名约定的 Resource 子类（…Settings / …Data / …Spec / …Config / …Table / …Def）。
+    private static readonly Regex StaticGodotField = new(
+        @"\bstatic\s+(?:readonly\s+)?(?:Resource|RefCounted|GodotObject|Node\w*|InputEvent\w*|Texture\w*|Image|PackedScene|Curve\w*|SpriteFrames|Theme|Font\w*|AudioStream\w*|Material|Shader\w*|StyleBox\w*|\w+(?:Settings|Data|Spec|Config|Table|Def))\??\s+\w+\s*(?:=(?!>)|;|\{)");
+
+    /// <summary>去掉字符串和注释后，这段源码里是否有“静态字段持有 Godot 对象、却没有登记退出时释放”。</summary>
+    private static bool HoldsUnreleasedStaticGodotRef(string source)
+    {
+        string code = StringsAndComments.Replace(source, "");
+        return StaticGodotField.IsMatch(code) && !code.Contains("ShutdownHooks.Register(");
+    }
+
+    /// <summary>
+    /// 规则（修复退出崩溃时定下）：静态字段持有的 Godot 对象会活到引擎销毁之后，退出时被终结会让进程崩溃。
+    /// 这种字段所在的文件必须用 ShutdownHooks.Register 登记退出前释放。只是防护，不能代替真实的退出测试。
+    /// </summary>
+    private void StaticGodotRefScan()
+    {
+        Check(HoldsUnreleasedStaticGodotRef("class A { private static UiSettings _shared; }")
+              && HoldsUnreleasedStaticGodotRef("class B { static readonly InputEventAction Press = new(); }"),
+            "扫描器自检：没登记释放的静态 Godot 字段能被发现");
+        Check(!HoldsUnreleasedStaticGodotRef("class A { private static UiSettings _shared; void F() { ShutdownHooks.Register(R); } }")
+              && !HoldsUnreleasedStaticGodotRef("class C { static readonly StringName X = \"a\"; static int n; public static Node Singleton => null; }")
+              && !HoldsUnreleasedStaticGodotRef("class D { // static Resource r;\n string s = \"static Resource r;\"; }"),
+            "扫描器自检：已登记的、StringName / 普通类型、只读属性、注释和字符串里的都不算");
+
+        var offenders = new List<string>();
+        foreach (string root in new[] { "res://assets/scripts", "res://tests" })
+            ScanDir(root, path =>
+            {
+                if (HoldsUnreleasedStaticGodotRef(FileAccess.GetFileAsString(path))) offenders.Add(path);
+            });
+        Check(offenders.Count == 0, "静态字段持有 Godot 对象的文件都登记了退出时释放" + (offenders.Count > 0 ? "，违规：" + string.Join(", ", offenders) : ""));
+    }
 
     private static void ScanDir(string dir, Action<string> onFile)
     {

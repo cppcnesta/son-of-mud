@@ -31,6 +31,12 @@ public abstract partial class FlowTestBase : Node
 
     /// <summary>进入 S1_01 时让剧情层自动播开场。默认关掉：开场会暂停游戏、吃掉按键，不测剧情的流程测试不需要它。</summary>
     protected virtual bool NarrativeOpening => false;
+
+    /// <summary>
+    /// 写完结果文件之后要做的收尾，例如用真实按键按游戏里的“退出”按钮，由游戏自己结束进程。
+    /// 为 null 时测试自己退出。不为 null 时，进程的退出码由 Run_Tests 逐场景检查：正常退出必须是 0。
+    /// </summary>
+    protected Func<Task> AfterReport { get; set; }
     protected abstract Task RunChecks();
 
     private int _checks;
@@ -95,7 +101,21 @@ public abstract partial class FlowTestBase : Node
             report?.StoreString(Json.Stringify(data, "\t"));
         }
         GD.Print($"Tests: {(_failures == 0 ? "PASS" : "FAIL")} {ResultPrefix}_{SuiteName} 总计{_checks}项，失败{_failures}项");
-        GetTree().Quit(_failures == 0 ? 0 : 1);
+        if (AfterReport == null || _failures > 0)
+        {
+            GetTree().Quit(_failures == 0 ? 0 : 1);
+            return;
+        }
+        QuitWatchdog();
+        _ = AfterReport();
+    }
+
+    /// <summary>兜底：收尾动作之后 300 帧进程还在，说明游戏的退出没有生效，以 5 退出，Run_Tests 会按退出码判失败。</summary>
+    private async void QuitWatchdog()
+    {
+        for (int i = 0; i < 300; i++) await ToSignal(GetTree(), SceneTree.SignalName.ProcessFrame);
+        GD.PrintErr($"{ResultPrefix}_{SuiteName}：收尾动作之后 300 帧进程仍未退出，以 5 退出。");
+        GetTree().Quit(5);
     }
 
     // ---------- 存档文件 ----------

@@ -1,4 +1,4 @@
-param(
+﻿param(
     [string]$GodotPath = $env:GODOT_DOTNET,
     [ValidateSet('all','core','world','player','combat','player-feel','flow','ui','narrative','enemy','new')][string]$Suite = 'all',
     [switch]$Headless
@@ -20,6 +20,9 @@ $variableNames = @('APPDATA','LOCALAPPDATA','MUDCHILD_TEST_ISOLATED','DOTNET_CLI
 $previousValues = @{}
 foreach ($variableName in $variableNames) { $previousValues[$variableName] = [Environment]::GetEnvironmentVariable($variableName, 'Process') }
 $resultCode = 1
+# 逐个记录每个测试场景（Godot 进程）的退出码：结果文件全部通过、进程却在退出时崩溃，也要能看出来是哪个场景。
+$sceneExits = New-Object System.Collections.Generic.List[object]
+function Add-SceneExit([string]$scene, [int]$code) { $sceneExits.Add([pscustomobject]@{ Scene = $scene; Code = $code }) }
 try {
     $env:DOTNET_CLI_HOME = Join-Path $runtimePath 'DotnetHome'
     $env:DOTNET_SKIP_FIRST_TIME_EXPERIENCE = '1'
@@ -31,12 +34,15 @@ try {
     $env:MUDCHILD_TEST_ISOLATED = '1'
     & $GodotPath --headless --path $projectPath --editor --import --quit --log-file (Join-Path $outputPath 'csharp_import.log')
     if ($LASTEXITCODE -ne 0) { throw "Godot import failed ($LASTEXITCODE)." }
+    $importIssues = Select-String -Path (Join-Path $outputPath 'csharp_import.log') -Pattern 'nonexistent section "preset\.' -SimpleMatch:$false -ErrorAction SilentlyContinue
+    if ($importIssues) { Write-Host "IMPORT ERROR: export_presets.cfg has an empty section ($($importIssues.Count) lines)" -ForegroundColor Red }
     $coreCode = 0
     if ($Suite -eq 'all' -or $Suite -eq 'core') {
         # Core 验收测试：结果写到 tests/output/core_results.json
         $coreArguments = @('--path', $projectPath, '--scene', 'res://tests/core/core_suite.tscn', '--audio-driver', 'Dummy', '--log-file', (Join-Path $outputPath 'core_suite.log'))
         if ($Headless) { $coreArguments += '--headless' }
         & $GodotPath @coreArguments
+        Add-SceneExit "res://tests/core/core_suite.tscn" $LASTEXITCODE
         $coreCode = $LASTEXITCODE
     }
     $worldCode = 0
@@ -48,6 +54,7 @@ try {
             $worldArguments = @('--path', $projectPath, '--scene', "res://$worldScene", '--audio-driver', 'Dummy', '--fixed-fps', '60', '--log-file', (Join-Path $outputPath "world_$worldName.log"))
             if ($Headless) { $worldArguments += '--headless' }
             & $GodotPath @worldArguments
+            Add-SceneExit "res://$worldScene" $LASTEXITCODE
             if ($LASTEXITCODE -ne 0 -and $worldCode -eq 0) { $worldCode = $LASTEXITCODE }
         }
     }
@@ -64,6 +71,7 @@ try {
         $newArguments = @('--path', $projectPath, '--scene', $newScenes[$name], '--rendering-method', 'gl_compatibility', '--audio-driver', 'Dummy', '--fixed-fps', '60', '--log-file', (Join-Path $outputPath $logName))
         if ($Headless) { $newArguments += '--headless' }
         & $GodotPath @newArguments
+        Add-SceneExit "$($newScenes[$name])" $LASTEXITCODE
         if ($LASTEXITCODE -ne 0) { $newCode = $LASTEXITCODE }
     }
     # 开局流程测试（一律从正式入口 main_game.tscn 启动）：每个场景单独运行，结果写到 tests/output/flow_<名字>_results.json
@@ -75,18 +83,20 @@ try {
             $flowArguments = @('--path', $projectPath, '--scene', "res://$flowScene", '--audio-driver', 'Dummy', '--fixed-fps', '60', '--log-file', (Join-Path $outputPath "flow_$flowName.log"))
             if ($Headless) { $flowArguments += '--headless' }
             & $GodotPath @flowArguments
+            Add-SceneExit "res://$flowScene" $LASTEXITCODE
             if ($LASTEXITCODE -ne 0 -and $flowCode -eq 0) { $flowCode = $LASTEXITCODE }
         }
     }
     # UI 测试（HUD 假事件、暂停菜单 / 地图、新主菜单流程、读档失败、真实玩家集成）：结果写到 tests/output/ui_<名字>_results.json
     $uiCode = 0
     if ($Suite -eq 'all' -or $Suite -eq 'ui' -or $Suite -eq 'new') {
-        $uiScenes = @('tests/ui/ui_hud_test.tscn', 'tests/ui/ui_pause_map_test.tscn', 'tests/ui/title_menu_test.tscn', 'tests/ui/title_menu_failure_test.tscn', 'tests/ui/ui_integration_test.tscn')
+        $uiScenes = @('tests/ui/ui_hud_test.tscn', 'tests/ui/ui_pause_map_test.tscn', 'tests/ui/title_menu_test.tscn', 'tests/ui/title_menu_failure_test.tscn', 'tests/ui/ui_integration_test.tscn', 'tests/ui/quit_from_pause_test.tscn', 'tests/ui/quit_from_title_test.tscn')
         foreach ($uiScene in $uiScenes) {
             $uiName = [System.IO.Path]::GetFileNameWithoutExtension($uiScene)
             $uiArguments = @('--path', $projectPath, '--scene', "res://$uiScene", '--audio-driver', 'Dummy', '--fixed-fps', '60', '--log-file', (Join-Path $outputPath "ui_$uiName.log"))
             if ($Headless) { $uiArguments += '--headless' }
             & $GodotPath @uiArguments
+            Add-SceneExit "res://$uiScene" $LASTEXITCODE
             if ($LASTEXITCODE -ne 0 -and $uiCode -eq 0) { $uiCode = $LASTEXITCODE }
         }
     }
@@ -100,6 +110,7 @@ try {
             $narrativeArguments = @('--path', $projectPath, '--scene', "res://$narrativeScene", '--audio-driver', 'Dummy', '--fixed-fps', '60', '--log-file', (Join-Path $outputPath "$narrativeName.log"))
             if ($Headless) { $narrativeArguments += '--headless' }
             & $GodotPath @narrativeArguments
+            Add-SceneExit "res://$narrativeScene" $LASTEXITCODE
             if ($LASTEXITCODE -ne 0 -and $narrativeCode -eq 0) { $narrativeCode = $LASTEXITCODE }
         }
     }
@@ -113,10 +124,17 @@ try {
             $enemyArguments = @('--path', $projectPath, '--scene', "res://$enemyScene", '--rendering-method', 'gl_compatibility', '--audio-driver', 'Dummy', '--fixed-fps', '60', '--log-file', (Join-Path $outputPath "enemy_$enemyName.log"))
             if ($Headless) { $enemyArguments += '--headless' }
             & $GodotPath @enemyArguments
+            Add-SceneExit "res://$enemyScene" $LASTEXITCODE
             if ($LASTEXITCODE -ne 0 -and $enemyCode -eq 0) { $enemyCode = $LASTEXITCODE }
         }
     }
+    $badExits = @($sceneExits | Where-Object { $_.Code -ne 0 })
+    ($sceneExits | ForEach-Object { "$($_.Code)`t$($_.Scene)" }) | Set-Content -Path (Join-Path $outputPath 'scene_exit_codes.txt') -Encoding utf8
+    Write-Host "Scenes run: $($sceneExits.Count), non-zero exit codes: $($badExits.Count)"
+    foreach ($bad in $badExits) { Write-Host "  EXIT $($bad.Code): $($bad.Scene)" -ForegroundColor Red }
     $resultCode = if ($coreCode -ne 0) { $coreCode } elseif ($worldCode -ne 0) { $worldCode } elseif ($flowCode -ne 0) { $flowCode } elseif ($uiCode -ne 0) { $uiCode } elseif ($narrativeCode -ne 0) { $narrativeCode } elseif ($enemyCode -ne 0) { $enemyCode } else { $newCode }
+    if ($resultCode -eq 0 -and $badExits.Count -gt 0) { $resultCode = $badExits[0].Code }
+    if ($resultCode -eq 0 -and $importIssues) { $resultCode = 3 }
 }
 finally {
     foreach ($variableName in $variableNames) { [Environment]::SetEnvironmentVariable($variableName, $previousValues[$variableName], 'Process') }

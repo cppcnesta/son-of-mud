@@ -28,7 +28,14 @@ public partial class Events : Node
 
     public override void _ExitTree()
     {
-        if (Instance == this) Instance = null;
+        if (Instance != this) return;
+        Instance = null;
+        // Events 是 autoload，只在进程退出时离开场景树，这时引擎还活着：
+        // 先释放静态持有的 Godot 对象，再强制回收，让终结器在引擎销毁之前跑完（否则退出时会崩溃）。
+        ShutdownHooks.RunAll();
+        System.GC.Collect();
+        System.GC.WaitForPendingFinalizers();
+        System.GC.Collect();
     }
 
     // World
