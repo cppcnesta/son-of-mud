@@ -10,7 +10,7 @@ using SonOfMud.World;
 /// 重开一局（RestartRunRequested）：一律重建整个游戏实例，不在当前实例里重置。
 /// 用正式入口开局，在 S1_04 存档点按 E 存一次档，然后把状态弄乱（残血、泥形态、闪避冷却、增伤就绪、进度变量、
 /// 已探索的格子，外加暂停和输入锁），发 RestartRunRequested：
-/// 玩家是新实例、旧实例已释放；140 血、水形态、冷却为 0、增伤未就绪；变量清空、能力回到初始；
+/// 玩家是新实例、旧实例已释放；70 血（起始上限）、水形态、冷却为 0、增伤未就绪；变量清空、能力回到初始；
 /// 已探索的格子清空；人在 S1_01；暂停和输入锁没有残留；存档文件没被改动。
 /// </summary>
 public partial class RestartRunTest : FlowTestBase
@@ -59,7 +59,7 @@ public partial class RestartRunTest : FlowTestBase
         InputLock.Request(InputLock.Narrative, true);
         await Frames(2);
 
-        Check(oldPlayer.Forms.Form == FormController.Mud && oldPlayer.Stats.Health < 140 && oldPlayer.Stats.Health > 0 && oldPlayer.Timers.DodgeCooldown > 1f
+        Check(oldPlayer.Forms.Form == FormController.Mud && oldPlayer.Stats.Health < oldPlayer.Stats.MaxHealth && oldPlayer.Stats.Health > 0 && oldPlayer.Timers.DodgeCooldown > 1f
               && oldPlayer.Timers.Bonus.Ready && GameSession.Progress.Flag(TestVar) && PauseService.IsPaused && InputLock.IsLocked,
             $"搭建：已弄乱（形态 {oldPlayer.Forms.Form}、血 {oldPlayer.Stats.Health}、闪避冷却 {oldPlayer.Timers.DodgeCooldown:F2}、" +
             $"增伤 {oldPlayer.Timers.Bonus.Ready}、暂停 {PauseService.IsPaused}、锁 {InputLock.IsLocked}）");
@@ -77,7 +77,7 @@ public partial class RestartRunTest : FlowTestBase
         Check(Player.GetInstanceId() != oldId && !GodotObject.IsInstanceIdValid(oldId) && !GodotObject.IsInstanceValid(oldScene),
             "重开：玩家是新实例（实例 ID 不同），旧玩家和旧场景都已释放");
         Check(AllPlayers().Count == 1 && World.Player == Player && Cam.Target == Player, "重开：场景里只有一个玩家，WorldGame 和镜头都拿到它");
-        Check(Player.Stats.Health == 140 && Player.Stats.MaxHealth == 140, $"重开：血量 140（实际 {Player.Stats.Health}）");
+        Check(Player.Stats.Health == 70 && Player.Stats.MaxHealth == 70, $"重开：血量 70/70（实际 {Player.Stats.Health}/{Player.Stats.MaxHealth}）");
         Check(Player.Forms.Form == FormController.Water, "重开：水形态");
         PlayerTimers t = Player.Timers;
         Check(t.DodgeCooldown == 0f && t.BlockCooldown == 0f && t.AttackInterval == 0f && t.SwitchCooldown == 0f && t.Recovery.Multiplier() == 1f,

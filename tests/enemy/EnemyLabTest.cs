@@ -255,7 +255,7 @@ public partial class EnemyLabTest : LabSuiteBase
         await Frames(5);
         Check(third == HitOutcome.Killed && _pilgrim.IsDead && _killed.SequenceEqual(new[] { "pilgrim" }), "朝圣者（水）：补第三刀才死，EnemyKilled 一次");
         Check(_dropped.SequenceEqual(new[] { "小泥偶" }), $"朝圣者：固定掉落种子 → 掉一个小泥偶（{string.Join(",", _dropped)}）");
-        Check(_pilgrim.AttacksStarted == 0 && _playerDamaged == 0 && Player.Stats.Health == 140 && _pilgrim.GetNodeOrNull("HitBox") == null,
+        Check(_pilgrim.AttacksStarted == 0 && _playerDamaged == 0 && Player.Stats.Health == Player.Stats.MaxHealth && _pilgrim.GetNodeOrNull("HitBox") == null,
             "朝圣者：从不出手（没有攻击判定，全程玩家没掉血）");
     }
 

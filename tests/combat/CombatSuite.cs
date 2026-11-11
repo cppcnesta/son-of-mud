@@ -250,12 +250,12 @@ public partial class CombatSuite : LabSuiteBase
         await HoldBlock();
         Check(Player.State is BlockState && Mathf.Abs(Player.Timers.BlockCooldown - 3f) < 0.001f, "水格挡：按下进入格挡，并立即开始 3 秒冷却");
         _a.Strike(_plain);
-        Check(_a.StrikeOutcomes[^1] == HitOutcome.Blocked && Player.Stats.Health == 140, "水格挡挡住假人一刀：结果 Blocked，不掉血");
+        Check(_a.StrikeOutcomes[^1] == HitOutcome.Blocked && Player.Stats.Health == 70, "水格挡挡住假人一刀：结果 Blocked，不掉血");
         Check(Player.State is not BlockState && Player.Timers.BlockCooldown == 0f && Player.Timers.AttackInterval == 0f,
             "水格挡成功：结束格挡，清零格挡冷却和攻击间隔");
         await Frames(3);
         _a.Strike(_plain);
-        Check(_a.StrikeOutcomes[^1] == HitOutcome.Damaged && Player.Stats.Health == 120 && Player.State is HurtState,
+        Check(_a.StrikeOutcomes[^1] == HitOutcome.Damaged && Player.Stats.Health == 50 && Player.State is HurtState,
             "水格挡只挡一次：按住不续挡，下一刀照常受伤");
         Release(PlayerActions.Block);
 
@@ -264,7 +264,7 @@ public partial class CombatSuite : LabSuiteBase
         _a.Strike(_plain);
         await Frames(2);
         _a.Strike(_plain);
-        Check(_a.StrikeOutcomes[^1] == HitOutcome.Blocked && _a.StrikeOutcomes[^2] == HitOutcome.Blocked && Player.State is BlockState && Player.Stats.Health == 140,
+        Check(_a.StrikeOutcomes[^1] == HitOutcome.Blocked && _a.StrikeOutcomes[^2] == HitOutcome.Blocked && Player.State is BlockState && Player.Stats.Health == 70,
             "泥格挡：按住可以连续挡多段");
         Check(Player.Timers.Bonus.Ready && Mathf.Abs(Player.Timers.Bonus.Multiplier - 1.6f) < 0.001f && Player.Timers.BlockCooldown > 2.8f,
             "泥格挡成功：增伤 1.6 就绪，不清格挡冷却");
@@ -321,8 +321,8 @@ public partial class CombatSuite : LabSuiteBase
         await Arrange(Near, Far, 0);
         int events = _health.Count;
         _a.Strike(_plain);
-        Check(Player.State is HurtState && Player.Stats.Health == 120 && _health.Count == events + 1 && _health[^1] == (120, 140),
-            "受伤：扣血、进入 Hurt，并发出 PlayerHealthChanged(120, 140)");
+        Check(Player.State is HurtState && Player.Stats.Health == 50 && _health.Count == events + 1 && _health[^1] == (50, 70),
+            "受伤：扣血、进入 Hurt，并发出 PlayerHealthChanged(50, 70)");
         Check(Player.Velocity.X < -100f, $"受伤：从攻击来源方向被击退（vx={Player.Velocity.X:F0}）");
         await Frames(FramesFor(0.18f) + 1);
         Check(Player.State is IdleState or RunState, "受伤硬直 0.18 秒后回到自由状态");
@@ -330,13 +330,13 @@ public partial class CombatSuite : LabSuiteBase
         Hit same = MakeHit("same_attack", 10f, _a.GlobalPosition);
         HitOutcome o1 = Player.HurtBox.Receive(same);
         HitOutcome o2 = Player.HurtBox.Receive(same);
-        Check(o1 == HitOutcome.Damaged && o2 == HitOutcome.Duplicate && Player.Stats.Health == 110, "没有受伤无敌帧：同一次攻击靠去重只扣一次");
+        Check(o1 == HitOutcome.Damaged && o2 == HitOutcome.Duplicate && Player.Stats.Health == 40, "没有受伤无敌帧：同一次攻击靠去重只扣一次");
         HitOutcome o3 = Player.HurtBox.Receive(MakeHit("other_attack", 10f, _a.GlobalPosition));
-        Check(o3 == HitOutcome.Damaged && Player.Stats.Health == 100, "没有受伤无敌帧：受伤中挨另一次攻击照常扣血");
+        Check(o3 == HitOutcome.Damaged && Player.Stats.Health == 30, "没有受伤无敌帧：受伤中挨另一次攻击照常扣血");
 
         await Arrange(Near, Far, 0);
         _a.Strike(_tail);
-        Check(Player.State is StunnedState && Player.Stats.Health == 137, "眩晕：没挡住 StunSeconds=3 的攻击 → Stunned，扣 3");
+        Check(Player.State is StunnedState && Player.Stats.Health == 67, "眩晕：没挡住 StunSeconds=3 的攻击 → Stunned，扣 3");
         float x = Player.GlobalPosition.X;
         Press(PlayerActions.Right);
         await Tap(PlayerActions.Attack);
@@ -346,7 +346,7 @@ public partial class CombatSuite : LabSuiteBase
         bool stillStunned = Player.State is StunnedState;
         Check(stillStunned && Mathf.Abs(Player.GlobalPosition.X - x) < 1f, "眩晕 3 秒内无法操作（移动 / 攻击 / 跳 / 闪避都无效）");
         _a.Strike(_plain);
-        Check(Player.State is StunnedState && Player.Stats.Health == 117, "眩晕中还能继续挨打，且不会被普通受伤打断（连环惩罚）");
+        Check(Player.State is StunnedState && Player.Stats.Health == 47, "眩晕中还能继续挨打，且不会被普通受伤打断（连环惩罚）");
         Release(PlayerActions.Right);
         await WaitWhile(() => Player.State is StunnedState, 60);
         Check(Player.State is IdleState or RunState, "眩晕 3 秒后恢复");
@@ -361,15 +361,15 @@ public partial class CombatSuite : LabSuiteBase
             strikes++;
             await Frames(1);
         }
-        Check(strikes == 7 && Player.State is DeadState && Player.Stats.Health == 0, $"140 血被 20 伤害打 7 次打空 → Dead（{strikes} 次）");
-        Check(_health.Count == events + 7 && _health[^1] == (0, 140), "每次掉血都发 PlayerHealthChanged（7 次，最后是 0/140）");
+        Check(strikes == 4 && Player.State is DeadState && Player.Stats.Health == 0, $"70 血被 20 伤害打 4 次打空 → Dead（{strikes} 次）");
+        Check(_health.Count == events + 4 && _health[^1] == (0, 70), "每次掉血都发 PlayerHealthChanged（4 次，最后是 0/70）");
         Check(_died == died + 1, "血量归零发出一次 PlayerDied");
         Check(Player.HurtBox.Receive(MakeHit("after_death", 20f, _a.GlobalPosition)) == HitOutcome.Ignored, "死亡后不再受击（Ignored）");
         await Tap(PlayerActions.Jump);
         Check(Player.State is DeadState, "死亡中按键无效，只等 CheckpointRespawned");
         Events.Instance.EmitSignal(Events.SignalName.CheckpointRespawned);
-        Check(Player.State is IdleState && Player.Stats.Health == 140 && _health[^1] == (140, 140) && Player.HurtBox.Receiving,
-            "CheckpointRespawned：回满血 140、回 Idle、恢复受击");
+        Check(Player.State is IdleState && Player.Stats.Health == 70 && _health[^1] == (70, 70) && Player.HurtBox.Receiving,
+            "CheckpointRespawned：回满血 70（没吃生命之面包）、回 Idle、恢复受击");
     }
 
     // ---------- 第 7 步：反制僵直 ----------
@@ -382,7 +382,7 @@ public partial class CombatSuite : LabSuiteBase
         Release(PlayerActions.Block);
         Check(_a.StrikeOutcomes[^1] == HitOutcome.Blocked && _a.Stagger.Active && Mathf.Abs(_a.Stagger.Remaining - 5f) < 0.001f && _a.Stats.IncomingMultiplier == 2f,
             "挡住带 CounterOnBlock 的攻击 → 假人反制僵直 5 秒，易伤 ×2");
-        Check(Player.State is BlockState && Player.Stats.Health == 140, "挡住蝎尾：玩家不掉血、不眩晕");
+        Check(Player.State is BlockState && Player.Stats.Health == 70, "挡住蝎尾：玩家不掉血、不眩晕");
         await WaitWhile(() => Player.State is BlockState, 10);
         float before = _a.Stagger.Remaining;
         ulong startFrame = Engine.GetPhysicsFrames();

@@ -11,7 +11,7 @@ using SonOfMud.World;
 
 /// <summary>
 /// 计划第 4 节步骤 5：真实玩家 + 真实 World，从正式入口 main_game.tscn 启动。
-/// ① 开局 7 颗满珠；玩家真实受伤（HurtBox.Receive，24 / 10 / 44），泥珠按 Stats.Health 比例变化，掉空的珠子碎裂。
+/// ① 开局 70 血、3 颗满珠；玩家真实受伤（HurtBox.Receive，24 / 10 / 30），泥珠按 Stats.Health 比例变化，掉空的珠子碎裂。
 /// ② 站到 S1_04 存档点上 HUD 出现“E 存档”，按 E 后提示条“已存档”并自动消失，走开后提示隐藏。
 /// ③ 真实过门（S3_08 → S4_01）：黑幕仍按第 2 轮的配对约定——每个 FadeRequested 都收到同 id、同方向的 FadeCompleted，
 ///    淡出完成时全黑、淡入完成时全透明，没有超时。
@@ -41,11 +41,13 @@ public partial class UiIntegrationTest : UiTestBase
     {
         HpBeadBar bar = _hud.Beads;
         int hp = Player.Stats.Health, max = Player.Stats.MaxHealth;
-        if (bar.Health != hp || bar.MaxHealth != max || bar.BeadCount != HpBeadBar.BeadCountFor(max, 20)) return false;
+        // 独立按规则算：珠子数 = ⌊max / 基准⌋（至少 1），每颗容量 = max / 珠子数
+        int count = Mathf.Max(1, max / bar.Settings.BeadHp);
+        if (bar.Health != hp || bar.MaxHealth != max || bar.BeadCount != count) return false;
         for (int i = 0; i < bar.BeadCount; i++)
         {
-            int capacity = Mathf.Min(20, max - i * 20);
-            float expected = Mathf.Clamp(hp - i * 20, 0, capacity) / (float)capacity;
+            float capacity = (float)max / count;
+            float expected = Mathf.Clamp(hp - i * capacity, 0f, capacity) / capacity;
             float actual = displayed ? bar.GetBead(i).DisplayedFill : bar.GetBead(i).Fill;
             if (Mathf.Abs(actual - expected) > 0.001f) return false;
         }
@@ -66,26 +68,26 @@ public partial class UiIntegrationTest : UiTestBase
     private async Task DamageChecks()
     {
         HpBeadBar bar = _hud.Beads;
-        Check(Player.Stats.Health == 140 && bar.BeadCount == 7 && BeadsMatchPlayer(true) && Fills(bar) == "1 1 1 1 1 1 1",
-            $"开局：玩家 140 血，HUD 7 颗满珠（{Fills(bar)}）");
+        Check(Player.Stats.Health == 70 && Player.Stats.MaxHealth == 70 && bar.BeadCount == 3 && BeadsMatchPlayer(true) && Fills(bar) == "1 1 1",
+            $"开局：玩家 70/70 血，HUD 3 颗满珠（{Fills(bar)}）");
 
         HitOutcome outcome = await Hurt("ui_hit_water", 24f);
-        Check(outcome == HitOutcome.Damaged && Player.Stats.Health == 116 && BeadsMatchPlayer(true) && Fills(bar) == "1 1 1 1 1 0.8 0",
+        Check(outcome == HitOutcome.Damaged && Player.Stats.Health == 46 && BeadsMatchPlayer(true) && Fills(bar) == "1 0.97 0",
             $"真实受伤 24：玩家 {Player.Stats.Health} 血，泥珠按比例变化（{Fills(bar)}）");
 
         await Hurt("ui_hit_small", 10f);
-        Check(Player.Stats.Health == 106 && BeadsMatchPlayer(true) && Fills(bar) == "1 1 1 1 1 0.3 0", $"真实受伤 10：106 血（{Fills(bar)}）");
+        Check(Player.Stats.Health == 36 && BeadsMatchPlayer(true) && Fills(bar) == "1 0.54 0", $"真实受伤 10：36 血（{Fills(bar)}）");
 
-        int[] before = Enumerable.Range(0, 7).Select(i => bar.GetBead(i).BreakCount).ToArray();
-        await Hurt("ui_hit_big", 44f);
-        int[] after = Enumerable.Range(0, 7).Select(i => bar.GetBead(i).BreakCount).ToArray();
-        Check(Player.Stats.Health == 62 && BeadsMatchPlayer(true) && Fills(bar) == "1 1 1 0.1 0 0 0", $"真实受伤 44：62 血（{Fills(bar)}）");
-        Check(after[4] == before[4] + 1 && after[5] == before[5] + 1 && after[3] == before[3] && after[6] == before[6],
-            $"掉空的第 5、6 颗各碎裂一次，其余不碎（{string.Join(",", after)}）");
+        int[] before = Enumerable.Range(0, 3).Select(i => bar.GetBead(i).BreakCount).ToArray();
+        await Hurt("ui_hit_big", 30f);
+        int[] after = Enumerable.Range(0, 3).Select(i => bar.GetBead(i).BreakCount).ToArray();
+        Check(Player.Stats.Health == 6 && BeadsMatchPlayer(true) && Fills(bar) == "0.26 0 0", $"真实受伤 30：6 血（{Fills(bar)}）");
+        Check(after[1] == before[1] + 1 && after[0] == before[0] && after[2] == before[2],
+            $"掉空的第 2 颗碎裂一次，其余不碎（{string.Join(",", after)}）");
 
         Player.Stats.Refill();
         await Frames(30);
-        Check(Player.Stats.Health == 140 && BeadsMatchPlayer(true), $"回满血：泥珠全部回满（{Fills(bar)}）");
+        Check(Player.Stats.Health == 70 && BeadsMatchPlayer(true) && Fills(bar) == "1 1 1", $"回满血：泥珠全部回满（{Fills(bar)}）");
     }
 
     // ---------- ② 存档点 ----------
@@ -155,6 +157,6 @@ public partial class UiIntegrationTest : UiTestBase
         Check(completions.Count == 2 && completions[0].alpha > 0.99f && completions[1].alpha < 0.01f,
             "过门：淡出完成时全黑，淡入完成时全透明");
         Check(World.FadeTimeouts == timeouts && !InputLock.IsLocked && Mathf.IsZeroApprox(fadeOverlay.Alpha), "过门：没有等待超时，结束后输入锁解除、黑幕透明");
-        Check(Mathf.IsEqualApprox(_hud.RootAlpha, 1f) && _hud.Beads.BeadCount == 7, "过门后 HUD 照常显示");
+        Check(Mathf.IsEqualApprox(_hud.RootAlpha, 1f) && _hud.Beads.BeadCount == 3, "过门后 HUD 照常显示");
     }
 }
