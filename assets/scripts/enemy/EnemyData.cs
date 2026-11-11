@@ -40,6 +40,14 @@ public partial class EnemyData : Resource
     /// <summary>冲锋型：判定期间的冲刺速度（方向在前摇开始时锁定）。</summary>
     [Export] public float ChargeSpeed { get; set; } = 600f;
 
+    [ExportGroup("远程")]
+    /// <summary>远程型：投掷物的飞行参数（重力、半径、寿命）；伤害仍是 AttackSpec。</summary>
+    [Export] public ProjectileSpec ThrowSpec { get; set; }
+    /// <summary>远程型：抛物线的水平速度（像素 / 秒），飞行时间 = 水平距离 / 它。</summary>
+    [Export] public float ThrowSpeed { get; set; } = 420f;
+    /// <summary>远程型：出手点相对脚底的位置（按朝右摆，朝左时左右翻转）。</summary>
+    [Export] public Vector2 ThrowOrigin { get; set; } = new(20f, -56f);
+
     [ExportGroup("受击")]
     /// <summary>被打（没死）后的硬直时长。</summary>
     [Export] public float HurtStun { get; set; } = 0.3f;

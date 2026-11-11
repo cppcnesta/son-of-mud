@@ -11,4 +11,9 @@ public enum EnemyBehaviour
     Melee,
     /// <summary>近战冲锋：前摇时锁定方向，冲刺出手（塔庙泥卫）。</summary>
     Charge,
+    /// <summary>
+    /// 远程：巡逻，看见玩家就走过去，走到 AttackRange（约 300 像素）以内停下；前摇后朝玩家抛出一个投掷物（虔诚泥人扔泥肝）。
+    /// 伤害用 AttackSpec，飞行参数用 EnemyData.ThrowSpec，投掷物是 Combat.Projectile。
+    /// </summary>
+    Ranged,
 }

@@ -54,6 +54,12 @@ public partial class EnemyBody : CharacterBody2D
     public int Reactions { get; private set; }
     /// <summary>出过手的次数（被动型只有被打之后的反击才会加）。</summary>
     public int AttacksStarted { get; private set; }
+    /// <summary>远程型扔出去的投掷物个数。</summary>
+    public int ProjectilesThrown { get; private set; }
+    /// <summary>最近一次扔出去的投掷物（可能已经释放，用前先 IsInstanceValid）。</summary>
+    public Projectile LastProjectile { get; private set; }
+    /// <summary>远程型每扔出一个投掷物就通知一次（测试和以后的表现用）。</summary>
+    public event System.Action<Projectile> ProjectileThrown;
     /// <summary>当前生效的掉落表：摆放点覆盖优先。</summary>
     public DropTable Drops => DropsOverride ?? Data?.Drops;
 
@@ -216,6 +222,27 @@ public partial class EnemyBody : CharacterBody2D
 
     public string NextAttackId(string kind) => $"enemy_{GetInstanceId()}_{kind}_{++_attackSequence}";
 
+    /// <summary>
+    /// 远程型出手：从出手点朝玩家（瞄准扔出那一刻玩家的位置）抛出一个敌方投掷物，挂在自己的父节点（房间）下。
+    /// 只朝前摇时锁定的方向扔：玩家跑到身后时，扔向前方同样远的地方。没有玩家时扔向前方 AttackRange 处。
+    /// </summary>
+    public Projectile Throw()
+    {
+        AttacksStarted++;
+        Vector2 from = GlobalPosition + new Vector2(Mathf.Abs(Data.ThrowOrigin.X) * Facing, Data.ThrowOrigin.Y);
+        Vector2 to = HasTarget ? Target.GlobalPosition : from + new Vector2(Facing * Data.AttackRange, -Data.ThrowOrigin.Y);
+        if ((to.X - from.X) * Facing < 0f) to = new Vector2(from.X + Facing * Mathf.Abs(to.X - from.X), to.Y);
+        float gravity = Data.ThrowSpec?.Gravity ?? 1200f;
+        Vector2 velocity = Projectile.ArcVelocity(from, to, gravity, Data.ThrowSpeed);
+        Hit hit = Hit.From(Data.AttackSpec, NextAttackId("throw"), from, 1f, this);
+        Node parent = GetParent() ?? this;
+        Projectile projectile = Projectile.Launch(parent, from, velocity, hit, ProjectileTeam.Enemy, Data.ThrowSpec);
+        ProjectilesThrown++;
+        LastProjectile = projectile;
+        ProjectileThrown?.Invoke(projectile);
+        return projectile;
+    }
+
     /// <summary>按当前朝向摆好判定形状，用 spec 打开判定（同一帧立即查询一次）。</summary>
     public void OpenAttack(HitBox box, HitSpec spec, string kind)
     {
@@ -333,6 +360,12 @@ public partial class EnemyBody : CharacterBody2D
         {
             // 反击前摇：泥手高高举起（占位）
             DrawRect(new Rect2(Facing * size.X * 0.5f - 5f, -size.Y - 24f, 10f, 30f), tint.Darkened(0.2f));
+        }
+        if (State is AttackWindupState && Data?.Behaviour == EnemyBehaviour.Ranged)
+        {
+            // 投掷前摇：手里举着一块泥肝（占位）
+            Color liver = Data.ThrowSpec?.Tint ?? new Color(0.55f, 0.2f, 0.16f);
+            DrawCircle(new Vector2(-Facing * size.X * 0.3f, -size.Y - 14f), Data.ThrowSpec?.Radius ?? 10f, liver);
         }
         if (AttackHitBox is { Active: true })
             foreach (var (shape, _) in _attackShapes)

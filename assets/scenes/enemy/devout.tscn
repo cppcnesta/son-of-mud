@@ -4,7 +4,6 @@
 [ext_resource type="Resource" path="res://assets/data/enemy/devout.tres" id="2"]
 [ext_resource type="Script" path="res://assets/scripts/combat/Stats.cs" id="3"]
 [ext_resource type="Script" path="res://assets/scripts/combat/HurtBox.cs" id="4"]
-[ext_resource type="Script" path="res://assets/scripts/combat/HitBox.cs" id="5"]
 [ext_resource type="Script" path="res://assets/scripts/core/StateMachine.cs" id="6"]
 [ext_resource type="Script" path="res://assets/scripts/enemy/states/IdleState.cs" id="7"]
 [ext_resource type="Script" path="res://assets/scripts/enemy/states/PatrolState.cs" id="8"]
@@ -18,10 +17,6 @@
 
 [sub_resource type="RectangleShape2D" id="body"]
 size = Vector2(46, 62)
-
-[sub_resource type="RectangleShape2D" id="hit"]
-resource_local_to_scene = true
-size = Vector2(80, 60)
 
 [node name="Devout" type="CharacterBody2D"]
 collision_layer = 4
@@ -45,17 +40,6 @@ script = ExtResource("4")
 [node name="CollisionShape2D" type="CollisionShape2D" parent="HurtBox"]
 position = Vector2(0, -31)
 shape = SubResource("body")
-
-[node name="HitBox" type="Area2D" parent="."]
-collision_layer = 64
-collision_mask = 8
-monitoring = false
-monitorable = false
-script = ExtResource("5")
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="HitBox"]
-position = Vector2(52, -30)
-shape = SubResource("hit")
 
 [node name="StateMachine" type="Node" parent="." node_paths=PackedStringArray("Initial")]
 script = ExtResource("6")
