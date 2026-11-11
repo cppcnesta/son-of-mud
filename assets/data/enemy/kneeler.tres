@@ -1,0 +1,23 @@
+[gd_resource type="Resource" script_class="EnemyData" format=3]
+
+[ext_resource type="Script" path="res://assets/scripts/enemy/EnemyData.cs" id="1"]
+[ext_resource type="Script" path="res://assets/scripts/enemy/DropTable.cs" id="2"]
+
+[sub_resource type="Resource" id="drops"]
+script = ExtResource("2")
+ItemId = &"小泥偶"
+Chance = 1.0
+
+[resource]
+script = ExtResource("1")
+Drops = SubResource("drops")
+Kind = &"kneeler"
+DisplayName = "跪拜的泥人"
+MaxHealth = 10
+Behaviour = 0
+MoveSpeed = 0.0
+BodySize = Vector2(48, 48)
+Tint = Color(0.62, 0.52, 0.4, 1)
+VisionRange = 0.0
+ReactsToHits = false
+FleeChance = 0.0

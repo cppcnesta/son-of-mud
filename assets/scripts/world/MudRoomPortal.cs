@@ -1,5 +1,10 @@
 using Godot;
 using System.Collections.Generic;
+using SonOfMud.Core;
+using SonOfMud.Player;
+using SonOfMud.Tools;
+
+namespace SonOfMud.World;
 
 [GlobalClass]
 public partial class MudRoomPortal : Area2D, IMudInteractable

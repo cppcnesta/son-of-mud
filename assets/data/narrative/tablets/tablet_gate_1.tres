@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="TabletData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://assets/scripts/narrative/data/TabletData.cs" id="1_tablet"]
+
+[resource]
+script = ExtResource("1_tablet")
+Id = "gate_1"
+Title = "一"
+Room = "S4_02"
+PartialText = "我来到他的身边，他戴着众神的角冠，创造新的世界。"

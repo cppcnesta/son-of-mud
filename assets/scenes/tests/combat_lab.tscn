@@ -1,0 +1,105 @@
+[gd_scene load_steps=19 format=3]
+
+[ext_resource type="Script" path="res://assets/scripts/tools/PlayerLab.cs" id="1"]
+[ext_resource type="Script" path="res://assets/scripts/tools/LabGeometry.cs" id="2"]
+[ext_resource type="PackedScene" path="res://assets/scenes/player/player_v2.tscn" id="3"]
+[ext_resource type="Script" path="res://assets/scripts/tools/TrainingDummy.cs" id="4"]
+[ext_resource type="Script" path="res://assets/scripts/combat/Stats.cs" id="5"]
+[ext_resource type="Script" path="res://assets/scripts/combat/HurtBox.cs" id="6"]
+[ext_resource type="Script" path="res://assets/scripts/combat/HitBox.cs" id="7"]
+[ext_resource type="Script" path="res://assets/scripts/combat/StaggerWindow.cs" id="8"]
+[ext_resource type="Resource" path="res://assets/data/combat/stagger_default.tres" id="9"]
+[ext_resource type="Resource" path="res://assets/data/combat/lab/plain_strike.tres" id="10"]
+[ext_resource type="Script" path="res://assets/scripts/tools/PlayerDebugHud.cs" id="11"]
+[ext_resource type="Script" path="res://assets/scripts/tools/DebugFlyToggle.cs" id="12"]
+
+[sub_resource type="RectangleShape2D" id="dummy_body"]
+size = Vector2(48, 96)
+
+[sub_resource type="RectangleShape2D" id="dummy_head"]
+size = Vector2(40, 32)
+
+[sub_resource type="RectangleShape2D" id="dummy_torso"]
+size = Vector2(48, 64)
+
+[sub_resource type="CircleShape2D" id="dummy_strike"]
+radius = 120.0
+
+[node name="CombatLab" type="Node2D"]
+script = ExtResource("1")
+
+[node name="Geometry" type="Node2D" parent="."]
+script = ExtResource("2")
+Solids = Array[Rect2]([Rect2(-400, 600, 3200, 64), Rect2(-464, -400, 64, 1064), Rect2(2800, -400, 64, 1064)])
+
+[node name="Player" parent="." instance=ExtResource("3")]
+position = Vector2(400, 576)
+
+[node name="Camera2D" type="Camera2D" parent="Player"]
+
+[node name="DummyA" type="Node2D" parent="."]
+position = Vector2(470, 552)
+script = ExtResource("4")
+StrikeSpec = ExtResource("10")
+
+[node name="Stats" type="Node" parent="DummyA"]
+script = ExtResource("5")
+MaxHealth = 1000
+
+[node name="HurtBox" type="Area2D" parent="DummyA"]
+collision_layer = 16
+collision_mask = 0
+monitoring = false
+script = ExtResource("6")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="DummyA/HurtBox"]
+shape = SubResource("dummy_body")
+
+[node name="StaggerWindow" type="Node" parent="DummyA"]
+script = ExtResource("8")
+Config = ExtResource("9")
+
+[node name="HitBox" type="Area2D" parent="DummyA"]
+collision_layer = 64
+collision_mask = 8
+monitoring = false
+monitorable = false
+script = ExtResource("7")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="DummyA/HitBox"]
+shape = SubResource("dummy_strike")
+
+[node name="DummyB" type="Node2D" parent="."]
+position = Vector2(1400, 552)
+script = ExtResource("4")
+Tint = Color(0.5, 0.4, 0.8, 1)
+
+[node name="Stats" type="Node" parent="DummyB"]
+script = ExtResource("5")
+MaxHealth = 1000
+
+[node name="HeadHurtBox" type="Area2D" parent="DummyB"]
+position = Vector2(0, -24)
+collision_layer = 16
+collision_mask = 0
+monitoring = false
+script = ExtResource("6")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="DummyB/HeadHurtBox"]
+shape = SubResource("dummy_head")
+
+[node name="TorsoHurtBox" type="Area2D" parent="DummyB"]
+position = Vector2(0, 16)
+collision_layer = 16
+collision_mask = 0
+monitoring = false
+script = ExtResource("6")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="DummyB/TorsoHurtBox"]
+shape = SubResource("dummy_torso")
+
+[node name="DebugHud" type="CanvasLayer" parent="."]
+script = ExtResource("11")
+
+[node name="DebugFlyToggle" type="Node" parent="."]
+script = ExtResource("12")

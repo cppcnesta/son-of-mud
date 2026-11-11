@@ -1,0 +1,25 @@
+[gd_resource type="Resource" script_class="EnemyData" format=3]
+
+[ext_resource type="Script" path="res://assets/scripts/enemy/EnemyData.cs" id="1"]
+[ext_resource type="Resource" path="res://assets/data/enemy/guard_charge.tres" id="2"]
+
+[resource]
+script = ExtResource("1")
+AttackSpec = ExtResource("2")
+Kind = &"guard"
+DisplayName = "塔姆图之子·守卫"
+MaxHealth = 60
+Behaviour = 2
+MoveSpeed = 120.0
+BodySize = Vector2(52, 72)
+Tint = Color(0.4, 0.32, 0.26, 1)
+VisionRange = 384.0
+VisionHeight = 128.0
+AttackRange = 220.0
+AttackWindup = 0.6
+AttackActive = 0.35
+AttackRecover = 0.8
+ChargeSpeed = 600.0
+HurtStun = 0.25
+ReactsToHits = true
+FleeChance = 0.0

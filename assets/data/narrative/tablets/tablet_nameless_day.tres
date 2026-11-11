@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="TabletData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://assets/scripts/narrative/data/TabletData.cs" id="1_tablet"]
+
+[resource]
+script = ExtResource("1_tablet")
+Id = "nameless_day"
+Title = "当天还没有名字"
+Room = "S1_02"
+PartialText = "当天还没有名字，地也还没有名字。\n只有海。海底有泥，\n祂取出泥，混上自己的血……\n（…?）……\n第七夜，……落下。"
+FullText = "当天还没有名字，地也还没有名字。只有海。海底有泥。\n祂取出泥，混上自己的血，捏出了一件武器。第七夜，一颗星落下。祂说：我的儿子。"

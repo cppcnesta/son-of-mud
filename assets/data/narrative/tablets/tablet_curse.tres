@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="TabletData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://assets/scripts/narrative/data/TabletData.cs" id="1_tablet"]
+
+[resource]
+script = ExtResource("1_tablet")
+Id = "curse"
+Title = "诅咒"
+Room = "S3_06"
+PartialText = "弑亲者，命落其子。第七夜，（缺）……"
+FullText = "弑亲者，命落其子。第七夜，我说错了一句话。"

@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="CameraSettings" format=3]
+
+[ext_resource type="Script" path="res://assets/scripts/camera/CameraSettings.cs" id="1_cam"]
+
+[resource]
+script = ExtResource("1_cam")
+Zoom = Vector2(1, 1)
+SmoothingEnabled = true
+SmoothingSpeed = 8.0
+MaxShakeOffset = 24.0
+ShakeFalloff = 2.0

@@ -1,7 +1,10 @@
 using Godot;
 using System.Threading.Tasks;
-using Kind = MudActionState.Kind;
-using Source = MudMovementRecovery.Source;
+using SonOfMud.Core;
+using SonOfMud.Player;
+using SonOfMud.World;
+using Kind = SonOfMud.Player.MudActionState.Kind;
+using Source = SonOfMud.Player.MudMovementRecovery.Source;
 
 public sealed class MudCombatFeelChecks
 {

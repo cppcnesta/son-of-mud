@@ -1,0 +1,31 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://assets/scripts/tools/PlayerLab.cs" id="1"]
+[ext_resource type="Script" path="res://assets/scripts/tools/LabGeometry.cs" id="2"]
+[ext_resource type="PackedScene" path="res://assets/scenes/player/player_v2.tscn" id="3"]
+[ext_resource type="PackedScene" path="res://assets/scenes/enemy/keeper.tscn" id="4"]
+[ext_resource type="Script" path="res://assets/scripts/tools/KeeperDebugOverlay.cs" id="5"]
+[ext_resource type="Script" path="res://assets/scripts/tools/PlayerDebugHud.cs" id="6"]
+
+[node name="KeeperLab" type="Node2D"]
+script = ExtResource("1")
+
+[node name="Geometry" type="Node2D" parent="."]
+script = ExtResource("2")
+Solids = Array[Rect2]([Rect2(-64, 888, 2432, 84), Rect2(-64, -200, 64, 1172), Rect2(2304, -200, 64, 1172)])
+
+[node name="Player" parent="." instance=ExtResource("3")]
+position = Vector2(200, 864)
+
+[node name="Camera2D" type="Camera2D" parent="Player"]
+
+[node name="Keeper" parent="." instance=ExtResource("4")]
+position = Vector2(1800, 888)
+Arena = Rect2(320, 0, 1984, 972)
+
+[node name="KeeperDebug" type="CanvasLayer" parent="." node_paths=PackedStringArray("Keeper")]
+script = ExtResource("5")
+Keeper = NodePath("../Keeper")
+
+[node name="DebugHud" type="CanvasLayer" parent="."]
+script = ExtResource("6")

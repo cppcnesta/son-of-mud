@@ -1,0 +1,60 @@
+[gd_scene format=4 uid="uid://f411bd8adhcc"]
+
+[ext_resource type="Script" path="res://assets/scripts/world/RoomRoot.cs" id="1_de0qt"]
+[ext_resource type="PackedScene" path="res://addons/MetroidvaniaSystem/Nodes/RoomInstance.tscn" id="2_yguvp"]
+[ext_resource type="Script" path="res://addons/MetroidvaniaSystem/Scripts/RoomInstance.gd" id="3_v84o3"]
+[ext_resource type="TileSet" path="res://assets/data/world/world_tileset.tres" id="4_7vlff"]
+[ext_resource type="Script" path="res://assets/scripts/world/SpawnPoint.cs" id="5_5u5so"]
+[ext_resource type="Script" path="res://assets/scripts/narrative/world/StoryTrigger.cs" id="n_story"]
+
+[sub_resource type="RectangleShape2D" id="Shape_Story_SevenNights"]
+size = Vector2(96, 160)
+
+[node name="S1_06" type="Node2D" unique_id=1211725441]
+script = ExtResource("1_de0qt")
+RoomId = "S1_06"
+DisplayName = "祈祷者雕像「七夜」"
+
+[node name="RoomInstance" type="Node2D" parent="." unique_id=1246059462 instance=ExtResource("2_yguvp")]
+script = ExtResource("3_v84o3")
+
+[node name="Geometry" type="TileMapLayer" parent="." unique_id=1971063012]
+position = Vector2(0, -4)
+tile_map_data = PackedByteArray("AAAAAAkAAAAAAAAAAAABAAkAAAAAAAAAAAACAAkAAAAAAAAAAAADAAkAAAAAAAAAAAAEAAkAAAAAAAAAAAAFAAkAAAAAAAAAAAAGAAkAAAAAAAAAAAAHAAkAAAAAAAAAAAAIAAkAAAAAAAAAAAAJAAkAAAAAAAAAAAAKAAkAAAAAAAAAAAALAAkAAAAAAAAAAAAMAAkAAAAAAAAAAAANAAkAAAAAAAAAAAAOAAkAAAAAAAAAAAAPAAkAAAAAAAAAAAAQAAkAAAAAAAAAAAARAAkAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAOAAQAAAAAAAAAAAAAAAIAAAAAAAAAAAAPAAQAAAAAAAAAAAAAAAMAAAAAAAAAAAAQAAQAAAAAAAAAAAAAAAQAAAAAAAAAAAARAAQAAAAAAAAAAAARAAUAAAAAAAAAAAARAAYAAAAAAAAAAAARAAcAAAAAAAAAAAARAAgAAAAAAAAAAAA=")
+tile_set = ExtResource("4_7vlff")
+
+[node name="Spawns" type="Node2D" parent="." unique_id=351801406]
+
+[node name="Default" type="Marker2D" parent="Spawns" unique_id=1778752516]
+position = Vector2(576, 571)
+script = ExtResource("5_5u5so")
+
+[node name="From_S1_05" type="Marker2D" parent="Spawns" unique_id=361577033]
+position = Vector2(96, 571)
+script = ExtResource("5_5u5so")
+SpawnId = &"From_S1_05"
+
+[node name="From_S1_07" type="Marker2D" parent="Spawns" unique_id=578955248]
+position = Vector2(1056, 251)
+script = ExtResource("5_5u5so")
+SpawnId = &"From_S1_07"
+
+[node name="Objects" type="Node2D" parent="." unique_id=845524897]
+
+[node name="Story_SevenNights" type="Area2D" parent="Objects"]
+position = Vector2(700, 571)
+script = ExtResource("n_story")
+ScriptId = "m_pit"
+Label = "七夜"
+PromptText = "触碰雕像"
+
+[node name="Shape" type="CollisionShape2D" parent="Objects/Story_SevenNights"]
+position = Vector2(0, -80)
+shape = SubResource("Shape_Story_SevenNights")
+
+[node name="Placeholder" type="ColorRect" parent="Objects/Story_SevenNights"]
+offset_left = -29
+offset_top = -128
+offset_right = 29
+mouse_filter = 2
+color = Color(0.45, 0.38, 0.3, 1)

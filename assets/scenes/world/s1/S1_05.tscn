@@ -1,0 +1,118 @@
+[gd_scene format=4 uid="uid://3oxjj5geffmy"]
+
+[ext_resource type="Script" path="res://assets/scripts/world/RoomRoot.cs" id="1_ymdne"]
+[ext_resource type="PackedScene" path="res://addons/MetroidvaniaSystem/Nodes/RoomInstance.tscn" id="2_t2bmx"]
+[ext_resource type="Script" path="res://addons/MetroidvaniaSystem/Scripts/RoomInstance.gd" id="3_lgdk3"]
+[ext_resource type="TileSet" path="res://assets/data/world/world_tileset.tres" id="4_1d1jg"]
+[ext_resource type="Script" path="res://assets/scripts/world/SpawnPoint.cs" id="5_4vmye"]
+[ext_resource type="Script" path="res://assets/scripts/world/GateBarrier.cs" id="6_yrve7"]
+[ext_resource type="Script" path="res://assets/scripts/core/GateRequirement.cs" id="7_a27yu"]
+[ext_resource type="Script" path="res://assets/scripts/core/GateRequirement.cs" id="n_gate"]
+[ext_resource type="Script" path="res://assets/scripts/narrative/world/NpcTalk.cs" id="n_npc"]
+[ext_resource type="PackedScene" path="res://assets/scenes/enemy/keeper.tscn" id="e_keeper"]
+[ext_resource type="Script" path="res://assets/scripts/world/ArenaLock.cs" id="e_lock"]
+
+[sub_resource type="Resource" id="Gate_S1_05_1"]
+script = ExtResource("7_a27yu")
+Flags = Array[StringName]([&"boss_keeper"])
+LockedText = "守坑人还挡着路。"
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_7l6ec"]
+size = Vector2(64, 312)
+
+[sub_resource type="RectangleShape2D" id="Shape_Npc_Keeper"]
+size = Vector2(96, 144)
+
+[sub_resource type="Resource" id="Req_Npc_Keeper"]
+script = ExtResource("n_gate")
+Flags = Array[StringName]([&"boss_keeper"])
+
+[sub_resource type="RectangleShape2D" id="Shape_ArenaLock"]
+size = Vector2(64, 256)
+
+[node name="S1_05" type="Node2D" unique_id=953535163]
+script = ExtResource("1_ymdne")
+RoomId = "S1_05"
+DisplayName = "守坑人"
+
+[node name="RoomInstance" type="Node2D" parent="." unique_id=1246059462 instance=ExtResource("2_t2bmx")]
+script = ExtResource("3_lgdk3")
+
+[node name="Geometry" type="TileMapLayer" parent="." unique_id=1513863576]
+position = Vector2(0, -8)
+tile_map_data = PackedByteArray("AAAAAA4AAAAAAAAAAAABAA4AAAAAAAAAAAACAA4AAAAAAAAAAAADAA4AAAAAAAAAAAAEAA4AAAAAAAAAAAAFAA4AAAAAAAAAAAAGAA4AAAAAAAAAAAAHAA4AAAAAAAAAAAAIAA4AAAAAAAAAAAAJAA4AAAAAAAAAAAAKAA4AAAAAAAAAAAALAA4AAAAAAAAAAAAMAA4AAAAAAAAAAAANAA4AAAAAAAAAAAAOAA4AAAAAAAAAAAAPAA4AAAAAAAAAAAAQAA4AAAAAAAAAAAARAA4AAAAAAAAAAAASAA4AAAAAAAAAAAATAA4AAAAAAAAAAAAUAA4AAAAAAAAAAAAVAA4AAAAAAAAAAAAWAA4AAAAAAAAAAAAXAA4AAAAAAAAAAAAYAA4AAAAAAAAAAAAZAA4AAAAAAAAAAAAaAA4AAAAAAAAAAAAbAA4AAAAAAAAAAAAcAA4AAAAAAAAAAAAdAA4AAAAAAAAAAAAeAA4AAAAAAAAAAAAfAA4AAAAAAAAAAAAgAA4AAAAAAAAAAAAhAA4AAAAAAAAAAAAiAA4AAAAAAAAAAAAjAA4AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAgAAQAAAAAAAAAAAAAAAIAAAAAAAAAAAAhAAQAAAAAAAAAAAAAAAMAAAAAAAAAAAAiAAQAAAAAAAAAAAAAAAQAAAAAAAAAAAAjAAQAAAAAAAAAAAAAAAUAAAAAAAAAAAAjAAUAAAAAAAAAAAAAAAYAAAAAAAAAAAAjAAYAAAAAAAAAAAAAAAcAAAAAAAAAAAAjAAcAAAAAAAAAAAAAAAgAAAAAAAAAAAAjAAgAAAAAAAAAAAAAAAkAAAAAAAAAAAAjAAkAAAAAAAAAAAAjAAoAAAAAAAAAAAAjAAsAAAAAAAAAAAAjAAwAAAAAAAAAAAAjAA0AAAAAAAAAAAA=")
+tile_set = ExtResource("4_1d1jg")
+
+[node name="Spawns" type="Node2D" parent="." unique_id=189215406]
+
+[node name="Default" type="Marker2D" parent="Spawns" unique_id=1402366962]
+position = Vector2(1152, 887)
+script = ExtResource("5_4vmye")
+
+[node name="From_S1_04" type="Marker2D" parent="Spawns" unique_id=2056869515]
+position = Vector2(96, 887)
+script = ExtResource("5_4vmye")
+SpawnId = &"From_S1_04"
+
+[node name="From_S1_06" type="Marker2D" parent="Spawns" unique_id=1778519626]
+position = Vector2(2208, 247)
+script = ExtResource("5_4vmye")
+SpawnId = &"From_S1_06"
+
+[node name="Objects" type="Node2D" parent="." unique_id=1373251923]
+
+[node name="GateToS1_06" type="StaticBody2D" parent="Objects" unique_id=2042617353]
+position = Vector2(2272, 248)
+script = ExtResource("6_yrve7")
+Requirement = SubResource("Gate_S1_05_1")
+
+[node name="Shape" type="CollisionShape2D" parent="Objects/GateToS1_06" unique_id=1182099937]
+position = Vector2(0, -156)
+shape = SubResource("RectangleShape2D_7l6ec")
+
+[node name="Placeholder" type="ColorRect" parent="Objects/GateToS1_06" unique_id=301396265]
+offset_left = -32.0
+offset_top = -312.0
+offset_right = 32.0
+mouse_filter = 2
+color = Color(0.75, 0.2, 0.2, 0.85)
+
+[node name="Npc_Keeper" type="Area2D" parent="Objects"]
+position = Vector2(1500, 887)
+script = ExtResource("n_npc")
+NpcId = "keeper"
+ScriptId = "m_pit"
+FirstLabel = "守坑人"
+PromptText = "交谈"
+VisibleWhen = SubResource("Req_Npc_Keeper")
+
+[node name="Shape" type="CollisionShape2D" parent="Objects/Npc_Keeper"]
+position = Vector2(0, -72)
+shape = SubResource("Shape_Npc_Keeper")
+
+[node name="Placeholder" type="ColorRect" parent="Objects/Npc_Keeper"]
+offset_left = -29
+offset_top = -115
+offset_right = 29
+mouse_filter = 2
+color = Color(0.5, 0.45, 0.35, 1)
+
+[node name="Keeper" parent="Objects" instance=ExtResource("e_keeper")]
+position = Vector2(1900, 888)
+Arena = Rect2(320, 0, 1984, 972)
+
+[node name="ArenaLock" type="StaticBody2D" parent="Objects"]
+position = Vector2(32, 888)
+script = ExtResource("e_lock")
+BossId = &"keeper"
+
+[node name="Shape" type="CollisionShape2D" parent="Objects/ArenaLock"]
+position = Vector2(0, -128)
+shape = SubResource("Shape_ArenaLock")
+
+[node name="Placeholder" type="ColorRect" parent="Objects/ArenaLock"]
+offset_left = -32.0
+offset_top = -256.0
+offset_right = 32.0
+mouse_filter = 2
+color = Color(0.45, 0.3, 0.2, 0.9)

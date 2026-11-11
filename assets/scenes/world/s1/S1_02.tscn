@@ -1,0 +1,80 @@
+[gd_scene format=4 uid="uid://bbqahpjpxyw1f"]
+
+[ext_resource type="Script" path="res://assets/scripts/world/RoomRoot.cs" id="1_x7lis"]
+[ext_resource type="PackedScene" path="res://addons/MetroidvaniaSystem/Nodes/RoomInstance.tscn" id="2_kytrp"]
+[ext_resource type="Script" path="res://addons/MetroidvaniaSystem/Scripts/RoomInstance.gd" id="3_g28s5"]
+[ext_resource type="TileSet" path="res://assets/data/world/world_tileset.tres" id="4_7yfxo"]
+[ext_resource type="Script" path="res://assets/scripts/world/SpawnPoint.cs" id="5_bnf51"]
+[ext_resource type="Script" path="res://assets/scripts/narrative/world/StoryTrigger.cs" id="n_story"]
+[ext_resource type="Script" path="res://assets/scripts/narrative/world/TabletPickup.cs" id="n_tablet"]
+
+[sub_resource type="RectangleShape2D" id="Shape_Tablet_nameless_day"]
+size = Vector2(80, 96)
+
+[sub_resource type="RectangleShape2D" id="Shape_Story_Reflection"]
+size = Vector2(128, 96)
+
+[node name="S1_02" type="Node2D" unique_id=452894404]
+script = ExtResource("1_x7lis")
+RoomId = "S1_02"
+DisplayName = "坑底"
+
+[node name="RoomInstance" type="Node2D" parent="." unique_id=1246059462 instance=ExtResource("2_kytrp")]
+script = ExtResource("3_g28s5")
+
+[node name="Geometry" type="TileMapLayer" parent="." unique_id=914072414]
+position = Vector2(0, -20)
+tile_map_data = PackedByteArray("AAAAAA4AAAAAAAAAAAABAA4AAAAAAAAAAAACAA4AAAAAAAAAAAADAA4AAAAAAAAAAAAEAA4AAAAAAAAAAAAFAA4AAAAAAAAAAAAGAA4AAAAAAAAAAAAHAA4AAAAAAAAAAAAIAA4AAAAAAAAAAAAJAA4AAAAAAAAAAAAKAA4AAAAAAAAAAAALAA4AAAAAAAAAAAAMAA4AAAAAAAAAAAANAA4AAAAAAAAAAAAOAA4AAAAAAAAAAAAPAA4AAAAAAAAAAAAQAA4AAAAAAAAAAAARAA4AAAAAAAAAAAASAA4AAAAAAAAAAAATAA4AAAAAAAAAAAAUAA4AAAAAAAAAAAAVAA4AAAAAAAAAAAAWAA4AAAAAAAAAAAAXAA4AAAAAAAAAAAAYAA4AAAAAAAAAAAAZAA4AAAAAAAAAAAAaAA4AAAAAAAAAAAAAAAAAAAAAAAAAAAAaAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAaAAEAAAAAAAAAAAAAAAIAAAAAAAAAAAAaAAIAAAAAAAAAAAAAAAMAAAAAAAAAAAAaAAMAAAAAAAAAAAAAAAQAAAAAAAAAAAAaAAQAAAAAAAAAAAADAAkAAAAAAAAAAAAXAAkAAAAAAAAAAAACAAkAAAAAAAAAAAAYAAkAAAAAAAAAAAABAAkAAAAAAAAAAAAZAAkAAAAAAAAAAAAAAAkAAAAAAAAAAAAaAAkAAAAAAAAAAAAAAAoAAAAAAAAAAAAaAAoAAAAAAAAAAAAAAAsAAAAAAAAAAAAaAAsAAAAAAAAAAAAAAAwAAAAAAAAAAAAaAAwAAAAAAAAAAAAAAA0AAAAAAAAAAAAaAA0AAAAAAAAAAAA=")
+tile_set = ExtResource("4_7yfxo")
+
+[node name="Spawns" type="Node2D" parent="." unique_id=2119659025]
+
+[node name="Default" type="Marker2D" parent="Spawns" unique_id=230627307]
+position = Vector2(864, 875)
+script = ExtResource("5_bnf51")
+
+[node name="From_S1_01" type="Marker2D" parent="Spawns" unique_id=1483573626]
+position = Vector2(96, 555)
+script = ExtResource("5_bnf51")
+SpawnId = &"From_S1_01"
+
+[node name="From_S1_03" type="Marker2D" parent="Spawns" unique_id=1651558602]
+position = Vector2(1632, 555)
+script = ExtResource("5_bnf51")
+SpawnId = &"From_S1_03"
+
+[node name="Objects" type="Node2D" parent="." unique_id=717430575]
+
+[node name="Tablet_nameless_day" type="Area2D" parent="Objects"]
+position = Vector2(700, 876)
+script = ExtResource("n_tablet")
+TabletId = "nameless_day"
+
+[node name="Shape" type="CollisionShape2D" parent="Objects/Tablet_nameless_day"]
+position = Vector2(0, -48)
+shape = SubResource("Shape_Tablet_nameless_day")
+
+[node name="Placeholder" type="ColorRect" parent="Objects/Tablet_nameless_day"]
+offset_left = -24
+offset_top = -77
+offset_right = 24
+mouse_filter = 2
+color = Color(0.75, 0.6, 0.4, 1)
+
+[node name="Story_Reflection" type="Area2D" parent="Objects"]
+position = Vector2(1200, 876)
+script = ExtResource("n_story")
+ScriptId = "m_pit"
+Label = "倒影"
+PromptText = "照倒影"
+
+[node name="Shape" type="CollisionShape2D" parent="Objects/Story_Reflection"]
+position = Vector2(0, -48)
+shape = SubResource("Shape_Story_Reflection")
+
+[node name="Placeholder" type="ColorRect" parent="Objects/Story_Reflection"]
+offset_left = -39
+offset_top = -77
+offset_right = 38
+mouse_filter = 2
+color = Color(0.3, 0.12, 0.1, 0.8)

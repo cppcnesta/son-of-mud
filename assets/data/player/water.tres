@@ -1,5 +1,5 @@
 [gd_resource type="Resource" script_class="MudFormConfig" load_steps=2 format=3]
-[ext_resource type="Script" path="res://assets/scripts/player/components/MudFormConfig.cs" id="1"]
+[ext_resource type="Script" path="res://assets/scripts/player/MudFormConfig.cs" id="1"]
 [resource]
 script = ExtResource("1")
 DisplayName = "水"

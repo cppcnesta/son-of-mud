@@ -1,0 +1,35 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://assets/scripts/world/WorldGame.cs" id="1_world"]
+[ext_resource type="Resource" path="res://assets/data/world/world_layout.tres" id="2_layout"]
+[ext_resource type="Script" path="res://assets/scripts/camera/RoomCamera.cs" id="3_camera"]
+[ext_resource type="Resource" path="res://assets/data/camera/camera_settings.tres" id="4_camset"]
+[ext_resource type="Script" path="res://assets/scripts/save/SaveService.cs" id="5_save"]
+[ext_resource type="Script" path="res://assets/scripts/ui/FadeOverlay.cs" id="6_fade"]
+[ext_resource type="Resource" path="res://assets/data/ui/fade_settings.tres" id="7_fadeset"]
+[ext_resource type="Resource" path="res://assets/data/core/ability_table.tres" id="8_abilities"]
+[ext_resource type="Script" path="res://assets/scripts/world/DropSpawner.cs" id="9_drops"]
+
+[node name="Game" type="Node"]
+
+[node name="WorldGame" type="Node" parent="."]
+script = ExtResource("1_world")
+Layout = ExtResource("2_layout")
+
+[node name="Rooms" type="Node2D" parent="WorldGame"]
+
+[node name="RoomCamera" type="Camera2D" parent="."]
+script = ExtResource("3_camera")
+Settings = ExtResource("4_camset")
+
+[node name="SaveService" type="Node" parent="."]
+script = ExtResource("5_save")
+InitialAbilities = ExtResource("8_abilities")
+
+[node name="FadeOverlay" type="CanvasLayer" parent="."]
+script = ExtResource("6_fade")
+Settings = ExtResource("7_fadeset")
+
+[node name="DropSpawner" type="Node" parent="." node_paths=PackedStringArray("World")]
+script = ExtResource("9_drops")
+World = NodePath("../WorldGame")

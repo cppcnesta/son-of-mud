@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="TabletData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://assets/scripts/narrative/data/TabletData.cs" id="1_tablet"]
+
+[resource]
+script = ExtResource("1_tablet")
+Id = "mural"
+Title = "壁画铭文"
+Room = "S2_02"
+PartialText = "祂把风灌进她的嘴里，海就停了。祂举起弯刃，海就分成了两半。"

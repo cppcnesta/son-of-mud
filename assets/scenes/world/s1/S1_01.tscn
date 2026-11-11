@@ -1,0 +1,33 @@
+[gd_scene format=4 uid="uid://bl1uakidychqw"]
+
+[ext_resource type="Script" path="res://assets/scripts/world/RoomRoot.cs" id="1_1sa62"]
+[ext_resource type="PackedScene" path="res://addons/MetroidvaniaSystem/Nodes/RoomInstance.tscn" id="2_c4hrt"]
+[ext_resource type="Script" path="res://addons/MetroidvaniaSystem/Scripts/RoomInstance.gd" id="3_56hyv"]
+[ext_resource type="TileSet" path="res://assets/data/world/world_tileset.tres" id="4_eurea"]
+[ext_resource type="Script" path="res://assets/scripts/world/SpawnPoint.cs" id="5_2kp1i"]
+
+[node name="S1_01" type="Node2D" unique_id=639998933]
+script = ExtResource("1_1sa62")
+RoomId = "S1_01"
+DisplayName = "苏醒"
+
+[node name="RoomInstance" type="Node2D" parent="." unique_id=1246059462 instance=ExtResource("2_c4hrt")]
+script = ExtResource("3_56hyv")
+
+[node name="Geometry" type="TileMapLayer" parent="." unique_id=351529265]
+position = Vector2(0, -20)
+tile_map_data = PackedByteArray("AAAAAAkAAAAAAAAAAAABAAkAAAAAAAAAAAACAAkAAAAAAAAAAAADAAkAAAAAAAAAAAAEAAkAAAAAAAAAAAAFAAkAAAAAAAAAAAAGAAkAAAAAAAAAAAAHAAkAAAAAAAAAAAAIAAkAAAAAAAAAAAAJAAkAAAAAAAAAAAAKAAkAAAAAAAAAAAALAAkAAAAAAAAAAAAMAAkAAAAAAAAAAAANAAkAAAAAAAAAAAAOAAkAAAAAAAAAAAAPAAkAAAAAAAAAAAAQAAkAAAAAAAAAAAARAAkAAAAAAAAAAAAAAAAAAAAAAAAAAAARAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAARAAEAAAAAAAAAAAAAAAIAAAAAAAAAAAARAAIAAAAAAAAAAAAAAAMAAAAAAAAAAAARAAMAAAAAAAAAAAAAAAQAAAAAAAAAAAARAAQAAAAAAAAAAAAAAAUAAAAAAAAAAAAAAAYAAAAAAAAAAAAAAAcAAAAAAAAAAAAAAAgAAAAAAAAAAAA=")
+tile_set = ExtResource("4_eurea")
+
+[node name="Spawns" type="Node2D" parent="." unique_id=1646754197]
+
+[node name="Default" type="Marker2D" parent="Spawns" unique_id=850501933]
+position = Vector2(576, 555)
+script = ExtResource("5_2kp1i")
+
+[node name="From_S1_02" type="Marker2D" parent="Spawns" unique_id=1656114504]
+position = Vector2(1056, 555)
+script = ExtResource("5_2kp1i")
+SpawnId = &"From_S1_02"
+
+[node name="Objects" type="Node2D" parent="." unique_id=874509399]

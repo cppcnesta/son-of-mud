@@ -117,7 +117,7 @@ reserved = [dict(id='water_down',label='M02下方水域',anchor='M02',target=Non
 for rid in rooms:
     path=ROOT/('assets/scenes/whitebox/tests/form_lab.tscn' if rid=='TEST' else f'assets/scenes/whitebox/levels/{rid}.tscn')
     path.write_text(f'''[gd_scene load_steps=2 format=3]
-[ext_resource type="Script" path="res://assets/scripts/whitebox/MudWhiteboxRoom.cs" id="1"]
+[ext_resource type="Script" path="res://assets/scripts/tools/MudWhiteboxRoom.cs" id="1"]
 [node name="{rid}" type="Node2D"]
 script = ExtResource("1")
 RoomId = "{rid}"

@@ -1,6 +1,8 @@
 using Godot;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using SonOfMud.Core;
+using SonOfMud.Player;
 
 public sealed class MudSceneMigrationChecks
 {

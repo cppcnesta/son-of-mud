@@ -1,6 +1,8 @@
 using Godot;
 using System.Collections.Generic;
 
+namespace SonOfMud.Core;
+
 public partial class MudInputDefaults : Node
 {
     public override void _Ready()

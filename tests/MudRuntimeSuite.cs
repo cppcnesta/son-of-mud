@@ -1,9 +1,14 @@
 using Godot;
 using System;
 using System.Threading.Tasks;
+using SonOfMud.Core;
+using SonOfMud.Player;
+using SonOfMud.Tools;
+using SonOfMud.UI;
+using SonOfMud.World;
 using GDictionary = Godot.Collections.Dictionary;
 using GArray = Godot.Collections.Array;
-using Kind = MudActionState.Kind;
+using Kind = SonOfMud.Player.MudActionState.Kind;
 
 /// <summary>Real Godot input, physics, scene, combat and save regression tests.</summary>
 public partial class MudRuntimeSuite : Node

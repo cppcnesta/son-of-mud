@@ -1,0 +1,116 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://assets/scripts/enemy/bosses/keeper/KeeperBoss.cs" id="1"]
+[ext_resource type="Resource" path="res://assets/data/enemy/keeper/KeeperData.tres" id="2"]
+[ext_resource type="Script" path="res://assets/scripts/combat/Stats.cs" id="3"]
+[ext_resource type="Script" path="res://assets/scripts/combat/HurtBox.cs" id="4"]
+[ext_resource type="Script" path="res://assets/scripts/combat/HitBox.cs" id="5"]
+[ext_resource type="Script" path="res://assets/scripts/core/StateMachine.cs" id="6"]
+[ext_resource type="Script" path="res://assets/scripts/combat/StaggerWindow.cs" id="7"]
+[ext_resource type="Script" path="res://assets/scripts/enemy/bosses/keeper/states/DormantState.cs" id="8"]
+[ext_resource type="Script" path="res://assets/scripts/enemy/bosses/keeper/states/ApproachState.cs" id="9"]
+[ext_resource type="Script" path="res://assets/scripts/enemy/bosses/keeper/states/SweepWindupState.cs" id="10"]
+[ext_resource type="Script" path="res://assets/scripts/enemy/bosses/keeper/states/SweepStrikeState.cs" id="11"]
+[ext_resource type="Script" path="res://assets/scripts/enemy/bosses/keeper/states/SweepRecoverState.cs" id="12"]
+[ext_resource type="Script" path="res://assets/scripts/enemy/bosses/keeper/states/TailAimState.cs" id="13"]
+[ext_resource type="Script" path="res://assets/scripts/enemy/bosses/keeper/states/TailStrikeState.cs" id="14"]
+[ext_resource type="Script" path="res://assets/scripts/enemy/bosses/keeper/states/TailRecoverState.cs" id="15"]
+[ext_resource type="Script" path="res://assets/scripts/enemy/bosses/keeper/states/StaggeredState.cs" id="16"]
+[ext_resource type="Script" path="res://assets/scripts/enemy/bosses/keeper/states/TransformState.cs" id="17"]
+[ext_resource type="Script" path="res://assets/scripts/enemy/bosses/keeper/states/GoneState.cs" id="18"]
+
+[sub_resource type="RectangleShape2D" id="body"]
+size = Vector2(112, 160)
+
+[sub_resource type="RectangleShape2D" id="hit"]
+resource_local_to_scene = true
+size = Vector2(176, 120)
+
+[sub_resource type="RectangleShape2D" id="tail"]
+resource_local_to_scene = true
+size = Vector2(96, 2400)
+
+[node name="Keeper" type="CharacterBody2D"]
+collision_layer = 4
+collision_mask = 1
+script = ExtResource("1")
+Data = ExtResource("2")
+BossId = &"keeper"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+position = Vector2(0, -80)
+shape = SubResource("body")
+
+[node name="Stats" type="Node" parent="."]
+script = ExtResource("3")
+
+[node name="HurtBox" type="Area2D" parent="."]
+collision_layer = 16
+collision_mask = 0
+monitoring = false
+script = ExtResource("4")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="HurtBox"]
+position = Vector2(0, -80)
+shape = SubResource("body")
+
+[node name="HitBox" type="Area2D" parent="."]
+collision_layer = 64
+collision_mask = 8
+monitoring = false
+monitorable = false
+script = ExtResource("5")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="HitBox"]
+position = Vector2(88, -60)
+shape = SubResource("hit")
+
+[node name="TailHitBox" type="Area2D" parent="."]
+collision_layer = 64
+collision_mask = 8
+monitoring = false
+monitorable = false
+script = ExtResource("5")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="TailHitBox"]
+shape = SubResource("tail")
+
+[node name="StaggerWindow" type="Node" parent="."]
+script = ExtResource("7")
+
+[node name="StateMachine" type="Node" parent="." node_paths=PackedStringArray("Initial")]
+script = ExtResource("6")
+Initial = NodePath("Dormant")
+
+[node name="Dormant" type="Node" parent="StateMachine"]
+script = ExtResource("8")
+
+[node name="Approach" type="Node" parent="StateMachine"]
+script = ExtResource("9")
+
+[node name="SweepWindup" type="Node" parent="StateMachine"]
+script = ExtResource("10")
+
+[node name="SweepStrike" type="Node" parent="StateMachine"]
+script = ExtResource("11")
+
+[node name="SweepRecover" type="Node" parent="StateMachine"]
+script = ExtResource("12")
+
+[node name="TailAim" type="Node" parent="StateMachine"]
+script = ExtResource("13")
+
+[node name="TailStrike" type="Node" parent="StateMachine"]
+script = ExtResource("14")
+
+[node name="TailRecover" type="Node" parent="StateMachine"]
+script = ExtResource("15")
+
+[node name="Staggered" type="Node" parent="StateMachine"]
+script = ExtResource("16")
+
+[node name="Transform" type="Node" parent="StateMachine"]
+script = ExtResource("17")
+
+[node name="Gone" type="Node" parent="StateMachine"]
+script = ExtResource("18")

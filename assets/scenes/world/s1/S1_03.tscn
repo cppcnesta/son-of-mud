@@ -1,0 +1,72 @@
+[gd_scene format=4 uid="uid://uy1xe2evf5ka"]
+
+[ext_resource type="Script" path="res://assets/scripts/world/RoomRoot.cs" id="1_0vlwq"]
+[ext_resource type="PackedScene" path="res://addons/MetroidvaniaSystem/Nodes/RoomInstance.tscn" id="2_ioub0"]
+[ext_resource type="Script" path="res://addons/MetroidvaniaSystem/Scripts/RoomInstance.gd" id="3_qtlvq"]
+[ext_resource type="TileSet" path="res://assets/data/world/world_tileset.tres" id="4_eivtb"]
+[ext_resource type="Script" path="res://assets/scripts/world/SpawnPoint.cs" id="5_5sw5w"]
+[ext_resource type="Script" path="res://assets/scripts/narrative/world/StoryTrigger.cs" id="n_story"]
+[ext_resource type="PackedScene" path="res://assets/scenes/enemy/pilgrim.tscn" id="e_pilgrim"]
+
+[sub_resource type="RectangleShape2D" id="Shape_Story_Pilgrims"]
+size = Vector2(128, 256)
+
+[node name="S1_03" type="Node2D" unique_id=727550247]
+script = ExtResource("1_0vlwq")
+RoomId = "S1_03"
+DisplayName = "朝圣者之路"
+
+[node name="RoomInstance" type="Node2D" parent="." unique_id=1246059462 instance=ExtResource("2_ioub0")]
+script = ExtResource("3_qtlvq")
+
+[node name="Geometry" type="TileMapLayer" parent="." unique_id=687904681]
+position = Vector2(0, -16)
+tile_map_data = PackedByteArray("AAAAAA4AAAAAAAAAAAABAA4AAAAAAAAAAAACAA4AAAAAAAAAAAADAA4AAAAAAAAAAAAEAA4AAAAAAAAAAAAFAA4AAAAAAAAAAAAGAA4AAAAAAAAAAAAHAA4AAAAAAAAAAAAIAA4AAAAAAAAAAAAJAA4AAAAAAAAAAAAKAA4AAAAAAAAAAAALAA4AAAAAAAAAAAAMAA4AAAAAAAAAAAANAA4AAAAAAAAAAAAOAA4AAAAAAAAAAAAPAA4AAAAAAAAAAAAQAA4AAAAAAAAAAAARAA4AAAAAAAAAAAASAA4AAAAAAAAAAAATAA4AAAAAAAAAAAAUAA4AAAAAAAAAAAAVAA4AAAAAAAAAAAAWAA4AAAAAAAAAAAAXAA4AAAAAAAAAAAAYAA4AAAAAAAAAAAAZAA4AAAAAAAAAAAAaAA4AAAAAAAAAAAAbAA4AAAAAAAAAAAAcAA4AAAAAAAAAAAAdAA4AAAAAAAAAAAAeAA4AAAAAAAAAAAAfAA4AAAAAAAAAAAAgAA4AAAAAAAAAAAAhAA4AAAAAAAAAAAAiAA4AAAAAAAAAAAAjAA4AAAAAAAAAAAAkAA4AAAAAAAAAAAAlAA4AAAAAAAAAAAAmAA4AAAAAAAAAAAAnAA4AAAAAAAAAAAAoAA4AAAAAAAAAAAApAA4AAAAAAAAAAAAqAA4AAAAAAAAAAAArAA4AAAAAAAAAAAAsAA4AAAAAAAAAAAAtAA4AAAAAAAAAAAAuAA4AAAAAAAAAAAAvAA4AAAAAAAAAAAAwAA4AAAAAAAAAAAAxAA4AAAAAAAAAAAAyAA4AAAAAAAAAAAAzAA4AAAAAAAAAAAA0AA4AAAAAAAAAAAA1AA4AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAyAAQAAAAAAAAAAAAAAAIAAAAAAAAAAAAzAAQAAAAAAAAAAAAAAAMAAAAAAAAAAAA0AAQAAAAAAAAAAAAAAAQAAAAAAAAAAAA1AAQAAAAAAAAAAAAAAAUAAAAAAAAAAAA1AAUAAAAAAAAAAAAAAAYAAAAAAAAAAAA1AAYAAAAAAAAAAAAAAAcAAAAAAAAAAAA1AAcAAAAAAAAAAAAAAAgAAAAAAAAAAAA1AAgAAAAAAAAAAAAAAAkAAAAAAAAAAAA1AAkAAAAAAAAAAAA1AAoAAAAAAAAAAAA1AAsAAAAAAAAAAAA1AAwAAAAAAAAAAAA1AA0AAAAAAAAAAAA=")
+tile_set = ExtResource("4_eivtb")
+
+[node name="Spawns" type="Node2D" parent="." unique_id=1558404359]
+
+[node name="Default" type="Marker2D" parent="Spawns" unique_id=2075784293]
+position = Vector2(1728, 879)
+script = ExtResource("5_5sw5w")
+
+[node name="From_S1_02" type="Marker2D" parent="Spawns" unique_id=1821841502]
+position = Vector2(96, 879)
+script = ExtResource("5_5sw5w")
+SpawnId = &"From_S1_02"
+
+[node name="From_S1_04" type="Marker2D" parent="Spawns" unique_id=560889540]
+position = Vector2(3360, 239)
+script = ExtResource("5_5sw5w")
+SpawnId = &"From_S1_04"
+
+[node name="Objects" type="Node2D" parent="." unique_id=150542893]
+
+[node name="Story_Pilgrims" type="Area2D" parent="Objects"]
+position = Vector2(480, 879)
+script = ExtResource("n_story")
+ScriptId = "m_pit"
+Label = "朝圣者之路"
+Mode = 1
+Once = true
+
+[node name="Shape" type="CollisionShape2D" parent="Objects/Story_Pilgrims"]
+position = Vector2(0, -128)
+shape = SubResource("Shape_Story_Pilgrims")
+
+[node name="Pilgrim1" parent="Objects" instance=ExtResource("e_pilgrim")]
+position = Vector2(1000, 880)
+
+[node name="Pilgrim2" parent="Objects" instance=ExtResource("e_pilgrim")]
+position = Vector2(1500, 880)
+InitialFacing = 1.0
+
+[node name="Pilgrim3" parent="Objects" instance=ExtResource("e_pilgrim")]
+position = Vector2(2000, 880)
+
+[node name="Pilgrim4" parent="Objects" instance=ExtResource("e_pilgrim")]
+position = Vector2(2500, 880)
+InitialFacing = 1.0
+
+[node name="Pilgrim5" parent="Objects" instance=ExtResource("e_pilgrim")]
+position = Vector2(3000, 880)

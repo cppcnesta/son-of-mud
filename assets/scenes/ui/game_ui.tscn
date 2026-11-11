@@ -1,0 +1,22 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://assets/scripts/ui/GameUi.cs" id="1_ui"]
+[ext_resource type="PackedScene" path="res://assets/scenes/ui/hud.tscn" id="2_hud"]
+[ext_resource type="PackedScene" path="res://assets/scenes/ui/map_screen.tscn" id="3_map"]
+[ext_resource type="PackedScene" path="res://assets/scenes/ui/pause_menu.tscn" id="4_menu"]
+
+[node name="GameUi" type="Node" node_paths=PackedStringArray("Hud", "Map", "Menu")]
+process_mode = 3
+script = ExtResource("1_ui")
+Hud = NodePath("Hud")
+Map = NodePath("Overlay/MapScreen")
+Menu = NodePath("Overlay/PauseMenu")
+
+[node name="Hud" parent="." instance=ExtResource("2_hud")]
+
+[node name="Overlay" type="CanvasLayer" parent="."]
+layer = 50
+
+[node name="MapScreen" parent="Overlay" instance=ExtResource("3_map")]
+
+[node name="PauseMenu" parent="Overlay" instance=ExtResource("4_menu")]

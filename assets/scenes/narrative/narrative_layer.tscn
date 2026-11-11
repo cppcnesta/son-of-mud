@@ -1,0 +1,10 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://assets/scripts/narrative/NarrativeDirector.cs" id="1_director"]
+[ext_resource type="Resource" path="res://assets/data/narrative/settings.tres" id="2_settings"]
+
+[node name="NarrativeLayer" type="CanvasLayer"]
+process_mode = 3
+layer = 90
+script = ExtResource("1_director")
+Settings = ExtResource("2_settings")

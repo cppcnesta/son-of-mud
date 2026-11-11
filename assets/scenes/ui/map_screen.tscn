@@ -1,0 +1,77 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://assets/scripts/ui/MapScreen.cs" id="1_map"]
+[ext_resource type="Theme" path="res://assets/data/ui/ui_theme.tres" id="3_theme"]
+[ext_resource type="PackedScene" path="res://addons/MetroidvaniaSystem/Template/Nodes/Minimap.tscn" id="4_minimap"]
+
+[node name="MapScreen" type="Control" node_paths=PackedStringArray("MapView")]
+process_mode = 3
+visible = false
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("3_theme")
+script = ExtResource("1_map")
+MapView = NodePath("Center/Panel/Map")
+
+[node name="Dim" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.05, 0.04, 0.03, 0.8)
+
+[node name="Title" type="Label" parent="."]
+layout_mode = 1
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -200.0
+offset_top = 16.0
+offset_right = 200.0
+offset_bottom = 56.0
+grow_horizontal = 2
+text = "地图"
+horizontal_alignment = 1
+
+[node name="Center" type="CenterContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="Panel" type="PanelContainer" parent="Center"]
+layout_mode = 2
+mouse_filter = 2
+
+[node name="Map" parent="Center/Panel" instance=ExtResource("4_minimap")]
+layout_mode = 2
+mouse_filter = 2
+track_position = false
+smooth_scroll = false
+display_player_location = true
+area = Vector2i(19, 13)
+
+[node name="Hint" type="Label" parent="."]
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -300.0
+offset_top = -52.0
+offset_right = 300.0
+offset_bottom = -16.0
+grow_horizontal = 2
+grow_vertical = 0
+text = "方向键平移    M / Tab / Esc 关闭"
+horizontal_alignment = 1
