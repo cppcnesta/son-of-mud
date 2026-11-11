@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="BackgroundSettings" format=3]
+
+[ext_resource type="Script" path="res://assets/scripts/world/BackgroundSettings.cs" id="1_bg"]
+
+[resource]
+script = ExtResource("1_bg")
+ArtRoot = "res://assets/art/world/bg"
+FarScroll = Vector2(0.15, 0.15)
+MidScroll = Vector2(0.5, 0.5)
+FarSeamless = true
+MidSeamless = false
+ShakeMargin = 24.0
