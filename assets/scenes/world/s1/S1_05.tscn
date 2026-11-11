@@ -9,6 +9,8 @@
 [ext_resource type="Script" path="res://assets/scripts/core/GateRequirement.cs" id="7_a27yu"]
 [ext_resource type="Script" path="res://assets/scripts/core/GateRequirement.cs" id="n_gate"]
 [ext_resource type="Script" path="res://assets/scripts/narrative/world/NpcTalk.cs" id="n_npc"]
+[ext_resource type="PackedScene" path="res://assets/scenes/enemy/keeper.tscn" id="e_keeper"]
+[ext_resource type="Script" path="res://assets/scripts/world/ArenaLock.cs" id="e_lock"]
 
 [sub_resource type="Resource" id="Gate_S1_05_1"]
 script = ExtResource("7_a27yu")
@@ -24,6 +26,9 @@ size = Vector2(96, 144)
 [sub_resource type="Resource" id="Req_Npc_Keeper"]
 script = ExtResource("n_gate")
 Flags = Array[StringName]([&"boss_keeper"])
+
+[sub_resource type="RectangleShape2D" id="Shape_ArenaLock"]
+size = Vector2(64, 256)
 
 [node name="S1_05" type="Node2D" unique_id=953535163]
 script = ExtResource("1_ymdne")
@@ -91,3 +96,23 @@ offset_top = -115
 offset_right = 29
 mouse_filter = 2
 color = Color(0.5, 0.45, 0.35, 1)
+
+[node name="Keeper" parent="Objects" instance=ExtResource("e_keeper")]
+position = Vector2(1900, 888)
+Arena = Rect2(320, 0, 1984, 972)
+
+[node name="ArenaLock" type="StaticBody2D" parent="Objects"]
+position = Vector2(32, 888)
+script = ExtResource("e_lock")
+BossId = &"keeper"
+
+[node name="Shape" type="CollisionShape2D" parent="Objects/ArenaLock"]
+position = Vector2(0, -128)
+shape = SubResource("Shape_ArenaLock")
+
+[node name="Placeholder" type="ColorRect" parent="Objects/ArenaLock"]
+offset_left = -32.0
+offset_top = -256.0
+offset_right = 32.0
+mouse_filter = 2
+color = Color(0.45, 0.3, 0.2, 0.9)

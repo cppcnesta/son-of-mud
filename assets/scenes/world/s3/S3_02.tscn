@@ -5,6 +5,7 @@
 [ext_resource type="Script" path="res://addons/MetroidvaniaSystem/Scripts/RoomInstance.gd" id="3_wjnsd"]
 [ext_resource type="TileSet" path="res://assets/data/world/world_tileset.tres" id="4_yebw1"]
 [ext_resource type="Script" path="res://assets/scripts/world/SpawnPoint.cs" id="5_vwsye"]
+[ext_resource type="PackedScene" path="res://assets/scenes/enemy/kneeler.tscn" id="e_kneeler"]
 
 [node name="S3_02" type="Node2D" unique_id=445563852]
 script = ExtResource("1_1f74j")
@@ -36,3 +37,17 @@ script = ExtResource("5_vwsye")
 SpawnId = &"From_S3_03"
 
 [node name="Objects" type="Node2D" parent="." unique_id=1454979419]
+
+[node name="Kneeler1" parent="Objects" instance=ExtResource("e_kneeler")]
+position = Vector2(600, 572)
+
+[node name="Kneeler2" parent="Objects" instance=ExtResource("e_kneeler")]
+position = Vector2(1000, 572)
+InitialFacing = 1.0
+
+[node name="Kneeler3" parent="Objects" instance=ExtResource("e_kneeler")]
+position = Vector2(1400, 572)
+
+[node name="Kneeler4" parent="Objects" instance=ExtResource("e_kneeler")]
+position = Vector2(1800, 572)
+InitialFacing = 1.0

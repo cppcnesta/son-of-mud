@@ -7,6 +7,7 @@
 [ext_resource type="Script" path="res://assets/scripts/world/SpawnPoint.cs" id="5_5lsj6"]
 [ext_resource type="Script" path="res://assets/scripts/world/GateBarrier.cs" id="6_7b1fm"]
 [ext_resource type="Script" path="res://assets/scripts/core/GateRequirement.cs" id="7_q3r6a"]
+[ext_resource type="PackedScene" path="res://assets/scenes/enemy/worker.tscn" id="e_worker"]
 
 [sub_resource type="Resource" id="Gate_S2_03_1"]
 script = ExtResource("7_q3r6a")
@@ -62,3 +63,6 @@ offset_top = -312.0
 offset_right = 32.0
 mouse_filter = 2
 color = Color(0.75, 0.2, 0.2, 0.85)
+
+[node name="WorkerHammer" parent="Objects" instance=ExtResource("e_worker")]
+position = Vector2(1300, 888)

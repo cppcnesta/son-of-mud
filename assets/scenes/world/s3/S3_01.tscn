@@ -5,6 +5,7 @@
 [ext_resource type="Script" path="res://addons/MetroidvaniaSystem/Scripts/RoomInstance.gd" id="3_rea3o"]
 [ext_resource type="TileSet" path="res://assets/data/world/world_tileset.tres" id="4_8abwr"]
 [ext_resource type="Script" path="res://assets/scripts/world/SpawnPoint.cs" id="5_2v8i7"]
+[ext_resource type="PackedScene" path="res://assets/scenes/enemy/guard.tscn" id="e_guard"]
 
 [node name="S3_01" type="Node2D" unique_id=42731117]
 script = ExtResource("1_a278k")
@@ -36,3 +37,6 @@ script = ExtResource("5_2v8i7")
 SpawnId = &"From_S3_02"
 
 [node name="Objects" type="Node2D" parent="." unique_id=540082254]
+
+[node name="Guard" parent="Objects" instance=ExtResource("e_guard")]
+position = Vector2(800, 572)

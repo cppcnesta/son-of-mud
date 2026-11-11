@@ -5,6 +5,8 @@
 [ext_resource type="Script" path="res://addons/MetroidvaniaSystem/Scripts/RoomInstance.gd" id="3_3q1px"]
 [ext_resource type="TileSet" path="res://assets/data/world/world_tileset.tres" id="4_dum0x"]
 [ext_resource type="Script" path="res://assets/scripts/world/SpawnPoint.cs" id="5_4gj1q"]
+[ext_resource type="PackedScene" path="res://assets/scenes/enemy/worker.tscn" id="e_worker"]
+[ext_resource type="Resource" path="res://assets/data/enemy/worker_shovel.tres" id="e_shovel"]
 
 [node name="S2_01" type="Node2D" unique_id=554404438]
 script = ExtResource("1_lrnnp")
@@ -35,3 +37,10 @@ script = ExtResource("5_4gj1q")
 SpawnId = &"From_S2_02"
 
 [node name="Objects" type="Node2D" parent="." unique_id=581398192]
+
+[node name="WorkerHammer" parent="Objects" instance=ExtResource("e_worker")]
+position = Vector2(1000, 896)
+
+[node name="WorkerShovel" parent="Objects" instance=ExtResource("e_worker")]
+position = Vector2(1400, 896)
+Data = ExtResource("e_shovel")
