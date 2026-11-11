@@ -225,7 +225,7 @@ public partial class NarrativeUnitTest : Node
     {
         string dir = _settings.StoryDirectory;
         string[] files = DirAccess.GetFilesAt(dir).Where(f => f.EndsWith(".orph")).OrderBy(f => f).ToArray();
-        Check(files.SequenceEqual(new[] { "m_pit.orph", "tablets.orph" }), $"剧本：assets/story 下有 m_pit.orph 和 tablets.orph（实际 {string.Join(",", files)}）");
+        Check(files.SequenceEqual(new[] { "m_pit.orph", "pickups.orph", "tablets.orph" }), $"剧本：assets/story 下有 m_pit.orph、pickups.orph（第 4 轮：道具拾取台词）和 tablets.orph（实际 {string.Join(",", files)}）");
         var problems = new List<string>();
         foreach (string file in files)
         {
