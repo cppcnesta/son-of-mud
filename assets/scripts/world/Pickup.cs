@@ -24,14 +24,10 @@ public partial class Pickup : Area2D
 
     public bool Collected { get; private set; }
 
-    public static string CountKey(StringName itemId) => "count." + itemId;
+    public static string CountKey(StringName itemId) => ItemCounts.Key(itemId);
 
     /// <summary>某种物品当前的计数（没有或类型不对时是 0）。</summary>
-    public static long CountOf(StringName itemId)
-    {
-        Variant value = GameSession.Progress.GetVar(CountKey(itemId), 0);
-        return value.VariantType == Variant.Type.Int ? value.AsInt64() : 0;
-    }
+    public static long CountOf(StringName itemId) => ItemCounts.Get(itemId);
 
     public override void _Ready()
     {
