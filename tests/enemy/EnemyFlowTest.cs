@@ -17,6 +17,7 @@ using SonOfMud.World;
 /// ③ 掉落和拾取：在 S1_03 用固定掉落种子打死祈祷泥人掉泥瓶——满血时走上去不捡、留在地上，掉了血站在上面立刻回 30，回血不超过上限；
 ///    泥肝（走 ItemDropped 这条正式路径生成）碰到 count.泥肝 加 1，最多 5 个，满了留在地上，少了再捡；两种都不播拾取台词；读档后 count.泥肝 保留。
 /// ④ 摆放：各房间的敌人在设计的位置、站在地面上。
+/// ⑤ 正式游戏里 S1_03 末端的虔诚泥人：玩家真实走过去，它停在约 300 像素外扔泥肝，打中掉 15 血、只结算一次。
 /// </summary>
 public partial class EnemyFlowTest : EnemyFlowBase
 {
@@ -29,6 +30,7 @@ public partial class EnemyFlowTest : EnemyFlowBase
         {
             await LateLoadChecks();
             await PickupChecks();
+            await DevoutInGameChecks();
             await ContinueChecks();
             await RestartChecks();
             await PlacementChecks();
@@ -155,6 +157,37 @@ public partial class EnemyFlowTest : EnemyFlowBase
         await Frames(10);
         Check(Requests.Count(r => r.StartsWith("pickups:")) == pickupLines && !Narr.Subtitle.IsShowing,
             "拾取台词：泥瓶、泥肝的拾取都不请求拾取台词（暂时没有）");
+    }
+
+    // ---------- ⑤ 正式游戏里的虔诚泥人 ----------
+
+    private async Task DevoutInGameChecks()
+    {
+        EnemyBody devout = InRoom<EnemyBody>().FirstOrDefault(e => e.Data?.Kind == "devout");
+        if (devout == null)
+        {
+            Check(false, "虔诚泥人：S1_03 里找不到虔诚泥人");
+            return;
+        }
+        var thrown = new List<Projectile>();
+        devout.ProjectileThrown += p => thrown.Add(p);
+        bool spotted = await HoldKeyUntil(RealKeys.Right, () => devout.State is SonOfMud.Enemy.States.ChaseState or SonOfMud.Enemy.States.AttackWindupState, 900);
+        bool threw = await WaitUntil(() => thrown.Count > 0, 300);
+        float distance = Mathf.Abs(devout.GlobalPosition.X - Player.GlobalPosition.X);
+        int hp = Player.Stats.Health;
+        Projectile liver = thrown.FirstOrDefault();
+        ProjectileEnd end = ProjectileEnd.None;
+        HitOutcome? outcome = null;
+        int resolutions = -1;
+        if (liver != null && GodotObject.IsInstanceValid(liver))
+            liver.Finished += (reason, position) => { end = (ProjectileEnd)reason; outcome = liver.Outcome; resolutions = liver.Resolutions; };
+        await WaitUntil(() => end != ProjectileEnd.None, 180);
+        await Frames(2);
+        Check(spotted && threw && distance <= 305f && end == ProjectileEnd.Target && outcome == HitOutcome.Damaged && resolutions == 1 && Player.Stats.Health == hp - 15
+              && !GodotObject.IsInstanceValid(liver),
+            $"虔诚泥人（正式游戏 S1_03）：玩家真实走近，它在 {distance:F0} 像素处扔出泥肝，打中掉 15 血（{hp} → {Player.Stats.Health}），只结算一次，泥肝消失");
+        // 退回安全的地方，免得后面的检查一直挨打
+        await HoldKeyUntil(RealKeys.Left, () => !devout.CanSeeTarget(devout.Data.VisionRange * 1.5f), 600);
     }
 
     // ---------- ② 读档 ----------

@@ -128,8 +128,12 @@ public partial class EnemyUnitTest : LabSuiteBase
               && Mathf.IsEqualApprox(prayer.FleeChance, 0.5f) && prayer.AttackSpec?.Damage == 10f && prayer.AttackSpec.Blockable && prayer.AttackWindup >= 0.4f,
             $"数值：祈祷泥人血 30、被动（看不见玩家，不主动出手）、被打后 50% 逃跑，否则泥手挥击反击：伤害 10、可格挡、前摇 {prayer.AttackWindup} 秒看得出来");
         Check(devout.Kind == "devout" && devout.DisplayName == "虔诚泥人" && devout.MaxHealth == 40 && devout.AttackSpec?.Damage == 15f && devout.AttackSpec.Blockable
-              && devout.FleeChance == 0f && devout.PatrolDistance > 0f && Mathf.IsEqualApprox(devout.AttackWindup, 0.6f),
-            "数值：虔诚泥人血 40、泥肝伤害 15、可格挡、前摇 0.6 秒、会巡逻、不逃跑");
+              && devout.FleeChance == 0f && devout.PatrolDistance > 0f && Mathf.IsEqualApprox(devout.AttackWindup, 0.6f)
+              && devout.Behaviour == EnemyBehaviour.Ranged && devout.AttackRange == 300f && devout.VisionRange > devout.AttackRange && devout.ThrowSpec != null && devout.ThrowSpec.Gravity > 0f,
+            $"数值：虔诚泥人血 40、远程扔泥肝（伤害 15、可格挡、抛物线重力 {devout.ThrowSpec?.Gravity}）、前摇 0.6 秒、看见玩家走到 300 像素停下、会巡逻、不逃跑");
+        Node devoutNode = GD.Load<PackedScene>("res://assets/scenes/enemy/devout.tscn").Instantiate();
+        Check(devoutNode.GetNodeOrNull("HitBox") == null, "虔诚泥人：场景里没有近战判定，伤害只来自扔出去的泥肝");
+        devoutNode.Free();
         Check(mason.Kind == "mason" && mason.DisplayName == "塔庙泥匠" && mason.MaxHealth == 40 && mason.AttackSpec?.Damage == 20f && mason.Behaviour == EnemyBehaviour.Melee
               && mason.AttackSpec.Blockable && mason.FleeChance == 0f && mason.Drops == null && mason.PatrolDistance > 0f,
             "数值：塔庙泥匠血 40、挥锤伤害 20、近战、可格挡、巡逻、不逃跑、不掉落");
