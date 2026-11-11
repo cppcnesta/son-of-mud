@@ -297,9 +297,6 @@ public partial class UiHudTest : UiTestBase
     private static readonly Regex ScenePath = new(@"path=""(res://[^""]+\.(?:cs|gd|tscn))""");
     private static readonly string[] AllowedNamespaces = { "Core", "UI" };
 
-    /// <summary>旧白盒主菜单（MudMainMenu）是本轮之前就有的旧代码，按规则不改，扫描时排除。</summary>
-    private static readonly string[] LegacyScripts = { "MudMainMenu.cs" };
-    private static readonly string[] LegacyScenes = { "main_menu.tscn" };
 
     private static List<string> ForeignNamespaces(string source) =>
         NamespaceUse.Matches(StringsAndComments.Replace(source, ""))
@@ -319,7 +316,7 @@ public partial class UiHudTest : UiTestBase
         int scanned = 0;
         foreach (string file in DirAccess.GetFilesAt(dir))
         {
-            if (!file.EndsWith(".cs") || LegacyScripts.Contains(file)) continue;
+            if (!file.EndsWith(".cs")) continue;
             scanned++;
             string source = FileAccess.GetFileAsString($"{dir}/{file}");
             List<string> foreign = ForeignNamespaces(source);
@@ -335,7 +332,7 @@ public partial class UiHudTest : UiTestBase
         int scenes = 0;
         foreach (string file in DirAccess.GetFilesAt(sceneDir))
         {
-            if (!file.EndsWith(".tscn") || LegacyScenes.Contains(file)) continue;
+            if (!file.EndsWith(".tscn")) continue;
             scenes++;
             foreach (Match m in ScenePath.Matches(FileAccess.GetFileAsString($"{sceneDir}/{file}")))
             {

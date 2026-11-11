@@ -1,6 +1,6 @@
 param(
     [string]$GodotPath = $env:GODOT_DOTNET,
-    [ValidateSet('all','core','world','player','combat','player-feel','flow','ui','narrative','enemy','new','feel','scene-paths','jump-landing','attacks','stairs','focused')][string]$Suite = 'all',
+    [ValidateSet('all','core','world','player','combat','player-feel','flow','ui','narrative','enemy','new')][string]$Suite = 'all',
     [switch]$Headless
 )
 $ErrorActionPreference = 'Stop'
@@ -31,16 +31,6 @@ try {
     $env:MUDCHILD_TEST_ISOLATED = '1'
     & $GodotPath --headless --path $projectPath --editor --import --quit --log-file (Join-Path $outputPath 'csharp_import.log')
     if ($LASTEXITCODE -ne 0) { throw "Godot import failed ($LASTEXITCODE)." }
-    $legacyCode = 0
-    $newSuites = @('world','player','combat','player-feel','flow','ui','narrative','enemy','new')
-    if ($Suite -ne 'core' -and $newSuites -notcontains $Suite) {
-        $arguments = @('--path', $projectPath, '--scene', 'res://tests/runtime_suite.tscn', '--rendering-method', 'gl_compatibility', '--audio-driver', 'Dummy', '--fixed-fps', '60', '--max-fps', '240', '--log-file', (Join-Path $outputPath 'csharp_runtime_suite.log'))
-        if ($Headless) { $arguments += '--headless' }
-        if ($Suite -eq 'focused') { $arguments += @('--', '--focused') }
-        elseif ($Suite -ne 'all') { $arguments += @('--', "--$Suite-only") }
-        & $GodotPath @arguments
-        $legacyCode = $LASTEXITCODE
-    }
     $coreCode = 0
     if ($Suite -eq 'all' -or $Suite -eq 'core') {
         # Core 验收测试：结果写到 tests/output/core_results.json
@@ -126,7 +116,7 @@ try {
             if ($LASTEXITCODE -ne 0 -and $enemyCode -eq 0) { $enemyCode = $LASTEXITCODE }
         }
     }
-    $resultCode = if ($legacyCode -ne 0) { $legacyCode } elseif ($coreCode -ne 0) { $coreCode } elseif ($worldCode -ne 0) { $worldCode } elseif ($flowCode -ne 0) { $flowCode } elseif ($uiCode -ne 0) { $uiCode } elseif ($narrativeCode -ne 0) { $narrativeCode } elseif ($enemyCode -ne 0) { $enemyCode } else { $newCode }
+    $resultCode = if ($coreCode -ne 0) { $coreCode } elseif ($worldCode -ne 0) { $worldCode } elseif ($flowCode -ne 0) { $flowCode } elseif ($uiCode -ne 0) { $uiCode } elseif ($narrativeCode -ne 0) { $narrativeCode } elseif ($enemyCode -ne 0) { $enemyCode } else { $newCode }
 }
 finally {
     foreach ($variableName in $variableNames) { [Environment]::SetEnvironmentVariable($variableName, $previousValues[$variableName], 'Process') }

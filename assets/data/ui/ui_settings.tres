@@ -25,6 +25,5 @@ HudFadeSeconds = 0.3
 HudNarrativeAlpha = 0.0
 MapPanCellsPerSecond = 10.0
 GameScene = "res://assets/scenes/world/main_game.tscn"
-LegacyMenuScene = "res://assets/scenes/ui/main_menu.tscn"
 SaveSlot = 0
 StartErrorTitle = "无法开始旅程"

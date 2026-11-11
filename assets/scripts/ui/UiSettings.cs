@@ -54,8 +54,6 @@ public partial class UiSettings : Resource
 
     // ---- 主菜单 ----
     [Export(PropertyHint.File, "*.tscn")] public string GameScene { get; set; } = "res://assets/scenes/world/main_game.tscn";
-    /// <summary>调试版本里“旧白模”入口打开的旧主菜单。</summary>
-    [Export(PropertyHint.File, "*.tscn")] public string LegacyMenuScene { get; set; } = "res://assets/scenes/ui/main_menu.tscn";
     [Export] public int SaveSlot { get; set; } = 0;
     [Export] public string StartErrorTitle { get; set; } = "无法开始旅程";
 
