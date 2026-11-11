@@ -32,7 +32,7 @@ public partial class BootNewGameTest : FlowTestBase
         Check(Player.GetNodeOrNull<PlayerInteractor>("Interactor") != null, "玩家身上有交互组件 Interactor");
         Check(MainGame.GetChildren().OfType<GameBoot>().Count() == 1, "main_game 里有一个 GameBoot");
 
-        Check(AbilityList() == "block,switch_form", $"能力正好是 block 和 switch_form（实际 {AbilityList()}）");
+        Check(AbilityList() == "block,switch_form,wall_climb", $"能力正好是初始的 block、switch_form、wall_climb（实际 {AbilityList()}）");
         Check(!GameSession.Progress.VariableKeys.Any(), "新游戏没有任何进度变量");
 
         SpawnPoint spawn = World.CurrentRoom?.FindSpawn("Default");

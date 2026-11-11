@@ -37,7 +37,7 @@ public partial class SaveRoundtrip : WorldTestBase
         Check(!persistent.WasStored, "PersistentObject：第一次登记时没有被储存");
         persistent.MarkStored();
 
-        GameSession.Progress.Unlock("wall_climb");
+        GameSession.Progress.Unlock("heavy_slam");
         GameSession.Progress.SetVar("boss_keeper", true);
         GameSession.Progress.SetVar("tablets", 3);
         GameSession.Progress.SetVar("speaker", "伊吉");
@@ -70,7 +70,7 @@ public partial class SaveRoundtrip : WorldTestBase
         MetSysApi.SetSaveData();
         World.LoadRoomImmediate("S1_01", "Default");
         await Frames(5);
-        Check(!GameSession.Progress.HasAbility("wall_climb") && !GameSession.Progress.HasVar("boss_keeper"), "重置后内存里的进度已清空");
+        Check(!GameSession.Progress.HasAbility("heavy_slam") && !GameSession.Progress.HasVar("boss_keeper"), "重置后内存里的进度已清空");
         Check(!MetSysApi.IsCellDiscovered(visited, false), "重置后 MetSys 的探索记录已清空");
 
         string loadedRoom = null;
@@ -89,7 +89,7 @@ public partial class SaveRoundtrip : WorldTestBase
         Check(saveSpawn != null && loadedSavePoint != null && saveSpawn.GlobalPosition.DistanceTo(loadedSavePoint.GlobalPosition) < 2f
               && Mover.GlobalPosition.DistanceTo(saveSpawn.GlobalPosition) < 4f, $"人在 S1_04 的存档点（{Mover.GlobalPosition}，存档点 {loadedSavePoint?.GlobalPosition}）");
         Check(MetSysApi.IsCellDiscovered(visited, false) && !MetSysApi.IsCellDiscovered(unvisited, false), "已探索的格子恢复了，没去过的仍未探索");
-        Check(GameSession.Progress.HasAbility("wall_climb"), "能力 wall_climb 恢复");
+        Check(GameSession.Progress.HasAbility("heavy_slam"), "能力 heavy_slam 恢复（不在初始能力里，只能来自存档）");
         Variant flag = GameSession.Progress.GetVar("boss_keeper"), count = GameSession.Progress.GetVar("tablets"), speaker = GameSession.Progress.GetVar("speaker");
         Check(flag.VariantType == Variant.Type.Bool && flag.AsBool(), "变量 boss_keeper 恢复为 bool true");
         Check(count.VariantType == Variant.Type.Int && count.AsInt64() == 3, "变量 tablets 恢复为 int 3");
@@ -100,7 +100,7 @@ public partial class SaveRoundtrip : WorldTestBase
         // ---- 坏档 ----
         using (FileAccess bad = FileAccess.Open(Saves.SlotPath(1), FileAccess.ModeFlags.Write))
             bad.StoreString(GD.VarToStr(new GDictionary { ["version"] = 99, ["world"] = new GDictionary { ["room"] = "S1_01" } }));
-        Check(!Saves.LoadFromDisk(1) && GameSession.Progress.HasAbility("wall_climb"), "版本不对的存档被拒绝，内存里的进度不受影响（会打印一条预期的错误）");
+        Check(!Saves.LoadFromDisk(1) && GameSession.Progress.HasAbility("heavy_slam"), "版本不对的存档被拒绝，内存里的进度不受影响（会打印一条预期的错误）");
         Check(!Saves.LoadFromDisk(7), "不存在的存档槽返回 false（会打印一条预期的错误）");
 
         await TearDownGame();

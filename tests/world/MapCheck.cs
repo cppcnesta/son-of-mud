@@ -127,9 +127,13 @@ public partial class MapCheck : WorldTestBase
         Check(HasDoor("S3_08", "S4_01") && !Adjacent(_layout.Find("S3_08"), _layout.Find("S4_01")), "②S3_08→S4_01 是按键过门，地图上不相邻");
         Check(Adjacent(_layout.Find("S2_02"), _layout.Find("S2_04")) && !HasEdge("S2_02", "S2_04"), "②S2_02|S2_04 相邻但是墙");
         Check(Adjacent(_layout.Find("S4_03"), _layout.Find("S4_05")) && !HasEdge("S4_03", "S4_05"), "②S4_03|S4_05 相邻但是墙");
-        Check(Gate("S1_04", "S1_08", ability: "wall_climb") && Gate("S2_04", "S2_05", ability: "wall_climb"), "②能力门：S1_04↑S1_08、S2_04↑S2_05 需要 wall_climb");
-        Check(Gate("S1_05", "S1_06", flag: "boss_keeper") && Gate("S2_03", "S2_04", flag: "flood_done") && Gate("S2_04", "S2_06", flag: "boss_dragon")
-              && Gate("S3_06", "S3_07", flag: "districts_done") && Gate("S4_02", "S4_03", flag: "seven_gates"), "②事件门：boss_keeper / flood_done / boss_dragon / districts_done / seven_gates 位置正确");
+        // 攀墙开局就有（关卡几何计划 v3 第 2 节），原来的两道能力门去掉了：S1_04↑S1_08、S2_04↑S2_05 两个方向都没有条件。
+        Check(NoRequirement("S1_04", "S1_08") && NoRequirement("S1_08", "S1_04") && NoRequirement("S2_04", "S2_05") && NoRequirement("S2_05", "S2_04"),
+            "②原能力门已去掉：S1_04↑S1_08、S2_04↑S2_05 这两条通道存在，两侧出口都没有条件");
+        List<string> abilityGates = _layout.Rooms.SelectMany(r => r.Exits.Where(e => e.Requirement != null && e.Requirement.Abilities.Count > 0).Select(e => $"{r.Id}→{e.Target}")).ToList();
+        Check(abilityGates.Count == 0, "②清单里没有任何能力门（所有出口条件都只用剧情标记）" + (abilityGates.Count > 0 ? "：" + string.Join(",", abilityGates) : ""));
+        Check(Gate("S1_05", "S1_06", "boss_keeper") && Gate("S2_03", "S2_04", "flood_done") && Gate("S2_04", "S2_06", "boss_dragon")
+              && Gate("S3_06", "S3_07", "districts_done") && Gate("S4_02", "S4_03", "seven_gates"), "②事件门：boss_keeper / flood_done / boss_dragon / districts_done / seven_gates 位置正确");
 
         var objectProblems = new List<string>();
         foreach (RoomDef room in _layout.Rooms)
@@ -150,7 +154,7 @@ public partial class MapCheck : WorldTestBase
             if (room.HasSavePoint != (saves.Count == 1) || room.HasSavePoint != hasSaveSpawn) objectProblems.Add($"{room.Id} 的存档点和清单不一致");
             if (saves.Count == 1 && saves[0].SavePointId.ToString() != room.Id) objectProblems.Add($"{room.Id} 的存档点编号是 {saves[0].SavePointId}");
         }
-        Check(objectProblems.Count == 0, "②场景里的实体门、过门、存档点和清单一致（能力门没有实体门，靠地形）" + (objectProblems.Count > 0 ? "：" + string.Join("; ", objectProblems.Take(6)) : ""));
+        Check(objectProblems.Count == 0, "②场景里的实体门、过门、存档点和清单一致" + (objectProblems.Count > 0 ? "：" + string.Join("; ", objectProblems.Take(6)) : ""));
         string[] saveRooms = _layout.Rooms.Where(r => r.HasSavePoint).Select(r => r.Id).OrderBy(x => x).ToArray();
         Check(saveRooms.SequenceEqual(new[] { "S1_04", "S2_02", "S3_03", "S4_04" }), $"②存档点在 S1_04 / S2_02 / S3_03 / S4_04（实际 {string.Join(",", saveRooms)}）");
     }
@@ -161,14 +165,20 @@ public partial class MapCheck : WorldTestBase
     private bool HasDoor(string a, string b) =>
         _layout.Find(a).Exits.Any(e => e.Kind == ExitKind.Door && e.Target == b);
 
-    private bool Gate(string a, string b, string ability = null, string flag = null)
+    /// <summary>a→b 这条通道存在，并且 a 这一侧的出口没有任何条件。</summary>
+    private bool NoRequirement(string a, string b)
+    {
+        ExitDef exit = _layout.Find(a)?.Exits.FirstOrDefault(e => e.Target == b);
+        return exit != null && exit.Requirement == null && exit.Kind == ExitKind.Edge;
+    }
+
+    /// <summary>a→b 的出口是只有一个剧情标记 flag 的事件门（有实体门）。</summary>
+    private bool Gate(string a, string b, string flag)
     {
         ExitDef exit = _layout.Find(a).Exits.FirstOrDefault(e => e.Target == b);
         GateRequirement req = exit?.Requirement;
         if (req == null) return false;
-        return ability != null
-            ? req.Abilities.Count == 1 && req.Abilities[0] == ability && req.Flags.Count == 0 && !exit.HasBarrier
-            : req.Flags.Count == 1 && req.Flags[0] == flag && req.Abilities.Count == 0 && exit.HasBarrier;
+        return req.Flags.Count == 1 && req.Flags[0] == flag && req.Abilities.Count == 0 && exit.HasBarrier;
     }
 
     /// <summary>两个房间有没有共用的边（至少一格相接）。</summary>
@@ -232,19 +242,22 @@ public partial class MapCheck : WorldTestBase
 
     // ---------- ④ ----------
 
+    /// <summary>剧情标记的获取点。攀墙开局就有、下砸不发放，所以这里没有能力（关卡几何计划 v3 第 2 节）。</summary>
     private static readonly (string Room, string Token)[] Acquisitions =
     {
-        ("S1_05", "boss_keeper"), ("S2_02", "wall_climb"), ("S2_03", "flood_done"), ("S2_04", "boss_dragon"),
-        ("S3_03", "heavy_slam"), ("S4_02", "seven_gates"),
+        ("S1_05", "boss_keeper"), ("S2_03", "flood_done"), ("S2_04", "boss_dragon"), ("S4_02", "seven_gates"),
     };
     private static readonly string[] Districts = { "S3_04", "S3_05", "S3_06" };
     private const string DistrictsDone = "districts_done";
 
-    /// <summary>从 S1_01 出发反复扩展到不动点：通道条件（两侧出口条件的并集）满足才能走；到过获取点就拿到对应标记。forbidden 永远拿不到。</summary>
-    private (HashSet<string> Rooms, HashSet<string> Tokens) Reach(string forbidden)
+    /// <summary>
+    /// 从 S1_01 出发反复扩展到不动点：通道条件（两侧出口条件的并集）满足才能走；到过获取点就拿到对应标记。
+    /// forbidden 永远拿不到；given 一开始就有（用来“不考虑剧情标记”）。能力不会自动获得：能力条件只能靠 given 满足。
+    /// </summary>
+    private (HashSet<string> Rooms, HashSet<string> Tokens) Reach(string forbidden, IEnumerable<string> given = null)
     {
         var rooms = new HashSet<string> { "S1_01" };
-        var tokens = new HashSet<string>();
+        var tokens = new HashSet<string>(given ?? Enumerable.Empty<string>());
         bool changed = true;
         while (changed)
         {
@@ -284,7 +297,7 @@ public partial class MapCheck : WorldTestBase
         var missing = required.Where(t => !tokens.Contains(t)).ToList();
         Check(missing.Count == 0, $"④没有死锁：通道用到的条件（{string.Join(",", required)}）都能拿到" + (missing.Count > 0 ? "，拿不到：" + string.Join(",", missing) : ""));
         var unused = Acquisitions.Select(a => a.Token).Append(DistrictsDone).Where(t => !tokens.Contains(t)).ToList();
-        Check(unused.Count == 0, "④每个能力 / 事件标记都在它的获取点拿到" + (unused.Count > 0 ? "，没拿到：" + string.Join(",", unused) : ""));
+        Check(unused.Count == 0, "④每个事件标记都在它的获取点拿到" + (unused.Count > 0 ? "，没拿到：" + string.Join(",", unused) : ""));
 
         var selfLocked = new List<string>();
         foreach ((string room, string token) in Acquisitions)
@@ -295,11 +308,19 @@ public partial class MapCheck : WorldTestBase
         Check(selfLocked.Count == 0, "④每个获取点不需要它自己那项能力或事件就能进入" + (selfLocked.Count > 0 ? "：" + string.Join(",", selfLocked) : ""));
 
         HashSet<string> noKeeper = Reach("boss_keeper").Rooms;
-        Check(noKeeper.SetEquals(new[] { "S1_01", "S1_02", "S1_03", "S1_04", "S1_05" }), $"④自检：拿不到 boss_keeper 时只能到 S1_01–S1_05（实际 {string.Join(",", noKeeper.OrderBy(x => x))}），说明条件确实会挡路");
+        Check(noKeeper.SetEquals(new[] { "S1_01", "S1_02", "S1_03", "S1_04", "S1_05", "S1_08" }), $"④自检：拿不到 boss_keeper 时只能到 S1_01–S1_05 和 S1_08（实际 {string.Join(",", noKeeper.OrderBy(x => x))}），说明条件确实会挡路，S1_08 不再需要能力");
 
-        HashSet<string> noClimb = Reach("wall_climb").Rooms;
-        Check(!noClimb.Contains("S1_08") && !noClimb.Contains("S2_05"), "④拿到 wall_climb 之前进不去 S1_08 和 S2_05（逻辑上）");
-        Check(noClimb.Count == 25, $"④没有 wall_climb 时只少这两个房间（可达 {noClimb.Count}）");
+        // 没有能力门：不给任何能力、把全部剧情标记都当作已满足（不考虑剧情标记），27 个房间都可达。
+        string[] allFlags = _layout.Rooms.SelectMany(r => r.Exits).Where(e => e.Requirement != null).SelectMany(e => e.Requirement.Flags).Select(f => f.ToString()).Distinct().ToArray();
+        HashSet<string> flagsOnly = Reach(null, allFlags).Rooms;
+        Check(flagsOnly.Count == 27, $"④没有能力门：不给任何能力、不考虑剧情标记时 27 个房间全部可达（实际 {flagsOnly.Count}，缺 {string.Join(",", _layout.Rooms.Select(r => r.Id).Where(id => !flagsOnly.Contains(id)))}）");
+        var hiddenBehindFlags = new List<string>();
+        foreach (string flag in allFlags.Append(DistrictsDone))
+        {
+            HashSet<string> without = Reach(flag).Rooms;
+            if (without.Contains("S1_04") != without.Contains("S1_08") || without.Contains("S2_04") != without.Contains("S2_05")) hiddenBehindFlags.Add(flag);
+        }
+        Check(hiddenBehindFlags.Count == 0, "④S1_08、S2_05 和下面的房间（S1_04、S2_04）同时可达：缺任何一个剧情标记都不会单独挡住它们" + (hiddenBehindFlags.Count > 0 ? "：" + string.Join(",", hiddenBehindFlags) : ""));
     }
 
     private static List<T> Search<T>(Node node) where T : class
