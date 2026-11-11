@@ -7,7 +7,6 @@
 [sub_resource type="Resource" id="liver_hit"]
 script = ExtResource("2")
 Damage = 15.0
-Tags = PackedStringArray("player_liver")
 
 [resource]
 script = ExtResource("1")

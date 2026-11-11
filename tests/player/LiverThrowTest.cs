@@ -14,7 +14,7 @@ using SonOfMud.World;
 /// <summary>
 /// 扔泥肝（C 步），从正式入口 main_game.tscn 启动、真实玩家、真实按键（RealKeys，R = 扔泥肝）：
 /// ① 没有泥肝时按 R 没反应（不进投掷状态、不扣、不生成投掷物），HUD 的泥肝数量隐藏；
-/// ② 有 3 个时按 R：扔出一个、剩 2 个、HUD 显示 ×2；投掷物是玩家方（只打敌人受击框）、伤害 15、倍率 1、带 player_liver 标签，
+/// ② 有 3 个时按 R：扔出一个、剩 2 个、HUD 显示 ×2；投掷物是玩家方（只打敌人受击框）、伤害 15、倍率 1，
 ///    朝面向方向飞一段短抛物线（约 300 像素）；投掷状态约 0.2 秒、动画名 throw，之后回 Idle；朝左也能扔；扔到 0 个 HUD 隐藏，再按 R 没反应；
 /// ③ 投掷间隔：0.4 秒内连按只扔一个，间隔约 24 帧后才能扔下一个；
 /// ④ 攻击（水攻击、泥攻击后摇）/ 闪避 / 格挡中按 R 不扔，动作结束后也不补扔；空中能扔，而且不打断下落；
@@ -189,9 +189,9 @@ public partial class LiverThrowTest : EnemyFlowBase
             $"有 3 个时按 R：进入投掷状态，扔出一个，剩 {Count} 个，HUD 立即显示 ×2（{HudText}）");
         Check(anim == "water_throw", $"投掷动画：水形态播 water_throw（实际 {anim}）");
         Check(p != null && GodotObject.IsInstanceValid(p) && p.Team == ProjectileTeam.Player && p.CollisionLayer == Layers.PlayerHit && p.CollisionMask == Layers.EnemyHurt
-              && p.Hit?.Damage == Damage && Mathf.IsEqualApprox(p.Hit.Multiplier, 1f) && p.Hit.Tags.Contains(LiverSwitch.DefaultTag) && p.Hit.Source == Player
+              && p.Hit?.Damage == Damage && Mathf.IsEqualApprox(p.Hit.Multiplier, 1f) && p.Hit.Source == Player
               && p.Velocity.X > 0f && p.GlobalPosition.X > at.X,
-            "泥肝：玩家方投掷物（PlayerHit 层，只打敌人受击框），伤害 15、倍率 1、带 player_liver 标签，攻击方是玩家，朝面向（右）飞");
+            "泥肝：玩家方投掷物（PlayerHit 层，只打敌人受击框），伤害 15、倍率 1，攻击方是玩家，朝面向（右）飞");
 
         // 一边跟踪泥肝的飞行，一边数投掷状态持续的帧数
         Task<Flight> following = Follow(p);

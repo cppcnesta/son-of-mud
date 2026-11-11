@@ -5,7 +5,7 @@ namespace SonOfMud.Combat;
 
 /// <summary>
 /// 受击框。凡是能被打的东西都挂它（角色、可破坏物）。
-/// 结算顺序：不接受（含缺少 RequiredTag 标签）→ Ignored；按实体去重 → Duplicate；无敌 → Invulnerable；
+/// 结算顺序：不接受 → Ignored；按实体去重 → Duplicate；无敌 → Invulnerable；
 /// 格挡覆盖且可挡 → Blocked；否则按「取最大倍率、最后取整一次」扣血 → Damaged / Killed。
 /// </summary>
 [GlobalClass]
@@ -25,11 +25,6 @@ public partial class HurtBox : Area2D
     }
     /// <summary>只吃重击（脆弱地面）。</summary>
     [Export] public bool HeavyOnly { get; set; }
-    /// <summary>
-    /// 只吃带这个标签（Hit.Tags）的攻击；空字符串表示不限。不带标签的攻击一律 Ignored（投掷物会穿过去继续飞），
-    /// 例如泥肝开关只认玩家扔的泥肝（标签 player_liver），近战打它没反应。
-    /// </summary>
-    [Export] public string RequiredTag { get; set; } = "";
     /// <summary>全方向格挡；关掉时只挡 GuardFacing 一侧来的攻击。</summary>
     [Export] public bool Omnidirectional { get; set; } = true;
 
@@ -76,12 +71,9 @@ public partial class HurtBox : Area2D
         return (sourcePosition.X - GlobalPosition.X) * GuardFacing >= 0f;
     }
 
-    private bool HasRequiredTag(Hit hit) =>
-        string.IsNullOrEmpty(RequiredTag) || System.Array.IndexOf(hit.Tags ?? System.Array.Empty<string>(), RequiredTag) >= 0;
-
     public HitOutcome Receive(Hit hit)
     {
-        if (hit == null || !Receiving || (HeavyOnly && !hit.Heavy) || !HasRequiredTag(hit) || (Stats != null && Stats.IsDepleted))
+        if (hit == null || !Receiving || (HeavyOnly && !hit.Heavy) || (Stats != null && Stats.IsDepleted))
             return HitOutcome.Ignored;
         if (!AttackLedger.For(Entity).Accept(hit.AttackId, EntityId))
             return HitOutcome.Duplicate;

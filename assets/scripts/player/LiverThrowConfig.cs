@@ -15,7 +15,7 @@ public partial class LiverThrowConfig : Resource
     [Export] public StringName ItemId { get; set; } = "泥肝";
 
     [ExportGroup("伤害与飞行")]
-    /// <summary>单发伤害（15）。Tags 里带 player_liver，泥肝开关只认这个标签。</summary>
+    /// <summary>单发伤害（15）。</summary>
     [Export] public HitSpec Hit { get; set; }
     /// <summary>重力、判定半径、寿命、颜色。</summary>
     [Export] public ProjectileSpec Projectile { get; set; }
