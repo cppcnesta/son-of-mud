@@ -76,8 +76,12 @@ public partial class PlayerCharacter : CharacterBody2D
         Callable.From(AnnounceSpawn).CallDeferred();
     }
 
+    /// <summary>进入场景树就登记为当前玩家（晚加载的敌人从 PlayerRegistry 拿到玩家）。</summary>
+    public override void _EnterTree() => PlayerRegistry.Register(this);
+
     public override void _ExitTree()
     {
+        PlayerRegistry.Unregister(this);
         if (Events.Instance is not { } events) return;
         events.RoomExiting -= OnRoomExiting;
         events.PlayerTeleported -= OnTeleported;
