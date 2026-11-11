@@ -27,10 +27,11 @@ public partial class ConditionalTerrain : TileMapLayer
     /// <summary>生成工具和测试共用：按格子坐标建一个条件地形（瓦片用 # 的图块）。</summary>
     public static ConditionalTerrain Create(IEnumerable<Vector2I> cells, StringName flag, int shift)
     {
+        using TileSet tiles = GD.Load<TileSet>(TerrainTiles.TileSetPath); // 节点自己持有瓦片集，托管包装用完就放掉
         var layer = new ConditionalTerrain
         {
             Name = NodeName,
-            TileSet = GD.Load<TileSet>(TerrainTiles.TileSetPath),
+            TileSet = tiles,
             Position = new Vector2(0, -shift),
             Requirement = new GateRequirement { Flags = new Godot.Collections.Array<StringName> { flag } },
         };

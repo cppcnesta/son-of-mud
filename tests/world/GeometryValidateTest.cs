@@ -72,12 +72,22 @@ public partial class GeometryValidateTest : WorldTestBase
         Check(SceneHashes().SequenceEqual(before), "以上所有失败用例之后，仓库里 27 个房间场景和瓦片集一个字节都没变");
 
         ClearOut();
-        // 对照组：合法改动（S1_01 半空加一格实心）→ 干跑报告 S1_01 的 Geometry 会变；写入模式真的写出 S1_01 一个文件
-        string control = Edit("S1_01", g => g.Set(10, 5, RoomGrid.Solid));
+        // 对照组：合法改动（S1_01 半空加一格 #，再加 R / B / H 各一格）→ 干跑报告 S1_01 会变；写入模式真的写出 S1_01 一个文件，
+        // 写出的场景里有对应的瓦片、条件地形、可破坏物节点，并且按同一张图再算一次没有任何变化（生成可重复）
+        void Extra(RoomGrid g)
+        {
+            g.Set(10, 5, RoomGrid.Solid);
+            g.Set(12, 5, RoomGrid.Conditional);
+            g.Set(14, 5, RoomGrid.Breakable);
+            g.Set(15, 5, RoomGrid.Breakable);
+            g.Set(17, 5, RoomGrid.HiddenBreakable);
+            g.SetCondition("test_flag");
+        }
+        string control = Edit("S1_01", Extra);
         var dry = NewBuilder(("S1_01", control));
         bool dryOk = dry.RunGeometry(write: false);
-        Check(dryOk && dry.Changes.Count == 1 && dry.Changes[0].StartsWith("S1_01：Geometry") && dry.Written.Count == 0 && OutFiles().Count == 0,
-            $"对照组干跑：只报告 S1_01 的 Geometry 会变，不写文件（{string.Join("；", dry.Changes)}）");
+        Check(dryOk && dry.Changes.Count == 3 && dry.Changes.All(c => c.StartsWith("S1_01：")) && dry.Written.Count == 0 && OutFiles().Count == 0,
+            $"对照组干跑：只报告 S1_01 的 Geometry、ConditionalTerrain、Breakables 会变，不写文件（{string.Join("；", dry.Changes)}）");
         var real = NewBuilder(("S1_01", control));
         bool realOk = real.RunGeometry(write: true);
         string outScene = $"{OutDir}/S1_01.tscn";
@@ -86,7 +96,24 @@ public partial class GeometryValidateTest : WorldTestBase
         using PackedScene writtenScene = ResourceLoader.Load<PackedScene>(outScene);
         Node written = writtenScene?.Instantiate();
         var geometry = written?.GetNodeOrNull<TileMapLayer>("Geometry");
-        Check(geometry != null && geometry.GetCellAtlasCoords(new Vector2I(10, 5)) == TerrainTiles.SolidAtlas, "对照组写入：写出的场景里 (10,5) 是实心瓦片");
+        Check(geometry != null && geometry.GetCellAtlasCoords(new Vector2I(10, 5)) == TerrainTiles.SolidAtlas
+              && geometry.GetCellSourceId(new Vector2I(12, 5)) == -1 && geometry.GetCellSourceId(new Vector2I(14, 5)) == -1,
+            "对照组写入：写出的场景里 (10,5) 是实心瓦片，R / B / H 不在 Geometry 层里");
+        var conditional = written?.GetNodeOrNull<ConditionalTerrain>(ConditionalTerrain.NodeName);
+        Check(conditional != null && conditional.GetUsedCells().SequenceEqual(new[] { new Vector2I(12, 5) })
+              && conditional.Requirement?.Flags.SequenceEqual(new StringName[] { "test_flag" }) == true && conditional.Position == geometry?.Position,
+            "对照组写入：条件地形节点存进了场景（格子 (12,5)、条件 test_flag、和 Geometry 对齐）");
+        var blocks = written?.GetNodeOrNull(BreakableTerrain.ContainerName)?.GetChildren().OfType<BreakableTerrain>().ToList() ?? new List<BreakableTerrain>();
+        Check(blocks.Count == 2 && blocks[0].Name == "Breakable_0" && blocks[0].BreakKey == "broken.S1_01.0" && !blocks[0].HiddenWall
+              && blocks[0].Cells.SequenceEqual(new[] { new Vector2I(14, 5), new Vector2I(15, 5) })
+              && blocks[1].BreakKey == "broken.S1_01.1" && blocks[1].HiddenWall && blocks[1].Cells.SequenceEqual(new[] { new Vector2I(17, 5) }),
+            $"对照组写入：可破坏物存进了场景（B 两格连成一块 broken.S1_01.0，H 一块 broken.S1_01.1）（{string.Join(",", blocks.Select(b => $"{b.Name}:{b.BreakKey}:{b.Cells.Count}"))}）");
+        if (written != null)
+        {
+            var again = NewBuilder();
+            List<string> rerun = again.Plan(_layout.Find("S1_01"), Parse("S1_01", control), written);
+            Check(rerun.Count == 0 && again.Errors.Count == 0, $"对照组：按同一张图对写出的场景再算一次，没有任何变化（{string.Join("；", rerun)}）");
+        }
         written?.Free();
         Check(SceneHashes().SequenceEqual(before), "对照组之后，仓库里的房间场景仍然没变（输出确实改到了 user://）");
         ClearOut();
