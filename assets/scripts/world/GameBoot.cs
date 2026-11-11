@@ -130,7 +130,9 @@ public partial class GameBoot : Node
     /// 旧的正式场景真正释放之后（等两帧），在主线程上做一次完整回收、等终结器跑完。
     /// 原因：场景释放后，只剩 C# 包装对象还引用着的资源（PlayerRules 等 C# 脚本资源）留在资源缓存里，
     /// 要等终结器才释放。如果之后（主菜单 → 继续 / 新游戏）重新载入正式场景时，终结器线程恰好在释放同一个资源，
-    /// 引擎会触发 FATAL「gchandle.is_released()」。在没有任何加载进行时先把它们回收掉，就不会和重新载入撞上。
+    /// 引擎会触发 FATAL「gchandle.is_released()」。
+    /// 这是规避措施，不是根治：切场景之后尽早在主线程回收，降低终结器和重新载入撞上的概率。
+    /// 它不阻止目标场景加载，也不阻止玩家马上从菜单再进游戏，所以不能保证两者完全不重叠。
     /// </summary>
     private static void CollectAfterSceneFreed(SceneTree tree)
     {
