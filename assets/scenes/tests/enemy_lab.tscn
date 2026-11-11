@@ -3,11 +3,16 @@
 [ext_resource type="Script" path="res://assets/scripts/tools/PlayerLab.cs" id="1"]
 [ext_resource type="Script" path="res://assets/scripts/tools/LabGeometry.cs" id="2"]
 [ext_resource type="PackedScene" path="res://assets/scenes/player/player_v2.tscn" id="3"]
-[ext_resource type="PackedScene" path="res://assets/scenes/enemy/worker.tscn" id="4"]
-[ext_resource type="PackedScene" path="res://assets/scenes/enemy/pilgrim.tscn" id="5"]
-[ext_resource type="PackedScene" path="res://assets/scenes/enemy/kneeler.tscn" id="6"]
-[ext_resource type="PackedScene" path="res://assets/scenes/enemy/guard.tscn" id="7"]
+[ext_resource type="PackedScene" path="res://assets/scenes/enemy/mason.tscn" id="4"]
+[ext_resource type="PackedScene" path="res://assets/scenes/enemy/prayer.tscn" id="5"]
+[ext_resource type="Script" path="res://assets/scripts/enemy/DropTable.cs" id="6"]
+[ext_resource type="PackedScene" path="res://assets/scenes/enemy/temple_guard.tscn" id="7"]
 [ext_resource type="Script" path="res://assets/scripts/tools/PlayerDebugHud.cs" id="8"]
+
+[sub_resource type="Resource" id="CityDrops"]
+script = ExtResource("6")
+ItemId = &"泥瓶"
+Chance = 1.0
 
 [node name="EnemyLab" type="Node2D"]
 script = ExtResource("1")
@@ -21,16 +26,17 @@ position = Vector2(400, 576)
 
 [node name="Camera2D" type="Camera2D" parent="Player"]
 
-[node name="Worker" parent="." instance=ExtResource("4")]
+[node name="Mason" parent="." instance=ExtResource("4")]
 position = Vector2(900, 600)
 
-[node name="Pilgrim" parent="." instance=ExtResource("5")]
+[node name="Prayer" parent="." instance=ExtResource("5")]
 position = Vector2(1700, 600)
 
-[node name="Kneeler" parent="." instance=ExtResource("6")]
+[node name="PrayerCity" parent="." instance=ExtResource("5")]
 position = Vector2(2300, 600)
+DropsOverride = SubResource("CityDrops")
 
-[node name="Guard" parent="." instance=ExtResource("7")]
+[node name="TempleGuard" parent="." instance=ExtResource("7")]
 position = Vector2(3300, 600)
 
 [node name="DebugHud" type="CanvasLayer" parent="."]

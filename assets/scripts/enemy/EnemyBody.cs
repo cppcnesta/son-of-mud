@@ -12,8 +12,8 @@ namespace SonOfMud.Enemy;
 /// - 找玩家：_EnterTree 里先读 PlayerRegistry.Current，再订阅 Changed，_ExitTree 取消订阅。
 ///   房间比玩家晚加载也能拿到玩家；只当 Node2D 用，不认识玩家类。
 /// - 每个物理帧：当前状态 PhysicsUpdate（设速度、切状态）→ MoveAndSlide。
-/// - 受击：HurtBox 结算后，没死 → 按行为组合反应（逃跑 / 举手 / 受击硬直 / 不理会）；
-///   死了 → 关掉判定、发 EnemyKilled 恰好一次，按掉落表发 ItemDropped，进入 Dead。
+/// - 受击：HurtBox 结算后，没死 → 按行为组合反应（逃跑 / 起身反击 / 受击硬直）；
+///   死了 → 关掉判定、发 EnemyKilled 恰好一次，按掉落表（摆放点可以覆盖）发 ItemDropped，进入 Dead。
 /// - 攻击结果：HitBox.HitLanded 转给当前状态（只用来分支，收招一律按状态自己的计时器）。
 /// - 随机数分两路：反应（逃跑概率）和掉落，各自可以用固定种子（测试用 SetSeeds）。
 /// 没有接触伤害（Q8）：身体只在敌人层，玩家身体不和它碰撞。
@@ -28,6 +28,8 @@ public partial class EnemyBody : CharacterBody2D
     [Export] public float InitialFacing { get; set; } = -1f;
     /// <summary>随机种子；0 表示随机。</summary>
     [Export] public ulong Seed { get; set; }
+    /// <summary>这个摆放点自己的掉落表；不填就用 Data.Drops（占卜之城的祈祷泥人 100% 掉泥瓶）。</summary>
+    [Export] public DropTable DropsOverride { get; set; }
 
     public Stats Stats { get; private set; }
     public HurtBox HurtBox { get; private set; }
@@ -47,11 +49,13 @@ public partial class EnemyBody : CharacterBody2D
     public bool IsDead { get; private set; }
     /// <summary>发过的 EnemyKilled 次数（应当最多 1）。</summary>
     public int KilledEmits { get; private set; }
-    /// <summary>最近一次受击反应："flee" / "cower" / "hurt" / "none"；还没被打过是空字符串。</summary>
+    /// <summary>最近一次受击反应："flee"（逃跑）/ "counter"（起身反击）/ "hurt"（受击硬直）/ "none"；还没被打过是空字符串。</summary>
     public string LastReaction { get; private set; } = "";
     public int Reactions { get; private set; }
-    /// <summary>出过手的次数（被动型应当一直是 0）。</summary>
+    /// <summary>出过手的次数（被动型只有被打之后的反击才会加）。</summary>
     public int AttacksStarted { get; private set; }
+    /// <summary>当前生效的掉落表：摆放点覆盖优先。</summary>
+    public DropTable Drops => DropsOverride ?? Data?.Drops;
 
     public RandomNumberGenerator ReactionRng { get; } = new();
     public RandomNumberGenerator DropRng { get; } = new();
@@ -250,17 +254,13 @@ public partial class EnemyBody : CharacterBody2D
     protected virtual void OnDamaged(Hit hit, int dealt) => React();
 
     /// <summary>
-    /// 受击反应：被动型 —— ReactsToHits 为 false 就不理会，否则按 FleeChance 逃跑、不然举起双手；
-    /// 近战型 —— 按 FleeChance 逃跑（扔下筐），不然进受击硬直。每次都消耗反应随机数（FleeChance 为 0 时不掷）。
+    /// 受击反应（被打中没死时，每次都重新决定）：先按 FleeChance 逃跑（掷一次反应随机数；为 0 时不掷）。
+    /// 没逃跑时：被动型（祈祷泥人）配了攻击就起身反击——前摇、挥击、收招各一次，之后回去跪着，不会追；没配攻击就不理会。
+    /// 攻击型进受击硬直（打断前摇和出手）。
     /// </summary>
     public void React()
     {
         Reactions++;
-        if (Data.Behaviour == EnemyBehaviour.Passive && !Data.ReactsToHits)
-        {
-            LastReaction = "none";
-            return;
-        }
         bool flee = Data.FleeChance > 0f && ReactionRng.Randf() < Data.FleeChance;
         if (flee)
         {
@@ -269,8 +269,15 @@ public partial class EnemyBody : CharacterBody2D
         }
         else if (Data.Behaviour == EnemyBehaviour.Passive)
         {
-            LastReaction = "cower";
-            Machine.TransitionTo<CowerState>();
+            if (Data.AttackSpec != null && AttackHitBox != null)
+            {
+                LastReaction = "counter";
+                Machine.TransitionTo<AttackWindupState>();
+            }
+            else
+            {
+                LastReaction = "none";
+            }
         }
         else
         {
@@ -289,12 +296,13 @@ public partial class EnemyBody : CharacterBody2D
         CollisionLayer = 0;
         KilledEmits++;
         Events.Instance?.EmitSignal(Events.SignalName.EnemyKilled, Data.Kind, GlobalPosition);
-        if (Data.Drops != null && Data.Drops.Roll(DropRng))
-            Events.Instance?.EmitSignal(Events.SignalName.ItemDropped, Data.Drops.ItemId, GlobalPosition);
+        DropTable drops = Drops;
+        if (drops != null && drops.Roll(DropRng))
+            Events.Instance?.EmitSignal(Events.SignalName.ItemDropped, drops.ItemId, GlobalPosition);
         Machine.TransitionTo<DeadState>();
     }
 
-    /// <summary>行为结束后回到自由状态：看得见玩家的攻击型去追，否则待机。</summary>
+    /// <summary>行为结束后回到自由状态：看得见玩家的攻击型去追，否则待机（被动型回去跪着）。</summary>
     public void ToFreeState()
     {
         if (Data.Behaviour != EnemyBehaviour.Passive && CanSeeTarget()) Machine.TransitionTo<ChaseState>();
@@ -315,13 +323,16 @@ public partial class EnemyBody : CharacterBody2D
         }
         if (State is FleeState) tint = tint.Lightened(0.3f);
         if (State is AttackWindupState) tint = tint.Lerp(new Color(1f, 0.85f, 0.3f), 0.5f);
-        DrawRect(new Rect2(-size.X * 0.5f, -size.Y, size.X, size.Y), tint);
-        DrawRect(new Rect2(Facing > 0 ? size.X * 0.2f : -size.X * 0.4f, -size.Y * 0.85f, size.X * 0.2f, 6f), Colors.Black);
-        if (State is CowerState)
+        // 被动型待着时是跪坐祈祷的姿势（矮一截、双手合在胸前）；逃跑和反击时站起来。
+        bool kneeling = Data?.Behaviour == EnemyBehaviour.Passive && State is IdleState;
+        float height = kneeling ? size.Y * 0.7f : size.Y;
+        DrawRect(new Rect2(-size.X * 0.5f, -height, size.X, height), tint);
+        DrawRect(new Rect2(Facing > 0 ? size.X * 0.2f : -size.X * 0.4f, -height * 0.85f, size.X * 0.2f, 6f), Colors.Black);
+        if (kneeling) DrawRect(new Rect2(Facing * size.X * 0.25f - 6f, -height * 0.6f, 12f, 14f), tint.Darkened(0.25f));
+        if (State is AttackWindupState && Data?.Behaviour == EnemyBehaviour.Passive)
         {
-            // 举起双手（占位）
-            DrawRect(new Rect2(-size.X * 0.5f, -size.Y - 20f, 8f, 22f), tint);
-            DrawRect(new Rect2(size.X * 0.5f - 8f, -size.Y - 20f, 8f, 22f), tint);
+            // 反击前摇：泥手高高举起（占位）
+            DrawRect(new Rect2(Facing * size.X * 0.5f - 5f, -size.Y - 24f, 10f, 30f), tint.Darkened(0.2f));
         }
         if (AttackHitBox is { Active: true })
             foreach (var (shape, _) in _attackShapes)

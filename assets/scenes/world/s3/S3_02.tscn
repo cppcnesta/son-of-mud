@@ -5,7 +5,13 @@
 [ext_resource type="Script" path="res://addons/MetroidvaniaSystem/Scripts/RoomInstance.gd" id="3_wjnsd"]
 [ext_resource type="TileSet" path="res://assets/data/world/world_tileset.tres" id="4_yebw1"]
 [ext_resource type="Script" path="res://assets/scripts/world/SpawnPoint.cs" id="5_vwsye"]
-[ext_resource type="PackedScene" path="res://assets/scenes/enemy/kneeler.tscn" id="e_kneeler"]
+[ext_resource type="PackedScene" path="res://assets/scenes/enemy/prayer.tscn" id="e_prayer"]
+[ext_resource type="Script" path="res://assets/scripts/enemy/DropTable.cs" id="e_drops"]
+
+[sub_resource type="Resource" id="CityDrops"]
+script = ExtResource("e_drops")
+ItemId = &"泥瓶"
+Chance = 1.0
 
 [node name="S3_02" type="Node2D" unique_id=445563852]
 script = ExtResource("1_1f74j")
@@ -38,16 +44,20 @@ SpawnId = &"From_S3_03"
 
 [node name="Objects" type="Node2D" parent="." unique_id=1454979419]
 
-[node name="Kneeler1" parent="Objects" instance=ExtResource("e_kneeler")]
+[node name="Prayer1" parent="Objects" instance=ExtResource("e_prayer")]
 position = Vector2(600, 572)
+DropsOverride = SubResource("CityDrops")
 
-[node name="Kneeler2" parent="Objects" instance=ExtResource("e_kneeler")]
+[node name="Prayer2" parent="Objects" instance=ExtResource("e_prayer")]
 position = Vector2(1000, 572)
+DropsOverride = SubResource("CityDrops")
 InitialFacing = 1.0
 
-[node name="Kneeler3" parent="Objects" instance=ExtResource("e_kneeler")]
+[node name="Prayer3" parent="Objects" instance=ExtResource("e_prayer")]
 position = Vector2(1400, 572)
+DropsOverride = SubResource("CityDrops")
 
-[node name="Kneeler4" parent="Objects" instance=ExtResource("e_kneeler")]
+[node name="Prayer4" parent="Objects" instance=ExtResource("e_prayer")]
 position = Vector2(1800, 572)
+DropsOverride = SubResource("CityDrops")
 InitialFacing = 1.0

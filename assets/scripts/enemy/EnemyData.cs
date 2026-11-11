@@ -12,7 +12,7 @@ public partial class EnemyData : Resource
     [ExportGroup("基本")]
     /// <summary>种类编号，EnemyKilled 事件带的就是它。</summary>
     [Export] public StringName Kind { get; set; } = "";
-    /// <summary>屏幕上显示的名字（策划案：「塔姆图之子」等）。</summary>
+    /// <summary>屏幕上显示的名字（「祈祷泥人」「塔庙泥卫」等）。</summary>
     [Export] public string DisplayName { get; set; } = "";
     [Export] public int MaxHealth { get; set; } = 30;
     [Export] public EnemyBehaviour Behaviour { get; set; } = EnemyBehaviour.Passive;
@@ -43,9 +43,7 @@ public partial class EnemyData : Resource
     [ExportGroup("受击")]
     /// <summary>被打（没死）后的硬直时长。</summary>
     [Export] public float HurtStun { get; set; } = 0.3f;
-    /// <summary>被动型：受到没打死它的攻击后有没有反应（逃跑 / 举手）。跪拜泥人为 false。</summary>
-    [Export] public bool ReactsToHits { get; set; } = true;
-    /// <summary>受到没打死它的攻击后逃跑的概率；被动型没逃跑就举起双手，近战型没逃跑就进受击硬直。</summary>
+    /// <summary>受到没打死它的攻击后逃跑的概率；被动型没逃跑就起身反击，攻击型没逃跑就进受击硬直。</summary>
     [Export(PropertyHint.Range, "0,1,0.01")] public float FleeChance { get; set; }
     [Export] public float FleeSpeed { get; set; } = 220f;
     [Export] public float FleeDuration { get; set; } = 1.5f;
