@@ -1,0 +1,38 @@
+[gd_resource type="Resource" script_class="KeeperData" format=3]
+
+[ext_resource type="Script" path="res://assets/scripts/enemy/bosses/keeper/KeeperData.cs" id="1"]
+[ext_resource type="Resource" path="res://assets/data/enemy/keeper/sweep.tres" id="2"]
+[ext_resource type="Resource" path="res://assets/data/enemy/keeper/tail.tres" id="3"]
+[ext_resource type="Resource" path="res://assets/data/combat/stagger_default.tres" id="4"]
+
+[resource]
+script = ExtResource("1")
+SweepSpec = ExtResource("2")
+TailSpec = ExtResource("3")
+Stagger = ExtResource("4")
+Kind = &"keeper"
+DisplayName = "守坑人：蝎"
+MaxHealth = 150
+Behaviour = 1
+MoveSpeed = 120.0
+BodySize = Vector2(112, 160)
+Tint = Color(0.35, 0.27, 0.2, 1)
+VisionRange = 0.0
+ReactsToHits = false
+StopDistance = 96.0
+SweepCooldown = 5.0
+SweepRange = 128.0
+SweepWindup = 1.0
+SweepActive = 0.2
+SweepRecover = 0.5
+SweepRecoverMultiplier = 2.0
+SweepReducesTail = 5.0
+TailCooldown = 20.0
+TailTriggerRange = 384.0
+TailAim = 3.0
+TailDelay = 0.1
+TailActive = 0.1
+TailWidth = 96.0
+TailHeight = 2400.0
+TailRecover = 0.5
+TransformFlash = 1.0
