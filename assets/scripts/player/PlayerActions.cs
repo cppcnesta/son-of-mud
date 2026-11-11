@@ -15,6 +15,8 @@ public static class PlayerActions
     public static readonly StringName Dodge = "dodge";
     public static readonly StringName SwitchForm = "switch_form";
     public static readonly StringName Interact = "interact";
+    /// <summary>投掷泥肝（R）。不进输入缓冲：攻击、闪避、格挡中按下直接作废，不会在动作结束后补扔。</summary>
+    public static readonly StringName ThrowItem = "throw_item";
 
     /// <summary>进输入缓冲的动作。</summary>
     public static readonly StringName[] Buffered = { Jump, Attack, Block, Dodge };

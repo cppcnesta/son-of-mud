@@ -1,0 +1,35 @@
+[gd_resource type="Resource" script_class="EnemyData" format=3]
+
+[ext_resource type="Script" path="res://assets/scripts/enemy/EnemyData.cs" id="1"]
+[ext_resource type="Resource" path="res://assets/data/enemy/devout_liver.tres" id="2"]
+[ext_resource type="Script" path="res://assets/scripts/enemy/DropTable.cs" id="3"]
+[ext_resource type="Resource" path="res://assets/data/combat/mud_liver_projectile.tres" id="4"]
+
+[sub_resource type="Resource" id="drops"]
+script = ExtResource("3")
+ItemId = &"泥肝"
+Chance = 0.3
+
+[resource]
+script = ExtResource("1")
+AttackSpec = ExtResource("2")
+ThrowSpec = ExtResource("4")
+Drops = SubResource("drops")
+Kind = &"devout"
+DisplayName = "虔诚泥人"
+MaxHealth = 40
+Behaviour = 3
+MoveSpeed = 120.0
+BodySize = Vector2(46, 62)
+Tint = Color(0.6, 0.45, 0.32, 1)
+VisionRange = 400.0
+VisionHeight = 128.0
+PatrolDistance = 64.0
+AttackRange = 300.0
+AttackWindup = 0.6
+AttackActive = 0.1
+AttackRecover = 1.0
+HurtStun = 0.3
+FleeChance = 0.0
+ThrowSpeed = 420.0
+ThrowOrigin = Vector2(20, -56)

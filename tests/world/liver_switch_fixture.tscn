@@ -1,0 +1,30 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://assets/scripts/world/LiverSwitch.cs" id="1"]
+[ext_resource type="Script" path="res://assets/scripts/world/GateBarrier.cs" id="2"]
+
+[sub_resource type="RectangleShape2D" id="gate_shape"]
+size = Vector2(64, 256)
+
+[node name="LiverSwitchFixture" type="Node2D"]
+
+[node name="Switch" type="Node2D" parent="." node_paths=PackedStringArray("Gates")]
+position = Vector2(220, 0)
+script = ExtResource("1")
+Flag = &"test_liver_switch"
+Gates = [NodePath("../Gate")]
+
+[node name="Gate" type="StaticBody2D" parent="."]
+position = Vector2(420, 0)
+script = ExtResource("2")
+
+[node name="Shape" type="CollisionShape2D" parent="Gate"]
+position = Vector2(0, -128)
+shape = SubResource("gate_shape")
+
+[node name="Placeholder" type="ColorRect" parent="Gate"]
+offset_left = -32.0
+offset_top = -256.0
+offset_right = 32.0
+mouse_filter = 2
+color = Color(0.75, 0.2, 0.2, 0.85)

@@ -4,7 +4,7 @@ using SonOfMud.Core;
 namespace SonOfMud.UI;
 
 /// <summary>
-/// 游戏中的 HUD：泥珠、器物环、Boss 血条、交互提示、提示条、小地图都放在 Root 下面，各自订阅自己的事件。
+/// 游戏中的 HUD：泥珠、泥肝数量、器物环、Boss 血条、交互提示、提示条、小地图都放在 Root 下面，各自订阅自己的事件。
 /// Hud 本身只做一件事：NarrativeStarted 时整体淡出，NarrativeFinished 时淡回（按开始 / 结束配对计数）。
 /// ProcessMode = Always，剧情暂停期间淡入淡出照常进行。
 /// </summary>
@@ -14,6 +14,8 @@ public partial class Hud : CanvasLayer
     public UiSettings Settings { get; set; }
     [Export] public Control Root { get; set; }
     [Export] public HpBeadBar Beads { get; set; }
+    /// <summary>泥珠下面的泥肝数量（0 个时隐藏）。</summary>
+    [Export] public LiverCounter Livers { get; set; }
     [Export] public ArtifactRing Artifacts { get; set; }
     [Export] public BossBar Boss { get; set; }
     [Export] public InteractPrompt Prompt { get; set; }

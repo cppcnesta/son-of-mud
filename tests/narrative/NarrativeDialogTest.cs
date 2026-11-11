@@ -170,9 +170,9 @@ public partial class NarrativeDialogTest : NarrativeFlowBase
         Check(Requests.Count == requests && !Narr.Subtitle.IsShowing, "字幕：看过之后再跑进来不再触发（Once）");
 
         // 字幕播放中开始对话框剧情 → 字幕立刻收起
-        Request("m_pit", "小泥偶");
+        Request("m_pit", "朝圣者之路");
         await Frames(3);
-        bool barkOn = Narr.Subtitle.IsShowing && Narr.Bark.IsPlaying && Narr.Subtitle.CurrentText == "母神的土偶！打碎它！";
+        bool barkOn = Narr.Subtitle.IsShowing && Narr.Bark.IsPlaying && Narr.Subtitle.CurrentText == "杀了他们！";
         Request("m_pit", "倒影");
         bool barkGone = !Narr.Subtitle.IsShowing && !Narr.Bark.IsPlaying && Narr.MainActive;
         Check(barkOn && barkGone, "字幕：字幕播放中对话框剧情开始 → 字幕当帧收起");

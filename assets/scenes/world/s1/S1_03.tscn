@@ -6,7 +6,8 @@
 [ext_resource type="TileSet" path="res://assets/data/world/world_tileset.tres" id="4_eivtb"]
 [ext_resource type="Script" path="res://assets/scripts/world/SpawnPoint.cs" id="5_5sw5w"]
 [ext_resource type="Script" path="res://assets/scripts/narrative/world/StoryTrigger.cs" id="n_story"]
-[ext_resource type="PackedScene" path="res://assets/scenes/enemy/pilgrim.tscn" id="e_pilgrim"]
+[ext_resource type="PackedScene" path="res://assets/scenes/enemy/prayer.tscn" id="e_prayer"]
+[ext_resource type="PackedScene" path="res://assets/scenes/enemy/devout.tscn" id="e_devout"]
 
 [sub_resource type="RectangleShape2D" id="Shape_Story_Pilgrims"]
 size = Vector2(128, 256)
@@ -54,19 +55,23 @@ Once = true
 position = Vector2(0, -128)
 shape = SubResource("Shape_Story_Pilgrims")
 
-[node name="Pilgrim1" parent="Objects" instance=ExtResource("e_pilgrim")]
+[node name="Prayer1" parent="Objects" instance=ExtResource("e_prayer")]
 position = Vector2(1000, 880)
 
-[node name="Pilgrim2" parent="Objects" instance=ExtResource("e_pilgrim")]
+[node name="Prayer2" parent="Objects" instance=ExtResource("e_prayer")]
 position = Vector2(1500, 880)
 InitialFacing = 1.0
 
-[node name="Pilgrim3" parent="Objects" instance=ExtResource("e_pilgrim")]
+[node name="Prayer3" parent="Objects" instance=ExtResource("e_prayer")]
 position = Vector2(2000, 880)
 
-[node name="Pilgrim4" parent="Objects" instance=ExtResource("e_pilgrim")]
+[node name="Prayer4" parent="Objects" instance=ExtResource("e_prayer")]
 position = Vector2(2500, 880)
 InitialFacing = 1.0
 
-[node name="Pilgrim5" parent="Objects" instance=ExtResource("e_pilgrim")]
+[node name="Prayer5" parent="Objects" instance=ExtResource("e_prayer")]
 position = Vector2(3000, 880)
+
+[node name="Devout1" parent="Objects" instance=ExtResource("e_devout")]
+position = Vector2(3250, 880)
+InitialFacing = -1.0

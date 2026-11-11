@@ -27,6 +27,8 @@
 [ext_resource type="Script" path="res://assets/scripts/player/states/LockedState.cs" id="25"]
 [ext_resource type="Script" path="res://assets/scripts/player/states/DebugFlyState.cs" id="26"]
 [ext_resource type="Script" path="res://assets/scripts/player/PlayerInteractor.cs" id="27"]
+[ext_resource type="Script" path="res://assets/scripts/player/states/ThrowState.cs" id="28"]
+[ext_resource type="Resource" path="res://assets/data/player_v2/liver_throw.tres" id="29"]
 
 [sub_resource type="RectangleShape2D" id="body_shape"]
 size = Vector2(48, 48)
@@ -124,6 +126,10 @@ script = ExtResource("25")
 
 [node name="DebugFly" type="Node" parent="StateMachine"]
 script = ExtResource("26")
+
+[node name="Throw" type="Node" parent="StateMachine"]
+script = ExtResource("28")
+Config = ExtResource("29")
 
 [node name="AttackHitBox" type="Area2D" parent="."]
 collision_layer = 32
