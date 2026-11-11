@@ -16,10 +16,7 @@ using GDictionary = Godot.Collections.Dictionary;
 /// 往存档槽 0 直接写一份“攀墙还不是初始能力时”的存档（能力只有 block、switch_form；有 boss_keeper、seen.opening、
 /// tablet.nameless_day 等进度；存档点 S1_04；格式和 SaveService 写出来的 v2 文本一样）→ 新主菜单按“继续” →
 /// 有攀墙（读档时补上、发一次 AbilityUnlocked），存档里的进度原样都在 → 用真实按键攀墙。
-/// S1_04 现在还是 64 像素骨架，爬不到 S1_08（实测）：整个房间只有地面一行瓦片，和左右两列只从房顶挂到 y=308 的墙
-/// （下半截是通往 S1_03、S1_05 的出口开口），没有天花板；原地跳的身体顶部只到 y≈398，够不着任何一面墙。
-/// 所以这一轮改成：从 S1_04 走进 S1_03，在 S1_03 右墙（出口平台下面那面墙）用真实按键往上爬，高度远超单跳。
-/// 合并新地形之后换回“从 S1_04 攀墙上到 S1_08（真的换房间）”。
+/// 然后用真实按键从 S1_04 攀墙上到 S1_08（真的换房间）。
 /// </summary>
 public partial class LegacySaveClimbTest : UiTestBase
 {
@@ -91,7 +88,7 @@ public partial class LegacySaveClimbTest : UiTestBase
         Check(World.CurrentRoomDef?.Id == "S1_04" && Saves.CheckpointRoom == "S1_04" && Saves.CheckpointSavePoint == "S1_04", "读档后人在 S1_04，最近存档点 S1_04");
         Check(SameBytes(written, ReadSaveBytes()), "读档没有改动存档文件（补齐只在内存里）");
 
-        await ClimbInS103();
+        await ClimbToS108();
     }
 
     private void OnUnlocked(StringName id) => _unlocked.Add(id.ToString());
@@ -117,40 +114,39 @@ public partial class LegacySaveClimbTest : UiTestBase
     }
 
     /// <summary>
-    /// 从 S1_04 的存档点用真实按键：按住 A 走进 S1_03（落在出口平台上）→ 继续往左走下平台落到地面 →
-    /// 按住 D 走回平台下面、贴住右墙 → 按住 D+W、按一下空格，攀墙往上爬。
+    /// 从 S1_04 的存档点用真实按键攀墙上到 S1_08（关卡几何地图 1：天花板挂下来一面墙，左面可攀，顶上有洞通 S1_08）：
+    /// 按住 A 走到挂墙左边 → 按住 W、按一下空格原地起跳 → 身体高过挂墙底边后按住 D 贴上墙 → 一直按住 D+W 往上爬，
+    /// 穿过 S1_04 顶上的洞进入 S1_08，爬到顶翻上去站在 S1_08 的地面上。
     /// </summary>
-    private async Task ClimbInS103()
+    private async Task ClimbToS108()
     {
-        bool inS103 = await HoldUntil(new[] { RealKeys.Left }, () => RoomId == "S1_03" && !World.IsTransitioning, 600);
-        Check(inS103, $"真实按键：从 S1_04 往左走进 S1_03（实际 {RoomId}）");
-        if (!inS103) return;
-        float roomWidth = World.CurrentRoomDef.Size.X * MetSysApi.CellSize.X;
-        bool down = await HoldUntil(new[] { RealKeys.Left }, () => Player.IsOnFloor() && LocalY > 800f, 600);
-        float floorY = LocalY;
-        bool atWall = down && await HoldUntil(new[] { RealKeys.Right }, () => Player.IsOnWall() && LocalX > roomWidth - 128f, 600);
-        Check(down && atWall, $"真实按键：走下出口平台落到 S1_03 地面（y={floorY:F0}），再走回右墙脚下（x={LocalX:F0}）");
-        if (!atWall) return;
+        const float wallLeft = 576f;      // 挂墙左面（S1_04 文字图第 18 列）
+        const float wallBottom = 532f;    // 挂墙底边（第 16 行的底边，房间局部 y）
+        bool atStart = await HoldUntil(new[] { RealKeys.Left }, () => LocalX < wallLeft - 56f, 300);
+        Check(atStart && RoomId == "S1_04" && Player.IsOnFloor(), $"真实按键：从 S1_04 存档点往左走到挂墙左边（x={LocalX:F0}）");
+        if (!atStart) return;
 
-        float startY = LocalY, minY = startY;
-        bool sawClimb = false;
-        RealKeys.Down(RealKeys.Right);
+        float startY = LocalY;
+        bool sawClimb = false, roseAbove = false;
         RealKeys.Down(RealKeys.MoveUp);
         RealKeys.Down(RealKeys.Jump);
         await Frames(2);
         RealKeys.Up(RealKeys.Jump);
-        for (int i = 0; i < 300; i++)
+        bool arrived = false;
+        for (int i = 0; i < 900 && !arrived; i++)
         {
             await Frames(1);
-            minY = Mathf.Min(minY, LocalY);
+            if (!roseAbove && RoomId == "S1_04" && LocalY - 24f < wallBottom - 16f)
+            {
+                roseAbove = true;
+                RealKeys.Down(RealKeys.Right);
+            }
             sawClimb |= Player.State is WallClimbState;
+            arrived = RoomId == "S1_08" && !World.IsTransitioning && Player.IsOnFloor();
         }
         RealKeys.ReleaseAll();
         await Frames(2);
-        FormConfig cfg = Player.Forms.Current;
-        float single = cfg.JumpSpeed * cfg.JumpSpeed / (2f * cfg.Gravity);
-        float climbed = startY - minY;
-        Check(sawClimb && RoomId == "S1_03" && climbed > single * 3f,
-            $"真实按键攀墙：在 S1_03 右墙往上爬了 {climbed:F0}px（单跳按配置约 {single:F0}px），进入过攀墙状态");
+        Check(roseAbove && sawClimb && arrived,
+            $"真实按键攀墙：从 S1_04 贴着挂墙爬上去，穿过顶上的洞到 S1_08 并站上地面（起跳 y={startY:F0}，进入过攀墙 {sawClimb}，现在 {RoomId}）");
     }
 }

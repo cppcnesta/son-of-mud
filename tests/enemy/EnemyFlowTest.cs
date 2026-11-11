@@ -177,8 +177,9 @@ public partial class EnemyFlowTest : EnemyFlowBase
                 count++;
                 float tolerance = e.scene == "worker" ? 70f : 1f;
                 Vector2 local = enemy.GlobalPosition - World.CurrentRoom.GlobalPosition;
-                if (!enemy.IsOnFloor() || Mathf.Abs(local.X - e.at.X) > tolerance || Mathf.Abs(local.Y - e.at.Y) > 1f)
-                    problems.Add($"{room}/{e.node} 在 {local}（地面 {enemy.IsOnFloor()}），设计 {e.at}");
+                Vector2 design = EnemyUnitTest.ScenePosition(room, e.node);   // 场景里的位置已由 enemy_unit 核对过在锚点格里
+                if (!enemy.IsOnFloor() || Mathf.Abs(local.X - design.X) > tolerance || Mathf.Abs(local.Y - design.Y) > 1f)
+                    problems.Add($"{room}/{e.node} 在 {local}（地面 {enemy.IsOnFloor()}），设计 {design}");
                 if (enemy.Target != Player) problems.Add($"{room}/{e.node} 没拿到玩家");
             }
         }

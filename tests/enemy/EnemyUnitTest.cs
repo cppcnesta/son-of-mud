@@ -8,6 +8,7 @@ using SonOfMud.Core;
 using SonOfMud.Enemy;
 using SonOfMud.Enemy.Bosses.Keeper;
 using SonOfMud.Player;
+using SonOfMud.World;
 
 /// <summary>
 /// 第 4 轮（Enemy）的单元检查：
@@ -237,19 +238,48 @@ public partial class EnemyUnitTest : LabSuiteBase
 
     // ---------- ⑦ 摆放 ----------
 
-    /// <summary>设计位置：房间 → (节点名, 场景, 位置)。</summary>
-    public static readonly (string room, string node, string scene, Vector2 at)[] Layout =
+    /// <summary>
+    /// 设计摆放：房间 → (节点名, 场景)。位置以房间文字图的锚点为准（关卡几何计划 v3 第 6 节：测试里的固定坐标改成读锚点），
+    /// 见 <see cref="AnchorCell"/>：节点要站在锚点那一格里（x 在格子左右边界内，脚在格子底边或上方 1 像素以内）。
+    /// </summary>
+    public static readonly (string room, string node, string scene)[] Layout =
     {
-        ("S1_03", "Pilgrim1", "pilgrim", new(1000, 880)), ("S1_03", "Pilgrim2", "pilgrim", new(1500, 880)), ("S1_03", "Pilgrim3", "pilgrim", new(2000, 880)),
-        ("S1_03", "Pilgrim4", "pilgrim", new(2500, 880)), ("S1_03", "Pilgrim5", "pilgrim", new(3000, 880)),
-        ("S1_05", "Keeper", "keeper", new(1900, 888)),
-        ("S2_01", "WorkerHammer", "worker", new(1000, 896)), ("S2_01", "WorkerShovel", "worker", new(1400, 896)),
-        ("S2_02", "WorkerShovel", "worker", new(1500, 900)),
-        ("S2_03", "WorkerHammer", "worker", new(1300, 888)),
-        ("S3_01", "Guard", "guard", new(800, 572)),
-        ("S3_02", "Kneeler1", "kneeler", new(600, 572)), ("S3_02", "Kneeler2", "kneeler", new(1000, 572)),
-        ("S3_02", "Kneeler3", "kneeler", new(1400, 572)), ("S3_02", "Kneeler4", "kneeler", new(1800, 572)),
+        ("S1_03", "Pilgrim1", "pilgrim"), ("S1_03", "Pilgrim2", "pilgrim"), ("S1_03", "Pilgrim3", "pilgrim"),
+        ("S1_03", "Pilgrim4", "pilgrim"), ("S1_03", "Pilgrim5", "pilgrim"),
+        ("S1_05", "Keeper", "keeper"),
+        ("S2_01", "WorkerHammer", "worker"), ("S2_01", "WorkerShovel", "worker"),
+        ("S2_02", "WorkerShovel", "worker"),
+        ("S2_03", "WorkerHammer", "worker"),
+        ("S3_01", "Guard", "guard"),
+        ("S3_02", "Kneeler1", "kneeler"), ("S3_02", "Kneeler2", "kneeler"),
+        ("S3_02", "Kneeler3", "kneeler"), ("S3_02", "Kneeler4", "kneeler"),
     };
+
+    /// <summary>房间文字图里，名为 node 的锚点所在那一格（房间局部像素）；找不到返回 null。</summary>
+    public static Rect2? AnchorCell(string room, string node)
+    {
+        RoomDef def = GD.Load<WorldLayout>(WorldLayout.DefaultPath).Rooms.FirstOrDefault(r => r.Id == room);
+        if (def == null) return null;
+        Vector2 cell = MetSysApi.CellSize;
+        RoomGrid grid = RoomGrid.Load(def, new Vector2I((int)cell.X, (int)cell.Y), out _);
+        if (grid == null) return null;
+        foreach (var (letter, name) in grid.Anchors)
+            if (name == node && grid.Find(letter) is { } at) return grid.TileRect(at.X, at.Y);
+        return null;
+    }
+
+    /// <summary>位置是否站在锚点那一格里（和生成工具的“就近不动”规则相同）。</summary>
+    public static bool InAnchorCell(Vector2 position, Rect2 cell) =>
+        position.X >= cell.Position.X && position.X < cell.End.X && position.Y <= cell.End.Y && position.Y >= cell.End.Y - 1f;
+
+    /// <summary>房间场景文件里这个节点的位置（运行中的检查用它做基准）。</summary>
+    public static Vector2 ScenePosition(string room, string node)
+    {
+        Node scene = GD.Load<PackedScene>(RoomPath(room)).Instantiate();
+        Vector2 at = scene.GetNodeOrNull<Node2D>("Objects/" + node)?.Position ?? new Vector2(float.NaN, float.NaN);
+        scene.Free();
+        return at;
+    }
 
     public static string RoomPath(string room) => $"res://assets/scenes/world/s{room[1]}/{room}.tscn";
 
@@ -270,7 +300,9 @@ public partial class EnemyUnitTest : LabSuiteBase
                 var enemy = objects.GetNodeOrNull<EnemyBody>(e.node);
                 if (enemy == null) { problems.Add($"{room} 缺 {e.node}"); continue; }
                 if (enemy.SceneFilePath != $"res://assets/scenes/enemy/{e.scene}.tscn") problems.Add($"{room}/{e.node} 场景是 {enemy.SceneFilePath}");
-                if (enemy.Position != e.at) problems.Add($"{room}/{e.node} 在 {enemy.Position}，设计 {e.at}");
+                Rect2? cell = AnchorCell(room, e.node);
+                if (cell == null) problems.Add($"{room} 的文字图里没有 {e.node} 的锚点");
+                else if (!InAnchorCell(enemy.Position, cell.Value)) problems.Add($"{room}/{e.node} 在 {enemy.Position}，不在锚点格 {cell.Value} 里");
                 found.Add($"{room}:{e.node}");
             }
             scene.Free();
@@ -283,15 +315,15 @@ public partial class EnemyUnitTest : LabSuiteBase
             scene.Free();
         }
         Check(problems.Count == 0 && found.Count == Layout.Length,
-            $"摆放：S1_03 朝圣者 5、S1_05 守坑人、S2_01–S2_03 工人 4、S3_01 守卫、S3_02 跪拜泥人 4，位置和设计一致；其他房间没有敌人" + (problems.Count > 0 ? "：" + string.Join("; ", problems.Take(6)) : ""));
+            $"摆放：S1_03 朝圣者 5、S1_05 守坑人、S2_01–S2_03 工人 4、S3_01 守卫、S3_02 跪拜泥人 4，都站在文字图的锚点格里；其他房间没有敌人" + (problems.Count > 0 ? "：" + string.Join("; ", problems.Take(6)) : ""));
 
         Node s105 = GD.Load<PackedScene>(RoomPath("S1_05")).Instantiate();
         var lockNode = s105.GetNodeOrNull<SonOfMud.World.ArenaLock>("Objects/ArenaLock");
         var npcs = FindAll<SonOfMud.Narrative.World.NpcTalk>(s105);
         var keeper = s105.GetNodeOrNull<KeeperBoss>("Objects/Keeper");
-        Check(lockNode != null && lockNode.BossId == "keeper" && lockNode.Position == new Vector2(32, 888) && npcs.Count == 1 && npcs[0].NpcId == "keeper"
+        Check(lockNode != null && lockNode.BossId == "keeper" && AnchorCell("S1_05", "ArenaLock") is { } lockCell && InAnchorCell(lockNode.Position, lockCell) && npcs.Count == 1 && npcs[0].NpcId == "keeper"
               && keeper != null && keeper.BossId == "keeper" && keeper.Arena == new Rect2(320, 0, 1984, 972),
-            "摆放：S1_05 有竞技场入口门（左侧入口）、守坑人（竞技场 x 320–2304），老人 NPC 沿用 Narrative 已摆的那一个，没有重复");
+            "摆放：S1_05 有竞技场入口门（左侧入口，站在锚点格里）、守坑人（竞技场 x 320–2304），老人 NPC 沿用 Narrative 已摆的那一个，没有重复");
         s105.Free();
     }
 
