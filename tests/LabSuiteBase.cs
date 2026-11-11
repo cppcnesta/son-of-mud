@@ -81,7 +81,10 @@ public abstract partial class LabSuiteBase : Node
         await Frames(1);
     }
 
-    protected async Task LoadLab(string path)
+    protected Task LoadLab(string path) => UseLab(GD.Load<PackedScene>(path).Instantiate());
+
+    /// <summary>用一个现成的测试场节点（例如运行时用代码搭的场地），里面要有名为 Player 的真实玩家。</summary>
+    protected async Task UseLab(Node lab)
     {
         if (Lab != null)
         {
@@ -89,7 +92,7 @@ public abstract partial class LabSuiteBase : Node
             await Frames(2);
         }
         ReleaseInputs();
-        Lab = GD.Load<PackedScene>(path).Instantiate();
+        Lab = lab;
         AddChild(Lab);
         Player = Lab.GetNode<PlayerCharacter>("Player");
         await Frames(4);

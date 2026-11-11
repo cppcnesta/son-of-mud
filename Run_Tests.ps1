@@ -1,6 +1,6 @@
 ﻿param(
     [string]$GodotPath = $env:GODOT_DOTNET,
-    [ValidateSet('all','core','world','player','combat','player-feel','flow','ui','narrative','enemy','new')][string]$Suite = 'all',
+    [ValidateSet('all','core','world','player','combat','player-feel','wall-surface','flow','ui','narrative','enemy','new')][string]$Suite = 'all',
     [switch]$Headless
 )
 $ErrorActionPreference = 'Stop'
@@ -64,6 +64,7 @@ try {
         'player' = 'res://tests/player/player_suite.tscn'
         'combat' = 'res://tests/combat/combat_suite.tscn'
         'player-feel' = 'res://tests/player/feel_checks.tscn'
+        'wall-surface' = 'res://tests/player/wall_surface_test.tscn'
     }
     foreach ($name in $newScenes.Keys) {
         if ($Suite -ne 'all' -and $Suite -ne 'new' -and $Suite -ne $name) { continue }
