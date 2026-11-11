@@ -92,6 +92,7 @@ public partial class KeeperFlowTest : EnemyFlowBase
         bool respawned = await WaitUntil(() => RoomId == "S1_04" && !World.IsTransitioning && Player.Stats.Health == 140, 600);
         await Frames(10);
         Check(respawned && Deaths == 1 && Defeats.Count == 0 && !GameSession.Progress.Flag("boss_keeper"), "战斗中死亡：在 S1_04 复活、满血，守坑人没被记为击败");
+        Check(!_bar.Showing && !_bar.Visible, "战斗中死亡：复活后 Boss 血条已收起，不再挂着（审查 Minor）");
 
         // 再进来：守坑人重新生成、满血
         in105 = await HoldKeyUntil(RealKeys.Right, () => RoomId == "S1_05", 400);

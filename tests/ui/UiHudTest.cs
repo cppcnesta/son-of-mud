@@ -286,6 +286,26 @@ public partial class UiHudTest : UiTestBase
         Emit(Events.SignalName.BossEncounterStarted, new StringName("dragon"), "龙蛇", 300);
         await Frames(30);
         Check(bar.Visible && bar.NameLabel.Text == "龙蛇" && bar.Fill.Value == 300 && bar.Delay.Value == 300 && bar.Phase == 1, "Boss 血条：下一场战斗重新开始（名字、满血、第 1 阶段）");
+
+        // 战斗中断：玩家死亡
+        Emit(Events.SignalName.PlayerDied);
+        await Frames(30);
+        Check(!bar.Showing && !bar.Visible, "Boss 血条：战斗中玩家死亡（PlayerDied）后收起");
+        Emit(Events.SignalName.BossHealthChanged, new StringName("dragon"), 100, 300);
+        await Frames(5);
+        Check(!bar.Visible, "Boss 血条：中断后同一个 Boss 的扣血事件不再让它出现");
+
+        // 战斗中断：离开房间
+        Emit(Events.SignalName.BossEncounterStarted, new StringName("keeper"), "守坑人", 150);
+        await Frames(30);
+        Emit(Events.SignalName.RoomExiting, "S1_05");
+        await Frames(30);
+        Check(!bar.Showing && !bar.Visible, "Boss 血条：战斗中离开房间（RoomExiting）后收起");
+
+        // 中断之后重新开战，原来接着发的击败事件用它来收尾
+        Emit(Events.SignalName.BossEncounterStarted, new StringName("dragon"), "龙蛇", 300);
+        await Frames(30);
+        Check(bar.Visible && bar.Showing && bar.Fill.Value == 300 && bar.Delay.Value == 300, "Boss 血条：中断后重新开战，满血重新出现");
         Emit(Events.SignalName.BossDefeated, new StringName("dragon"), Vector2.Zero);
         await Frames(30);
     }
