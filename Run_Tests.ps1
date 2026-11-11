@@ -1,6 +1,6 @@
 ﻿param(
     [string]$GodotPath = $env:GODOT_DOTNET,
-    [ValidateSet('all','core','world','player','combat','player-feel','flow','ui','narrative','enemy','new')][string]$Suite = 'all',
+    [ValidateSet('all','core','world','player','combat','player-feel','flow','ui','narrative','enemy','levelcheck','new')][string]$Suite = 'all',
     [switch]$Headless
 )
 $ErrorActionPreference = 'Stop'
@@ -128,11 +128,25 @@ try {
             if ($LASTEXITCODE -ne 0 -and $enemyCode -eq 0) { $enemyCode = $LASTEXITCODE }
         }
     }
+    # 关卡几何：静态可达性检查（fixtures）和模拟器校准 + 路线机器人（真实玩家、真实按键）。
+    # 结果写到 tests/output/levelcheck_results.json、levelcheck_calibration_results.json
+    $levelCode = 0
+    if ($Suite -eq 'all' -or $Suite -eq 'levelcheck' -or $Suite -eq 'new') {
+        $levelScenes = @('tests/levelcheck/levelcheck_suite.tscn', 'tests/levelcheck/levelcheck_calibration.tscn')
+        foreach ($levelScene in $levelScenes) {
+            $levelName = [System.IO.Path]::GetFileNameWithoutExtension($levelScene)
+            $levelArguments = @('--path', $projectPath, '--scene', "res://$levelScene", '--rendering-method', 'gl_compatibility', '--audio-driver', 'Dummy', '--fixed-fps', '60', '--log-file', (Join-Path $outputPath "$levelName.log"))
+            if ($Headless) { $levelArguments += '--headless' }
+            & $GodotPath @levelArguments
+            Add-SceneExit "res://$levelScene" $LASTEXITCODE
+            if ($LASTEXITCODE -ne 0 -and $levelCode -eq 0) { $levelCode = $LASTEXITCODE }
+        }
+    }
     $badExits = @($sceneExits | Where-Object { $_.Code -ne 0 })
     ($sceneExits | ForEach-Object { "$($_.Code)`t$($_.Scene)" }) | Set-Content -Path (Join-Path $outputPath 'scene_exit_codes.txt') -Encoding utf8
     Write-Host "Scenes run: $($sceneExits.Count), non-zero exit codes: $($badExits.Count)"
     foreach ($bad in $badExits) { Write-Host "  EXIT $($bad.Code): $($bad.Scene)" -ForegroundColor Red }
-    $resultCode = if ($coreCode -ne 0) { $coreCode } elseif ($worldCode -ne 0) { $worldCode } elseif ($flowCode -ne 0) { $flowCode } elseif ($uiCode -ne 0) { $uiCode } elseif ($narrativeCode -ne 0) { $narrativeCode } elseif ($enemyCode -ne 0) { $enemyCode } else { $newCode }
+    $resultCode = if ($coreCode -ne 0) { $coreCode } elseif ($worldCode -ne 0) { $worldCode } elseif ($flowCode -ne 0) { $flowCode } elseif ($uiCode -ne 0) { $uiCode } elseif ($narrativeCode -ne 0) { $narrativeCode } elseif ($enemyCode -ne 0) { $enemyCode } elseif ($levelCode -ne 0) { $levelCode } else { $newCode }
     if ($resultCode -eq 0 -and $badExits.Count -gt 0) { $resultCode = $badExits[0].Code }
     if ($resultCode -eq 0 -and $importIssues) { $resultCode = 3 }
 }
