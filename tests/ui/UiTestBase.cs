@@ -14,7 +14,6 @@ using SonOfMud.UI;
 public abstract partial class UiTestBase : FlowTestBase
 {
     public const string TitleMenuScene = "res://assets/scenes/ui/title_menu.tscn";
-    public const string LegacyMenuScene = "res://assets/scenes/ui/main_menu.tscn";
 
     protected override string ResultPrefix => "ui";
 

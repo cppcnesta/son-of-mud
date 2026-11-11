@@ -5,7 +5,7 @@
 [ext_resource type="Texture2D" path="res://assets/art/ui/tex_ui_menu_bg.png" id="4_bg"]
 [ext_resource type="Texture2D" path="res://assets/art/ui/tex_ui_title_logo.png" id="5_logo"]
 
-[node name="TitleMenu" type="Control" node_paths=PackedStringArray("NewGameButton", "ContinueButton", "LegacyButton", "QuitButton", "ErrorPopup", "ErrorTitle", "ErrorText", "ErrorOkButton")]
+[node name="TitleMenu" type="Control" node_paths=PackedStringArray("NewGameButton", "ContinueButton", "QuitButton", "ErrorPopup", "ErrorTitle", "ErrorText", "ErrorOkButton")]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -16,7 +16,6 @@ theme = ExtResource("3_theme")
 script = ExtResource("1_title")
 NewGameButton = NodePath("Buttons/NewGame")
 ContinueButton = NodePath("Buttons/Continue")
-LegacyButton = NodePath("Buttons/Legacy")
 QuitButton = NodePath("Buttons/Quit")
 ErrorPopup = NodePath("ErrorPopup")
 ErrorTitle = NodePath("ErrorPopup/Items/Title")
@@ -81,11 +80,6 @@ text = "新的旅程"
 custom_minimum_size = Vector2(320, 52)
 layout_mode = 2
 text = "继续"
-
-[node name="Legacy" type="Button" parent="Buttons"]
-custom_minimum_size = Vector2(320, 52)
-layout_mode = 2
-text = "旧白模（调试）"
 
 [node name="Quit" type="Button" parent="Buttons"]
 custom_minimum_size = Vector2(320, 52)

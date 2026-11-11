@@ -21,9 +21,6 @@ config/icon="res://icon.svg"
 
 [autoload]
 
-InputDefaults="*res://assets/scripts/core/MudInputDefaults.cs"
-Progress="*res://assets/scripts/core/MudProgress.cs"
-RoomTravel="*res://assets/scripts/world/MudRoomTravel.cs"
 MetSys="*res://addons/MetroidvaniaSystem/Nodes/Singleton.tscn"
 Events="*res://assets/scripts/core/Events.cs"
 

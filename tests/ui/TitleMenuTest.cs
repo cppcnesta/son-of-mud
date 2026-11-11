@@ -7,11 +7,11 @@ using SonOfMud.World;
 
 /// <summary>
 /// 计划第 4 节步骤 4（正常流程，全部用键盘真实操作主菜单和暂停菜单）：
-/// ① run/main_scene 是新主菜单；没有存档时“继续”置灰，按了没有反应；“旧白模”只在调试版本出现。
+/// ① run/main_scene 是新主菜单；没有存档时“继续”置灰，按了没有反应；旧白模已删除，主菜单里没有“旧白模”入口。
 /// ② “新的旅程”进入 main_game.tscn、到 S1_01；新游戏不生成也不改动存档。
 /// ③ 在 S1_04 存档点按 E 存档；Esc → “回主菜单”：回到新主菜单，没有残留的暂停或输入锁，上一局已释放。
 /// ④ 有存档后“继续”亮起，按“继续”回到存档点房间。
-/// ⑤ “旧白模”入口打开旧的 main_menu.tscn。
+/// ⑤ 再经暂停菜单回一次主菜单，整个流程里存档文件不被主菜单改动。
 /// </summary>
 public partial class TitleMenuTest : UiTestBase
 {
@@ -29,7 +29,7 @@ public partial class TitleMenuTest : UiTestBase
         Check(menu != null, "新主菜单能打开");
         if (menu == null) return;
         Check(menu.ContinueButton.Disabled && !menu.NewGameButton.Disabled && !menu.QuitButton.Disabled, "没有存档时“继续”置灰，“新的旅程”“退出”可用");
-        Check(menu.LegacyButton.Visible == OS.IsDebugBuild() && OS.IsDebugBuild(), "调试版本里有“旧白模”入口");
+        Check(menu.GetNodeOrNull("Buttons/Legacy") == null, "旧白模已删除，主菜单里没有“旧白模”入口");
         Check(!menu.ErrorShowing, "没有开局失败时不弹提示");
         Check(menu.NewGameButton.HasFocus(), "“继续”置灰时，焦点默认在“新的旅程”");
 
@@ -83,13 +83,10 @@ public partial class TitleMenuTest : UiTestBase
         Check(Ui.Hud.Prompt.Visible && Ui.Hud.Prompt.Text == "E 存档", $"继续：站在存档点上，HUD 提示“E 存档”（“{Ui.Hud.Prompt.Text}”）");
         Check(SameBytes(saved, ReadSaveBytes()), "继续不改动存档");
 
-        // ⑤ 旧白模入口
+        // ⑤ 再回一次主菜单（旧白模入口已随旧白模一起删除）
         menu = await QuitToMenuViaPauseMenu();
         Check(menu != null && NoPauseOrLock(), "再次经暂停菜单回主菜单");
         if (menu == null) return;
-        sent = await Activate(menu.LegacyButton);
-        bool legacy = await WaitUntil(() => GetTree().CurrentScene?.SceneFilePath == LegacyMenuScene, 120);
-        Check(sent && legacy, "“旧白模”入口打开旧的 main_menu.tscn");
         await Frames(5);
         Check(SameBytes(saved, ReadSaveBytes()), "整个流程里存档文件没有被主菜单改动");
     }
