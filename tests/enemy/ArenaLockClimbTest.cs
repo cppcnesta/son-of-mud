@@ -9,7 +9,9 @@ using SonOfMud.World;
 /// 关卡几何计划 v3 第 2.1 节：战斗中贴着 ArenaLock 门体爬不上去。从正式入口 main_game.tscn 开新游戏，真实玩家、真实按键：
 /// S1_04 → 走进 S1_05，在竞技场外先原地跳一次量出单跳高度 → 走进竞技场开战（入口门关上）→ 回头贴着门，
 /// 按住 A+W 起跳，再连按跳 20 次：始终没有进入攀墙、没有蹬墙跳，最高点不超过单跳，身体顶部始终低于门顶。
-/// （S1_05 正式房间里“三种上墙方式都上不去”要等地图 1 的新地形，竞技场墙是 X 之后再做。）
+/// 再跑到竞技场右墙（文字图里是不可攀的 X，出口平台就挂在它上面）：① 按住 D+W 起跳并一直按住；② 按住 D 连按跳 20 次。
+/// 两种都不能进入攀墙、不能蹬墙跳，身体顶部始终低于出口平台底面——战斗中够不到出口（计划 2.1 / 4.1 的三种上墙方式）。
+/// 右墙那段持续几秒，守坑人会追过来打，测试每帧把玩家血量补满，只是为了不让“被打死”干扰攀爬判定。
 /// </summary>
 public partial class ArenaLockClimbTest : EnemyFlowBase
 {
@@ -107,5 +109,55 @@ public partial class ArenaLockClimbTest : EnemyFlowBase
         Check(!sawClimb && airWindups == 0, $"战斗中贴着门体按住 A+W 并连按跳 {JumpPresses} 次：从未进入攀墙，没有蹬墙跳（{airWindups} 次）");
         Check(rise <= single + 1f && minY - 24f > doorTop,
             $"最高点 {rise:F1}px 不超过单跳 {single:F1}px，身体顶部（{minY - 24f:F0}）始终低于门顶（{doorTop:F0}）");
+
+        await RightWallAttempts(arenaLock, single);
+    }
+
+    /// <summary>出口平台底面（S1_05 文字图：平台在第 10～11 行，底面 = 第 12 行顶边）。</summary>
+    private float LedgeBottom => 12 * RoomGrid.Tile - RoomGrid.ShiftFor(World.CurrentRoomDef, new Vector2I((int)MetSysApi.CellSize.X, (int)MetSysApi.CellSize.Y));
+
+    private async Task RightWallAttempts(ArenaLock arenaLock, float single)
+    {
+        float width = World.CurrentRoomDef.Size.X * MetSysApi.CellSize.X;
+        bool atWall = await HoldKeyUntil(RealKeys.Right, () => { Player.Stats.Refill(); return Player.IsOnWall() && LocalX > width - 100f; }, 600);
+        Check(atWall && arenaLock.IsClosed, $"战斗中跑到竞技场右墙脚下（x={LocalX:F0}），入口门还关着");
+        if (!atWall) return;
+
+        foreach (bool holdUp in new[] { true, false })
+        {
+            string how = holdUp ? "按住 D+W 起跳并一直按住" : $"按住 D 连按跳 {JumpPresses} 次";
+            await HoldKeyUntil(RealKeys.Right, () => { Player.Stats.Refill(); return Player.IsOnFloor() && Player.IsOnWall(); }, 120);
+            float startY = LocalY, minY = startY;
+            int contact = 0, airWindups = 0;
+            bool sawClimb = false, stayedClosed = true;
+            void OnState(StringName from, StringName to)
+            {
+                if (Player.State is JumpWindupState && !Player.IsOnFloor()) airWindups++;
+            }
+            Player.Machine.StateChanged += OnState;
+            RealKeys.Down(RealKeys.Right);
+            if (holdUp) RealKeys.Down(RealKeys.MoveUp);
+            int presses = holdUp ? 1 : JumpPresses;
+            for (int f = 0; f < presses * PressEvery + 120; f++)
+            {
+                int k = f / PressEvery, phase = f % PressEvery;
+                if (k < presses && phase == 2) RealKeys.Down(RealKeys.Jump);
+                if (k < presses && phase == 4) RealKeys.Up(RealKeys.Jump);
+                Player.Stats.Refill();
+                await Frames(1);
+                minY = Mathf.Min(minY, LocalY);
+                sawClimb |= Player.State is WallClimbState;
+                stayedClosed &= arenaLock.IsClosed;
+                if (Player.IsOnWall() && LocalX > width - 100f) contact++;
+            }
+            RealKeys.ReleaseAll();
+            Player.Machine.StateChanged -= OnState;
+            await Frames(2);
+            float rise = startY - minY;
+            Check(stayedClosed && RoomId == "S1_05" && contact > 30, $"右墙（{how}）：一直在战斗中，确实贴着右墙（{contact} 帧）");
+            Check(!sawClimb && airWindups == 0, $"右墙（{how}）：从未进入攀墙，没有蹬墙跳（{airWindups} 次）");
+            Check(rise <= single + 1f && minY - 24f > LedgeBottom,
+                $"右墙（{how}）：最高点 {rise:F1}px 不超过单跳 {single:F1}px，身体顶部（{minY - 24f:F0}）始终低于出口平台底面（{LedgeBottom:F0}）");
+        }
     }
 }
