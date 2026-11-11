@@ -1,4 +1,5 @@
 using Godot;
+using SonOfMud.Core;
 using GDict = Godot.Collections.Dictionary<string, string>;
 
 namespace SonOfMud.UI;
@@ -73,7 +74,18 @@ public partial class UiSettings : Resource
     /// 场景释放后这些包装对象等着被 GC 终结，下一次进入同一场景又拿到同一个资源时，偶尔触发引擎的
     /// FATAL（gchandle.is_released）。一直持有的对象不会被终结，也就没有这个竞争。
     /// </summary>
-    public static UiSettings Shared => _shared ??= LoadDefault();
+    public static UiSettings Shared
+    {
+        get
+        {
+            if (_shared != null) return _shared;
+            _shared = LoadDefault();
+            ShutdownHooks.Register(ReleaseShared);
+            return _shared;
+        }
+    }
+
+    private static void ReleaseShared() => _shared = null;
 
     public static UiSettings LoadDefault() =>
         ResourceLoader.Exists(DefaultPath) ? GD.Load<UiSettings>(DefaultPath) : new UiSettings();

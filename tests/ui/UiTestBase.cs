@@ -19,8 +19,6 @@ public abstract partial class UiTestBase : FlowTestBase
 
     // 两个按键事件整个进程只建一次、一直持有：每次 new 一个交给 Input.ParseInputEvent，
     // 偶尔会在 GC 终结器里触发引擎的 FATAL（gchandle.is_released），所以不让它们被终结。
-    private static readonly InputEventAction AcceptPress = new() { Action = "ui_accept", Pressed = true };
-    private static readonly InputEventAction AcceptRelease = new() { Action = "ui_accept", Pressed = false };
 
     /// <summary>当前正式场景里的整套界面（不在 main_game 里时为 null）。</summary>
     protected GameUi Ui => MainGame?.GetNodeOrNull<GameUi>("GameUi");
@@ -58,9 +56,9 @@ public abstract partial class UiTestBase : FlowTestBase
         button.GrabFocus();
         await Frames(1);
         if (!button.HasFocus()) return false;
-        Input.ParseInputEvent(AcceptPress);
+        Input.ParseInputEvent(new InputEventAction { Action = "ui_accept", Pressed = true });
         await Frames(1);
-        Input.ParseInputEvent(AcceptRelease);
+        Input.ParseInputEvent(new InputEventAction { Action = "ui_accept", Pressed = false });
         await Frames(2);
         return true;
     }
