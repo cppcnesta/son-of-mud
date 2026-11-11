@@ -65,7 +65,9 @@ public static class TerrainTiles
         tileSet.SetCustomDataLayerName(0, Surfaces.NoClimbData);
         tileSet.SetCustomDataLayerType(0, Variant.Type.Bool);
 
-        var source = new TileSetAtlasSource { Texture = ImageTexture.CreateFromImage(PaintAtlas()), TextureRegionSize = new Vector2I(Tile, Tile) };
+        using Image image = PaintAtlas();
+        using ImageTexture texture = ImageTexture.CreateFromImage(image);
+        using var source = new TileSetAtlasSource { Texture = texture, TextureRegionSize = new Vector2I(Tile, Tile) };
         tileSet.AddSource(source, SourceId);
         float h = Tile / 2f;
         foreach (Vector2I atlas in AllAtlas)
@@ -99,7 +101,10 @@ public static class TerrainTiles
         sb.Append($";custom={tileSet.GetCustomDataLayersCount()}");
         for (int i = 0; i < tileSet.GetCustomDataLayersCount(); i++)
             sb.Append($";custom{i}={tileSet.GetCustomDataLayerName(i)}:{tileSet.GetCustomDataLayerType(i)}");
-        if (!tileSet.HasSource(SourceId) || tileSet.GetSource(SourceId) is not TileSetAtlasSource source) return sb.Append(";no source").ToString();
+        if (!tileSet.HasSource(SourceId)) return sb.Append(";no source").ToString();
+        // 用完放掉托管包装，不让 C# 一直拿着图集源（否则退出时报 Shape2D 泄漏）
+        using TileSetSource anySource = tileSet.GetSource(SourceId);
+        if (anySource is not TileSetAtlasSource source) return sb.Append(";no atlas source").ToString();
         sb.Append($";sources={tileSet.GetSourceCount()};region={source.TextureRegionSize};tiles={source.GetTilesCount()}");
         var tiles = new List<Vector2I>();
         for (int i = 0; i < source.GetTilesCount(); i++) tiles.Add(source.GetTileId(i));

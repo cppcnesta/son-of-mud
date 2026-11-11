@@ -72,7 +72,7 @@ public sealed class GeometryBuilder
             Node root = LoadScene(room, false);
             if (root == null) continue;
             string text = ExportRoom(room, root);
-            root.Free();
+            FreeRoom(root);
             if (text != null) texts[room] = text;
         }
         if (Errors.Count > 0 || !write) return Errors.Count == 0;
@@ -97,7 +97,8 @@ public sealed class GeometryBuilder
 
         var geometry = root.GetNodeOrNull<TileMapLayer>(GeometryName);
         if (geometry == null) { Fail("没有 Geometry 瓦片层"); return null; }
-        int srcTile = geometry.TileSet?.TileSize.X ?? 64;
+        int srcTile;
+        using (TileSet srcTiles = geometry.TileSet) srcTile = srcTiles?.TileSize.X ?? 64;
         int srcShift = Mathf.RoundToInt(-geometry.Position.Y);
         if (srcTile % Tile != 0) { Fail($"Geometry 的瓦片尺寸 {srcTile} 不是 {Tile} 的倍数"); return null; }
 
@@ -238,10 +239,12 @@ public sealed class GeometryBuilder
     /// </summary>
     public bool RunGeometry(bool write)
     {
-        TileSet expectedTiles = TerrainTiles.Build();
-        TileSet currentTiles = ResourceLoader.Exists(TerrainTiles.TileSetPath)
-            ? ResourceLoader.Load<TileSet>(TerrainTiles.TileSetPath, null, ResourceLoader.CacheMode.Ignore) : null;
-        bool tilesStale = TerrainTiles.Describe(currentTiles) != TerrainTiles.Describe(expectedTiles);
+        // 用到的 Godot 资源都在用完后放掉托管包装（using），不然 C# 一直拿着它们，退出时会报 Shape2D 泄漏
+        using TileSet expectedTiles = TerrainTiles.Build();
+        string currentDescription;
+        using (TileSet currentTiles = ResourceLoader.Exists(TerrainTiles.TileSetPath) ? ResourceLoader.Load<TileSet>(TerrainTiles.TileSetPath, null, ResourceLoader.CacheMode.Ignore) : null)
+            currentDescription = TerrainTiles.Describe(currentTiles);
+        bool tilesStale = currentDescription != TerrainTiles.Describe(expectedTiles);
         if (tilesStale) Changes.Add("瓦片集：world_tileset.tres 需要按 32 像素重新生成");
 
         var grids = new Dictionary<string, RoomGrid>();
@@ -256,34 +259,34 @@ public sealed class GeometryBuilder
         foreach (var (id, grid) in grids) ValidateRoom(Layout.Find(id), grid);
         ValidateAlignment(grids);
 
-        var pending = new List<(RoomDef Room, Node Root)>();
+        // 先用普通实例算出每个房间的改动（干跑只做这一步）
+        var pending = new List<(RoomDef Room, RoomGrid Grid)>();
         foreach (var (id, grid) in grids)
         {
             RoomDef room = Layout.Find(id);
-            Node root = LoadScene(room, true);
+            Node root = LoadScene(room, false);
             if (root == null) continue;
             List<string> changes = Plan(room, grid, root);
-            if (changes.Count > 0)
-            {
-                Changes.AddRange(changes.Select(c => $"{id}：{c}"));
-                pending.Add((room, root));
-            }
-            else root.Free();
+            FreeRoom(root);
+            if (changes.Count == 0) continue;
+            Changes.AddRange(changes.Select(c => $"{id}：{c}"));
+            pending.Add((room, grid));
         }
+        if (Errors.Count > 0 || !write) return Errors.Count == 0;
 
-        bool ok = Errors.Count == 0;
-        if (ok && write)
+        // 写入：只对有改动的房间按“编辑态”重新实例化（保留子场景实例的覆盖关系，打包时不会把子场景的默认值写成覆盖），再改一遍、打包
+        if (tilesStale) Save(expectedTiles, TileSetOutput);
+        foreach (var (room, grid) in pending)
         {
-            if (tilesStale) Save(expectedTiles, TileSetOutput);
-            foreach (var (room, root) in pending)
-            {
-                var packed = new PackedScene();
-                Error packResult = packed.Pack(root);
-                if (packResult != Error.Ok) { Errors.Add($"{room.Id}：打包失败 {packResult}"); continue; }
-                Save(packed, SceneOutput(room));
-            }
+            Node root = LoadScene(room, true);
+            if (root == null) continue;
+            Plan(room, grid, root);
+            using var packed = new PackedScene();
+            Error packResult = packed.Pack(root);
+            FreeRoom(root);
+            if (packResult != Error.Ok) { Errors.Add($"{room.Id}：打包失败 {packResult}"); continue; }
+            Save(packed, SceneOutput(room));
         }
-        foreach (var (_, root) in pending) root.Free();
         return Errors.Count == 0;
     }
 
@@ -312,10 +315,23 @@ public sealed class GeometryBuilder
         Written.Add(path);
     }
 
+    /// <summary>
+    /// 释放房间实例，并立刻让 .NET 的终结器跑完。
+    /// 房间里的 C# 脚本对象（敌人、门、剧情触发器等）被释放后，它们的托管包装要靠终结器线程回收；
+    /// 实测连续实例化几百个房间时，终结器线程和主线程同时操作 Godot 对象偶尔会让引擎崩溃（gchandle.is_released 断言，退出码 132），
+    /// 所以每释放一个房间就在主线程上等终结器跑完，不让它和下一个房间的实例化同时进行。
+    /// </summary>
+    private static void FreeRoom(Node root)
+    {
+        root.Free();
+        GC.Collect();
+        GC.WaitForPendingFinalizers();
+    }
+
     private Node LoadScene(RoomDef room, bool forEditing)
     {
         if (!ResourceLoader.Exists(room.ScenePath)) { Errors.Add($"{room.Id}：房间场景不存在 {room.ScenePath}"); return null; }
-        var packed = ResourceLoader.Load<PackedScene>(room.ScenePath);
+        using var packed = ResourceLoader.Load<PackedScene>(room.ScenePath); // 用完就放掉托管包装，场景资源不会被 C# 一直拿着
         Node root = forEditing ? packed?.Instantiate(PackedScene.GenEditState.Instance) : packed?.Instantiate();
         if (root == null) Errors.Add($"{room.Id}：房间场景实例化失败");
         return root;
@@ -459,9 +475,11 @@ public sealed class GeometryBuilder
         bool sameTiles = have.Count == want.Count && want.All(kv => have.TryGetValue(kv.Key, out Vector2I v) && v == kv.Value);
         // 场景里存的瓦片数据还带着已删除的格子（不在场景树里的 TileMapLayer 删格子只做标记，存盘时会一起写出去），也算要重写
         bool stale = geometry.TileMapData.Length != EncodeTiles(have).Length;
-        if (!sameTiles || stale || geometry.TileSet?.ResourcePath != TerrainTiles.TileSetPath || geometry.Position != new Vector2(0, -shift))
+        string layerTiles;
+        using (TileSet current = geometry.TileSet) layerTiles = current?.ResourcePath;
+        if (!sameTiles || stale || layerTiles != TerrainTiles.TileSetPath || geometry.Position != new Vector2(0, -shift))
         {
-            geometry.TileSet = GD.Load<TileSet>(TerrainTiles.TileSetPath);
+            using (TileSet tiles = GD.Load<TileSet>(TerrainTiles.TileSetPath)) geometry.TileSet = tiles;
             geometry.Position = new Vector2(0, -shift);
             geometry.TileMapData = EncodeTiles(want);
             geometry.UpdateInternals();
@@ -596,7 +614,9 @@ public sealed class GeometryBuilder
             var run = MainOpening(grid, exit.Side, from, to);
             int? floor = run == null ? null : FloorRow(grid, exit.Side, run.Value);
             if (floor == null) continue; // 已报错
-            float half = gate.GetNodeOrNull<CollisionShape2D>("Shape")?.Shape is RectangleShape2D rect ? rect.Size.X / 2f : Tile;
+            Shape2D gateShape = gate.GetNodeOrNull<CollisionShape2D>("Shape")?.Shape;
+            float half = gateShape is RectangleShape2D rect ? rect.Size.X / 2f : Tile;
+            gateShape?.Dispose(); // 只放掉托管包装（形状仍归场景所有），否则退出时会报 Shape2D 泄漏
             var at = new Vector2(exit.Side == ExitSide.Left ? half : width - half, floor.Value * Tile - shift);
             if (gate.Position != at)
             {

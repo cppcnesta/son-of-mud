@@ -71,6 +71,7 @@ public partial class GeometryValidateTest : WorldTestBase
 
         Check(SceneHashes().SequenceEqual(before), "以上所有失败用例之后，仓库里 27 个房间场景和瓦片集一个字节都没变");
 
+        ClearOut();
         // 对照组：合法改动（S1_01 半空加一格实心）→ 干跑报告 S1_01 的 Geometry 会变；写入模式真的写出 S1_01 一个文件
         string control = Edit("S1_01", g => g.Set(10, 5, RoomGrid.Solid));
         var dry = NewBuilder(("S1_01", control));
@@ -82,7 +83,8 @@ public partial class GeometryValidateTest : WorldTestBase
         string outScene = $"{OutDir}/S1_01.tscn";
         Check(realOk && real.Written.SequenceEqual(new[] { outScene }) && OutFiles().SequenceEqual(new[] { "S1_01.tscn" }),
             $"对照组写入：只写出 {outScene}（写了 {string.Join(",", real.Written)}；输出目录 {string.Join(",", OutFiles())}；{string.Join(";", real.Errors)}）");
-        Node written = ResourceLoader.Load<PackedScene>(outScene)?.Instantiate();
+        using PackedScene writtenScene = ResourceLoader.Load<PackedScene>(outScene);
+        Node written = writtenScene?.Instantiate();
         var geometry = written?.GetNodeOrNull<TileMapLayer>("Geometry");
         Check(geometry != null && geometry.GetCellAtlasCoords(new Vector2I(10, 5)) == TerrainTiles.SolidAtlas, "对照组写入：写出的场景里 (10,5) 是实心瓦片");
         written?.Free();
@@ -105,6 +107,7 @@ public partial class GeometryValidateTest : WorldTestBase
 
     private void Run(string name, string roomId, string text, string where, string what)
     {
+        ClearOut(); // 每个用例从空的输出目录开始，失败只算在这个用例上
         GeometryBuilder builder = NewBuilder((roomId, text));
         bool ok = builder.RunGeometry(write: true);
         bool reported = builder.Errors.Any(e => e.Contains(where) && e.Contains(what));
