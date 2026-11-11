@@ -2,7 +2,7 @@ using SonOfMud.Core;
 
 namespace SonOfMud.Player.States;
 
-/// <summary>Idle / Run 共用：落地时消费缓冲的跳；走下平台开始土狼时间；攻击 / 格挡 / 闪避的入口。</summary>
+/// <summary>Idle / Run 共用：落地时消费缓冲的跳；走下平台开始土狼时间；攻击 / 格挡 / 闪避 / 扔泥肝的入口。</summary>
 public abstract partial class GroundState : PlayerState
 {
     public override bool CanSwitchForm => true;
@@ -24,7 +24,7 @@ public abstract partial class GroundState : PlayerState
             Machine.TransitionTo<JumpWindupState>();
             return;
         }
-        if (P.TryStartAttack() || P.TryStartBlock() || P.TryStartDodge()) return;
+        if (P.TryStartAttack() || P.TryStartBlock() || P.TryStartDodge() || ThrowState.TryEnter(Machine)) return;
 
         float axis = P.Axis;
         P.Walk(axis);
