@@ -17,8 +17,7 @@ public abstract partial class UiTestBase : FlowTestBase
 
     protected override string ResultPrefix => "ui";
 
-    // 两个按键事件整个进程只建一次、一直持有：每次 new 一个交给 Input.ParseInputEvent，
-    // 偶尔会在 GC 终结器里触发引擎的 FATAL（gchandle.is_released），所以不让它们被终结。
+    // 按键事件每次用到时新建，不放进静态字段：静态字段持有的 Godot 对象会活到引擎销毁之后，退出时被终结会让进程崩溃。
 
     /// <summary>当前正式场景里的整套界面（不在 main_game 里时为 null）。</summary>
     protected GameUi Ui => MainGame?.GetNodeOrNull<GameUi>("GameUi");

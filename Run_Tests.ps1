@@ -90,7 +90,7 @@ try {
     # UI 测试（HUD 假事件、暂停菜单 / 地图、新主菜单流程、读档失败、真实玩家集成）：结果写到 tests/output/ui_<名字>_results.json
     $uiCode = 0
     if ($Suite -eq 'all' -or $Suite -eq 'ui' -or $Suite -eq 'new') {
-        $uiScenes = @('tests/ui/ui_hud_test.tscn', 'tests/ui/ui_pause_map_test.tscn', 'tests/ui/title_menu_test.tscn', 'tests/ui/title_menu_failure_test.tscn', 'tests/ui/ui_integration_test.tscn')
+        $uiScenes = @('tests/ui/ui_hud_test.tscn', 'tests/ui/ui_pause_map_test.tscn', 'tests/ui/title_menu_test.tscn', 'tests/ui/title_menu_failure_test.tscn', 'tests/ui/ui_integration_test.tscn', 'tests/ui/quit_from_pause_test.tscn', 'tests/ui/quit_from_title_test.tscn')
         foreach ($uiScene in $uiScenes) {
             $uiName = [System.IO.Path]::GetFileNameWithoutExtension($uiScene)
             $uiArguments = @('--path', $projectPath, '--scene', "res://$uiScene", '--audio-driver', 'Dummy', '--fixed-fps', '60', '--log-file', (Join-Path $outputPath "ui_$uiName.log"))
