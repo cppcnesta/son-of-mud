@@ -9,12 +9,12 @@ namespace SonOfMud.UI;
 /// </summary>
 public partial class HpBead : TextureProgressBar
 {
-    /// <summary>这颗珠子能装的血量（通常 20；最大血量不是 20 的倍数时最后一颗小一些）。</summary>
-    public int Capacity { get; private set; } = 1;
+    /// <summary>这颗珠子能装的血量 = 上限 / 珠子数（上限 140 时 20；上限 70 时约 23.3，所以是小数）。</summary>
+    public float Capacity { get; private set; } = 1f;
     /// <summary>这颗珠子应当显示的血量（动画的目标）。</summary>
-    public int Amount { get; private set; }
+    public float Amount { get; private set; }
     /// <summary>目标填充比例 0..1。</summary>
-    public float Fill => Capacity > 0 ? (float)Amount / Capacity : 0f;
+    public float Fill => Capacity > 0f ? Amount / Capacity : 0f;
     /// <summary>当前画面上的填充比例（动画进行中会和 Fill 不同）。</summary>
     public float DisplayedFill => MaxValue > 0 ? (float)(Value / MaxValue) : 0f;
     /// <summary>播放过几次碎裂效果。</summary>
@@ -25,13 +25,13 @@ public partial class HpBead : TextureProgressBar
     private Tween _fillTween;
     private Tween _breakTween;
 
-    public void Setup(int capacity, Vector2 size)
+    public void Setup(float capacity, Vector2 size)
     {
         Step = 0;
         MinValue = 0;
         CustomMinimumSize = size;
         MouseFilter = MouseFilterEnum.Ignore;
-        Capacity = Mathf.Max(1, capacity);
+        Capacity = capacity > 0f ? capacity : 1f;
         MaxValue = Capacity;
         Amount = 0;
         Value = 0;
@@ -40,10 +40,10 @@ public partial class HpBead : TextureProgressBar
     }
 
     /// <summary>设置目标血量。animate=false 时立刻到位；animate=true 且从有血掉到空时播放碎裂。</summary>
-    public void SetAmount(int amount, bool animate, float seconds, float breakSeconds)
+    public void SetAmount(float amount, bool animate, float seconds, float breakSeconds)
     {
-        amount = Mathf.Clamp(amount, 0, Capacity);
-        bool broke = Amount > 0 && amount == 0;
+        amount = Mathf.Clamp(amount, 0f, Capacity);
+        bool broke = Amount > 0f && amount <= 0f;
         Amount = amount;
         _fillTween?.Kill();
         if (!animate || seconds <= 0f || !IsInsideTree())
