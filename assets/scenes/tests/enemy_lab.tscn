@@ -1,0 +1,37 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://assets/scripts/tools/PlayerLab.cs" id="1"]
+[ext_resource type="Script" path="res://assets/scripts/tools/LabGeometry.cs" id="2"]
+[ext_resource type="PackedScene" path="res://assets/scenes/player/player_v2.tscn" id="3"]
+[ext_resource type="PackedScene" path="res://assets/scenes/enemy/worker.tscn" id="4"]
+[ext_resource type="PackedScene" path="res://assets/scenes/enemy/pilgrim.tscn" id="5"]
+[ext_resource type="PackedScene" path="res://assets/scenes/enemy/kneeler.tscn" id="6"]
+[ext_resource type="PackedScene" path="res://assets/scenes/enemy/guard.tscn" id="7"]
+[ext_resource type="Script" path="res://assets/scripts/tools/PlayerDebugHud.cs" id="8"]
+
+[node name="EnemyLab" type="Node2D"]
+script = ExtResource("1")
+
+[node name="Geometry" type="Node2D" parent="."]
+script = ExtResource("2")
+Solids = Array[Rect2]([Rect2(-400, 600, 4400, 64), Rect2(-464, -400, 64, 1064), Rect2(4000, -400, 64, 1064)])
+
+[node name="Player" parent="." instance=ExtResource("3")]
+position = Vector2(400, 576)
+
+[node name="Camera2D" type="Camera2D" parent="Player"]
+
+[node name="Worker" parent="." instance=ExtResource("4")]
+position = Vector2(900, 600)
+
+[node name="Pilgrim" parent="." instance=ExtResource("5")]
+position = Vector2(1700, 600)
+
+[node name="Kneeler" parent="." instance=ExtResource("6")]
+position = Vector2(2300, 600)
+
+[node name="Guard" parent="." instance=ExtResource("7")]
+position = Vector2(3300, 600)
+
+[node name="DebugHud" type="CanvasLayer" parent="."]
+script = ExtResource("8")
