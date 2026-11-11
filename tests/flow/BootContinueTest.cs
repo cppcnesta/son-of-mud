@@ -68,7 +68,7 @@ public partial class BootContinueTest : FlowTestBase
         Check(save != null && save.SpawnId == SpawnPoint.SaveId && Mathf.Abs(Player.GlobalPosition.X - save.GlobalPosition.X) < 1f && Mathf.Abs(Player.GlobalPosition.Y - save.GlobalPosition.Y) < 32f && Player.IsOnFloor(),
             $"读档：人在存档点的 Save 出生点（玩家 {Player.GlobalPosition}，出生点 {save?.GlobalPosition}）");
         Check(GameSession.Progress.GetVar(TestVar).AsInt32() == 7, $"读档：进度变量回到存档时的值 7（实际 {GameSession.Progress.GetVar(TestVar)}）");
-        Check(AbilityList() == savedAbilities && AbilityList() == "block,switch_form", $"读档：能力恢复（{AbilityList()}）");
+        Check(AbilityList() == savedAbilities && AbilityList() == "block,switch_form,wall_climb", $"读档：能力恢复（{AbilityList()}）");
         Check(Saves.CheckpointSavePoint == "S1_04" && Saves.CheckpointRoom == "S1_04", "读档：最近存档点是 S1_04");
         Check(Player.GetNode<PlayerInteractor>("Interactor").CurrentPrompt == "存档", "读档：站在存档点上，交互提示是“存档”");
         Check(Player.Stats.Health == 140 && Player.Forms.Form == FormController.Water, "读档：新玩家满血、水形态");

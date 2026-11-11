@@ -7,6 +7,7 @@ namespace SonOfMud.World;
 /// Boss 房的入口门（只听 Events，不认识 Enemy）：开局是开着的；
 /// 收到 BossEncounterStarted(BossId) 关上；收到 BossDefeated(BossId)、PlayerDied 或离开房间（RoomExiting）时打开。
 /// 关着时是 World 层的阻挡并显示占位色块；开着时没有碰撞、隐藏。出口那道门是 GateBarrier（读 boss_&lt;id&gt;），不归这里管。
+/// 门体在 Surfaces.NoClimbGroup 分组里：不能攀爬、不能蹬墙跳。
 /// </summary>
 [GlobalClass]
 public partial class ArenaLock : StaticBody2D
@@ -33,7 +34,12 @@ public partial class ArenaLock : StaticBody2D
         Events.Instance.RoomExiting -= OnRoomExiting;
     }
 
-    public override void _Ready() => Apply(false);
+    public override void _Ready()
+    {
+        // 门体不能攀爬，也不能蹬墙跳（关卡几何计划 v3 第 2.1 节）：战斗中不能贴着门爬出竞技场。
+        AddToGroup(Surfaces.NoClimbGroup);
+        Apply(false);
+    }
 
     private void OnEncounterStarted(StringName bossId, string displayName, int maxHp)
     {

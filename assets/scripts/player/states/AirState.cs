@@ -19,10 +19,13 @@ public abstract partial class AirState : PlayerState
         P.ApplyAirGravity((float)delta);
     }
 
-    /// <summary>空中能起跳的情况：土狼时间内（Fall）或贴墙且有攀墙能力（蹬墙跳）。</summary>
+    /// <summary>
+    /// 空中能起跳的情况：土狼时间内（Fall）或贴着能用的墙（CanUseWall：有攀墙能力、墙面没有不可攀的）蹬墙跳。
+    /// 墙不能用时不消费跳跃缓冲，落地后照常当地面跳。
+    /// </summary>
     protected virtual bool TryAirJump()
     {
-        if (!P.HasAbility(PlayerAbilities.WallClimb) || !P.IsOnWall()) return false;
+        if (!P.CanUseWall()) return false;
         if (!P.Buffer.Consume(PlayerActions.Jump, P.Rules.JumpBuffer)) return false;
         Machine.TransitionTo<JumpWindupState>(new Core.StateMsg().Set(JumpWindupState.WallKey, true));
         return true;

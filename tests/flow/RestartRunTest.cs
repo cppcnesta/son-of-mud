@@ -84,7 +84,7 @@ public partial class RestartRunTest : FlowTestBase
             $"重开：各种冷却为 0、没有减速（闪避 {t.DodgeCooldown}、格挡 {t.BlockCooldown}、攻击 {t.AttackInterval}、切换 {t.SwitchCooldown}）");
         Check(!t.Bonus.Ready, "重开：增伤未就绪");
         Check(!GameSession.Progress.VariableKeys.Any(), "重开：进度变量清空");
-        Check(AbilityList() == "block,switch_form", $"重开：能力恢复初始（{AbilityList()}）");
+        Check(AbilityList() == "block,switch_form,wall_climb", $"重开：能力恢复初始（{AbilityList()}）");
         Check(!MetSysApi.IsCellDiscovered(explored, false) && !MetSysApi.IsCellDiscovered(explored2, false),
             $"重开：上一局探索的格子 {explored}、{explored2} 已清空");
         Check(Mathf.IsEqualApprox(MetSysApi.GetExploredRatio(), freshRatio), $"重开：探索比例回到新游戏时的 {freshRatio:F4}（实际 {MetSysApi.GetExploredRatio():F4}）");

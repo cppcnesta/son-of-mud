@@ -7,6 +7,9 @@ namespace SonOfMud.Core;
 [GlobalClass]
 public partial class AbilityTable : Resource
 {
+    /// <summary>正式的能力表（正式入口 game.tscn 的 SaveService 用的就是这一份）。</summary>
+    public const string DefaultPath = "res://assets/data/core/ability_table.tres";
+
     [Export] public Array<AbilityDef> All { get; set; } = new();
     [Export] public Array<StringName> Initial { get; set; } = new();
 

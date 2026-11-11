@@ -1,6 +1,6 @@
 ﻿param(
     [string]$GodotPath = $env:GODOT_DOTNET,
-    [ValidateSet('all','core','world','player','combat','player-feel','flow','ui','narrative','enemy','new')][string]$Suite = 'all',
+    [ValidateSet('all','core','world','player','combat','player-feel','wall-surface','flow','ui','narrative','enemy','new')][string]$Suite = 'all',
     [switch]$Headless
 )
 $ErrorActionPreference = 'Stop'
@@ -64,6 +64,7 @@ try {
         'player' = 'res://tests/player/player_suite.tscn'
         'combat' = 'res://tests/combat/combat_suite.tscn'
         'player-feel' = 'res://tests/player/feel_checks.tscn'
+        'wall-surface' = 'res://tests/player/wall_surface_test.tscn'
     }
     foreach ($name in $newScenes.Keys) {
         if ($Suite -ne 'all' -and $Suite -ne 'new' -and $Suite -ne $name) { continue }
@@ -90,7 +91,7 @@ try {
     # UI 测试（HUD 假事件、暂停菜单 / 地图、新主菜单流程、读档失败、真实玩家集成）：结果写到 tests/output/ui_<名字>_results.json
     $uiCode = 0
     if ($Suite -eq 'all' -or $Suite -eq 'ui' -or $Suite -eq 'new') {
-        $uiScenes = @('tests/ui/ui_hud_test.tscn', 'tests/ui/ui_pause_map_test.tscn', 'tests/ui/title_menu_test.tscn', 'tests/ui/title_menu_failure_test.tscn', 'tests/ui/ui_integration_test.tscn', 'tests/ui/quit_from_pause_test.tscn', 'tests/ui/quit_from_title_test.tscn')
+        $uiScenes = @('tests/ui/ui_hud_test.tscn', 'tests/ui/ui_pause_map_test.tscn', 'tests/ui/title_menu_test.tscn', 'tests/ui/title_menu_failure_test.tscn', 'tests/ui/ui_integration_test.tscn', 'tests/ui/quit_from_pause_test.tscn', 'tests/ui/quit_from_title_test.tscn', 'tests/ui/legacy_save_climb_test.tscn')
         foreach ($uiScene in $uiScenes) {
             $uiName = [System.IO.Path]::GetFileNameWithoutExtension($uiScene)
             $uiArguments = @('--path', $projectPath, '--scene', "res://$uiScene", '--audio-driver', 'Dummy', '--fixed-fps', '60', '--log-file', (Join-Path $outputPath "ui_$uiName.log"))
@@ -118,7 +119,7 @@ try {
     # enemy_flow / keeper_flow 从正式入口 main_game.tscn 启动，结果写到 tests/output/enemy_flow_results.json、enemy_keeper_flow_results.json
     $enemyCode = 0
     if ($Suite -eq 'all' -or $Suite -eq 'enemy' -or $Suite -eq 'new') {
-        $enemyScenes = @('tests/enemy/enemy_unit.tscn', 'tests/enemy/enemy_lab.tscn', 'tests/enemy/keeper_lab.tscn', 'tests/enemy/enemy_flow.tscn', 'tests/enemy/keeper_flow.tscn')
+        $enemyScenes = @('tests/enemy/enemy_unit.tscn', 'tests/enemy/enemy_lab.tscn', 'tests/enemy/keeper_lab.tscn', 'tests/enemy/enemy_flow.tscn', 'tests/enemy/keeper_flow.tscn', 'tests/enemy/arena_lock_climb.tscn')
         foreach ($enemyScene in $enemyScenes) {
             $enemyName = [System.IO.Path]::GetFileNameWithoutExtension($enemyScene)
             $enemyArguments = @('--path', $projectPath, '--scene', "res://$enemyScene", '--rendering-method', 'gl_compatibility', '--audio-driver', 'Dummy', '--fixed-fps', '60', '--log-file', (Join-Path $outputPath "enemy_$enemyName.log"))

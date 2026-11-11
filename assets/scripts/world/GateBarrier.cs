@@ -5,7 +5,7 @@ namespace SonOfMud.World;
 
 /// <summary>
 /// 条件门：通道上的阻挡物。条件满足（GameSession.Progress.Meets）就打开：去掉碰撞并隐藏。
-/// 收到 VariableChanged / AbilityUnlocked 时立即重新判断。能力门（攀墙）靠地形挡，不用这个类。
+/// 收到 VariableChanged / AbilityUnlocked 时立即重新判断。含能力条件的出口靠地形挡、不用这个类（攀墙开局就有之后，目前没有能力门）。
 /// </summary>
 [GlobalClass]
 public partial class GateBarrier : StaticBody2D

@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Godot;
 using SonOfMud.Combat;
@@ -50,8 +51,8 @@ public partial class PlayerSuite : LabSuiteBase
         Check(Player.Stats.Health == 140 && Player.Stats.MaxHealth == 140, $"出生：HP 140/140（实际 {Player.Stats.Health}/{Player.Stats.MaxHealth}）");
         Check(Player.State is IdleState && Player.Forms.Form == FormController.Water, "出生：水形态、Idle 状态");
         Check(Player.HasAbility(PlayerAbilities.Block) && Player.HasAbility(PlayerAbilities.SwitchForm) &&
-              !Player.HasAbility(PlayerAbilities.WallClimb) && !Player.HasAbility(PlayerAbilities.HeavySlam),
-              "能力：开局只有 block 和 switch_form");
+              Player.HasAbility(PlayerAbilities.WallClimb) && !Player.HasAbility(PlayerAbilities.HeavySlam) && GameSession.Progress.Abilities.Count() == 3,
+              "能力：开局正好是 block、switch_form、wall_climb（攀墙开局就有），没有 heavy_slam");
 
         var timers = new PlayerTimers { DodgeCooldown = 1.25f, BlockCooldown = 2f, AttackInterval = 0.5f, SwitchCooldown = 0.1f };
         timers.Recovery.Start(MovementRecovery.Source.Dodge, 1f, 0.2f, Player.Forms.MudConfig.RecoveryCurve);
@@ -298,14 +299,18 @@ public partial class PlayerSuite : LabSuiteBase
         Check(Player.State is IdleState, "水形态下砸后摇 0.25 秒后回到 Idle");
     }
 
-    // ---------- 第 8 步：攀墙能力门、传送清理、输入锁 ----------
+    // ---------- 第 8 步：攀墙（开局就有）、传送清理、输入锁 ----------
 
+    /// <summary>真实按键：按住 D（朝墙）和 W，按一下空格起跳贴墙，一直爬到翻上墙顶或 4 秒。</summary>
     private async Task<(float minY, bool climbed, bool sawClimb)> TryClimb()
     {
         await Reset(new Vector2(1300, FloorY), 0);
-        Press(PlayerActions.Right);
-        Press(PlayerActions.Up);
-        await Tap(PlayerActions.Jump);
+        RealKeys.Down(RealKeys.Right);
+        RealKeys.Down(RealKeys.MoveUp);
+        RealKeys.Down(RealKeys.Jump);
+        await Frames(1);
+        RealKeys.Up(RealKeys.Jump);
+        await Frames(1);
         float minY = Player.GlobalPosition.Y;
         bool sawClimb = false;
         for (int i = 0; i < 240; i++)
@@ -315,7 +320,7 @@ public partial class PlayerSuite : LabSuiteBase
             sawClimb |= Player.State is WallClimbState;
             if (Player.GlobalPosition.X > 1420f && Player.IsOnFloor()) break;
         }
-        ReleaseInputs();
+        RealKeys.ReleaseAll();
         await Frames(2);
         bool climbed = Player.GlobalPosition.X > 1420f && Player.GlobalPosition.Y < 152f;
         return (minY, climbed, sawClimb);
@@ -323,12 +328,23 @@ public partial class PlayerSuite : LabSuiteBase
 
     private async Task WallClimbChecks()
     {
+        // 开局（测试场按正式能力表写入初始能力，测试里没有手动解锁攀墙）就能爬
+        bool unlockedByTest = false;
+        void OnUnlocked(StringName id) => unlockedByTest |= id == PlayerAbilities.WallClimb;
+        Events.Instance.AbilityUnlocked += OnUnlocked;
         var (minY, climbed, sawClimb) = await TryClimb();
-        Check(!climbed && !sawClimb && minY > 152f + 200f, $"没有攀墙能力：448px 的墙上不去（最高 y={minY:F0}，墙顶 152）");
-        GameSession.Progress.Unlock(PlayerAbilities.WallClimb);
-        (minY, climbed, sawClimb) = await TryClimb();
-        Check(climbed && sawClimb, $"有攀墙能力：贴墙按上爬上 448px 的墙（最终 {Player.GlobalPosition}）");
+        Events.Instance.AbilityUnlocked -= OnUnlocked;
+        Check(!unlockedByTest && climbed && sawClimb, $"攀墙开局就能用：真实按键 D+W+空格，贴墙爬上 448px 的墙（最终 {Player.GlobalPosition}）");
         Check(Player.State is not WallClimbState, "爬上墙顶后离开攀墙状态，回到地面状态");
+
+        // 能力仍然是门槛：进度里没有 wall_climb 时同样的操作爬不上去，之后恢复原来的能力（含前面解锁的 heavy_slam）
+        List<StringName> before = GameSession.Progress.Abilities.ToList();
+        GameSession.Reset();
+        GameSession.Progress.Unlock(PlayerAbilities.Block);
+        GameSession.Progress.Unlock(PlayerAbilities.SwitchForm);
+        (minY, climbed, sawClimb) = await TryClimb();
+        Check(!climbed && !sawClimb && minY > 152f + 200f, $"进度里没有 wall_climb 时：448px 的墙上不去（最高 y={minY:F0}，墙顶 152）");
+        foreach (StringName id in before) GameSession.Progress.Unlock(id);
     }
 
     private async Task TeleportChecks()

@@ -94,19 +94,13 @@ Target = "S1_05"
 Kind = 0
 Requirement = null
 
-[sub_resource type="Resource" id="Gate_S1_04_2"]
-script = ExtResource("4_gate")
-Abilities = Array[StringName]([&"wall_climb"])
-Flags = Array[StringName]([])
-LockedText = ""
-
 [sub_resource type="Resource" id="Exit_S1_04_2"]
 script = ExtResource("3_exit")
 Side = 3
 Offset = 0
 Target = "S1_08"
 Kind = 0
-Requirement = SubResource("Gate_S1_04_2")
+Requirement = null
 
 [sub_resource type="Resource" id="Room_S1_04"]
 script = ExtResource("2_room")
@@ -334,19 +328,13 @@ Target = "S2_06"
 Kind = 0
 Requirement = SubResource("Gate_S2_04_1")
 
-[sub_resource type="Resource" id="Gate_S2_04_2"]
-script = ExtResource("4_gate")
-Abilities = Array[StringName]([&"wall_climb"])
-Flags = Array[StringName]([])
-LockedText = ""
-
 [sub_resource type="Resource" id="Exit_S2_04_2"]
 script = ExtResource("3_exit")
 Side = 3
 Offset = 3
 Target = "S2_05"
 Kind = 0
-Requirement = SubResource("Gate_S2_04_2")
+Requirement = null
 
 [sub_resource type="Resource" id="Room_S2_04"]
 script = ExtResource("2_room")
