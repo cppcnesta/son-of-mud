@@ -225,7 +225,7 @@ public partial class NarrativeUnitTest : Node
     {
         string dir = _settings.StoryDirectory;
         string[] files = DirAccess.GetFilesAt(dir).Where(f => f.EndsWith(".orph")).OrderBy(f => f).ToArray();
-        Check(files.SequenceEqual(new[] { "m_pit.orph", "pickups.orph", "tablets.orph" }), $"剧本：assets/story 下有 m_pit.orph、pickups.orph（第 4 轮：道具拾取台词）和 tablets.orph（实际 {string.Join(",", files)}）");
+        Check(files.SequenceEqual(new[] { "m_pit.orph", "pickups.orph", "tablets.orph" }), $"剧本：assets/story 下有 m_pit.orph、pickups.orph（道具拾取台词，目前没有段落）和 tablets.orph（实际 {string.Join(",", files)}）");
         var problems = new List<string>();
         foreach (string file in files)
         {
@@ -239,11 +239,11 @@ public partial class NarrativeUnitTest : Node
               (problems.Count > 0 ? "：" + string.Join("; ", problems.Take(8)) : ""));
 
         OrphScript pit = OrphParser.Parse(FileAccess.GetFileAsString($"{dir}/m_pit.orph"), "m_pit");
-        string[] labels = { "开场", "苏醒", "倒影", "朝圣者之路", "小泥偶", "供桌", "供桌·离开", "供桌·吃下", "守坑人", "七夜", "两河源头", "重塑" };
+        string[] labels = { "开场", "苏醒", "倒影", "朝圣者之路", "供桌", "供桌·离开", "供桌·吃下", "守坑人", "七夜", "两河源头", "重塑" };
         string[] missing = labels.Where(l => pit.FindLabel(l) < 0).ToArray();
-        Check(missing.Length == 0 && pit.Labels.Count == labels.Length, $"地图一剧本：12 个标签齐全（缺 {string.Join(",", missing)}，共 {pit.Labels.Count} 个）");
+        Check(missing.Length == 0 && pit.Labels.Count == labels.Length, $"地图一剧本：11 个标签齐全（小泥偶拾取台词已随道具删掉）（缺 {string.Join(",", missing)}，共 {pit.Labels.Count} 个）");
         string[] subtitles = pit.Labels.Where(l => pit.Entries[l.Index].Command == "字幕").Select(l => l.Name).ToArray();
-        Check(subtitles.SequenceEqual(new[] { "朝圣者之路", "小泥偶", "两河源头" }), $"地图一剧本：玩家能动时的插话（朝圣者之路、小泥偶、两河源头）走字幕条（实际 {string.Join(",", subtitles)}）");
+        Check(subtitles.SequenceEqual(new[] { "朝圣者之路", "两河源头" }), $"地图一剧本：玩家能动时的插话（朝圣者之路、两河源头）走字幕条（实际 {string.Join(",", subtitles)}）");
         string say(int line) => pit.Entries.First(e => e.SourceLine == line).Args[2];
         OrphEntry wake = pit.Entries.FirstOrDefault(e => e.Command == "说" && e.Args[0] == "？？？" && e.Args[2] == "——我的儿子，醒来。");
         Check(wake != null && pit.Entries.IndexOf(wake) < pit.FindLabel("苏醒"), "地图一剧本：开场以“？？？：——我的儿子，醒来。”结束，接着播苏醒");
