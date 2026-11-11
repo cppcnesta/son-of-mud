@@ -122,6 +122,26 @@ public partial class GameBoot : Node
         {
             Error result = tree.ChangeSceneToFile(scenePath);
             if (result != Error.Ok) GD.PushError($"GameBoot：切换到 {scenePath} 失败：{result}");
+            else CollectAfterSceneFreed(tree);
         }).CallDeferred();
+    }
+
+    /// <summary>
+    /// 旧的正式场景真正释放之后（等两帧），在主线程上做一次完整回收、等终结器跑完。
+    /// 原因：场景释放后，只剩 C# 包装对象还引用着的资源（PlayerRules 等 C# 脚本资源）留在资源缓存里，
+    /// 要等终结器才释放。如果之后（主菜单 → 继续 / 新游戏）重新载入正式场景时，终结器线程恰好在释放同一个资源，
+    /// 引擎会触发 FATAL「gchandle.is_released()」。在没有任何加载进行时先把它们回收掉，就不会和重新载入撞上。
+    /// </summary>
+    private static void CollectAfterSceneFreed(SceneTree tree)
+    {
+        int frames = 0;
+        void OnFrame()
+        {
+            if (++frames < 2) return;
+            tree.ProcessFrame -= OnFrame;
+            System.GC.Collect();
+            System.GC.WaitForPendingFinalizers();
+        }
+        tree.ProcessFrame += OnFrame;
     }
 }
