@@ -27,7 +27,7 @@ public partial class SubtitleBar : Control, ILineSurface
     public override void _Ready()
     {
         Settings ??= new NarrativeSettings();
-        SetAnchorsPreset(LayoutPreset.FullRect);
+        SetAnchorsAndOffsetsPreset(LayoutPreset.FullRect); // 已在场景树里：只改锚点会保留原来 0 大小的矩形，必须连偏移一起设
         MouseFilter = MouseFilterEnum.Ignore;
         _bar = new PanelContainer { Name = "Bar", MouseFilter = MouseFilterEnum.Ignore };
         _bar.SetAnchorsPreset(LayoutPreset.CenterBottom);

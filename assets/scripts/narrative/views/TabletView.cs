@@ -19,7 +19,7 @@ public partial class TabletView : Control
 
     public override void _Ready()
     {
-        SetAnchorsPreset(LayoutPreset.FullRect);
+        SetAnchorsAndOffsetsPreset(LayoutPreset.FullRect); // 已在场景树里：只改锚点会保留原来 0 大小的矩形，必须连偏移一起设
         MouseFilter = MouseFilterEnum.Ignore;
         var dim = new ColorRect { Name = "Dim", Color = new Color(0, 0, 0, 0.6f), MouseFilter = MouseFilterEnum.Ignore };
         dim.SetAnchorsPreset(LayoutPreset.FullRect);

@@ -42,7 +42,7 @@ public partial class DialogBox : Control, ILineSurface
     public override void _Ready()
     {
         Settings ??= new NarrativeSettings();
-        SetAnchorsPreset(LayoutPreset.FullRect);
+        SetAnchorsAndOffsetsPreset(LayoutPreset.FullRect); // 已在场景树里：只改锚点会保留原来 0 大小的矩形，必须连偏移一起设
         MouseFilter = MouseFilterEnum.Ignore;
         Build();
         Hide();
