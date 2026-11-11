@@ -47,7 +47,7 @@ public partial class PlayerSuite : LabSuiteBase
     private void SpawnChecks()
     {
         Check(_spawned.Count >= 1 && _spawned[^1] == Player, "出生：发出 Events.PlayerSpawned(玩家)");
-        Check(Player.Stats.Health == 140 && Player.Stats.MaxHealth == 140, $"出生：HP 140/140（实际 {Player.Stats.Health}/{Player.Stats.MaxHealth}）");
+        Check(Player.Stats.Health == 70 && Player.Stats.MaxHealth == 70, $"出生：HP 70/70（起始上限）（实际 {Player.Stats.Health}/{Player.Stats.MaxHealth}）");
         Check(Player.State is IdleState && Player.Forms.Form == FormController.Water, "出生：水形态、Idle 状态");
         Check(Player.HasAbility(PlayerAbilities.Block) && Player.HasAbility(PlayerAbilities.SwitchForm) &&
               !Player.HasAbility(PlayerAbilities.WallClimb) && !Player.HasAbility(PlayerAbilities.HeavySlam),
@@ -407,7 +407,7 @@ public partial class PlayerSuite : LabSuiteBase
         hud.Refresh();
         Check(hud.PlayingAnimation == "water_attack" && hud.StateName == "攻击前摇", $"HUD：水攻击显示 water_attack / 攻击前摇（实际 {hud.PlayingAnimation} / {hud.StateName}）");
         await Frames(30);
-        Check(hud.Health == Player.Stats.Health && hud.MaxHealth == 140, "HUD：血量来自 Events.PlayerHealthChanged");
+        Check(hud.Health == Player.Stats.Health && hud.MaxHealth == 70, "HUD：血量来自 Events.PlayerHealthChanged（起始上限 70）");
     }
 
     private async Task ToggleFly()

@@ -10,6 +10,7 @@ namespace SonOfMud.Save;
 /// - LoadFromDisk(slot)：清空内存 → 读盘 → 恢复 MetSys 和进度 → 进入存档点所在房间。
 /// - RespawnAtCheckpoint()：玩家死亡（D4）。不读盘，保留内存里的进度，回到最近存档点。
 /// 只依赖 Core：换房通过 Events.TravelRequested 交给 World，当前房间从 Events.RoomEntered 得知。
+/// 新游戏清空进度、读档恢复进度之后各发一次 Events.ProgressRestored（在换房请求之前）。
 /// 开局结果（新游戏、读档）用 Events.GameStartFinished 报告：等 World 回执“已到达”之后才报成功；
 /// 读不出存档、版本不支持、目标房间不存在、换房失败都报失败并带原因。新游戏和失败的读档都不碰存档文件。
 /// </summary>
@@ -81,6 +82,7 @@ public partial class SaveService : Node
         CheckpointSavePoint = "";
         PendingRespawnId = -1;
         PendingLoadId = -1;
+        Events.Instance?.EmitSignal(Events.SignalName.ProgressRestored);
         // GameStartFinished 等 World 回执“已到达”之后才发（见 OnTravelFinished）。
         PendingNewGameId = Events.NewRequestId();
         Events.Instance?.EmitSignal(Events.SignalName.TravelRequested, PendingNewGameId, NewGameRoom, NewGameSpawn);
@@ -122,6 +124,8 @@ public partial class SaveService : Node
             MetSysApi.SetSaveData(data.MetSys);
         }
         GameSession.Progress.FromSave(data.Progress);
+        // 只在进度完全恢复之后发一次（不在上面的 Reset 之后发），玩家的血量上限一步到位，不会先按空进度算一遍。
+        Events.Instance?.EmitSignal(Events.SignalName.ProgressRestored);
         CheckpointRoom = data.Room;
         CheckpointSavePoint = data.SavePoint;
         LastError = "";

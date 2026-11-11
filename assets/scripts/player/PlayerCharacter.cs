@@ -7,7 +7,7 @@ namespace SonOfMud.Player;
 
 /// <summary>
 /// 玩家外壳：持有组件引用、统一的输入读取、移动辅助函数，以及跨状态的全局规则
-/// （受击分派、切形态、输入锁、换房清理、复活）。每个动作的逻辑都在 states/ 里各自的状态类中。
+/// （受击分派、切形态、输入锁、换房清理、复活、按进度决定的血量上限）。每个动作的逻辑都在 states/ 里各自的状态类中。
 ///
 /// 每个物理帧的顺序固定：计时 → 记录输入缓冲 → 输入锁 / 切形态 → 当前状态 PhysicsUpdate（设速度、切状态）
 /// → MoveAndSlide → 当前状态 AfterMove（落地、离地、贴墙判断）。HitBox 是子节点，在这之后查询。
@@ -35,6 +35,8 @@ public partial class PlayerCharacter : CharacterBody2D
 
     private int _attackSequence;
     private uint _bodyMask;
+    /// <summary>正在按进度调整血量上限：期间 Stats 的 HealthChanged 不单独转发，调整完统一报一次。</summary>
+    private bool _applyingMaxHealth;
 
     public override void _Ready()
     {
@@ -52,7 +54,8 @@ public partial class PlayerCharacter : CharacterBody2D
         // 由 Player 自己按固定顺序驱动状态机（见类注释）。
         Machine.SetPhysicsProcess(false);
         Forms.SetForm(Rules.InitialForm);
-        Stats.MaxHealth = Rules.MaxHealth;
+        // 先按当前进度定上限；正式开局时 SaveService 清空 / 恢复进度后会发 ProgressRestored，再按最终进度重算一次。
+        Stats.MaxHealth = Rules.MaxHealthFor(GameSession.Progress);
         Stats.Refill();
 
         HurtBox.Damaged += OnDamaged;
@@ -72,6 +75,8 @@ public partial class PlayerCharacter : CharacterBody2D
             events.CheckpointRespawned += OnCheckpointRespawned;
             events.InputLockChanged += OnInputLockChanged;
             events.DebugFlyToggled += OnDebugFlyToggled;
+            events.ProgressRestored += OnProgressRestored;
+            events.VariableChanged += OnVariableChanged;
         }
         Callable.From(AnnounceSpawn).CallDeferred();
     }
@@ -88,14 +93,21 @@ public partial class PlayerCharacter : CharacterBody2D
         events.CheckpointRespawned -= OnCheckpointRespawned;
         events.InputLockChanged -= OnInputLockChanged;
         events.DebugFlyToggled -= OnDebugFlyToggled;
+        events.ProgressRestored -= OnProgressRestored;
+        events.VariableChanged -= OnVariableChanged;
     }
 
     private void AnnounceSpawn()
     {
         Events.Instance?.EmitSignal(Events.SignalName.PlayerSpawned, this);
-        Events.Instance?.EmitSignal(Events.SignalName.PlayerHealthChanged, Stats.Health, Stats.MaxHealth);
+        // 正式开局（新游戏 / 读档）还在排队时，进度还没换成最终内容，这时的上限可能不对（读档前总是起始上限）。
+        // 先不报血量，等 SaveService 发 ProgressRestored 时再报，HUD 不会先显示 3 颗再跳成 7 颗。
+        if (GameSession.PendingStart == StartMode.None) AnnounceHealth();
         Events.Instance?.EmitSignal(Events.SignalName.PlayerFormChanged, Forms.Form);
     }
+
+    private void AnnounceHealth() =>
+        Events.Instance?.EmitSignal(Events.SignalName.PlayerHealthChanged, Stats.Health, Stats.MaxHealth);
 
     // ---------- 每帧 ----------
 
@@ -236,8 +248,39 @@ public partial class PlayerCharacter : CharacterBody2D
             Events.Instance?.EmitSignal(Events.SignalName.HitStopRequested, Rules.HitStopSeconds);
     }
 
-    private void OnHealthChanged(int oldHealth, int newHealth) =>
-        Events.Instance?.EmitSignal(Events.SignalName.PlayerHealthChanged, newHealth, Stats.MaxHealth);
+    private void OnHealthChanged(int oldHealth, int newHealth)
+    {
+        if (!_applyingMaxHealth) AnnounceHealth();
+    }
+
+    // ---------- 血量上限（生命之面包） ----------
+
+    /// <summary>新游戏 / 读档：进度整体换掉了，按最终进度定上限并回满血（读档等于回到存档点），然后报一次血量。</summary>
+    private void OnProgressRestored() => ApplyMaxHealth(refill: true, alwaysAnnounce: true);
+
+    /// <summary>剧情等改了生命之面包的变量：上限变大时当前血量加上新增的部分（吃下面包 +70）。</summary>
+    private void OnVariableChanged(StringName key, Variant value)
+    {
+        if (key == Rules.LifeBreadFlag) ApplyMaxHealth(refill: false, alwaysAnnounce: false);
+    }
+
+    /// <summary>
+    /// 按 GameSession.Progress 重算血量上限。refill=true 时回满；否则上限增加多少当前血量就加多少（上限变小时只按新上限截断），
+    /// 已经倒下（血量 0）时不加血。有变化（或 alwaysAnnounce）时发一次 PlayerHealthChanged。
+    /// </summary>
+    private void ApplyMaxHealth(bool refill, bool alwaysAnnounce)
+    {
+        int oldMax = Stats.MaxHealth;
+        int oldHealth = Stats.Health;
+        int newMax = Rules.MaxHealthFor(GameSession.Progress);
+        int gained = Mathf.Max(0, newMax - oldMax);
+        int newHealth = refill ? newMax : Stats.IsDepleted ? 0 : oldHealth + gained;
+        _applyingMaxHealth = true;
+        Stats.MaxHealth = newMax;
+        Stats.SetHealth(newHealth);
+        _applyingMaxHealth = false;
+        if (alwaysAnnounce || oldMax != Stats.MaxHealth || oldHealth != Stats.Health) AnnounceHealth();
+    }
 
     /// <summary>
     /// 血量归零时不立刻通知：延到本帧的伤害结算全部结束之后再发 PlayerDied，

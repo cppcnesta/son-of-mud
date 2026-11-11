@@ -65,7 +65,7 @@ MudConfig = ExtResource("4")
 
 [node name="Stats" type="Node" parent="."]
 script = ExtResource("6")
-MaxHealth = 140
+MaxHealth = 70
 
 [node name="HurtBox" type="Area2D" parent="."]
 collision_layer = 8

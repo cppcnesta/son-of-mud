@@ -9,7 +9,8 @@ using SonOfMud.UI;
 
 /// <summary>
 /// 计划第 4 节步骤 1、2：在 ui_lab.tscn 里只发假事件检查 HUD。
-/// ① 泥珠：140 → 7 颗满；130 → 6 颗满 + 1 颗半；0 → 全空（掉空的珠子播碎裂）；最大 160 → 8 颗；最大 150 → 8 颗、满血时最后一颗也满。
+/// ① 泥珠（珠子数 = ⌊上限 / 20⌋、至少 1 颗，每颗容量 = 上限 / 珠子数）：70 → 3 颗满；60 → 2 颗满 + 第 3 颗 0.57；
+///    140 → 7 颗满；130 → 6 颗满 + 1 颗半；0 → 全空（掉空的珠子播碎裂）；最大 150 → 7 颗；160 → 8 颗；19 → 1 颗；静态规则逐个血量检查。
 /// ② 交互提示、提示条（出现约 2 秒后自动消失）、剧情开始 / 结束时 HUD 淡出 / 淡回。
 /// ③ 器物环：mask 0..127 每个都显示正确；7 个槽摆成环。
 /// ④ Boss 血条：开战、平滑扣血、换阶段、击败收起；别的 bossId 的事件不理会。
@@ -50,16 +51,22 @@ public partial class UiHudTest : UiTestBase
 
     // ---------- ① 泥珠 ----------
 
-    private static float Expected(int hp, int max, int index)
+    /// <summary>泥珠基准（UiSettings.BeadHp，默认 20）。测试不写死 20，跟着设置走。</summary>
+    private int BeadBase => _hud.Beads.Settings.BeadHp;
+
+    /// <summary>独立按规则算：珠子数 = ⌊max / 基准⌋（至少 1），每颗容量 = max / 珠子数，第 i 颗装 [i×容量, (i+1)×容量)。</summary>
+    private int ExpectedCount(int max) => max <= 0 ? 0 : Math.Max(1, max / BeadBase);
+
+    private float Expected(int hp, int max, int index)
     {
-        int capacity = Math.Min(20, max - index * 20);
-        return Math.Clamp(hp - index * 20, 0, capacity) / (float)capacity;
+        float capacity = (float)max / ExpectedCount(max);
+        return Math.Clamp(hp - index * capacity, 0f, capacity) / capacity;
     }
 
     private bool FillsMatch(int hp, int max, bool displayed)
     {
         HpBeadBar bar = _hud.Beads;
-        if (bar.BeadCount != HpBeadBar.BeadCountFor(max, 20)) return false;
+        if (bar.BeadCount != ExpectedCount(max)) return false;
         for (int i = 0; i < bar.BeadCount; i++)
         {
             HpBead bead = bar.GetBead(i);
@@ -78,16 +85,37 @@ public partial class UiHudTest : UiTestBase
     private async Task BeadChecks()
     {
         HpBeadBar bar = _hud.Beads;
-        await Health(140, 140, 2);
-        Check(bar.BeadCount == 7 && FillsMatch(140, 140, false) && FillsMatch(140, 140, true), $"140/140：7 颗满珠（{Fills(bar)}）");
+        Check(BeadBase == 20, $"泥珠基准来自 UiSettings.BeadHp（ui_settings.tres 里是 {BeadBase}）");
+
+        // 起始上限 70：3 颗，每颗约 23.3
+        await Health(70, 70, 2);
+        Check(bar.BeadCount == 3 && FillsMatch(70, 70, false) && FillsMatch(70, 70, true), $"70/70：3 颗满珠（{Fills(bar)}）");
+        Check(Enumerable.Range(0, 3).All(i => bar.GetBead(i).Fill == 1f && Mathf.IsEqualApprox(bar.GetBead(i).Capacity, 70f / 3f)),
+            $"70/70：每颗容量 70/3 ≈ 23.3，满血时每颗都正好是满的（{Fills(bar)}）");
+
+        Emit(Events.SignalName.PlayerHealthChanged, 60, 70);
+        await Frames(2);
+        float mid = bar.GetBead(2).DisplayedFill;
+        Check(FillsMatch(60, 70, false) && Fills(bar) == "1 1 0.57", $"60/70：从最后一颗开始空，前两颗满、第 3 颗 13.3/23.3（{Fills(bar)}）");
+        Check(mid > 0.57f && mid < 1f, $"扣血时液面渐变，不是瞬间跳过去（2 帧后第 3 颗显示 {mid:0.00}）");
+        await Frames(30);
+        Check(FillsMatch(60, 70, true), "渐变结束后画面上的填充和目标一致");
+
+        int[] breaks3 = Enumerable.Range(0, 3).Select(i => bar.GetBead(i).BreakCount).ToArray();
+        await Health(46, 70);
+        Check(FillsMatch(46, 70, true) && Fills(bar) == "1 0.97 0", $"46/70（一次 24 伤害之后）：按比例填充（{Fills(bar)}）");
+        Check(bar.GetBead(2).BreakCount == breaks3[2] + 1 && bar.GetBead(1).BreakCount == breaks3[1] && bar.GetBead(0).BreakCount == breaks3[0],
+            "46/70：第 3 颗从有血变成空，碎裂一次；其余不碎");
+        await Health(47, 70);
+        Check(FillsMatch(47, 70, true) && Fills(bar) == "1 1 0.01", $"47/70：刚过第 2 颗的边界（46.7），前两颗满、第 3 颗有一点点（{Fills(bar)}）");
+
+        // 真实上限 140：7 颗，每颗 20
+        await Health(140, 140, 3);
+        Check(bar.BeadCount == 7 && FillsMatch(140, 140, false) && FillsMatch(140, 140, true) && bar.GetBead(0).Capacity == 20f, $"140/140：7 颗满珠，每颗 20（{Fills(bar)}）");
 
         Emit(Events.SignalName.PlayerHealthChanged, 130, 140);
-        await Frames(2);
-        float mid = bar.GetBead(6).DisplayedFill;
-        Check(FillsMatch(130, 140, false) && Fills(bar) == "1 1 1 1 1 1 0.5", $"130/140：6 颗满 + 1 颗半（{Fills(bar)}）");
-        Check(mid > 0.5f && mid < 1f, $"扣血时液面渐变，不是瞬间跳过去（2 帧后第 7 颗显示 {mid:0.00}）");
-        await Frames(30);
-        Check(FillsMatch(130, 140, true), "渐变结束后画面上的填充和目标一致");
+        await Frames(32);
+        Check(FillsMatch(130, 140, true) && Fills(bar) == "1 1 1 1 1 1 0.5", $"130/140：6 颗满 + 1 颗半（{Fills(bar)}）");
 
         await Health(116, 140);
         Check(FillsMatch(116, 140, true) && Fills(bar) == "1 1 1 1 1 0.8 0", $"116/140（一次 24 伤害之后）：按比例填充（{Fills(bar)}）");
@@ -103,15 +131,51 @@ public partial class UiHudTest : UiTestBase
             $"掉空的 6 颗各播一次碎裂，原本就空的第 7 颗不播（碎裂次数 {string.Join(",", breaksAfter)}）");
         Check(Enumerable.Range(0, 7).All(i => !bar.GetBead(i).BreakPlaying), "碎裂效果播完后自动收起");
 
+        // 不是基准倍数的上限：向下取整，容量平分
+        await Health(150, 150, 3);
+        Check(bar.BeadCount == 7 && Mathf.IsEqualApprox(bar.GetBead(6).Capacity, 150f / 7f) && FillsMatch(150, 150, true) && Fills(bar) == "1 1 1 1 1 1 1",
+            $"最大血量 150：⌊150/20⌋ = 7 颗，每颗 150/7，满血时全满（{Fills(bar)}）");
         await Health(160, 160, 3);
         Check(bar.BeadCount == 8 && FillsMatch(160, 160, true), $"最大血量 160：8 颗满珠（{Fills(bar)}）");
-        await Health(150, 150, 3);
-        Check(bar.BeadCount == 8 && bar.GetBead(7).Capacity == 10 && FillsMatch(150, 150, true), $"最大血量 150：8 颗，最后一颗容量 10，满血时全满（{Fills(bar)}）");
-        await Health(145, 150);
-        Check(FillsMatch(145, 150, true) && Mathf.IsEqualApprox(bar.GetBead(7).Fill, 0.5f), $"145/150：最后一颗半满（{Fills(bar)}）");
+        await Health(10, 19, 3);
+        Check(bar.BeadCount == 1 && bar.GetBead(0).Capacity == 19f && FillsMatch(10, 19, true), $"最大血量 19（不到一个基准）：至少 1 颗（{Fills(bar)}）");
+        await Health(70, 70, 3);
+        Check(bar.BeadCount == 3 && FillsMatch(70, 70, true) && bar.Health == 70 && bar.MaxHealth == 70 && Fills(bar) == "1 1 1", "回到 70/70：3 颗满珠");
         await Health(140, 140, 3);
         Check(bar.BeadCount == 7 && FillsMatch(140, 140, true) && bar.Health == 140 && bar.MaxHealth == 140, "回到 140/140：7 颗满珠");
-        Check(HpBeadBar.BeadCountFor(140, 20) == 7 && HpBeadBar.BeadCountFor(141, 20) == 8 && HpBeadBar.BeadCountFor(0, 20) == 0, "珠子数 = ⌈max / 20⌉");
+
+        Check(HpBeadBar.BeadCountFor(70, 20) == 3 && HpBeadBar.BeadCountFor(140, 20) == 7 && HpBeadBar.BeadCountFor(159, 20) == 7
+              && HpBeadBar.BeadCountFor(160, 20) == 8 && HpBeadBar.BeadCountFor(19, 20) == 1 && HpBeadBar.BeadCountFor(0, 20) == 0,
+            "珠子数 = ⌊max / 20⌋（至少 1 颗；max 为 0 时没有珠子）");
+        Check(BeadUnitChecks(), "泥珠规则单元检查：70 → 3 颗、140 → 7 颗；各种血量下每颗的填充都按规则（满血全满、从最后一颗往前空、总量守恒）");
+    }
+
+    /// <summary>直接检查 HpBeadBar 的静态规则：对 70 和 140 的每一个血量值，逐颗比较装的血量。</summary>
+    private static bool BeadUnitChecks()
+    {
+        foreach (int max in new[] { 70, 140 })
+        {
+            int count = HpBeadBar.BeadCountFor(max, 20);
+            if (count != (max == 70 ? 3 : 7)) return false;
+            float capacity = HpBeadBar.BeadCapacityFor(max, count);
+            for (int hp = 0; hp <= max; hp++)
+            {
+                float sum = 0f;
+                for (int i = 0; i < count; i++)
+                {
+                    float amount = HpBeadBar.BeadAmountFor(hp, max, count, i);
+                    float expected = Math.Clamp(hp - i * capacity, 0f, capacity);
+                    if (Mathf.Abs(amount - expected) > 0.001f) return false;
+                    // 前面的珠子不满时后面的必须是空的（从最后一颗往前空）
+                    if (i > 0 && HpBeadBar.BeadAmountFor(hp, max, count, i - 1) < capacity && amount > 0f) return false;
+                    sum += amount;
+                }
+                if (Mathf.Abs(sum - hp) > 0.001f) return false;
+            }
+            for (int i = 0; i < count; i++)
+                if (HpBeadBar.BeadAmountFor(max, max, count, i) != capacity) return false;
+        }
+        return true;
     }
 
     // ---------- ② 提示、提示条、剧情淡出 ----------

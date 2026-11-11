@@ -291,7 +291,7 @@ public partial class EnemyLabTest : LabSuiteBase
         await Frames(5);
         Check(third == HitOutcome.Killed && _prayer.IsDead && _killed.SequenceEqual(new[] { "prayer" }), "祈祷泥人（水）：补第三刀才死，EnemyKilled 一次");
         Check(_dropped.SequenceEqual(new[] { "泥瓶" }), $"祈祷泥人：泥坑的掉落表（30%）固定掉落种子 → 掉一个泥瓶（{string.Join(",", _dropped)}）");
-        Check(_prayer.AttacksStarted == 0 && _playerDamaged == 0 && Player.Stats.Health == 140,
+        Check(_prayer.AttacksStarted == 0 && _playerDamaged == 0 && Player.Stats.Health == Player.Stats.MaxHealth,
             "祈祷泥人：两次都逃跑时从没出手，全程玩家没掉血");
     }
 
