@@ -22,7 +22,7 @@ public partial class CgLayer : Control
 
     public override void _Ready()
     {
-        SetAnchorsPreset(LayoutPreset.FullRect);
+        SetAnchorsAndOffsetsPreset(LayoutPreset.FullRect); // 已在场景树里：只改锚点会保留原来 0 大小的矩形，必须连偏移一起设
         MouseFilter = MouseFilterEnum.Ignore;
         _placeholder = new ColorRect { Name = "Placeholder", MouseFilter = MouseFilterEnum.Ignore };
         _placeholder.SetAnchorsPreset(LayoutPreset.FullRect);

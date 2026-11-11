@@ -51,6 +51,16 @@ public partial class NarrativeDialogTest : NarrativeFlowBase
         Check(Narr.Cg.IsShowing && Narr.Cg.CurrentId == "black", "开场：黑屏（CG black）");
         Check(Narr.Dialog.IsOpen && !Narr.Dialog.NameVisible && Narr.Dialog.CurrentText.StartsWith("我是父亲用血和泥捏出的第一个。") && !Narr.Dialog.PortraitVisible,
             $"开场：对话框显示旁白第一句，旁白不显示名牌、没有立绘（{Narr.Dialog.CurrentText}）");
+        Check(OnScreen(Narr.Dialog.GetNodeOrNull<Control>("Box"), out string boxInfo) && OnScreen(Narr.Dialog.GetNodeOrNull<Control>("Box/Body"), out _),
+            $"开场：对话框和正文真的显示在屏幕内（{boxInfo}）");
+        Check(Narr.Dialog.GetNodeOrNull<Control>("Box").GetGlobalRect().Position.Y > GetViewport().GetVisibleRect().Size.Y / 2,
+            "开场：对话框在屏幕下半部");
+        Check(CoversScreen(Narr.Cg.GetNodeOrNull<Control>("Placeholder"), out string cgInfo), $"开场：黑屏 CG 铺满整个屏幕（{cgInfo}）");
+        Check(CoversScreen(Narr.Fade, out string fadeInfo), $"剧情淡入淡出层铺满整个屏幕（{fadeInfo}）");
+        var roomFade = MainGame.FindChild("FadeOverlay", true, false)?.GetNodeOrNull<Control>("Black");
+        Check(CoversScreen(roomFade, out string roomFadeInfo), $"切房间用的黑屏遮罩铺满整个屏幕（{roomFadeInfo}）");
+        var openingLayout = LayoutProblems(Narr);
+        Check(openingLayout.Count == 0, "开场：剧情层所有可见控件都在屏幕内，没有 0 大小却有内容的容器" + Join(openingLayout));
 
         var seen = new List<(string name, string text, bool portrait)>();
         void Observe() => seen.Add((Narr.Dialog.CurrentName, Narr.Dialog.CurrentText.Split('\n').Last(), Narr.Dialog.PortraitVisible));
@@ -96,6 +106,9 @@ public partial class NarrativeDialogTest : NarrativeFlowBase
         int linesAtPress = Narr.Dialog.LineCount;
         Check(paused && firstLine && Started.Count == started + 1, $"守坑人：按 E → 游戏暂停、对话框开始打第一句“祂……醒了……”（{Narr.Dialog.CurrentName}：{Narr.Dialog.CurrentText}）");
         Check(Narr.Dialog.PortraitVisible, "守坑人：显示守坑人立绘（占位）");
+        Check(OnScreen(Narr.Dialog.GetNodeOrNull<Control>("Box"), out string npcBox) && OnScreen(Narr.Dialog.GetNodeOrNull<Control>("Box/Portrait"), out _)
+              && OnScreen(Narr.Dialog.GetNodeOrNull<Control>("Box/Name"), out _),
+            $"守坑人：对话框、立绘、名牌都显示在屏幕内（{npcBox}）");
         await Frames(30);   // 一直按着 E
         bool notSkipped = Narr.Dialog.LineCount == linesAtPress && Narr.Dialog.CurrentText == "祂……醒了……" && Narr.MainActive && Narr.Main.WaitingForAdvance;
         KeyUp(Key.E);
@@ -132,6 +145,7 @@ public partial class NarrativeDialogTest : NarrativeFlowBase
         float x0 = LocalX;
         Input.ActionPress(PlayerActions.Right);
         bool shown = await WaitUntil(() => Narr.Subtitle.IsShowing, 240);
+        bool barOnScreen = OnScreen(Narr.Subtitle.GetNodeOrNull<Control>("Bar"), out string barInfo);
         bool running = true, neverPaused = true, neverLocked = true;
         float xShown = LocalX;
         string text = Narr.Subtitle.CurrentText, name = Narr.Subtitle.CurrentName;
@@ -144,6 +158,7 @@ public partial class NarrativeDialogTest : NarrativeFlowBase
         running = LocalX > xShown + 100;
         Input.ActionRelease(PlayerActions.Right);
         Check(shown && name == "？？？" && text == "杀了他们！" && Narr.BarkLabel == "朝圣者之路", $"字幕：跑进 S1_03 触发插话“？？？：杀了他们！”（{name}：{text}）");
+        Check(barOnScreen, $"字幕：字幕条真的显示在屏幕内（{barInfo}）");
         Check(neverPaused && neverLocked && running && Started.Count == started, $"字幕：不暂停、不锁输入，玩家一直在跑（{xShown:F0} → {LocalX:F0}），不发 NarrativeStarted");
         bool hidden = await WaitUntil(() => !Narr.Subtitle.IsShowing && !Narr.Bark.IsPlaying, 400);
         Check(hidden && GameSession.Progress.Flag("seen.m_pit.朝圣者之路"), "字幕：停留一会儿后自动消失，写 seen.m_pit.朝圣者之路");
@@ -155,9 +170,9 @@ public partial class NarrativeDialogTest : NarrativeFlowBase
         Check(Requests.Count == requests && !Narr.Subtitle.IsShowing, "字幕：看过之后再跑进来不再触发（Once）");
 
         // 字幕播放中开始对话框剧情 → 字幕立刻收起
-        Request("m_pit", "小泥偶");
+        Request("m_pit", "朝圣者之路");
         await Frames(3);
-        bool barkOn = Narr.Subtitle.IsShowing && Narr.Bark.IsPlaying && Narr.Subtitle.CurrentText == "母神的土偶！打碎它！";
+        bool barkOn = Narr.Subtitle.IsShowing && Narr.Bark.IsPlaying && Narr.Subtitle.CurrentText == "杀了他们！";
         Request("m_pit", "倒影");
         bool barkGone = !Narr.Subtitle.IsShowing && !Narr.Bark.IsPlaying && Narr.MainActive;
         Check(barkOn && barkGone, "字幕：字幕播放中对话框剧情开始 → 字幕当帧收起");

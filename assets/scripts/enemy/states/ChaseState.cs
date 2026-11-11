@@ -2,7 +2,10 @@ using Godot;
 
 namespace SonOfMud.Enemy.States;
 
-/// <summary>追击：朝玩家走，水平距离进入攻击距离就开始前摇；玩家跑出视野 1.5 倍以外就回待机。</summary>
+/// <summary>
+/// 追击：朝玩家走，水平距离进入攻击距离就开始前摇；玩家跑出视野 1.5 倍以外就回待机。
+/// 远程型的攻击距离就是它停下来扔东西的距离（虔诚泥人约 300 像素）。
+/// </summary>
 public partial class ChaseState : EnemyState
 {
     public const float LeashFactor = 1.5f;

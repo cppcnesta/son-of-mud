@@ -54,6 +54,7 @@ public partial class CombatSuite : LabSuiteBase
         await HurtStunDeathChecks();
         await StaggerChecks();
         await EdgeAttackChecks();
+        await ProjectileChecks();
     }
 
     private async Task Arrange(Vector2 a, Vector2 b, int form = 0)
@@ -250,12 +251,12 @@ public partial class CombatSuite : LabSuiteBase
         await HoldBlock();
         Check(Player.State is BlockState && Mathf.Abs(Player.Timers.BlockCooldown - 3f) < 0.001f, "水格挡：按下进入格挡，并立即开始 3 秒冷却");
         _a.Strike(_plain);
-        Check(_a.StrikeOutcomes[^1] == HitOutcome.Blocked && Player.Stats.Health == 140, "水格挡挡住假人一刀：结果 Blocked，不掉血");
+        Check(_a.StrikeOutcomes[^1] == HitOutcome.Blocked && Player.Stats.Health == 70, "水格挡挡住假人一刀：结果 Blocked，不掉血");
         Check(Player.State is not BlockState && Player.Timers.BlockCooldown == 0f && Player.Timers.AttackInterval == 0f,
             "水格挡成功：结束格挡，清零格挡冷却和攻击间隔");
         await Frames(3);
         _a.Strike(_plain);
-        Check(_a.StrikeOutcomes[^1] == HitOutcome.Damaged && Player.Stats.Health == 120 && Player.State is HurtState,
+        Check(_a.StrikeOutcomes[^1] == HitOutcome.Damaged && Player.Stats.Health == 50 && Player.State is HurtState,
             "水格挡只挡一次：按住不续挡，下一刀照常受伤");
         Release(PlayerActions.Block);
 
@@ -264,7 +265,7 @@ public partial class CombatSuite : LabSuiteBase
         _a.Strike(_plain);
         await Frames(2);
         _a.Strike(_plain);
-        Check(_a.StrikeOutcomes[^1] == HitOutcome.Blocked && _a.StrikeOutcomes[^2] == HitOutcome.Blocked && Player.State is BlockState && Player.Stats.Health == 140,
+        Check(_a.StrikeOutcomes[^1] == HitOutcome.Blocked && _a.StrikeOutcomes[^2] == HitOutcome.Blocked && Player.State is BlockState && Player.Stats.Health == 70,
             "泥格挡：按住可以连续挡多段");
         Check(Player.Timers.Bonus.Ready && Mathf.Abs(Player.Timers.Bonus.Multiplier - 1.6f) < 0.001f && Player.Timers.BlockCooldown > 2.8f,
             "泥格挡成功：增伤 1.6 就绪，不清格挡冷却");
@@ -321,8 +322,8 @@ public partial class CombatSuite : LabSuiteBase
         await Arrange(Near, Far, 0);
         int events = _health.Count;
         _a.Strike(_plain);
-        Check(Player.State is HurtState && Player.Stats.Health == 120 && _health.Count == events + 1 && _health[^1] == (120, 140),
-            "受伤：扣血、进入 Hurt，并发出 PlayerHealthChanged(120, 140)");
+        Check(Player.State is HurtState && Player.Stats.Health == 50 && _health.Count == events + 1 && _health[^1] == (50, 70),
+            "受伤：扣血、进入 Hurt，并发出 PlayerHealthChanged(50, 70)");
         Check(Player.Velocity.X < -100f, $"受伤：从攻击来源方向被击退（vx={Player.Velocity.X:F0}）");
         await Frames(FramesFor(0.18f) + 1);
         Check(Player.State is IdleState or RunState, "受伤硬直 0.18 秒后回到自由状态");
@@ -330,13 +331,13 @@ public partial class CombatSuite : LabSuiteBase
         Hit same = MakeHit("same_attack", 10f, _a.GlobalPosition);
         HitOutcome o1 = Player.HurtBox.Receive(same);
         HitOutcome o2 = Player.HurtBox.Receive(same);
-        Check(o1 == HitOutcome.Damaged && o2 == HitOutcome.Duplicate && Player.Stats.Health == 110, "没有受伤无敌帧：同一次攻击靠去重只扣一次");
+        Check(o1 == HitOutcome.Damaged && o2 == HitOutcome.Duplicate && Player.Stats.Health == 40, "没有受伤无敌帧：同一次攻击靠去重只扣一次");
         HitOutcome o3 = Player.HurtBox.Receive(MakeHit("other_attack", 10f, _a.GlobalPosition));
-        Check(o3 == HitOutcome.Damaged && Player.Stats.Health == 100, "没有受伤无敌帧：受伤中挨另一次攻击照常扣血");
+        Check(o3 == HitOutcome.Damaged && Player.Stats.Health == 30, "没有受伤无敌帧：受伤中挨另一次攻击照常扣血");
 
         await Arrange(Near, Far, 0);
         _a.Strike(_tail);
-        Check(Player.State is StunnedState && Player.Stats.Health == 137, "眩晕：没挡住 StunSeconds=3 的攻击 → Stunned，扣 3");
+        Check(Player.State is StunnedState && Player.Stats.Health == 67, "眩晕：没挡住 StunSeconds=3 的攻击 → Stunned，扣 3");
         float x = Player.GlobalPosition.X;
         Press(PlayerActions.Right);
         await Tap(PlayerActions.Attack);
@@ -346,7 +347,7 @@ public partial class CombatSuite : LabSuiteBase
         bool stillStunned = Player.State is StunnedState;
         Check(stillStunned && Mathf.Abs(Player.GlobalPosition.X - x) < 1f, "眩晕 3 秒内无法操作（移动 / 攻击 / 跳 / 闪避都无效）");
         _a.Strike(_plain);
-        Check(Player.State is StunnedState && Player.Stats.Health == 117, "眩晕中还能继续挨打，且不会被普通受伤打断（连环惩罚）");
+        Check(Player.State is StunnedState && Player.Stats.Health == 47, "眩晕中还能继续挨打，且不会被普通受伤打断（连环惩罚）");
         Release(PlayerActions.Right);
         await WaitWhile(() => Player.State is StunnedState, 60);
         Check(Player.State is IdleState or RunState, "眩晕 3 秒后恢复");
@@ -361,15 +362,15 @@ public partial class CombatSuite : LabSuiteBase
             strikes++;
             await Frames(1);
         }
-        Check(strikes == 7 && Player.State is DeadState && Player.Stats.Health == 0, $"140 血被 20 伤害打 7 次打空 → Dead（{strikes} 次）");
-        Check(_health.Count == events + 7 && _health[^1] == (0, 140), "每次掉血都发 PlayerHealthChanged（7 次，最后是 0/140）");
+        Check(strikes == 4 && Player.State is DeadState && Player.Stats.Health == 0, $"70 血被 20 伤害打 4 次打空 → Dead（{strikes} 次）");
+        Check(_health.Count == events + 4 && _health[^1] == (0, 70), "每次掉血都发 PlayerHealthChanged（4 次，最后是 0/70）");
         Check(_died == died + 1, "血量归零发出一次 PlayerDied");
         Check(Player.HurtBox.Receive(MakeHit("after_death", 20f, _a.GlobalPosition)) == HitOutcome.Ignored, "死亡后不再受击（Ignored）");
         await Tap(PlayerActions.Jump);
         Check(Player.State is DeadState, "死亡中按键无效，只等 CheckpointRespawned");
         Events.Instance.EmitSignal(Events.SignalName.CheckpointRespawned);
-        Check(Player.State is IdleState && Player.Stats.Health == 140 && _health[^1] == (140, 140) && Player.HurtBox.Receiving,
-            "CheckpointRespawned：回满血 140、回 Idle、恢复受击");
+        Check(Player.State is IdleState && Player.Stats.Health == 70 && _health[^1] == (70, 70) && Player.HurtBox.Receiving,
+            "CheckpointRespawned：回满血 70（没吃生命之面包）、回 Idle、恢复受击");
     }
 
     // ---------- 第 7 步：反制僵直 ----------
@@ -382,7 +383,7 @@ public partial class CombatSuite : LabSuiteBase
         Release(PlayerActions.Block);
         Check(_a.StrikeOutcomes[^1] == HitOutcome.Blocked && _a.Stagger.Active && Mathf.Abs(_a.Stagger.Remaining - 5f) < 0.001f && _a.Stats.IncomingMultiplier == 2f,
             "挡住带 CounterOnBlock 的攻击 → 假人反制僵直 5 秒，易伤 ×2");
-        Check(Player.State is BlockState && Player.Stats.Health == 140, "挡住蝎尾：玩家不掉血、不眩晕");
+        Check(Player.State is BlockState && Player.Stats.Health == 70, "挡住蝎尾：玩家不掉血、不眩晕");
         await WaitWhile(() => Player.State is BlockState, 10);
         float before = _a.Stagger.Remaining;
         ulong startFrame = Engine.GetPhysicsFrames();
@@ -490,5 +491,154 @@ public partial class CombatSuite : LabSuiteBase
         hpA = _a.Stats.Health;
         await WaitWhile(() => Player.State is SlamState, 60);
         Check(slamming && _shakes == shakes + 1 && hpA - _a.Stats.Health == 44, $"RoomExiting：下砸资格保留，落地照常结算（扣 44）（下砸中 {slamming}，震动 {_shakes - shakes}，扣 {hpA - _a.Stats.Health}）");
+    }
+
+    // ---------- 通用投掷物（Combat.Projectile） ----------
+
+    private sealed class ProjectileRun
+    {
+        public ProjectileEnd End;
+        public HitOutcome? Outcome;
+        public int Resolutions;
+        public HurtBox Target;
+        public Vector2 EndPosition;
+        public bool Freed;
+    }
+
+    /// <summary>等投掷物结束（结束那一帧末尾就释放，所以结果在 Finished 信号里记下）。</summary>
+    private async Task<ProjectileRun> Fly(Projectile p, int maxFrames = 240)
+    {
+        var run = new ProjectileRun();
+        if (p == null) return run;
+        if (p.Ended)
+        {
+            run.End = p.EndReason;
+            run.Outcome = p.Outcome;
+            run.Resolutions = p.Resolutions;
+            run.Target = p.Target;
+            run.EndPosition = p.GlobalPosition;
+        }
+        else
+        {
+            p.Finished += (reason, position) =>
+            {
+                run.End = (ProjectileEnd)reason;
+                run.Outcome = p.Outcome;
+                run.Resolutions = p.Resolutions;
+                run.Target = p.Target;
+                run.EndPosition = position;
+            };
+        }
+        for (int i = 0; i < maxFrames && GodotObject.IsInstanceValid(p) && !p.Ended; i++) await Frames(1);
+        await Frames(2);
+        run.Freed = !GodotObject.IsInstanceValid(p);
+        return run;
+    }
+
+    private int _projectileSeq;
+
+    private Projectile Throw(Vector2 from, Vector2 velocity, ProjectileTeam team, float damage = 7f, float gravity = 0f, float lifetime = 4f) =>
+        Projectile.Launch(Lab, from, velocity, new HitSpec { Damage = damage }, $"lab_projectile_{++_projectileSeq}", null, team,
+            new ProjectileSpec { Gravity = gravity, Radius = 10f, MaxLifetime = lifetime });
+
+    private async Task ProjectileChecks()
+    {
+        // 我方投掷物：穿过玩家自己，打中敌方受击框（假人），只结算一次
+        await Arrange(Near, Far);
+        int hpA = _a.Stats.Health, hpP = Player.Stats.Health;
+        Projectile mine = Throw(new Vector2(300, 540), new Vector2(600, 0), ProjectileTeam.Player);
+        bool layers = mine.CollisionLayer == Layers.PlayerHit && mine.CollisionMask == Layers.EnemyHurt;
+        ProjectileRun run = await Fly(mine);
+        Check(layers && run.End == ProjectileEnd.Target && run.Outcome == HitOutcome.Damaged && run.Target?.Entity == _a && hpA - _a.Stats.Health == 7
+              && Player.Stats.Health == hpP && run.Resolutions == 1 && run.Freed,
+            $"投掷物（我方）：PlayerHit 层只打敌方受击框——穿过玩家自己（不掉血），打中假人扣 7、只结算一次后消失（{run.End}/{run.Outcome}）");
+
+        // 敌方投掷物：穿过敌方受击框（假人），打中玩家
+        await Arrange(new Vector2(600, 552), Far);
+        hpA = _a.Stats.Health;
+        hpP = Player.Stats.Health;
+        Projectile theirs = Throw(new Vector2(800, 560), new Vector2(-600, 0), ProjectileTeam.Enemy, 12f);
+        run = await Fly(theirs);
+        Check(run.End == ProjectileEnd.Target && run.Outcome == HitOutcome.Damaged && run.Target == Player.HurtBox && hpP - Player.Stats.Health == 12
+              && _a.Stats.Health == hpA && run.Resolutions == 1,
+            $"投掷物（敌方）：EnemyHit 层只打玩家受击框——穿过敌方假人（不掉血），打中玩家扣 12（{hpP} → {Player.Stats.Health}）");
+
+        // 只结算一次：两个假人挨着站在一条线上，只打第一个
+        await Arrange(new Vector2(800, 552), new Vector2(830, 552));
+        hpA = _a.Stats.Health;
+        int hpB = _b.Stats.Health;
+        run = await Fly(Throw(new Vector2(650, 560), new Vector2(500, 0), ProjectileTeam.Player));
+        Check(run.Resolutions == 1 && run.Target?.Entity == _a && hpA - _a.Stats.Health == 7 && _b.Stats.Health == hpB,
+            $"投掷物：同一个投掷物只结算一次——两个假人重叠在弹道上，只有第一个扣血（A {hpA - _a.Stats.Health}，B {hpB - _b.Stats.Health}）");
+
+        // 受击方不接受攻击（Ignored）时穿过去，打后面那个
+        await Arrange(new Vector2(800, 552), new Vector2(1000, 552));
+        foreach (HurtBox hb in _a.HurtBoxes) hb.Receiving = false;
+        hpB = _b.Stats.Health;
+        run = await Fly(Throw(new Vector2(650, 560), new Vector2(600, 0), ProjectileTeam.Player));
+        foreach (HurtBox hb in _a.HurtBoxes) hb.Receiving = true;
+        Check(run.Resolutions == 1 && run.Target?.Entity == _b && hpB - _b.Stats.Health == 7,
+            "投掷物：受击方不接受攻击（Ignored）不算结算，投掷物穿过去打中后面的假人");
+
+        // 格挡：走 HurtBox 同一套判定。单向格挡按投掷物当前所在的一侧判断
+        await Arrange(Near, Far);
+        HurtBox guard = _a.HurtBoxes[0];
+        guard.Guard = GuardMode.Hold;
+        guard.Omnidirectional = false;
+        guard.GuardFacing = -1f;
+        hpA = _a.Stats.Health;
+        run = await Fly(Throw(new Vector2(300, 540), new Vector2(600, 0), ProjectileTeam.Player));
+        bool blocked = run.Outcome == HitOutcome.Blocked && _a.Stats.Health == hpA && run.End == ProjectileEnd.Target && run.Freed;
+        guard.GuardFacing = 1f;
+        run = await Fly(Throw(new Vector2(300, 540), new Vector2(600, 0), ProjectileTeam.Player));
+        bool notCovered = run.Outcome == HitOutcome.Damaged && hpA - _a.Stats.Health == 7;
+        var unblockable = new HitSpec { Damage = 5f, Blockable = false };
+        guard.GuardFacing = -1f;
+        int hpA2 = _a.Stats.Health;
+        run = await Fly(Projectile.Launch(Lab, new Vector2(300, 540), new Vector2(600, 0), unblockable, "lab_unblockable", null, ProjectileTeam.Player,
+            new ProjectileSpec { Gravity = 0f }));
+        bool pierced = run.Outcome == HitOutcome.Damaged && hpA2 - _a.Stats.Health == 5;
+        guard.Guard = GuardMode.None;
+        guard.Omnidirectional = true;
+        Check(blocked && notCovered && pierced,
+            "投掷物：格挡走 HurtBox 同一套判定——朝着来向的单向格挡挡住（Blocked，投掷物碎掉）；背对来向挡不住；Blockable=false 的投掷物挡不住");
+
+        // 撞世界碰撞就消失：地面、墙
+        await Arrange(Far, Far);
+        run = await Fly(Throw(new Vector2(1000, 400), new Vector2(0, 600), ProjectileTeam.Enemy));
+        bool floor = run.End == ProjectileEnd.World && Mathf.Abs(run.EndPosition.Y - 590f) < 2f && run.Outcome == null && run.Freed;
+        float floorY = run.EndPosition.Y;
+        run = await Fly(Throw(new Vector2(2600, 400), new Vector2(900, 0), ProjectileTeam.Enemy));
+        bool wall = run.End == ProjectileEnd.World && Mathf.Abs(run.EndPosition.X - 2790f) < 2f && run.Freed;
+        Projectile inside = Throw(new Vector2(1000, 620), new Vector2(100, 0), ProjectileTeam.Enemy);
+        bool insideEnded = inside.EndReason == ProjectileEnd.World;
+        await Frames(2);
+        Check(floor && wall && insideEnded && !GodotObject.IsInstanceValid(inside),
+            $"投掷物：撞到地面（y 600）、墙（x 2800）就碎，停在碰撞面外（y {floorY:F0}、x {run.EndPosition.X:F0}），不穿过去；生成在墙里的当场就碎");
+
+        // 寿命到了自己消失
+        run = await Fly(Throw(new Vector2(1000, 300), new Vector2(10, 0), ProjectileTeam.Enemy, lifetime: 0.25f), 60);
+        Check(run.End == ProjectileEnd.Expired && run.Freed, "投掷物：飞得超过 MaxLifetime 就自己消失");
+
+        // 抛物线初速度：按 ArcVelocity 扔，经过目标点（打中站在 300 像素外的假人身体中心）
+        await Arrange(new Vector2(1300, 552), Far);
+        Vector2 from = new(1000, 520), to = _a.GlobalPosition;
+        Vector2 velocity = Projectile.ArcVelocity(from, to, 1200f, 400f);
+        Vector2 expected = new(400f, (to.Y - from.Y - 0.5f * 1200f * 0.75f * 0.75f) / 0.75f);
+        int events = _a.DamageEvents;
+        Projectile arc = Throw(from, velocity, ProjectileTeam.Player, gravity: 1200f);
+        float apex = from.Y;
+        for (int i = 0; i < 120 && GodotObject.IsInstanceValid(arc) && !arc.Ended; i++)
+        {
+            apex = Mathf.Min(apex, arc.GlobalPosition.Y);
+            await Frames(1);
+        }
+        await Frames(2);
+        Check(velocity.DistanceTo(expected) < 0.01f && apex < from.Y - 40f && _a.DamageEvents == events + 1 && !GodotObject.IsInstanceValid(arc),
+            $"投掷物：ArcVelocity 算出的初速度 {velocity}（水平 400，飞 0.75 秒），先升到 {apex:F0} 再落下，正好打中 300 像素外的假人");
+
+        string source = FileAccess.GetFileAsString("res://assets/scripts/combat/Projectile.cs");
+        Check(source.Contains("partial class Projectile : HitBox") && !source.Contains("SonOfMud.Player") && !source.Contains("SonOfMud.Enemy"),
+            "投掷物：是 HitBox 的子类（结算走同一套），在 Combat 里，不认识 Player / Enemy");
     }
 }

@@ -10,7 +10,8 @@ public partial class UiSettings : Resource
 {
     public const string DefaultPath = "res://assets/data/ui/ui_settings.tres";
 
-    // ---- 泥珠血条（D10：每颗 20 HP） ----
+    // ---- 泥珠血条（D10） ----
+    /// <summary>泥珠基准：珠子数 = ⌊血量上限 / BeadHp⌋（至少 1 颗），每颗容量 = 上限 / 珠子数。默认 20：上限 70 → 3 颗，140 → 7 颗。</summary>
     [Export] public int BeadHp { get; set; } = 20;
     [Export] public Vector2 BeadSize { get; set; } = new(32, 32);
     [Export] public int BeadSpacing { get; set; } = 4;

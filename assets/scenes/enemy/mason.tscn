@@ -1,7 +1,7 @@
 [gd_scene format=3]
 
 [ext_resource type="Script" path="res://assets/scripts/enemy/EnemyBody.cs" id="1"]
-[ext_resource type="Resource" path="res://assets/data/enemy/worker_hammer.tres" id="2"]
+[ext_resource type="Resource" path="res://assets/data/enemy/mason.tres" id="2"]
 [ext_resource type="Script" path="res://assets/scripts/combat/Stats.cs" id="3"]
 [ext_resource type="Script" path="res://assets/scripts/combat/HurtBox.cs" id="4"]
 [ext_resource type="Script" path="res://assets/scripts/combat/HitBox.cs" id="5"]
@@ -14,8 +14,7 @@
 [ext_resource type="Script" path="res://assets/scripts/enemy/states/AttackRecoverState.cs" id="12"]
 [ext_resource type="Script" path="res://assets/scripts/enemy/states/HurtState.cs" id="13"]
 [ext_resource type="Script" path="res://assets/scripts/enemy/states/FleeState.cs" id="14"]
-[ext_resource type="Script" path="res://assets/scripts/enemy/states/CowerState.cs" id="15"]
-[ext_resource type="Script" path="res://assets/scripts/enemy/states/DeadState.cs" id="16"]
+[ext_resource type="Script" path="res://assets/scripts/enemy/states/DeadState.cs" id="15"]
 
 [sub_resource type="RectangleShape2D" id="body"]
 size = Vector2(48, 64)
@@ -24,7 +23,7 @@ size = Vector2(48, 64)
 resource_local_to_scene = true
 size = Vector2(80, 60)
 
-[node name="Worker" type="CharacterBody2D"]
+[node name="Mason" type="CharacterBody2D"]
 collision_layer = 4
 collision_mask = 1
 script = ExtResource("1")
@@ -86,8 +85,5 @@ script = ExtResource("13")
 [node name="Flee" type="Node" parent="StateMachine"]
 script = ExtResource("14")
 
-[node name="Cower" type="Node" parent="StateMachine"]
-script = ExtResource("15")
-
 [node name="Dead" type="Node" parent="StateMachine"]
-script = ExtResource("16")
+script = ExtResource("15")

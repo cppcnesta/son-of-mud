@@ -2,7 +2,7 @@ using Godot;
 
 /// <summary>
 /// 测试用的真实按键：发 InputEventKey（和玩家按键盘一样经过 InputMap），不直接按动作。
-/// 键位和 project.godot 一致：A / D 左右、空格跳、J 攻击、K 格挡、Q 切形态、E 交互、Shift 闪避。
+/// 键位和 project.godot 一致：A / D 左右、空格跳、J 攻击、K 格挡、Q 切形态、E 交互、Shift 闪避、R 扔泥肝。
 /// </summary>
 public static class RealKeys
 {
@@ -14,8 +14,9 @@ public static class RealKeys
     public const Key SwitchForm = Key.Q;
     public const Key Interact = Key.E;
     public const Key Dodge = Key.Shift;
+    public const Key Throw = Key.R;
 
-    private static readonly Key[] All = { Left, Right, Jump, Attack, Block, SwitchForm, Interact, Dodge };
+    private static readonly Key[] All = { Left, Right, Jump, Attack, Block, SwitchForm, Interact, Dodge, Throw };
 
     public static void Down(Key key) =>
         Input.ParseInputEvent(new InputEventKey { Keycode = key, PhysicalKeycode = key, Pressed = true });

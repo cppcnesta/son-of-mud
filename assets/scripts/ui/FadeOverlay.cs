@@ -39,7 +39,7 @@ public partial class FadeOverlay : CanvasLayer
             _rect = new ColorRect { Name = "Black" };
             AddChild(_rect);
         }
-        _rect.SetAnchorsPreset(Control.LayoutPreset.FullRect);
+        _rect.SetAnchorsAndOffsetsPreset(Control.LayoutPreset.FullRect); // 已在场景树里：只改锚点会保留原来 0 大小的矩形，必须连偏移一起设
         _rect.MouseFilter = Control.MouseFilterEnum.Ignore;
         Color c = Settings.Color;
         _rect.Color = new Color(c.R, c.G, c.B, 0f);

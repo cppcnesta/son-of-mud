@@ -24,6 +24,7 @@ public partial class PlayerAnimator : Node
         ["attack"] = (5, 7, false), ["attack_down"] = (4, 4, false), ["attack_recover"] = (0, 6, false),
         ["slam_fall"] = (2, 2, true), ["slam_land"] = (4, 4, false),
         ["dodge"] = (4, 4, false), ["block"] = (3, 3, true),
+        ["throw"] = (3, 3, false),
         ["hurt"] = (2, 2, false), ["stunned"] = (4, 4, true), ["death"] = (8, 8, false),
     };
 

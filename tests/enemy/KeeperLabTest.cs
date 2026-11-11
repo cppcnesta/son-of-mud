@@ -242,7 +242,7 @@ public partial class KeeperLabTest : LabSuiteBase
         int strikeFrames = await CountFramesWhile(() => _keeper.State is SweepStrikeState, 60);
         float tailDrop = prevTail - _keeper.Tail.Remaining;
         int recoverFrames = await CountFramesWhile(() => _keeper.State is SweepRecoverState, 60);
-        Check(windup && strike.LastOutcome == null && Player.Stats.Health == 140 && _keeper.TailReductions == 0 && tailDrop < 0.5f,
+        Check(windup && strike.LastOutcome == null && Player.Stats.Health == Player.Stats.MaxHealth && _keeper.TailReductions == 0 && tailDrop < 0.5f,
             $"横扫：玩家在前摇里跑开（距离 {Distance:F0}），挥空——没有结算回调，蝎尾不减（{strikeFrames + 1} 帧里少了 {tailDrop:F3} 秒）");
         Check(Mathf.Abs(strikeFrames - 12) <= 1 && Mathf.Abs(recoverFrames - 30) <= 1 && _keeper.Sweep.IsRecharging,
             $"横扫：挥空也按计时收招（判定 {strikeFrames} 帧、收招 {recoverFrames} 帧），冷却照常开始");

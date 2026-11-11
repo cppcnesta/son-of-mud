@@ -7,7 +7,9 @@
 [ext_resource type="Script" path="res://assets/scripts/world/SpawnPoint.cs" id="5_5lsj6"]
 [ext_resource type="Script" path="res://assets/scripts/world/GateBarrier.cs" id="6_7b1fm"]
 [ext_resource type="Script" path="res://assets/scripts/core/GateRequirement.cs" id="7_q3r6a"]
-[ext_resource type="PackedScene" path="res://assets/scenes/enemy/worker.tscn" id="e_worker"]
+[ext_resource type="PackedScene" path="res://assets/scenes/enemy/mason.tscn" id="e_mason"]
+[ext_resource type="PackedScene" path="res://assets/scenes/enemy/devout.tscn" id="e_devout"]
+[ext_resource type="PackedScene" path="res://assets/scenes/enemy/temple_guard.tscn" id="e_guard"]
 
 [sub_resource type="Resource" id="Gate_S2_03_1"]
 script = ExtResource("7_q3r6a")
@@ -64,5 +66,12 @@ offset_right = 32.0
 mouse_filter = 2
 color = Color(0.75, 0.2, 0.2, 0.85)
 
-[node name="WorkerHammer" parent="Objects" instance=ExtResource("e_worker")]
+[node name="TempleGuard1" parent="Objects" instance=ExtResource("e_guard")]
+position = Vector2(300, 888)
+InitialFacing = 1.0
+
+[node name="Mason1" parent="Objects" instance=ExtResource("e_mason")]
 position = Vector2(1300, 888)
+
+[node name="Devout1" parent="Objects" instance=ExtResource("e_devout")]
+position = Vector2(1450, 888)

@@ -297,7 +297,7 @@ public partial class RealPlayerTest : WorldTestBase
         Events.Instance.CheckpointRespawned += OnRespawn;
         _player.Stats.HealthChanged += OnHealth;
 
-        _player.HurtBox.Receive(Lethal("bring_to_10", 130f, _player.GlobalPosition + new Vector2(40, 0)));
+        _player.HurtBox.Receive(Lethal("bring_to_10", _player.Stats.MaxHealth - 10, _player.GlobalPosition + new Vector2(40, 0)));
         Check(_player.Stats.Health == 10, $"致死搭建：先打到剩 10 血（{_player.Stats.Health}）");
 
         Hit killing = Lethal("killing_blow", 20f, _player.GlobalPosition + new Vector2(40, 0));
@@ -324,8 +324,8 @@ public partial class RealPlayerTest : WorldTestBase
             $"致死：死亡之后依次是 换房请求 → 到达检查点 → 复活通知（{string.Join(",", log)}）");
         Check(roomAtRespawn == "S1_04" && healthAtArrival == 0,
             $"致死：到达检查点那一刻血量仍是 0，复活通知发出时人已在 S1_04（到达时血量 {healthAtArrival}）");
-        Check(_player.Stats.Health == 140 && _player.State is IdleState, $"致死：复活后回满 140 血、回 Idle（{_player.Stats.Health}，{_player.State?.GetType().Name}）");
-        Check(healthValues.All(v => v >= 0) && healthValues.IndexOf(140) == healthValues.Count - 1,
+        Check(_player.Stats.Health == 70 && _player.State is IdleState, $"致死：复活后回满 70 血（没吃生命之面包）、回 Idle（{_player.Stats.Health}，{_player.State?.GetType().Name}）");
+        Check(healthValues.All(v => v >= 0) && healthValues.IndexOf(70) == healthValues.Count - 1,
             $"致死：血量变化过程没有负数，回满只发生在最后（{string.Join(",", healthValues)}）");
         Check(GameSession.Progress.Flag("after_save_flag"), "致死：存档之后写的进度变量复活后还在（D4）");
     }
@@ -379,7 +379,7 @@ public partial class RealPlayerTest : WorldTestBase
         Check(busy, "换房途中死亡搭建：致死结算后同一帧开始换房，死亡通知到达时 World 正忙");
         Check(done && string.Join(",", log) == "enter:S4_01,enter:S1_04,respawn",
             $"换房途中死亡：复活请求排队，等这次换房结束后才回检查点，再发复活通知（{string.Join(",", log)}）");
-        Check(_player.Stats.Health == 140 && World.CurrentRoomDef?.Id == "S1_04", "换房途中死亡：最终在 S1_04 满血复活");
+        Check(_player.Stats.Health == 70 && World.CurrentRoomDef?.Id == "S1_04", "换房途中死亡：最终在 S1_04 满血（70）复活");
     }
 
     // ---------- ④ 过门 ----------
@@ -437,7 +437,7 @@ public partial class RealPlayerTest : WorldTestBase
 
         Check(World.CurrentRoomDef?.Id == "S4_01", "过门：真实玩家到达 S4_01");
         Check(lockedSeen && !attackDuringLock, "过门：锁输入期间玩家处于 Locked，按攻击和跳都没有反应");
-        Check(hitDuringLock == HitOutcome.Ignored && _player.Stats.Health == 140, $"过门：锁输入期间受击被忽略（{hitDuringLock}）");
+        Check(hitDuringLock == HitOutcome.Ignored && _player.Stats.Health == _player.Stats.MaxHealth, $"过门：锁输入期间受击被忽略（{hitDuringLock}）");
         Check(teleportedClean, "过门：PlayerTeleported 时速度清零、判定框关闭、跳跃缓冲清空");
         Check(stateAtUnlock == nameof(IdleState) || _player.State is IdleState, $"过门：解锁后回到 Idle（解锁时 {stateAtUnlock}，现在 {_player.State?.GetType().Name}）");
         Check(!InputLock.IsLocked && !World.IsTransitioning, "过门：输入锁已释放");
