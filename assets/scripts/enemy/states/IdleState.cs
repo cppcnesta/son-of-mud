@@ -9,6 +9,7 @@ public partial class IdleState : EnemyState
     private float _idle;
 
     public override string DisplayName => "待机";
+    public override string AnimName => "idle";
 
     public override void Enter(StateMsg msg)
     {

@@ -15,6 +15,7 @@
 [ext_resource type="Script" path="res://assets/scripts/enemy/states/HurtState.cs" id="13"]
 [ext_resource type="Script" path="res://assets/scripts/enemy/states/FleeState.cs" id="14"]
 [ext_resource type="Script" path="res://assets/scripts/enemy/states/DeadState.cs" id="15"]
+[ext_resource type="Script" path="res://assets/scripts/enemy/EnemySprite.cs" id="enemy_sprite"]
 
 [sub_resource type="RectangleShape2D" id="body"]
 size = Vector2(52, 72)
@@ -32,6 +33,9 @@ Data = ExtResource("2")
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 position = Vector2(0, -36)
 shape = SubResource("body")
+
+[node name="Sprite" type="AnimatedSprite2D" parent="."]
+script = ExtResource("enemy_sprite")
 
 [node name="Stats" type="Node" parent="."]
 script = ExtResource("3")

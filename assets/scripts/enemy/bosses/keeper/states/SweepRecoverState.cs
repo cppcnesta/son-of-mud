@@ -11,6 +11,8 @@ public partial class SweepRecoverState : KeeperState
     public float Remaining { get; private set; }
 
     public override string DisplayName => "横扫收招";
+    public override string AnimName => "sweep_recover";
+    public override float AnimDuration => D.SweepRecover;
 
     public override void Enter(StateMsg msg)
     {

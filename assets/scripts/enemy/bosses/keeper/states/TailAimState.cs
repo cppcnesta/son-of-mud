@@ -11,6 +11,7 @@ public partial class TailAimState : KeeperState
     public float Remaining { get; private set; }
 
     public override string DisplayName => "蝎尾瞄准";
+    public override string AnimName => "tail_aim";
 
     public override void Enter(StateMsg msg)
     {

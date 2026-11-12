@@ -18,6 +18,7 @@
 [ext_resource type="Script" path="res://assets/scripts/enemy/bosses/keeper/states/StaggeredState.cs" id="16"]
 [ext_resource type="Script" path="res://assets/scripts/enemy/bosses/keeper/states/TransformState.cs" id="17"]
 [ext_resource type="Script" path="res://assets/scripts/enemy/bosses/keeper/states/GoneState.cs" id="18"]
+[ext_resource type="Script" path="res://assets/scripts/enemy/EnemySprite.cs" id="enemy_sprite"]
 
 [sub_resource type="RectangleShape2D" id="body"]
 size = Vector2(112, 160)
@@ -40,6 +41,9 @@ BossId = &"keeper"
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 position = Vector2(0, -80)
 shape = SubResource("body")
+
+[node name="Sprite" type="AnimatedSprite2D" parent="."]
+script = ExtResource("enemy_sprite")
 
 [node name="Stats" type="Node" parent="."]
 script = ExtResource("3")

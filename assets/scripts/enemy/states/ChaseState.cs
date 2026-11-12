@@ -11,6 +11,7 @@ public partial class ChaseState : EnemyState
     public const float LeashFactor = 1.5f;
 
     public override string DisplayName => "追击";
+    public override string AnimName => "chase";
 
     public override void PhysicsUpdate(double delta)
     {

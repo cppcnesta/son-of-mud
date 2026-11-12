@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://cnnny6e50vo1s"
-path="res://.godot/imported/塔庙守卫.png-427b3489df2d8e1d67847459a6f0adc7.ctex"
+uid="uid://dx4rbh3gerf2k"
+path="res://.godot/imported/spr_enemy_prayer_idle.png-05414bbccc6339ad91c08d3532aa665f.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/art/enemy/塔庙守卫.png"
-dest_files=["res://.godot/imported/塔庙守卫.png-427b3489df2d8e1d67847459a6f0adc7.ctex"]
+source_file="res://assets/art/enemy/spr_enemy_prayer_idle.png"
+dest_files=["res://.godot/imported/spr_enemy_prayer_idle.png-05414bbccc6339ad91c08d3532aa665f.ctex"]
 
 [params]
 

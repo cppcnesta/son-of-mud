@@ -145,17 +145,28 @@ public partial class KeeperBoss : BossBody
 
     protected override void EnterDefeated() => Machine.TransitionTo<GoneState>();
 
-    // ---------- 技术占位外观 ----------
+    // ---------- 外观 ----------
+
+    /// <summary>僵直变黄、横扫收招偏橙、横扫前摇偏黄。</summary>
+    public override Color StateTint(Color baseColor)
+    {
+        if (State is StaggeredState) return new Color("ffd166");
+        if (State is SweepRecoverState) return baseColor.Lerp(new Color(1f, 0.55f, 0.2f), 0.6f);
+        if (State is SweepWindupState) return baseColor.Lerp(new Color(1f, 0.85f, 0.3f), 0.4f);
+        return baseColor;
+    }
+
+    /// <summary>变身闪白：每 0.2 秒里有 0.1 秒是白的。</summary>
+    public override float FlashAmount => FlashRemaining > 0f && Mathf.PosMod(FlashRemaining, 0.2f) > 0.1f ? 1f : 0f;
+
+    // ---------- 技术占位外观（当前动作没有美术图时） ----------
 
     public override void _Draw()
     {
-        if (!Visible) return;
+        if (!Visible || !DrawsPlaceholder) return;
         Vector2 size = BodySize;
-        Color body = Data?.Tint ?? new Color("5a4632");
-        if (State is StaggeredState) body = new Color("ffd166");
-        else if (State is SweepRecoverState) body = body.Lerp(new Color(1f, 0.55f, 0.2f), 0.6f);
-        else if (State is SweepWindupState) body = body.Lerp(new Color(1f, 0.85f, 0.3f), 0.4f);
-        if (FlashRemaining > 0f && Mathf.PosMod(FlashRemaining, 0.2f) > 0.1f) body = Colors.White;
+        Color body = StateTint(Data?.Tint ?? new Color("5a4632"));
+        if (FlashAmount > 0f) body = Colors.White;
         DrawRect(new Rect2(-size.X * 0.5f, -size.Y, size.X, size.Y), body);
         // 蝎尾（占位）
         DrawRect(new Rect2(-Facing * size.X * 0.5f - 8f, -size.Y - 40f, 16f, 60f), body.Darkened(0.3f));

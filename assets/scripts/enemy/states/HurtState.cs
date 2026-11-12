@@ -8,6 +8,8 @@ public partial class HurtState : EnemyState
     public float Remaining { get; private set; }
 
     public override string DisplayName => "受击";
+    public override string AnimName => "hurt";
+    public override float AnimDuration => E.Data.HurtStun;
 
     public override void Enter(StateMsg msg)
     {

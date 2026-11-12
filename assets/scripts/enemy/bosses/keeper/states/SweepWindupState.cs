@@ -8,6 +8,8 @@ public partial class SweepWindupState : KeeperState
     public float Remaining { get; private set; }
 
     public override string DisplayName => "横扫前摇";
+    public override string AnimName => "sweep_windup";
+    public override float AnimDuration => D.SweepWindup;
 
     public override void Enter(StateMsg msg)
     {

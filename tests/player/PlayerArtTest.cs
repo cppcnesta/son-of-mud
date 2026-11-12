@@ -105,5 +105,27 @@ public partial class PlayerArtTest : LabSuiteBase
         await Frames(2);
         Check(anim.CurrentIsArt == repoIdle && sprite.Modulate == (repoIdle ? Colors.White : Player.Forms.Current.Tint) && !anim.IsArt("mud_attack"),
             $"换回默认文件夹：又按仓库里的图显示（待机{(repoIdle ? "用美术图" : "是占位")}，攻击是占位）");
+
+        // 手动做的 SpriteFrames（6 FPS、帧时长 1/2/1）：速度倍率按实际 FPS 和各帧相对时长算，整段刚好播满攻击时长
+        var manual = new SpriteFrames();
+        manual.AddAnimation("water_attack");
+        manual.SetAnimationLoop("water_attack", false);
+        manual.SetAnimationSpeed("water_attack", 6f);
+        Texture2D block = GD.Load<Texture2D>(FixtureArt + "/spr_player_idle.png");
+        manual.AddFrame("water_attack", block, 1f);
+        manual.AddFrame("water_attack", block, 2f);
+        manual.AddFrame("water_attack", block, 1f);
+        manual.AddAnimation("water_idle");
+        manual.AddFrame("water_idle", block);
+        sprite.SpriteFrames = manual;
+        await Reset(new Vector2(900, FloorY), 0);
+        await Tap(PlayerActions.Attack);
+        await Frames(1);
+        FormConfig form = Player.Forms.Current;
+        float seconds = form.AttackWindup + form.AttackActive + form.AttackRecovery;
+        float manualExpected = 4f / (6f * seconds);
+        Check(anim.CurrentAnimation == "water_attack" && Mathf.Abs(anim.CurrentSpeedScale - manualExpected) < 0.001f,
+            $"手动帧（6 FPS、1/2/1）：速度倍率 = 4 ÷ (6 × {seconds:F2}) = {manualExpected:F3}（实际 {anim.CurrentSpeedScale:F3}），不是按帧数 3 算的 {3f / (6f * seconds):F3}");
+        anim.UseArtDirectory(PlayerAnimator.DefaultArtDirectory);
     }
 }

@@ -10,6 +10,7 @@ public partial class FleeState : EnemyState
     public float Direction { get; private set; }
 
     public override string DisplayName => "逃跑";
+    public override string AnimName => "flee";
 
     public override void Enter(StateMsg msg)
     {
