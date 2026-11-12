@@ -311,16 +311,19 @@ public partial class EnemyLabTest : LabSuiteBase
         int hp = Player.Stats.Health;
         float x = _prayer.GlobalPosition.X;
         HitOutcome? first = await StrikeHit(_prayer);
+        // 打中时被击退（打击感）：等击退结束，记下停住的位置，之后反击全程不应再动
+        await WaitFor(() => _prayer.KnockbackVelocity == 0f, 60);
+        float pushedX = _prayer.GlobalPosition.X;
         Check(first == HitOutcome.Damaged && _prayer.Stats.Health == 6 && !_prayer.IsDead && _prayer.LastReaction == "counter",
             $"祈祷泥人（泥）：第一刀打不死（剩 {_prayer.Stats.Health}），被惊动后起身反击（固定种子，实际 {_prayer.LastReaction}）");
         bool done = await WaitFor(() => _prayer.State is EnemyIdle, 180);
         var windup = states.FirstOrDefault(s => s.state == "AttackWindup");
         var active = states.FirstOrDefault(s => s.state == "AttackActive");
-        long windupFrames = windup.state != null && active.state != null ? (long)(active.frame - windup.frame) : -1;
+        long windupFrames = windup.state != null && active.state != null ? (long)(active.frame - windup.frame) - FrozenBetween(windup.frame, active.frame) : -1;
         Check(done && Mathf.Abs(windupFrames - 30) <= 1 && states.Select(s => s.state).SequenceEqual(new[] { "AttackWindup", "AttackActive", "AttackRecover", "Idle" }),
             $"祈祷泥人（泥）：反击是看得出来的前摇 {windupFrames} 帧（0.5 秒）→ 挥击 → 收招 → 回去跪着（{string.Join("→", states.Select(s => s.state))}）");
-        Check(_prayer.AttacksStarted == 1 && Player.Stats.Health == hp - 10 && _playerDamaged == 1 && Mathf.Abs(_prayer.GlobalPosition.X - x) < 0.5f,
-            $"祈祷泥人（泥）：泥手挥击打中没格挡的玩家，只结算一次、扣 10（{hp} → {Player.Stats.Health}），反击时原地不动");
+        Check(_prayer.AttacksStarted == 1 && Player.Stats.Health == hp - 10 && _playerDamaged == 1 && pushedX > x && Mathf.Abs(_prayer.GlobalPosition.X - pushedX) < 0.5f,
+            $"祈祷泥人（泥）：泥手挥击打中没格挡的玩家，只结算一次、扣 10（{hp} → {Player.Stats.Health}），被击退停住后反击时原地不动");
 
         bool quiet = true;
         for (int i = 0; i < 120; i++)

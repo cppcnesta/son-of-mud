@@ -195,6 +195,7 @@ public partial class KeeperLabTest : LabSuiteBase
         int bossHp = _keeper.Stats.Health;
         RealKeys.Down(RealKeys.Attack);
         int recoverFrames = 0;
+        ulong recoverStart = Engine.GetPhysicsFrames();
         bool released = false;
         while (_keeper.State is SweepRecoverState && recoverFrames < 120)
         {
@@ -203,7 +204,9 @@ public partial class KeeperLabTest : LabSuiteBase
             if (!released) { RealKeys.Up(RealKeys.Attack); released = true; }
         }
         Check(bossHp - _keeper.Stats.Health == 20, $"横扫收招：期间玩家水形态一刀打出 {bossHp - _keeper.Stats.Health}（10 × 2）");
-        Check(Mathf.Abs(recoverFrames - 30) <= 1, $"横扫收招：固定 0.5 秒，受击不缩短（{recoverFrames} 帧，Q4）");
+        // 期间那一刀会顿帧（游戏时间不走）：扣掉顿帧的帧
+        int recoverFrozen = FrozenBetween(recoverStart, Engine.GetPhysicsFrames());
+        Check(Mathf.Abs(recoverFrames - recoverFrozen - 30) <= 1, $"横扫收招：固定 0.5 秒，受击不缩短（{recoverFrames} 帧，其中顿帧 {recoverFrozen} 帧，Q4）");
         Check(_keeper.State is ApproachState && _keeper.Sweep.IsRecharging && _keeper.Sweep.Remaining > 4.95f,
             $"横扫：5 秒 CD 在收招结束后才开始算（收招结束时剩 {_keeper.Sweep.Remaining:F2}）");
         int cdFrames = await CountFramesWhile(() => _keeper.State is not SweepWindupState && _keeper.State is not TailAimState, 600);
@@ -380,6 +383,7 @@ public partial class KeeperLabTest : LabSuiteBase
             "变身 ①：所有判定和受击都关了，计时和易伤清掉；这时还没写 boss_keeper、没发 BossDefeated");
         int playerHp = Player.Stats.Health, healthEvents = _healthEvents;
         int flashFrames = 0;
+        ulong flashStart = Engine.GetPhysicsFrames();
         float flashAtStart = _keeper.FlashRemaining;
         bool flagEarly = false, defeatedEarly = false;
         HitOutcome? during = null;
@@ -395,6 +399,7 @@ public partial class KeeperLabTest : LabSuiteBase
             flashFrames++;
         }
         Player.AttackHitBox.HitLanded -= OnLanded;
+        flashFrames -= FrozenBetween(flashStart, Engine.GetPhysicsFrames()); // 打死那一下的顿帧期间游戏时间不走
         Check(!flagEarly && !defeatedEarly && flashAtStart > 0.9f && flashAtStart <= 1f && Mathf.Abs(flashFrames - flashAtStart * 60f) <= 1.01f,
             $"变身：闪白 1 秒（进入变身后已过 {(1f - flashAtStart) * 60f:F0} 帧，再等 {flashFrames} 帧结束）期间 boss_keeper 一直没写、BossDefeated 没发");
         Check(during == null || during == HitOutcome.Ignored, $"变身：闪白期间再打它不结算伤害（结果 {during?.ToString() ?? "没有"}）");

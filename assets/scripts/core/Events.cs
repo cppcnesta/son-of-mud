@@ -90,6 +90,10 @@ public partial class Events : Node
     // 战斗反馈
     [Signal] public delegate void HitStopRequestedEventHandler(float seconds);
     [Signal] public delegate void CameraShakeRequestedEventHandler(float strength, float duration);
+    /// <summary>在 position 喷一团粒子，朝 direction 飞（打击感服务负责）。</summary>
+    [Signal] public delegate void HitSparkRequestedEventHandler(Vector2 position, Vector2 direction, int amount, Color color, float speed);
+    /// <summary>从 streams（AudioStream）里随机挑一个播，音高随机浮动（打击感服务负责）。</summary>
+    [Signal] public delegate void SoundRequestedEventHandler(Godot.Collections.Array streams);
 
     // Enemy / Boss
     [Signal] public delegate void BossEncounterStartedEventHandler(StringName bossId, string displayName, int maxHp);

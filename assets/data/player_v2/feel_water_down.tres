@@ -1,0 +1,30 @@
+[gd_resource type="Resource" script_class="HitFeel" load_steps=12 format=3]
+
+[ext_resource type="Script" path="res://assets/scripts/combat/HitFeel.cs" id="1"]
+[ext_resource type="AudioStream" path="res://assets/audio/sfx/combat/impactSoft_medium_000.ogg" id="s1"]
+[ext_resource type="AudioStream" path="res://assets/audio/sfx/combat/impactSoft_medium_001.ogg" id="s2"]
+[ext_resource type="AudioStream" path="res://assets/audio/sfx/combat/impactSoft_medium_002.ogg" id="s3"]
+[ext_resource type="AudioStream" path="res://assets/audio/sfx/combat/impactSoft_medium_003.ogg" id="s4"]
+[ext_resource type="AudioStream" path="res://assets/audio/sfx/combat/impactSoft_medium_004.ogg" id="s5"]
+[ext_resource type="AudioStream" path="res://assets/audio/sfx/combat/impactSoft_heavy_000.ogg" id="s6"]
+[ext_resource type="AudioStream" path="res://assets/audio/sfx/combat/impactSoft_heavy_001.ogg" id="s7"]
+[ext_resource type="AudioStream" path="res://assets/audio/sfx/combat/impactSoft_heavy_002.ogg" id="s8"]
+[ext_resource type="AudioStream" path="res://assets/audio/sfx/combat/impactSoft_heavy_003.ogg" id="s9"]
+[ext_resource type="AudioStream" path="res://assets/audio/sfx/combat/impactSoft_heavy_004.ogg" id="s10"]
+
+[resource]
+script = ExtResource("1")
+HitStop = 0.05
+KillHitStop = 0.12
+ShakeStrength = 3.0
+KillShakeStrength = 5.0
+ShakeDuration = 0.1
+FlashSeconds = 0.08
+Knockback = 0.0
+KnockbackDecay = 1600.0
+SparkAmount = 6
+SparkColor = Color(0.55, 0.72, 0.86, 1)
+SparkSpeed = 360.0
+SwingSounds = Array[AudioStream]([])
+HitSounds = Array[AudioStream]([ExtResource("s1"), ExtResource("s2"), ExtResource("s3"), ExtResource("s4"), ExtResource("s5")])
+KillSounds = Array[AudioStream]([ExtResource("s6"), ExtResource("s7"), ExtResource("s8"), ExtResource("s9"), ExtResource("s10")])

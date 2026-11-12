@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using System.Linq;
 using System;
 using System.Threading.Tasks;
 using Godot;
@@ -25,6 +27,20 @@ public abstract partial class LabSuiteBase : Node
 
     protected abstract string ReportName { get; }
     protected abstract Task RunChecks();
+
+    /// <summary>
+    /// 顿帧（Engine.TimeScale = 0）期间的物理帧号。顿帧时物理帧照常一帧帧过，但游戏时间不走；
+    /// 按帧数量时长的检查要扣掉这些帧，量的才是游戏时间（打击感接入后命中会顿帧）。
+    /// </summary>
+    private readonly HashSet<ulong> _frozenFrames = new();
+
+    public override void _PhysicsProcess(double delta)
+    {
+        if (Engine.TimeScale == 0.0) _frozenFrames.Add(Engine.GetPhysicsFrames());
+    }
+
+    /// <summary>物理帧号 (from, to] 之间有几帧在顿帧中。</summary>
+    protected int FrozenBetween(ulong from, ulong to) => _frozenFrames.Count(f => f > from && f <= to);
 
     public override void _Ready() => Callable.From(Run).CallDeferred();
 

@@ -22,12 +22,13 @@ public partial class PlayerSuite : LabSuiteBase
     private readonly List<Node2D> _spawned = new();
     private readonly List<int> _forms = new();
     private int _shakes;
+    private readonly List<float> _shakeStrengths = new();
 
     protected override async Task RunChecks()
     {
         Events.Instance.PlayerSpawned += p => _spawned.Add(p);
         Events.Instance.PlayerFormChanged += f => _forms.Add(f);
-        Events.Instance.CameraShakeRequested += (_, _) => _shakes++;
+        Events.Instance.CameraShakeRequested += (strength, _) => { _shakes++; _shakeStrengths.Add(strength); };
 
         await LoadLab(LabPath);
         SpawnChecks();
@@ -277,13 +278,16 @@ public partial class PlayerSuite : LabSuiteBase
         GameSession.Progress.Unlock(PlayerAbilities.HeavySlam);
         await Reset(new Vector2(2096, 300), 1);
         int shakes = _shakes;
+        int strengthsBefore = _shakeStrengths.Count;
         Press(PlayerActions.Down);
         await Tap(PlayerActions.Attack);
         Release(PlayerActions.Down);
         Check(Player.State is SlamState, "有 heavy_slam 时，空中下+攻击进入下砸");
         for (int i = 0; i < 60 && Player.State is SlamState; i++) await Frames(1);
-        Check(Player.State is AttackRecoveryState { Soft: true } && _shakes == shakes + 1,
-            "泥形态下砸落地：进入 1.5 秒可移动后摇，并请求镜头震动");
+        // 落地震屏恰好一次；砸碎东西时打击感还会另外请求打死的震屏，不算在内
+        int landingShakes = _shakeStrengths.Skip(strengthsBefore).Count(s => s == Player.Rules.SlamShakeStrength);
+        Check(Player.State is AttackRecoveryState { Soft: true } && landingShakes == 1 && _shakes >= shakes + 1,
+            $"泥形态下砸落地：进入 1.5 秒可移动后摇，并请求一次落地震屏（震屏请求 {string.Join("/", _shakeStrengths.Skip(strengthsBefore))}）");
         await Frames(2);
         Check(!GodotObject.IsInstanceValid(floor) || floor.Broken, "下砸（重击 44）砸开脆弱地面");
         for (int i = 0; i < 90 && Player.GlobalPosition.Y < 800f; i++) await Frames(1);

@@ -23,6 +23,8 @@ public partial class Hit : RefCounted
     public Node Source { get; set; }
     /// <summary>结算后实际扣掉的血量（Damaged / Killed 时有效）。</summary>
     public int Dealt { get; set; }
+    /// <summary>这一刀的打击感（来自 HitSpec.Feel；攻击方可以换成别的，例如下劈）。</summary>
+    public HitFeel Feel { get; set; }
 
     public static Hit From(HitSpec spec, string attackId, Vector2 sourcePosition, float multiplier = 1f, Node source = null) => new()
     {
@@ -37,5 +39,6 @@ public partial class Hit : RefCounted
         Multiplier = multiplier,
         SourcePosition = sourcePosition,
         Source = source,
+        Feel = spec?.Feel,
     };
 }
