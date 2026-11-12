@@ -1,13 +1,17 @@
 [gd_scene format=4 uid="uid://uy1xe2evf5ka"]
 
-[ext_resource type="Script" path="res://assets/scripts/world/RoomRoot.cs" id="1_0vlwq"]
-[ext_resource type="PackedScene" path="res://addons/MetroidvaniaSystem/Nodes/RoomInstance.tscn" id="2_ioub0"]
-[ext_resource type="Script" path="res://addons/MetroidvaniaSystem/Scripts/RoomInstance.gd" id="3_qtlvq"]
-[ext_resource type="TileSet" path="res://assets/data/world/world_tileset.tres" id="4_eivtb"]
-[ext_resource type="Script" path="res://assets/scripts/world/SpawnPoint.cs" id="5_5sw5w"]
-[ext_resource type="Script" path="res://assets/scripts/narrative/world/StoryTrigger.cs" id="n_story"]
-[ext_resource type="PackedScene" path="res://assets/scenes/enemy/prayer.tscn" id="e_prayer"]
+[ext_resource type="Script" uid="uid://bp6qc4ftue0bq" path="res://assets/scripts/world/RoomRoot.cs" id="1_0vlwq"]
+[ext_resource type="Texture2D" uid="uid://ds2q5dr5m588e" path="res://assets/art/world/bg/s1/tex_bg_s1_03_far.png" id="2_5sw5w"]
+[ext_resource type="PackedScene" uid="uid://bsg0351mx3b4u" path="res://addons/MetroidvaniaSystem/Nodes/RoomInstance.tscn" id="2_ioub0"]
+[ext_resource type="Texture2D" uid="uid://dy647iyb7jv6o" path="res://assets/art/world/bg/s1/tex_bg_s1_03_mid.png" id="3_g3rwd"]
+[ext_resource type="TileSet" uid="uid://cjutdcfket0jk" path="res://assets/data/world/world_tileset.tres" id="4_eivtb"]
+[ext_resource type="Texture2D" uid="uid://628rteywwjve" path="res://assets/art/world/bg/s1/tex_bg_s1_03_front.png" id="4_yeldr"]
+[ext_resource type="Texture2D" uid="uid://bg0m2ua271sei" path="res://assets/art/world/bg/s1/tex_bg_s1_03_tool_tree.png" id="5_3sj33"]
+[ext_resource type="Script" uid="uid://170bxbdwtr2a" path="res://assets/scripts/world/SpawnPoint.cs" id="5_5sw5w"]
+[ext_resource type="Texture2D" uid="uid://t1vyc2ff5xiy" path="res://assets/art/world/bg/s1/tex_bg_s1_03_tool_cloud.png" id="6_o2x7x"]
 [ext_resource type="PackedScene" path="res://assets/scenes/enemy/devout.tscn" id="e_devout"]
+[ext_resource type="PackedScene" path="res://assets/scenes/enemy/prayer.tscn" id="e_prayer"]
+[ext_resource type="Script" uid="uid://gcj5me3gasqr" path="res://assets/scripts/narrative/world/StoryTrigger.cs" id="n_story"]
 
 [sub_resource type="RectangleShape2D" id="Shape_Story_Pilgrims"]
 size = Vector2(128, 256)
@@ -17,12 +21,53 @@ script = ExtResource("1_0vlwq")
 RoomId = "S1_03"
 DisplayName = "朝圣者之路"
 
-[node name="RoomInstance" type="Node2D" parent="." unique_id=1246059462 instance=ExtResource("2_ioub0")]
-script = ExtResource("3_qtlvq")
+[node name="Background" type="Node2D" parent="." unique_id=514875534]
+z_index = -100
+
+[node name="Far" type="Parallax2D" parent="Background" unique_id=1084470887]
+scroll_scale = Vector2(0.15, 0.15)
+
+[node name="Image" type="Sprite2D" parent="Background/Far" unique_id=1394952874]
+position = Vector2(-57, -95)
+scale = Vector2(0.41799828, 0.29113036)
+texture = ExtResource("2_5sw5w")
+centered = false
+
+[node name="Mid" type="Parallax2D" parent="Background" unique_id=746054208]
+scroll_scale = Vector2(0.5, 0.5)
+
+[node name="Image" type="Sprite2D" parent="Background/Mid" unique_id=1984741692]
+position = Vector2(-12, -45.499084)
+scale = Vector2(0.8022212, 0.6331637)
+texture = ExtResource("3_g3rwd")
+centered = false
+
+[node name="front" type="Parallax2D" parent="Background" unique_id=2021514907]
+scroll_scale = Vector2(0.15, 0.15)
+
+[node name="Image" type="Sprite2D" parent="Background/front" unique_id=1501115081]
+position = Vector2(-30, 116)
+scale = Vector2(0.8088374, 0.53019184)
+texture = ExtResource("4_yeldr")
+centered = false
+
+[node name="tool" type="Parallax2D" parent="Background" unique_id=1883008663]
+
+[node name="tooltree" type="Sprite2D" parent="Background/tool" unique_id=30233833]
+position = Vector2(3046.9998, 658)
+scale = Vector2(0.32001394, 0.28209838)
+texture = ExtResource("5_3sj33")
+
+[node name="toolcloud" type="Sprite2D" parent="Background/tool" unique_id=1880822846]
+position = Vector2(1705, 500)
+scale = Vector2(0.23367277, 0.3448812)
+texture = ExtResource("6_o2x7x")
+
+[node name="RoomInstance" parent="." unique_id=1246059462 instance=ExtResource("2_ioub0")]
 
 [node name="Geometry" type="TileMapLayer" parent="." unique_id=687904681]
 position = Vector2(0, -16)
-tile_map_data = PackedByteArray("AAAAAA4AAAAAAAAAAAABAA4AAAAAAAAAAAACAA4AAAAAAAAAAAADAA4AAAAAAAAAAAAEAA4AAAAAAAAAAAAFAA4AAAAAAAAAAAAGAA4AAAAAAAAAAAAHAA4AAAAAAAAAAAAIAA4AAAAAAAAAAAAJAA4AAAAAAAAAAAAKAA4AAAAAAAAAAAALAA4AAAAAAAAAAAAMAA4AAAAAAAAAAAANAA4AAAAAAAAAAAAOAA4AAAAAAAAAAAAPAA4AAAAAAAAAAAAQAA4AAAAAAAAAAAARAA4AAAAAAAAAAAASAA4AAAAAAAAAAAATAA4AAAAAAAAAAAAUAA4AAAAAAAAAAAAVAA4AAAAAAAAAAAAWAA4AAAAAAAAAAAAXAA4AAAAAAAAAAAAYAA4AAAAAAAAAAAAZAA4AAAAAAAAAAAAaAA4AAAAAAAAAAAAbAA4AAAAAAAAAAAAcAA4AAAAAAAAAAAAdAA4AAAAAAAAAAAAeAA4AAAAAAAAAAAAfAA4AAAAAAAAAAAAgAA4AAAAAAAAAAAAhAA4AAAAAAAAAAAAiAA4AAAAAAAAAAAAjAA4AAAAAAAAAAAAkAA4AAAAAAAAAAAAlAA4AAAAAAAAAAAAmAA4AAAAAAAAAAAAnAA4AAAAAAAAAAAAoAA4AAAAAAAAAAAApAA4AAAAAAAAAAAAqAA4AAAAAAAAAAAArAA4AAAAAAAAAAAAsAA4AAAAAAAAAAAAtAA4AAAAAAAAAAAAuAA4AAAAAAAAAAAAvAA4AAAAAAAAAAAAwAA4AAAAAAAAAAAAxAA4AAAAAAAAAAAAyAA4AAAAAAAAAAAAzAA4AAAAAAAAAAAA0AA4AAAAAAAAAAAA1AA4AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAyAAQAAAAAAAAAAAAAAAIAAAAAAAAAAAAzAAQAAAAAAAAAAAAAAAMAAAAAAAAAAAA0AAQAAAAAAAAAAAAAAAQAAAAAAAAAAAA1AAQAAAAAAAAAAAAAAAUAAAAAAAAAAAA1AAUAAAAAAAAAAAAAAAYAAAAAAAAAAAA1AAYAAAAAAAAAAAAAAAcAAAAAAAAAAAA1AAcAAAAAAAAAAAAAAAgAAAAAAAAAAAA1AAgAAAAAAAAAAAAAAAkAAAAAAAAAAAA1AAkAAAAAAAAAAAA1AAoAAAAAAAAAAAA1AAsAAAAAAAAAAAA1AAwAAAAAAAAAAAA1AA0AAAAAAAAAAAA=")
+tile_map_data = PackedByteArray("AAAAAA4AAAAAAAAAAAABAA4AAAAAAAAAAAACAA4AAAAAAAAAAAADAA4AAAAAAAAAAAAEAA4AAAAAAAAAAAAFAA4AAAAAAAAAAAAGAA4AAAAAAAAAAAAHAA4AAAAAAAAAAAAIAA4AAAAAAAAAAAAJAA4AAAAAAAAAAAAKAA4AAAAAAAAAAAALAA4AAAAAAAAAAAAMAA4AAAAAAAAAAAANAA4AAAAAAAAAAAAOAA4AAAAAAAAAAAAPAA4AAAAAAAAAAAAQAA4AAAAAAAAAAAARAA4AAAAAAAAAAAASAA4AAAAAAAAAAAATAA4AAAAAAAAAAAAUAA4AAAAAAAAAAAAVAA4AAAAAAAAAAAAWAA4AAAAAAAAAAAAXAA4AAAAAAAAAAAAYAA4AAAAAAAAAAAAZAA4AAAAAAAAAAAAaAA4AAAAAAAAAAAAbAA4AAAAAAAAAAAAcAA4AAAAAAAAAAAAdAA4AAAAAAAAAAAAeAA4AAAAAAAAAAAAfAA4AAAAAAAAAAAAgAA4AAAAAAAAAAAAhAA4AAAAAAAAAAAAiAA4AAAAAAAAAAAAjAA4AAAAAAAAAAAAkAA4AAAAAAAAAAAAlAA4AAAAAAAAAAAAmAA4AAAAAAAAAAAAnAA4AAAAAAAAAAAAoAA4AAAAAAAAAAAApAA4AAAAAAAAAAAAqAA4AAAAAAAAAAAArAA4AAAAAAAAAAAAsAA4AAAAAAAAAAAAtAA4AAAAAAAAAAAAuAA4AAAAAAAAAAAAvAA4AAAAAAAAAAAAwAA4AAAAAAAAAAAAxAA4AAAAAAAAAAAAyAA4AAAAAAAAAAAAzAA4AAAAAAAAAAAA0AA4AAAAAAAAAAAA1AA4AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAIAAAAAAAAAAAAAAAMAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAUAAAAAAAAAAAAAAAYAAAAAAAAAAAAAAAcAAAAAAAAAAAAAAAgAAAAAAAAAAAAAAAkAAAAAAAAAAAA1AAkAAAAAAAAAAAA1AAoAAAAAAAAAAAA1AAsAAAAAAAAAAAA1AAwAAAAAAAAAAAA1AA0AAAAAAAAAAAA=")
 tile_set = ExtResource("4_eivtb")
 
 [node name="Spawns" type="Node2D" parent="." unique_id=1558404359]
@@ -43,7 +88,7 @@ SpawnId = &"From_S1_04"
 
 [node name="Objects" type="Node2D" parent="." unique_id=150542893]
 
-[node name="Story_Pilgrims" type="Area2D" parent="Objects"]
+[node name="Story_Pilgrims" type="Area2D" parent="Objects" unique_id=1544170759]
 position = Vector2(480, 879)
 script = ExtResource("n_story")
 ScriptId = "m_pit"
@@ -51,27 +96,26 @@ Label = "朝圣者之路"
 Mode = 1
 Once = true
 
-[node name="Shape" type="CollisionShape2D" parent="Objects/Story_Pilgrims"]
+[node name="Shape" type="CollisionShape2D" parent="Objects/Story_Pilgrims" unique_id=784306342]
 position = Vector2(0, -128)
 shape = SubResource("Shape_Story_Pilgrims")
 
-[node name="Prayer1" parent="Objects" instance=ExtResource("e_prayer")]
+[node name="Prayer1" parent="Objects" unique_id=960791451 instance=ExtResource("e_prayer")]
 position = Vector2(1000, 880)
 
-[node name="Prayer2" parent="Objects" instance=ExtResource("e_prayer")]
+[node name="Prayer2" parent="Objects" unique_id=1082598786 instance=ExtResource("e_prayer")]
 position = Vector2(1500, 880)
 InitialFacing = 1.0
 
-[node name="Prayer3" parent="Objects" instance=ExtResource("e_prayer")]
+[node name="Prayer3" parent="Objects" unique_id=1611264039 instance=ExtResource("e_prayer")]
 position = Vector2(2000, 880)
 
-[node name="Prayer4" parent="Objects" instance=ExtResource("e_prayer")]
+[node name="Prayer4" parent="Objects" unique_id=1202425901 instance=ExtResource("e_prayer")]
 position = Vector2(2500, 880)
 InitialFacing = 1.0
 
-[node name="Prayer5" parent="Objects" instance=ExtResource("e_prayer")]
+[node name="Prayer5" parent="Objects" unique_id=1795058708 instance=ExtResource("e_prayer")]
 position = Vector2(3000, 880)
 
-[node name="Devout1" parent="Objects" instance=ExtResource("e_devout")]
+[node name="Devout1" parent="Objects" unique_id=675455614 instance=ExtResource("e_devout")]
 position = Vector2(3250, 880)
-InitialFacing = -1.0
