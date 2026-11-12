@@ -1,0 +1,78 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://assets/scripts/narrative/views/TabletView.cs" id="1_tablet"]
+[ext_resource type="Theme" path="res://assets/data/narrative/narrative_theme.tres" id="2_theme"]
+
+[sub_resource type="StyleBoxFlat" id="Style_Tablet"]
+bg_color = Color(0.36, 0.27, 0.19, 1)
+border_width_left = 4
+border_width_top = 4
+border_width_right = 4
+border_width_bottom = 4
+border_color = Color(0.2, 0.14, 0.1, 1)
+
+[node name="Tablet" type="Control"]
+visible = false
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme = ExtResource("2_theme")
+script = ExtResource("1_tablet")
+
+[node name="Dim" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0, 0, 0, 0.6)
+
+[node name="Panel" type="Panel" parent="."]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -320.0
+offset_top = -240.0
+offset_right = 320.0
+offset_bottom = 240.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_styles/panel = SubResource("Style_Tablet")
+
+[node name="Title" type="Label" parent="Panel"]
+layout_mode = 0
+offset_left = 32.0
+offset_top = 24.0
+offset_right = 608.0
+offset_bottom = 64.0
+theme_override_font_sizes/font_size = 26
+horizontal_alignment = 1
+
+[node name="Body" type="RichTextLabel" parent="Panel"]
+layout_mode = 0
+offset_left = 40.0
+offset_top = 84.0
+offset_right = 600.0
+offset_bottom = 424.0
+mouse_filter = 2
+bbcode_enabled = true
+scroll_active = false
+
+[node name="Hint" type="Label" parent="Panel"]
+layout_mode = 0
+offset_left = 32.0
+offset_top = 436.0
+offset_right = 608.0
+offset_bottom = 466.0
+text = "按 E / 空格 继续"
+horizontal_alignment = 2

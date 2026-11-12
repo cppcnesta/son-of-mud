@@ -5,12 +5,14 @@ using SonOfMud.Narrative.Runtime;
 namespace SonOfMud.Narrative.Views;
 
 /// <summary>
-/// 字幕条（技术占位版）：玩家能动时的插话、拾取台词。不暂停、不锁输入、不读推进键，
+/// 字幕条：玩家能动时的插话、拾取台词。界面在 subtitle_bar.tscn：Bar（底条）→ Text（文字），位置、底图、字号以场景为准。不暂停、不锁输入、不读推进键，
 /// 每句打完字后由执行器按字数停留一会儿，自动换下一句，播完收起。一次只显示一句（不往下攒）。
 /// </summary>
 [GlobalClass]
 public partial class SubtitleBar : Control, ILineSurface
 {
+    public const string ScenePath = "res://assets/scenes/narrative/views/subtitle_bar.tscn";
+
     [Export] public NarrativeSettings Settings { get; set; }
 
     public bool IsTyping { get; private set; }
@@ -20,27 +22,16 @@ public partial class SubtitleBar : Control, ILineSurface
     public string CurrentText { get; private set; } = "";
     public int LineCount { get; private set; }
 
-    private PanelContainer _bar;
+    private Control _bar;
     private RichTextLabel _label;
     private double _shown;
 
     public override void _Ready()
     {
         Settings ??= new NarrativeSettings();
-        SetAnchorsAndOffsetsPreset(LayoutPreset.FullRect); // 已在场景树里：只改锚点会保留原来 0 大小的矩形，必须连偏移一起设
-        MouseFilter = MouseFilterEnum.Ignore;
-        _bar = new PanelContainer { Name = "Bar", MouseFilter = MouseFilterEnum.Ignore };
-        _bar.SetAnchorsPreset(LayoutPreset.CenterBottom);
-        _bar.OffsetLeft = -420;
-        _bar.OffsetRight = 420;
-        _bar.OffsetTop = -132;
-        _bar.OffsetBottom = -84;
-        _bar.AddThemeStyleboxOverride("panel", new StyleBoxFlat { BgColor = new Color(0f, 0f, 0f, 0.55f), ContentMarginLeft = 16, ContentMarginRight = 16, ContentMarginTop = 8, ContentMarginBottom = 8 });
-        AddChild(_bar);
-        _label = new RichTextLabel { Name = "Text", BbcodeEnabled = true, FitContent = true, ScrollActive = false, MouseFilter = MouseFilterEnum.Ignore, HorizontalAlignment = HorizontalAlignment.Center };
-        _label.AddThemeFontSizeOverride("normal_font_size", 20);
-        _bar.AddChild(_label);
-        _bar.Visible = false;
+        _bar = ViewNodes.Need<Control>(this, "Bar", ScenePath);
+        _label = ViewNodes.Need<RichTextLabel>(this, "Bar/Text", ScenePath);
+        if (_bar != null) _bar.Visible = false;
     }
 
     public void ShowLine(string name, string text, CharacterData character, string expression)

@@ -1,0 +1,41 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://assets/scripts/narrative/views/ChoicePanel.cs" id="1_choice"]
+[ext_resource type="Theme" path="res://assets/data/narrative/narrative_theme.tres" id="2_theme"]
+
+[node name="Choice" type="Control"]
+visible = false
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme = ExtResource("2_theme")
+script = ExtResource("1_choice")
+
+[node name="List" type="VBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -180.0
+offset_top = -120.0
+offset_right = 180.0
+offset_bottom = 40.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_constants/separation = 12
+
+[node name="OptionTemplate" type="Button" parent="."]
+visible = false
+custom_minimum_size = Vector2(360, 52)
+layout_mode = 0
+offset_right = 360.0
+offset_bottom = 52.0
+focus_mode = 0
+text = "选项模板（每个选项复制一份，位置由 List 排）"

@@ -100,14 +100,14 @@ public partial class NarrativeDirector : CanvasLayer
         ProcessMode = ProcessModeEnum.Always;
         Layer = Settings.CanvasLayer;
 
-        Cg = Ensure<CgLayer>("Cg");
-        Dialog = Ensure<DialogBox>("Dialog");
+        Cg = EnsureView<CgLayer>("Cg", CgLayer.ScenePath);
+        Dialog = EnsureView<DialogBox>("Dialog", DialogBox.ScenePath);
         Dialog.Settings = Settings;
-        Subtitle = Ensure<SubtitleBar>("Subtitle");
+        Subtitle = EnsureView<SubtitleBar>("Subtitle", SubtitleBar.ScenePath);
         Subtitle.Settings = Settings;
-        Choice = Ensure<ChoicePanel>("Choice");
-        Tablet = Ensure<TabletView>("Tablet");
-        Fade = Ensure<FadeLayer>("Fade");
+        Choice = EnsureView<ChoicePanel>("Choice", ChoicePanel.ScenePath);
+        Tablet = EnsureView<TabletView>("Tablet", TabletView.ScenePath);
+        Fade = EnsureView<FadeLayer>("Fade", FadeLayer.ScenePath);
         Audio = Ensure<NarrativeAudio>("Audio");
         Audio.Settings = Settings;
         Main = Ensure<VNRunner>("MainRunner");
@@ -135,6 +135,17 @@ public partial class NarrativeDirector : CanvasLayer
         Bark.Failed += OnBarkFailed;
 
         Library.EnsureLoaded(Settings.StoryDirectory);
+    }
+
+    /// <summary>剧情层场景里放好的界面；没有时（比如单独测试剧情层）按界面自己的场景实例化一份。界面一律来自场景，代码不搭节点。</summary>
+    private T EnsureView<T>(string name, string scenePath) where T : Node
+    {
+        T node = GetNodeOrNull<T>(name);
+        if (node != null) return node;
+        node = GD.Load<PackedScene>(scenePath).Instantiate<T>();
+        node.Name = name;
+        AddChild(node);
+        return node;
     }
 
     private T Ensure<T>(string name) where T : Node, new()
