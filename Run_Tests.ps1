@@ -133,7 +133,7 @@ try {
     # 结果写到 tests/output/levelcheck_results.json、levelcheck_calibration_results.json
     $levelCode = 0
     if ($Suite -eq 'all' -or $Suite -eq 'levelcheck' -or $Suite -eq 'new') {
-        $levelScenes = @('tests/levelcheck/levelcheck_suite.tscn', 'tests/levelcheck/levelcheck_calibration.tscn')
+        $levelScenes = @('tests/levelcheck/levelcheck_suite.tscn', 'tests/levelcheck/levelcheck_calibration.tscn', 'tests/levelcheck/levelcheck_map1.tscn')
         foreach ($levelScene in $levelScenes) {
             $levelName = [System.IO.Path]::GetFileNameWithoutExtension($levelScene)
             $levelArguments = @('--path', $projectPath, '--scene', "res://$levelScene", '--rendering-method', 'gl_compatibility', '--audio-driver', 'Dummy', '--fixed-fps', '60', '--log-file', (Join-Path $outputPath "$levelName.log"))
