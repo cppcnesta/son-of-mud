@@ -14,6 +14,8 @@ public partial class PlayerArtTest : LabSuiteBase
 {
     private const string LabPath = "res://assets/scenes/tests/player_lab.tscn";
     private const string FixtureArt = "res://tests/player/fixtures/art";
+    /// <summary>不存在的文件夹：里面一张图也没有，用来验证“全部是占位”。</summary>
+    private const string NoArt = "res://tests/player/fixtures/no_art_here";
     private const float FloorY = 576f;
 
     protected override string ReportName => "player_art_results";
@@ -26,12 +28,19 @@ public partial class PlayerArtTest : LabSuiteBase
         Check(anim != null && sprite != null, "玩家身上有 PlayerAnimator 和 AnimatedSprite2D");
         if (anim == null || sprite == null) return;
 
-        // ① 默认文件夹（仓库里没有主角美术图）：全部是占位
+        // ① 默认文件夹：仓库里有哪些主角美术图就用哪些（现在只有待机图 spr_player_idle.png），没有图的动作是占位
         await Reset(new Vector2(900, FloorY), 0);
-        Check(anim.ArtDirectory == PlayerAnimator.DefaultArtDirectory && !anim.IsArt("water_idle") && !anim.IsArt("mud_attack") && !anim.CurrentIsArt,
-            $"默认：美术文件夹是 {PlayerAnimator.DefaultArtDirectory}，仓库里没有图时全部是色块占位");
+        bool repoIdle = ResourceLoader.Exists(PlayerAnimator.DefaultArtDirectory + "/spr_player_idle.png");
+        Check(anim.ArtDirectory == PlayerAnimator.DefaultArtDirectory && anim.IsArt("water_idle") == repoIdle && anim.IsArt("mud_idle") == repoIdle
+              && !anim.IsArt("mud_attack") && anim.CurrentIsArt == repoIdle,
+            $"默认：美术文件夹是 {PlayerAnimator.DefaultArtDirectory}，仓库里{(repoIdle ? "有" : "没有")}待机图，待机{(repoIdle ? "用美术图" : "是占位")}；攻击没有图，是占位");
+
+        // 一张图也没有的文件夹：全部是占位
+        anim.UseArtDirectory(NoArt);
+        await Reset(new Vector2(900, FloorY), 0);
+        Check(!anim.IsArt("water_idle") && !anim.IsArt("mud_attack") && !anim.CurrentIsArt, "没有图的文件夹：全部是色块占位");
         Check(anim.CurrentAnimation == "water_idle" && sprite.Modulate == Player.Forms.Current.Tint && sprite.Scale == Vector2.One && sprite.Position == Vector2.Zero,
-            $"默认：占位色块按形态着色、不缩放、居中（{anim.CurrentAnimation} {sprite.Modulate}）");
+            $"占位色块按形态着色、不缩放、居中（{anim.CurrentAnimation} {sprite.Modulate}）");
 
         // 帧数规则
         Check(PlayerAnimator.FrameCountFor(512, 512) == 1 && PlayerAnimator.FrameCountFor(192, 64) == 3 && PlayerAnimator.FrameCountFor(100, 40) == 2
@@ -90,10 +99,11 @@ public partial class PlayerArtTest : LabSuiteBase
               && sprite.Position == Vector2.Zero && sprite.Offset == Vector2.Zero,
             $"泥攻击：没有图，用占位色块，按泥着色、不缩放、居中（{anim.CurrentAnimation} {sprite.Modulate}）");
 
-        // 换回默认文件夹：又全部是占位
+        // 换回默认文件夹：又按仓库里的图显示
         await Reset(new Vector2(900, FloorY), 0);
         anim.UseArtDirectory(PlayerAnimator.DefaultArtDirectory);
         await Frames(2);
-        Check(!anim.CurrentIsArt && sprite.Modulate == Player.Forms.Current.Tint && sprite.Scale == Vector2.One, "换回默认文件夹：重新全部是占位");
+        Check(anim.CurrentIsArt == repoIdle && sprite.Modulate == (repoIdle ? Colors.White : Player.Forms.Current.Tint) && !anim.IsArt("mud_attack"),
+            $"换回默认文件夹：又按仓库里的图显示（待机{(repoIdle ? "用美术图" : "是占位")}，攻击是占位）");
     }
 }

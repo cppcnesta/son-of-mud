@@ -1,5 +1,6 @@
 using Godot;
 using SonOfMud.Combat;
+using SonOfMud.Core;
 
 namespace SonOfMud.Player;
 
@@ -8,7 +9,7 @@ namespace SonOfMud.Player;
 /// 伤害固定是 Hit 里的值（15），不吃形态倍率和泥格挡增伤；飞行参数和虔诚泥人共用 mud_liver_projectile.tres。
 /// </summary>
 [GlobalClass]
-public partial class LiverThrowConfig : Resource
+public partial class LiverThrowConfig : KeptResource
 {
     [ExportGroup("道具")]
     /// <summary>消耗的计数道具编号：数量在进度变量 count.&lt;编号&gt; 里。</summary>

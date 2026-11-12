@@ -1,4 +1,5 @@
 using Godot;
+using SonOfMud.Core;
 
 namespace SonOfMud.Combat;
 
@@ -7,7 +8,7 @@ namespace SonOfMud.Combat;
 /// 敌人扔泥肝和玩家扔泥肝可以共用同一份。
 /// </summary>
 [GlobalClass]
-public partial class ProjectileSpec : Resource
+public partial class ProjectileSpec : KeptResource
 {
     /// <summary>向下的重力加速度（像素 / 秒²）；0 表示直线飞行。</summary>
     [Export] public float Gravity { get; set; } = 1200f;

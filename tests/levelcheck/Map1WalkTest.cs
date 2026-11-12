@@ -14,6 +14,8 @@ using SonOfMud.World;
 ///    朝圣者之路尽头的台阶和攀墙都在里面）；② 走进竞技场开战，用 KeeperBot 真实按键打赢守坑人；
 /// ③ 闪白结束、条件台阶（R）出现后，再规划一次：爬上之字形台阶出竞技场，经 S1_06 的台阶、S1_07 平地，走过边缘进入 S2_01。
 /// 全程只靠走边缘换房（不发 PlayerTeleported），玩家没死。路线每一步的结果打印在日志里。
+/// 这条测试验证的是地形能不能走通：沿路的普通敌人（祈祷泥人、虔诚泥人等）进房间时就冻结（不跑 AI、不出手），
+/// 和它们打的情况由敌人测试覆盖；守坑人照常真打。
 /// </summary>
 public partial class Map1WalkTest : EnemyFlowBase
 {
@@ -26,6 +28,7 @@ public partial class Map1WalkTest : EnemyFlowBase
     private LevelWorld _world;
     private RouteBot _bot;
     private int _teleports;
+    private Callable _freeze;
 
     protected override async Task RunChecks()
     {
@@ -39,12 +42,21 @@ public partial class Map1WalkTest : EnemyFlowBase
         {
             if (Events.Instance.IsConnected(Events.SignalName.PlayerTeleported, onTeleport))
                 Events.Instance.Disconnect(Events.SignalName.PlayerTeleported, onTeleport);
+            if (_freeze.Target != null && Events.Instance.IsConnected(Events.SignalName.RoomEntered, _freeze))
+                Events.Instance.Disconnect(Events.SignalName.RoomEntered, _freeze);
             _bot?.ReleaseAll();
             UnlistenEnemy();
         }
     }
 
     private Vector2 RealOrigin => World.CurrentRoom.GlobalPosition;
+
+    /// <summary>冻结当前房间里除守坑人以外的敌人（见类注释）。</summary>
+    private void FreezeRegularEnemies(string roomId)
+    {
+        foreach (SonOfMud.Enemy.EnemyBody enemy in InRoom<SonOfMud.Enemy.EnemyBody>())
+            if (enemy is not KeeperBoss) enemy.ProcessMode = ProcessModeEnum.Disabled;
+    }
 
     /// <summary>玩家身体中心换算到模拟器的全局坐标（房间原点 + 房间局部坐标）。</summary>
     private Vector2 SimCenter => _world.Find(RoomId).Origin + (Player.GlobalPosition - RealOrigin);
@@ -73,6 +85,9 @@ public partial class Map1WalkTest : EnemyFlowBase
         Check(finished && Player != null && RoomId == "S1_01", "新游戏：从正式入口开局，玩家在 S1_01");
         if (Player == null || RoomId != "S1_01") return;
         Events.Instance.Connect(Events.SignalName.PlayerTeleported, onTeleport);
+        _freeze = Callable.From<string>(FreezeRegularEnemies);
+        Events.Instance.Connect(Events.SignalName.RoomEntered, _freeze);
+        FreezeRegularEnemies(RoomId);
 
         _cfg = SimConfig.Load();
         _world = new LevelWorld(LevelWorld.DefaultCellSize);
