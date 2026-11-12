@@ -5,7 +5,8 @@ namespace SonOfMud.Enemy;
 /// <summary>
 /// 敌人场景里的显示节点（名为 Sprite）。游戏里由 <see cref="EnemyAnimator"/> 按状态播放；
 /// 编辑器里（只有这个节点是工具脚本，敌人本体不是）按命名显示 idle 图（守坑人是 dormant），摆敌人时就能看到样子，尺寸和脚底对齐与游戏里一致。
-/// - 敌人种类从父节点的 Data（EnemyData 资源）的 Kind 读，不直接引用 EnemyBody 类。
+/// - 敌人种类从父节点的 Data（EnemyData 资源）的 Kind 读，朝向从父节点的 InitialFacing 读（图画朝左，初始朝右的就翻过来），
+///   不直接引用 EnemyBody 类。检查器里改了初始朝向，编辑器里马上跟着翻。
 /// - 自动生成的显示只在编辑器里存在：保存场景前还原成原来的样子（不存进场景），保存后再显示。
 ///   手动填的 SpriteFrames 不是自动生成的那一份，保存时不动，照常存进场景。
 /// - 没有 idle 图时什么都不显示（和以前一样只看得到碰撞框）。
@@ -30,7 +31,29 @@ public partial class EnemySprite : AnimatedSprite2D
     private StringName _animation;
     private int _frame;
     private bool _centered;
+    private bool _flipH;
     private Vector2 _scale, _offset, _position;
+
+    public override void _Ready()
+    {
+        if (!Engine.IsEditorHint()) SetProcess(false);
+    }
+
+    /// <summary>编辑器里：初始朝向改了就跟着翻（游戏里不处理，朝向归 EnemyAnimator 管）。</summary>
+    public override void _Process(double delta)
+    {
+        if (!Engine.IsEditorHint() || !PreviewShown) return;
+        bool flip = PreviewFlip();
+        if (FlipH != flip) FlipH = flip;
+    }
+
+    /// <summary>按父节点的初始朝向算编辑器里要不要翻转（EnemyBody：InitialFacing ≥ 0 是朝右）。</summary>
+    public bool PreviewFlip()
+    {
+        Variant facing = GetParent()?.Get("InitialFacing") ?? default;
+        float value = facing.VariantType == Variant.Type.Nil ? -1f : (float)facing.AsDouble();
+        return EnemyAnimator.FlipFor(value >= 0f ? 1f : -1f);
+    }
 
     public override void _Notification(int what)
     {
@@ -71,6 +94,7 @@ public partial class EnemySprite : AnimatedSprite2D
         _scale = Scale;
         _offset = Offset;
         _position = Position;
+        _flipH = FlipH;
         _hasSnapshot = true;
 
         int height = EnemyAnimator.FrameHeight(frames, preview);
@@ -86,6 +110,7 @@ public partial class EnemySprite : AnimatedSprite2D
         if (Animation != shown) Animation = shown;
         Frame = 0;
         EnemyAnimator.Layout(this, height, canvas);
+        FlipH = PreviewFlip();
         PreviewAction = preview;
         PreviewShown = true;
     }
@@ -103,6 +128,7 @@ public partial class EnemySprite : AnimatedSprite2D
         Scale = _scale;
         Offset = _offset;
         Position = _position;
+        FlipH = _flipH;
         PreviewFrames = null;
         PreviewAction = "";
     }

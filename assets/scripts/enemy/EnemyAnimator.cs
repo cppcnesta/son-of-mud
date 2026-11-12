@@ -10,7 +10,7 @@ namespace SonOfMud.Enemy;
 /// - 图放在 ArtDirectory（assets/art/enemy）下，文件名 spr_enemy_&lt;Kind&gt;_&lt;动作&gt;.png；动作名由当前状态的 AnimName 给出。
 /// - 横排图按正方形切帧（帧数 = 宽 ÷ 高，单张图就是 1 帧），每帧缩放到 Data.ArtCanvas 显示，帧底边中点对齐脚底（敌人原点）。
 ///   源图标准尺寸 = ArtCanvas × 4（普通敌人 512，守坑人 1024），不是标准尺寸照样显示，但给警告。
-/// - 画朝右，Facing &lt; 0 时水平翻转。
+/// - 敌人的图画**朝左**（主角相反，画朝右）：Facing &gt; 0（朝右）时水平翻转。
 /// - 不循环的动作拉伸到状态的 AnimDuration（读实际 FPS 和各帧相对时长，见 SpriteStrip.SpeedScaleFor）。
 /// - 当前动作没有图：Sprite 隐藏，敌人本体照旧画色块（以及攻击红框、蝎尾预警）；有图：本体什么都不画。
 /// - 状态颜色（前摇偏黄、守坑人僵直等）染在 Sprite 的 Modulate 上；守坑人变身闪白用一个小着色器。
@@ -141,7 +141,7 @@ void fragment() {
     private void UpdateLook()
     {
         if (_body == null || !IsInstanceValid(_body) || Sprite == null || !IsInstanceValid(Sprite)) return;
-        Sprite.FlipH = _body.Facing < 0f;
+        Sprite.FlipH = FlipFor(_body.Facing);
         Sprite.Modulate = _body.StateTint(Colors.White);
         FlashMaterial?.SetShaderParameter("flash", _body.FlashAmount);
     }
@@ -158,6 +158,9 @@ void fragment() {
     private static void ReleaseShared() => _flashShader = null;
 
     // ---------- 共用（编辑器里的 EnemySprite 也用） ----------
+
+    /// <summary>敌人的图画朝左，所以朝右（facing &gt; 0）时要水平翻转。</summary>
+    public static bool FlipFor(float facing) => facing > 0f;
 
     /// <summary>源图一帧的高度（像素），用来算缩放；取这个动作第 1 帧的贴图高度。</summary>
     public static int FrameHeight(SpriteFrames frames, string animation)
