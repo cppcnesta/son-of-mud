@@ -73,7 +73,13 @@ public class SayCommand : VNCommand
         else
         {
             // 下一句还是这一段的：打完字停一小会儿自动继续；玩家按过推进键（Rushing）就不停。
-            runner.WhenTrue(() => !lines.IsTyping, () => runner.WaitAtMost(ctx.LineGap, () => lines.Rushing, done));
+            // 但下一句接上去框里放不下（会翻页）时，先等推进键，让玩家看完这一页。
+            string nextText = next.Args.Length > 2 ? next.Args[2] : "";
+            runner.WhenTrue(() => !lines.IsTyping, () =>
+            {
+                if (!lines.FitsAppend(nextText)) runner.WaitForAdvance(done);
+                else runner.WaitAtMost(ctx.LineGap, () => lines.Rushing, done);
+            });
         }
     }
 }

@@ -63,8 +63,60 @@ public partial class NarrativeDialogTest : NarrativeFlowBase
         Check(openingLayout.Count == 0, "开场：剧情层所有可见控件都在屏幕内，没有 0 大小却有内容的容器" + Join(openingLayout));
 
         var seen = new List<(string name, string text, bool portrait)>();
-        void Observe() => seen.Add((Narr.Dialog.CurrentName, Narr.Dialog.CurrentText.Split('\n').Last(), Narr.Dialog.PortraitVisible));
-        bool done = await AdvanceUntil(() => !Narr.MainActive, 40, Observe);
+        var overflow = new List<string>();
+        var autoFlips = new List<string>();
+        var shown = new HashSet<string>();
+        int pagesBefore = Narr.Dialog.PageCount;
+        int pages = pagesBefore;
+        // 逐帧看：框里的字有没有放不下；有没有在玩家没按键的时候翻页（那样上一页还没看完就没了）
+        void Watch(bool justPressed)
+        {
+            if (!Narr.Dialog.IsOpen) return;
+            foreach (string line in Narr.Dialog.CurrentText.Split('\n')) shown.Add(line);
+            if (!Narr.Dialog.TextFits && overflow.Count < 5)
+                overflow.Add($"框里 {Narr.Dialog.CurrentText.Split('\n').Length} 行放不下（最后一句“{Narr.Dialog.CurrentText.Split('\n').Last()}”）");
+            if (Narr.Dialog.PageCount > pages && !justPressed && autoFlips.Count < 5)
+                autoFlips.Add($"没按键就翻到了“{Narr.Dialog.CurrentText.Split('\n')[0]}”");
+            pages = Narr.Dialog.PageCount;
+        }
+        bool done = false;
+        for (int tap = 0; tap < 40 && !done; tap++)
+        {
+            // 等字打完，再多等 0.75 秒（比句间停顿 LineGap 长）：同一段里自动接着出的句子也全部出完，才按键
+            for (int settle = 0; settle < 20 && Narr.MainActive; settle++)
+            {
+                for (int f = 0; f < 300 && Narr.MainActive && !ReadyForKey(); f++)
+                {
+                    await Frames(1);
+                    Watch(false);
+                }
+                int lines = Narr.Dialog.LineCount;
+                for (int f = 0; f < 45 && Narr.MainActive; f++)
+                {
+                    await Frames(1);
+                    Watch(false);
+                }
+                if (Narr.Dialog.LineCount == lines && ReadyForKey()) break;
+            }
+            if (!Narr.MainActive) { done = true; break; }
+            Watch(false);
+            seen.Add((Narr.Dialog.CurrentName, Narr.Dialog.CurrentText.Split('\n').Last(), Narr.Dialog.PortraitVisible));
+            await KeyTap(Key.E);
+            await Frames(2);
+            Watch(true);
+            done = !Narr.MainActive;
+        }
+        string[] narration =
+        {
+            "我是父亲用血和泥捏出的第一个。", "在祂说出我的名字之前，我只是泥。", "在人世（…?）之前，在塔庙（…?）之前，在两条河有名字之前，只有我。",
+            "祂的手指在我身上留下了纹路，祂的血塑造了我的骨和肉。", "那时天和地还没有分开，混沌的母神在咸水里翻身。", "我第一次睁眼，然后看见祂。这就是这个世界的样子。",
+            "父亲说：“你是我的手。”于是我成了父亲的手。", "父亲说：“你是我的刃。”于是我成了父亲的刃。",
+        };
+        string[] missing = narration.Where(line => !shown.Contains(line)).ToArray();
+        Check(overflow.Count == 0 && missing.Length == 0 && Narr.Dialog.PageCount > pagesBefore,
+            $"开场：旁白 8 句全部完整显示在框里，放不下时翻页（翻了 {Narr.Dialog.PageCount - pagesBefore} 页）"
+            + (overflow.Count > 0 ? "；放不下：" + string.Join(" | ", overflow) : "") + (missing.Length > 0 ? "；没完整出现过：" + string.Join(" | ", missing) : ""));
+        Check(autoFlips.Count == 0, "开场：翻页都发生在玩家按推进键之后，不会在玩家还没看完时自己翻走" + (autoFlips.Count > 0 ? "：" + string.Join(" | ", autoFlips) : ""));
         await WaitUntil(() => !PauseService.IsPaused, 30);
         await Frames(3);
         Check(done && Ended.SequenceEqual(new[] { "m_pit:开场" }), $"开场：按 E 一路推进到苏醒结束，Finished 一次（{string.Join(",", Ended)}，按了 {seen.Count} 次）");

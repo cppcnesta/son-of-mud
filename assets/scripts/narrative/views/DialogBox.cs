@@ -6,7 +6,7 @@ namespace SonOfMud.Narrative.Views;
 
 /// <summary>
 /// 对话框（技术占位版）：屏幕下方的底板、名牌、立绘占位、逐字显示的正文（RichTextLabel，支持 BBCode）。
-/// 同一个人连着说的几句攒在同一个框里：ShowLine 开始新的一段，AppendLine 在下面加一句。
+/// 同一个人连着说的几句攒在同一个框里：ShowLine 开始新的一段，AppendLine 在下面加一句；加上这一句放不下时翻页，从这一句开始新的一页。
 /// 不读输入：推进键由剧情层统一读，再交给执行器。界面在 _Ready 里用代码搭好，美术交付后可以换成场景。
 /// </summary>
 [GlobalClass]
@@ -27,6 +27,10 @@ public partial class DialogBox : Control, ILineSurface
     public string PortraitCaption => _portraitLabel?.Text ?? "";
     /// <summary>每出现一句（ShowLine 或 AppendLine）加一。</summary>
     public int LineCount { get; private set; }
+    /// <summary>同一个人连着说、框里放不下而翻页的次数。</summary>
+    public int PageCount { get; private set; }
+    /// <summary>正文现在的内容完整放得下（排版后的高度不超过正文区）。</summary>
+    public bool TextFits => _body == null || _body.GetContentHeight() <= _body.Size.Y + 0.5f;
 
     private Panel _box;
     private Label _name;
@@ -118,8 +122,27 @@ public partial class DialogBox : Control, ILineSurface
         int alreadyShown = _body.GetTotalCharacterCount();
         _body.Text += (_paragraphPending ? "\n\n" : "\n") + text;
         _paragraphPending = false;
+        if (!TextFits)
+        {
+            // 加上这句就放不下了：翻页，新的一页从这一句开始（名牌、立绘不变）
+            _body.Text = text;
+            alreadyShown = 0;
+            PageCount++;
+        }
         if (Rushing) CompleteTyping();
         else StartTyping(alreadyShown);
+    }
+
+    public bool FitsAppend(string text)
+    {
+        if (_body == null) return true;
+        string saved = _body.Text;
+        int visible = _body.VisibleCharacters;
+        _body.Text = saved + (_paragraphPending ? "\n\n" : "\n") + text;
+        bool fits = TextFits;
+        _body.Text = saved;
+        _body.VisibleCharacters = visible;
+        return fits;
     }
 
     public void BreakParagraph() => _paragraphPending = true;
