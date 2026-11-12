@@ -5,33 +5,30 @@ using Godot;
 namespace SonOfMud.Narrative.Views;
 
 /// <summary>
-/// 选项面板（技术占位版）：屏幕中间一列按钮。键盘由剧情层读（上下移动、推进键确认），鼠标悬停改选、点击确认。
+/// 选项面板。界面在 choice_panel.tscn：List（排列选项的容器）、OptionTemplate（选项按钮模板，隐藏；每个选项复制一份，样式以它为准）。
+/// 屏幕中间一列按钮。键盘由剧情层读（上下移动、推进键确认），鼠标悬停改选、点击确认。
 /// 选中后先关面板再回调，回调只会发生一次。
 /// </summary>
 [GlobalClass]
 public partial class ChoicePanel : Control
 {
+    public const string ScenePath = "res://assets/scenes/narrative/views/choice_panel.tscn";
+
     public bool IsOpen { get; private set; }
     public int Focus { get; private set; }
     public IReadOnlyList<string> Options => _options;
 
     private readonly List<string> _options = new();
     private readonly List<Button> _buttons = new();
-    private VBoxContainer _list;
+    private Container _list;
+    private Button _template;
     private Action<int> _onChosen;
 
     public override void _Ready()
     {
-        SetAnchorsAndOffsetsPreset(LayoutPreset.FullRect); // 已在场景树里：只改锚点会保留原来 0 大小的矩形，必须连偏移一起设
-        MouseFilter = MouseFilterEnum.Ignore;
-        _list = new VBoxContainer { Name = "List", MouseFilter = MouseFilterEnum.Ignore };
-        _list.SetAnchorsPreset(LayoutPreset.Center);
-        _list.OffsetLeft = -180;
-        _list.OffsetRight = 180;
-        _list.OffsetTop = -120;
-        _list.OffsetBottom = 40;
-        _list.AddThemeConstantOverride("separation", 12);
-        AddChild(_list);
+        _list = ViewNodes.Need<Container>(this, "List", ScenePath);
+        _template = ViewNodes.Need<Button>(this, "OptionTemplate", ScenePath);
+        if (_template != null) _template.Visible = false;
         Visible = false;
     }
 
@@ -43,8 +40,10 @@ public partial class ChoicePanel : Control
         for (int i = 0; i < options.Length; i++)
         {
             int index = i;
-            var button = new Button { Name = "Option" + i, Text = options[i], FocusMode = FocusModeEnum.None, CustomMinimumSize = new Vector2(360, 52) };
-            button.AddThemeFontSizeOverride("font_size", 22);
+            var button = (Button)_template.Duplicate();
+            button.Name = "Option" + i;
+            button.Text = options[i];
+            button.Visible = true;
             button.Pressed += () => Choose(index);
             button.MouseEntered += () => SetFocus(index);
             _list.AddChild(button);

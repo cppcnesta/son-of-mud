@@ -4,12 +4,14 @@ using SonOfMud.Narrative.Data;
 namespace SonOfMud.Narrative.Views;
 
 /// <summary>
-/// CG 层：铺满全屏，盖在世界上面、对话框下面。有正式图时显示图；没有时铺 PlaceholderColor 色块，中间写标题（技术占位）。
+/// CG 层：铺满全屏，盖在世界上面、对话框下面。界面在 cg_layer.tscn：Placeholder（色块）/ Image（CG 图）/ Caption（没有图时的标题）。有正式图时显示图；没有时铺 PlaceholderColor 色块，中间写标题（技术占位）。
 /// 渐变用 Tween（暂停时照常进行）。
 /// </summary>
 [GlobalClass]
 public partial class CgLayer : Control
 {
+    public const string ScenePath = "res://assets/scenes/narrative/views/cg_layer.tscn";
+
     /// <summary>当前（或正在淡入的）CG 编号；没有 CG 时为空。</summary>
     public string CurrentId { get; private set; } = "";
     public bool IsShowing => CurrentId != "";
@@ -22,19 +24,9 @@ public partial class CgLayer : Control
 
     public override void _Ready()
     {
-        SetAnchorsAndOffsetsPreset(LayoutPreset.FullRect); // 已在场景树里：只改锚点会保留原来 0 大小的矩形，必须连偏移一起设
-        MouseFilter = MouseFilterEnum.Ignore;
-        _placeholder = new ColorRect { Name = "Placeholder", MouseFilter = MouseFilterEnum.Ignore };
-        _placeholder.SetAnchorsPreset(LayoutPreset.FullRect);
-        AddChild(_placeholder);
-        _image = new TextureRect { Name = "Image", ExpandMode = TextureRect.ExpandModeEnum.IgnoreSize, StretchMode = TextureRect.StretchModeEnum.KeepAspectCovered, MouseFilter = MouseFilterEnum.Ignore };
-        _image.SetAnchorsPreset(LayoutPreset.FullRect);
-        AddChild(_image);
-        _caption = new Label { Name = "Caption", HorizontalAlignment = HorizontalAlignment.Center, VerticalAlignment = VerticalAlignment.Center };
-        _caption.SetAnchorsPreset(LayoutPreset.FullRect);
-        _caption.OffsetBottom = -220;
-        _caption.AddThemeFontSizeOverride("font_size", 32);
-        AddChild(_caption);
+        _placeholder = ViewNodes.Need<ColorRect>(this, "Placeholder", ScenePath);
+        _image = ViewNodes.Need<TextureRect>(this, "Image", ScenePath);
+        _caption = ViewNodes.Need<Label>(this, "Caption", ScenePath);
         Modulate = new Color(1, 1, 1, 0);
         Visible = false;
     }

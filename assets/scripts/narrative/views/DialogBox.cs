@@ -5,13 +5,21 @@ using SonOfMud.Narrative.Runtime;
 namespace SonOfMud.Narrative.Views;
 
 /// <summary>
-/// 对话框（技术占位版）：屏幕下方的底板、名牌、立绘占位、逐字显示的正文（RichTextLabel，支持 BBCode）。
+/// 对话框。界面在 <see cref="ScenePath"/>（dialog_box.tscn）里，位置、大小、底图、字号都以场景为准，代码只填内容、控制显示。
+/// 场景里的节点（名字固定，改名代码就找不到）：
+///   Portrait（大立绘，在对话框上方）→ Placeholder（没有图时的色块）/ Image（立绘图）/ Caption（没有图时写名字）
+///   Box（对话框底板）→ Name（名牌）/ Body（正文，逐字显示，支持 BBCode）/ Hint（▼ 等待推进）
 /// 同一个人连着说的几句攒在同一个框里：ShowLine 开始新的一段，AppendLine 在下面加一句；加上这一句放不下时翻页，从这一句开始新的一页。
-/// 不读输入：推进键由剧情层统一读，再交给执行器。界面在 _Ready 里用代码搭好，美术交付后可以换成场景。
+/// 一句话自己就放不下时，这一页的字号逐步缩小到放得下为止（最小 <see cref="MinFontSize"/>），换页后恢复场景里的字号。
+/// 不读输入：推进键由剧情层统一读，再交给执行器。
 /// </summary>
 [GlobalClass]
 public partial class DialogBox : Control, ILineSurface
 {
+    public const string ScenePath = "res://assets/scenes/narrative/views/dialog_box.tscn";
+    public const int MinFontSize = 14;
+    private const string FontSizeName = "normal_font_size";
+
     [Export] public NarrativeSettings Settings { get; set; }
 
     public bool IsTyping { get; private set; }
@@ -25,18 +33,25 @@ public partial class DialogBox : Control, ILineSurface
     public int VisibleCharacters => _body?.VisibleCharacters ?? 0;
     public bool PortraitVisible => _portrait != null && _portrait.Visible;
     public string PortraitCaption => _portraitLabel?.Text ?? "";
+    /// <summary>立绘现在用的图（没有图时为 null）。</summary>
+    public Texture2D PortraitTexture => _portraitImage?.Texture;
     /// <summary>每出现一句（ShowLine 或 AppendLine）加一。</summary>
     public int LineCount { get; private set; }
     /// <summary>同一个人连着说、框里放不下而翻页的次数。</summary>
     public int PageCount { get; private set; }
+    /// <summary>场景里正文的字号（这一页没被缩小时用它）。</summary>
+    public int BaseFontSize { get; private set; }
+    /// <summary>这一页正文现在的字号。</summary>
+    public int CurrentFontSize => _body?.GetThemeFontSize(FontSizeName) ?? 0;
     /// <summary>正文现在的内容完整放得下（排版后的高度不超过正文区）。</summary>
     public bool TextFits => _body == null || _body.GetContentHeight() <= _body.Size.Y + 0.5f;
 
-    private Panel _box;
+    private Control _box;
     private Label _name;
     private RichTextLabel _body;
-    private Label _hint;
-    private ColorRect _portrait;
+    private Control _hint;
+    private Control _portrait;
+    private ColorRect _portraitPlaceholder;
     private TextureRect _portraitImage;
     private Label _portraitLabel;
     private string _blockSpeaker;   // 这一段是谁在说；null 表示没有可以接着往下加的内容
@@ -46,48 +61,23 @@ public partial class DialogBox : Control, ILineSurface
     public override void _Ready()
     {
         Settings ??= new NarrativeSettings();
-        SetAnchorsAndOffsetsPreset(LayoutPreset.FullRect); // 已在场景树里：只改锚点会保留原来 0 大小的矩形，必须连偏移一起设
-        MouseFilter = MouseFilterEnum.Ignore;
-        Build();
+        _box = Need<Control>("Box");
+        _name = Need<Label>("Box/Name");
+        _body = Need<RichTextLabel>("Box/Body");
+        _hint = Need<Control>("Box/Hint");
+        _portrait = Need<Control>("Portrait");
+        _portraitPlaceholder = Need<ColorRect>("Portrait/Placeholder");
+        _portraitImage = Need<TextureRect>("Portrait/Image");
+        _portraitLabel = Need<Label>("Portrait/Caption");
+        BaseFontSize = _body?.GetThemeFontSize(FontSizeName) ?? 22;
         Hide();
     }
 
-    private void Build()
+    private T Need<T>(string path) where T : Node
     {
-        _box = new Panel { Name = "Box", MouseFilter = MouseFilterEnum.Ignore };
-        _box.SetAnchorsPreset(LayoutPreset.BottomWide);
-        _box.OffsetLeft = 56;
-        _box.OffsetRight = -56;
-        _box.OffsetTop = -204;
-        _box.OffsetBottom = -24;
-        _box.AddThemeStyleboxOverride("panel", new StyleBoxFlat { BgColor = new Color(0.06f, 0.05f, 0.04f, 0.88f), BorderColor = new Color(0.55f, 0.45f, 0.3f), BorderWidthTop = 2, BorderWidthBottom = 2, BorderWidthLeft = 2, BorderWidthRight = 2 });
-        AddChild(_box);
-
-        _portrait = new ColorRect { Name = "Portrait", Position = new Vector2(16, 16), Size = new Vector2(148, 148), MouseFilter = MouseFilterEnum.Ignore, Visible = false };
-        _box.AddChild(_portrait);
-        _portraitImage = new TextureRect { Name = "Image", Size = new Vector2(148, 148), ExpandMode = TextureRect.ExpandModeEnum.IgnoreSize, StretchMode = TextureRect.StretchModeEnum.KeepAspectCovered, MouseFilter = MouseFilterEnum.Ignore };
-        _portrait.AddChild(_portraitImage);
-        _portraitLabel = new Label { Name = "Caption", Size = new Vector2(148, 148), HorizontalAlignment = HorizontalAlignment.Center, VerticalAlignment = VerticalAlignment.Center, AutowrapMode = TextServer.AutowrapMode.WordSmart };
-        _portrait.AddChild(_portraitLabel);
-
-        _name = new Label { Name = "Name", Position = new Vector2(184, 10), Size = new Vector2(400, 30) };
-        _name.AddThemeFontSizeOverride("font_size", 22);
-        _box.AddChild(_name);
-
-        _body = new RichTextLabel { Name = "Body", BbcodeEnabled = true, ScrollActive = false, MouseFilter = MouseFilterEnum.Ignore, FitContent = false };
-        _body.SetAnchorsPreset(LayoutPreset.FullRect);
-        _body.OffsetLeft = 184;
-        _body.OffsetTop = 46;
-        _body.OffsetRight = -24;
-        _body.OffsetBottom = -16;
-        _body.AddThemeFontSizeOverride("normal_font_size", 22);
-        _box.AddChild(_body);
-
-        _hint = new Label { Name = "Hint", Text = "▼", Visible = false };
-        _hint.SetAnchorsPreset(LayoutPreset.BottomRight);
-        _hint.OffsetLeft = -40;
-        _hint.OffsetTop = -36;
-        _box.AddChild(_hint);
+        T node = GetNodeOrNull<T>(path);
+        if (node == null) GD.PushError($"对话框场景里找不到 {path}（{typeof(T).Name}）。请检查 {ScenePath}，节点名不能改。");
+        return node;
     }
 
     // ---------- ILineSurface ----------
@@ -102,14 +92,11 @@ public partial class DialogBox : Control, ILineSurface
         _name.Text = hasName ? name : "";
         _name.Modulate = character?.NameColor ?? new Color(0.95f, 0.85f, 0.6f);
         ShowPortrait(character, expression);
-        bool portrait = _portrait.Visible;
-        _name.Position = new Vector2(portrait ? 184 : 24, 10);
-        _body.OffsetLeft = portrait ? 184 : 24;
 
         _blockSpeaker = name ?? "";
         _paragraphPending = false;
         Rushing = false;
-        _body.Text = text;
+        StartPage(text);
         StartTyping(0);
     }
 
@@ -125,7 +112,7 @@ public partial class DialogBox : Control, ILineSurface
         if (!TextFits)
         {
             // 加上这句就放不下了：翻页，新的一页从这一句开始（名牌、立绘不变）
-            _body.Text = text;
+            StartPage(text);
             alreadyShown = 0;
             PageCount++;
         }
@@ -169,6 +156,24 @@ public partial class DialogBox : Control, ILineSurface
         Rushing = false;
         if (_box != null) _box.Visible = false;
         if (_hint != null) _hint.Visible = false;
+        if (_portrait != null) _portrait.Visible = false;
+    }
+
+    // ---------- 分页和字号 ----------
+
+    /// <summary>新的一页：恢复场景字号；这一句自己就放不下时逐步缩小字号，直到放得下或到最小字号。</summary>
+    private void StartPage(string text)
+    {
+        _body.AddThemeFontSizeOverride(FontSizeName, BaseFontSize);
+        _body.Text = text;
+        int size = BaseFontSize;
+        while (!TextFits && size > MinFontSize)
+        {
+            size = Mathf.Max(MinFontSize, size - 2);
+            _body.AddThemeFontSizeOverride(FontSizeName, size);
+        }
+        if (!TextFits)
+            GD.PushWarning($"对话框：这一句太长，缩到 {MinFontSize} 号字也放不下，请在剧本里拆成几句：{text}");
     }
 
     // ---------- 打字 ----------
@@ -190,14 +195,18 @@ public partial class DialogBox : Control, ILineSurface
         else _body.VisibleCharacters = (int)_shown;
     }
 
+    /// <summary>立绘：角色勾了 HasPortrait 才显示；有图显示图（按表情找，找不到用默认），没图显示色块加名字。</summary>
     private void ShowPortrait(CharacterData character, string expression)
     {
         bool show = character != null && character.HasPortrait;
         _portrait.Visible = show;
         if (!show) return;
-        _portraitImage.Texture = character.Portrait;
-        _portrait.Color = character.Portrait != null ? new Color(0, 0, 0, 0) : character.PortraitColor;
-        _portraitLabel.Visible = character.Portrait == null;
+        Texture2D texture = character.PortraitFor(expression);
+        _portraitImage.Texture = texture;
+        _portraitImage.Visible = texture != null;
+        _portraitPlaceholder.Visible = texture == null;
+        _portraitPlaceholder.Color = character.PortraitColor;
+        _portraitLabel.Visible = texture == null;
         _portraitLabel.Text = string.IsNullOrEmpty(expression) ? character.DisplayName : $"{character.DisplayName}\n（{expression}）";
     }
 }

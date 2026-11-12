@@ -53,7 +53,17 @@ public partial class NarrativeChoiceTest : NarrativeFlowBase
 
     private async Task ChoiceChecks()
     {
+        // 模拟在 choice_panel.tscn 里改了按钮模板：选项按钮的大小、字号要跟着模板走
+        var template = Narr.Choice.GetNode<Button>("OptionTemplate");
+        Vector2 oldSize = template.CustomMinimumSize;
+        template.CustomMinimumSize = new Vector2(420, oldSize.Y);   // 只改宽度：变高会盖到无界面模式下鼠标所在的屏幕中心，悬停会抢焦点
+        template.AddThemeFontSizeOverride("font_size", 27);
         bool opened = await OpenOffering();
+        var option0 = Narr.Choice.GetNodeOrNull<Button>("List/Option0");
+        Check(option0 != null && option0.CustomMinimumSize == new Vector2(420, oldSize.Y) && option0.GetThemeFontSize("font_size") == 27 && option0.Visible,
+            $"供桌：选项按钮照场景里的模板生成（模板改成 420 宽、27 号字，按钮也是 {option0?.CustomMinimumSize}、{option0?.GetThemeFontSize("font_size")} 号）");
+        template.CustomMinimumSize = oldSize;
+        template.RemoveThemeFontSizeOverride("font_size");
         Check(opened && Narr.Dialog.CurrentName == "？？？" && Narr.Dialog.CurrentText == "别碰！那是母神的东西！" && NarrativePaused,
             $"供桌：真实玩家走到供桌按 E → ？？？“别碰！那是母神的东西！”，暂停（{Narr.Dialog.CurrentName}：{Narr.Dialog.CurrentText}）");
         if (!opened) return;

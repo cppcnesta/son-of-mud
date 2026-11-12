@@ -3,10 +3,14 @@ using Godot;
 
 namespace SonOfMud.Narrative.Views;
 
-/// <summary>泥板 / 铭文阅读界面（技术占位版）：屏幕中间的面板，标题 + 正文。推进键关闭（由剧情层读键）。</summary>
+/// <summary>
+/// 泥板 / 铭文阅读界面。界面在 tablet_view.tscn：Dim（压暗）、Panel（泥板底图）→ Title / Body / Hint。推进键关闭（由剧情层读键）。
+/// </summary>
 [GlobalClass]
 public partial class TabletView : Control
 {
+    public const string ScenePath = "res://assets/scenes/narrative/views/tablet_view.tscn";
+
     public bool IsOpen { get; private set; }
     public string CurrentTitle => _title?.Text ?? "";
     public string CurrentText => _body?.Text ?? "";
@@ -19,27 +23,10 @@ public partial class TabletView : Control
 
     public override void _Ready()
     {
-        SetAnchorsAndOffsetsPreset(LayoutPreset.FullRect); // 已在场景树里：只改锚点会保留原来 0 大小的矩形，必须连偏移一起设
-        MouseFilter = MouseFilterEnum.Ignore;
-        var dim = new ColorRect { Name = "Dim", Color = new Color(0, 0, 0, 0.6f), MouseFilter = MouseFilterEnum.Ignore };
-        dim.SetAnchorsPreset(LayoutPreset.FullRect);
-        AddChild(dim);
-        var panel = new Panel { Name = "Panel", MouseFilter = MouseFilterEnum.Ignore };
-        panel.SetAnchorsPreset(LayoutPreset.Center);
-        panel.OffsetLeft = -320;
-        panel.OffsetRight = 320;
-        panel.OffsetTop = -240;
-        panel.OffsetBottom = 240;
-        panel.AddThemeStyleboxOverride("panel", new StyleBoxFlat { BgColor = new Color(0.36f, 0.27f, 0.19f), BorderColor = new Color(0.2f, 0.14f, 0.1f), BorderWidthTop = 4, BorderWidthBottom = 4, BorderWidthLeft = 4, BorderWidthRight = 4 });
-        AddChild(panel);
-        _title = new Label { Name = "Title", Position = new Vector2(32, 24), Size = new Vector2(576, 40), HorizontalAlignment = HorizontalAlignment.Center };
-        _title.AddThemeFontSizeOverride("font_size", 26);
-        panel.AddChild(_title);
-        _body = new RichTextLabel { Name = "Body", BbcodeEnabled = true, Position = new Vector2(40, 84), Size = new Vector2(560, 340), ScrollActive = false, MouseFilter = MouseFilterEnum.Ignore };
-        _body.AddThemeFontSizeOverride("normal_font_size", 22);
-        panel.AddChild(_body);
-        var hint = new Label { Name = "Hint", Text = "按 E / 空格 继续", Position = new Vector2(32, 436), Size = new Vector2(576, 30), HorizontalAlignment = HorizontalAlignment.Right };
-        panel.AddChild(hint);
+        ViewNodes.Need<Control>(this, "Dim", ScenePath);
+        ViewNodes.Need<Control>(this, "Panel", ScenePath);
+        _title = ViewNodes.Need<Label>(this, "Panel/Title", ScenePath);
+        _body = ViewNodes.Need<RichTextLabel>(this, "Panel/Body", ScenePath);
         Visible = false;
     }
 

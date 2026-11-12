@@ -1,8 +1,11 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Godot;
 using SonOfMud.Core;
+using SonOfMud.Narrative.Data;
+using SonOfMud.Narrative.Views;
 using SonOfMud.Narrative.World;
 using SonOfMud.Player;
 
@@ -33,6 +36,9 @@ public partial class NarrativeDialogTest : NarrativeFlowBase
             await OpeningChecks();
             await NpcChecks();
             await SubtitleChecks();
+            ViewSceneChecks();
+            await SceneAuthorityChecks();
+            await PortraitChecks();
             Check(Errors.Count == 0, "全程没有报错" + (Errors.Count > 0 ? "：" + string.Join(" | ", Errors.Snapshot().Take(5)) : ""));
         }
         finally
@@ -158,9 +164,12 @@ public partial class NarrativeDialogTest : NarrativeFlowBase
         int linesAtPress = Narr.Dialog.LineCount;
         Check(paused && firstLine && Started.Count == started + 1, $"守坑人：按 E → 游戏暂停、对话框开始打第一句“祂……醒了……”（{Narr.Dialog.CurrentName}：{Narr.Dialog.CurrentText}）");
         Check(Narr.Dialog.PortraitVisible, "守坑人：显示守坑人立绘（占位）");
-        Check(OnScreen(Narr.Dialog.GetNodeOrNull<Control>("Box"), out string npcBox) && OnScreen(Narr.Dialog.GetNodeOrNull<Control>("Box/Portrait"), out _)
-              && OnScreen(Narr.Dialog.GetNodeOrNull<Control>("Box/Name"), out _),
-            $"守坑人：对话框、立绘、名牌都显示在屏幕内（{npcBox}）");
+        Control npcPortrait = Narr.Dialog.GetNodeOrNull<Control>("Portrait");
+        bool boxOn = OnScreen(Narr.Dialog.GetNodeOrNull<Control>("Box"), out string npcBox);
+        bool portraitOn = OnScreen(npcPortrait, out string portraitInfo);
+        Check(boxOn && portraitOn && OnScreen(Narr.Dialog.GetNodeOrNull<Control>("Box/Name"), out _)
+              && Mathf.Abs(npcPortrait.GetGlobalRect().End.Y - Narr.Dialog.GetNodeOrNull<Control>("Box").GetGlobalRect().Position.Y) <= 0.5f,
+            $"守坑人：对话框、名牌和整张立绘都在屏幕内，立绘脚底贴着对话框上沿（框 {npcBox}；立绘 {portraitInfo}）");
         await Frames(30);   // 一直按着 E
         bool notSkipped = Narr.Dialog.LineCount == linesAtPress && Narr.Dialog.CurrentText == "祂……醒了……" && Narr.MainActive && Narr.Main.WaitingForAdvance;
         KeyUp(Key.E);
@@ -236,5 +245,136 @@ public partial class NarrativeDialogTest : NarrativeFlowBase
         await AdvanceUntil(() => !Narr.MainActive, 10);
         await WaitUntil(() => !PauseService.IsPaused, 30);
         Check(NoPauseOrLock(), "字幕：对话框剧情结束后没有暂停和输入锁残留");
+    }
+
+    // =================================================================
+    // 剧情界面来自场景：场景能单独打开、节点齐全；改了场景游戏里跟着变；大立绘和表情；单句超长
+    // =================================================================
+
+    private static readonly (string name, string scene, string[] nodes)[] ViewScenes =
+    {
+        ("Dialog", DialogBox.ScenePath, new[] { "Box", "Box/Name", "Box/Body", "Box/Hint", "Portrait", "Portrait/Placeholder", "Portrait/Image", "Portrait/Caption" }),
+        ("Subtitle", SubtitleBar.ScenePath, new[] { "Bar", "Bar/Text" }),
+        ("Choice", ChoicePanel.ScenePath, new[] { "List", "OptionTemplate" }),
+        ("Tablet", TabletView.ScenePath, new[] { "Dim", "Panel", "Panel/Title", "Panel/Body", "Panel/Hint" }),
+        ("Cg", CgLayer.ScenePath, new[] { "Placeholder", "Image", "Caption" }),
+        ("Fade", FadeLayer.ScenePath, Array.Empty<string>()),
+    };
+
+    private void ViewSceneChecks()
+    {
+        foreach (var (name, scene, nodes) in ViewScenes)
+        {
+            Node live = Narr.GetNodeOrNull(name);
+            var packed = ResourceLoader.Exists(scene) ? GD.Load<PackedScene>(scene) : null;
+            Node copy = packed?.Instantiate();
+            string[] missing = copy == null ? nodes : nodes.Where(n => copy.GetNodeOrNull(n) == null).ToArray();
+            copy?.Free();
+            Check(live != null && live.SceneFilePath == scene && copy != null && missing.Length == 0,
+                $"界面场景：剧情层的 {name} 来自 {scene}，场景能单独实例化，节点齐全" + (missing.Length > 0 ? "；缺：" + string.Join(", ", missing) : ""));
+        }
+        Node template = Narr.Choice.GetNodeOrNull("OptionTemplate");
+        Check(template is Button { Visible: false }, "界面场景：选项按钮模板在场景里，平时隐藏");
+    }
+
+    /// <summary>
+    /// 模拟“在编辑器里改了 dialog_box.tscn”：实例化一份，进树前改框的位置、名牌位置、正文字号，再用它播台词。
+    /// 代码如果还在自己搭节点或者重写布局，这些改动就不会生效。
+    /// </summary>
+    private async Task SceneAuthorityChecks()
+    {
+        var box = GD.Load<PackedScene>(DialogBox.ScenePath).Instantiate<DialogBox>();
+        box.Name = "EditedDialog";
+        box.Settings = Narr.Settings;
+        var frame = box.GetNode<Control>("Box");
+        frame.OffsetTop -= 40;
+        frame.OffsetBottom -= 40;
+        var name = box.GetNode<Label>("Box/Name");
+        name.Position = new Vector2(300, 6);
+        var body = box.GetNode<RichTextLabel>("Box/Body");
+        body.AddThemeFontSizeOverride("normal_font_size", 34);
+        Narr.AddChild(box);
+        await Frames(2);
+
+        var withPortrait = new CharacterData { DisplayName = "测试甲", HasPortrait = true };
+        var noPortrait = new CharacterData { DisplayName = "测试乙", HasPortrait = false };
+        float frameTop = frame.GetGlobalRect().Position.Y;
+        box.ShowLine("测试甲", "有立绘时名牌和正文不被代码挪动。", withPortrait, "");
+        await Frames(2);
+        bool keptWith = name.Position == new Vector2(300, 6) && Mathf.IsEqualApprox(body.OffsetLeft, 24f) && box.PortraitVisible;
+        box.ShowLine("测试乙", "没立绘时也一样。", noPortrait, "");
+        await Frames(2);
+        bool keptWithout = name.Position == new Vector2(300, 6) && Mathf.IsEqualApprox(body.OffsetLeft, 24f) && !box.PortraitVisible;
+        Check(keptWith && keptWithout && Mathf.IsEqualApprox(frame.GetGlobalRect().Position.Y, frameTop) && box.BaseFontSize == 34,
+            $"场景为准：改了场景里框的位置、名牌位置、正文字号（34），有立绘、没立绘两种情况代码都不改它们（名牌 {name.Position}，字号 {box.BaseFontSize}）");
+
+        // 字号变大后，开场旁白照样逐句完整放得下（会多翻几页）
+        string[] narration =
+        {
+            "我是父亲用血和泥捏出的第一个。", "在祂说出我的名字之前，我只是泥。", "", "在人世（…?）之前，在塔庙（…?）之前，在两条河有名字之前，只有我。", "",
+            "祂的手指在我身上留下了纹路，祂的血塑造了我的骨和肉。", "那时天和地还没有分开，混沌的母神在咸水里翻身。", "我第一次睁眼，然后看见祂。这就是这个世界的样子。", "",
+            "父亲说：“你是我的手。”于是我成了父亲的手。", "父亲说：“你是我的刃。”于是我成了父亲的刃。",
+        };
+        var bad = new List<string>();
+        int pages = box.PageCount;
+        bool first = true;
+        foreach (string line in narration)
+        {
+            if (line == "") { box.BreakParagraph(); continue; }
+            if (first) box.ShowLine("", line, null, "");
+            else box.AppendLine(line);
+            first = false;
+            box.CompleteTyping();
+            await Frames(1);
+            if (!box.TextFits || !box.CurrentText.Contains(line) || box.CurrentFontSize != 34) bad.Add($"“{line}”（字号 {box.CurrentFontSize}）");
+        }
+        Check(bad.Count == 0 && box.PageCount - pages >= 3,
+            $"场景为准：正文改成 34 号字后，旁白每句都完整显示、字号不变，放不下就翻页（翻了 {box.PageCount - pages} 页）" + (bad.Count > 0 ? "；有问题：" + string.Join(" | ", bad) : ""));
+
+        // 一句话自己就超过正文区：这一页缩小字号到放得下；下一页恢复
+        string longLine = string.Concat(Enumerable.Repeat("这是一句非常非常长、自己一句就超过对话框正文区的台词，", 12));
+        box.ShowLine("", longLine, null, "");
+        box.CompleteTyping();
+        await Frames(1);
+        bool shrunk = box.TextFits && box.CurrentFontSize < 34 && box.CurrentFontSize >= DialogBox.MinFontSize && box.CurrentText == longLine;
+        int shrunkSize = box.CurrentFontSize;
+        box.ShowLine("", "短的一句。", null, "");
+        box.CompleteTyping();
+        await Frames(1);
+        Check(shrunk && box.CurrentFontSize == 34 && box.TextFits,
+            $"单句超长：{longLine.Length} 个字的一句缩到 {shrunkSize} 号字完整放下；下一句恢复 34 号");
+        box.QueueFree();
+        await Frames(1);
+    }
+
+    /// <summary>大立绘：整张在屏幕内、脚底贴对话框；表情换图，没有这个表情用默认图；没图显示色块；没勾 HasPortrait 不显示。</summary>
+    private async Task PortraitChecks()
+    {
+        DialogBox dialog = Narr.Dialog;
+        Texture2D normal = ImageTexture.CreateFromImage(Image.CreateEmpty(30, 40, false, Image.Format.Rgba8));
+        Texture2D surprised = ImageTexture.CreateFromImage(Image.CreateEmpty(30, 40, false, Image.Format.Rgba8));
+        var hero = new CharacterData { DisplayName = "测试丙", HasPortrait = true, Portrait = normal };
+        hero.ExpressionPortraits["惊讶"] = surprised;
+        var blank = new CharacterData { DisplayName = "测试丁", HasPortrait = true };
+
+        dialog.ShowLine("测试丙", "默认表情。", hero, "");
+        await Frames(2);
+        Control portrait = dialog.GetNode<Control>("Portrait");
+        Rect2 rect = portrait.GetGlobalRect();
+        bool placed = OnScreen(portrait, out string info) && Mathf.Abs(rect.End.Y - dialog.GetNode<Control>("Box").GetGlobalRect().Position.Y) <= 0.5f && rect.Size.Y >= 300;
+        bool normalShown = dialog.PortraitTexture == normal;
+        dialog.ShowLine("测试丙", "惊讶。", hero, "惊讶");
+        bool surprisedShown = dialog.PortraitTexture == surprised;
+        dialog.ShowLine("测试丙", "生气（没有这张图）。", hero, "生气");
+        bool fallback = dialog.PortraitTexture == normal;
+        dialog.ShowLine("测试丁", "没有图。", blank, "");
+        bool placeholder = dialog.PortraitVisible && dialog.PortraitTexture == null && dialog.GetNode<CanvasItem>("Portrait/Placeholder").Visible;
+        dialog.ShowLine("", "旁白不显示立绘。", null, "");
+        bool narrator = !dialog.PortraitVisible;
+        dialog.Hide();
+        Check(placed, $"立绘：整张立绘在屏幕内，脚底贴着对话框上沿（{info}）");
+        Check(normalShown && surprisedShown && fallback, "立绘：按表情换图（惊讶 → 惊讶图），没有这个表情的图就用默认立绘");
+        Check(placeholder && narrator, "立绘：没有图时显示占位色块；旁白不显示立绘");
+        await Frames(1);
     }
 }
