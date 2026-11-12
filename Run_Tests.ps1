@@ -58,12 +58,13 @@ try {
             if ($LASTEXITCODE -ne 0 -and $worldCode -eq 0) { $worldCode = $LASTEXITCODE }
         }
     }
-    # 新玩家 / 战斗验收测试：结果写到 tests/output/player_results.json、combat_results.json、player_feel_results.json
+    # 新玩家 / 战斗验收测试：结果写到 tests/output/player_results.json、combat_results.json、player_feel_results.json、player_art_results.json
     $newCode = 0
     $newScenes = [ordered]@{
         'player' = 'res://tests/player/player_suite.tscn'
         'combat' = 'res://tests/combat/combat_suite.tscn'
         'player-feel' = 'res://tests/player/feel_checks.tscn'
+        'player-art' = 'res://tests/player/player_art.tscn'
     }
     foreach ($name in $newScenes.Keys) {
         if ($Suite -ne 'all' -and $Suite -ne 'new' -and $Suite -ne $name) { continue }
