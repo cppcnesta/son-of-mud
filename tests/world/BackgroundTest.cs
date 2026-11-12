@@ -44,7 +44,11 @@ public partial class BackgroundTest : FlowTestBase
         await ToolImportChecks();
         await UpgradeChecks();
         await HandBuiltChecks();
+        await ZFillChecks();
+        await MigrationFidelityChecks();
+        await DepthChecks();
         await OrderChecks();
+        await PreviewChecks();
         await UndoRedoChecks();
         await WarningChecks();
         await ParallaxShiftChecks();
@@ -162,7 +166,7 @@ public partial class BackgroundTest : FlowTestBase
     private List<Node> ItemsOf(string key) =>
         ToolLayer?.GetChildren().Where(c => BackgroundImporter.ToolKeyOf(c) == key).ToList() ?? new List<Node>();
 
-    private static string PathOf(Node node) => (node as Sprite2D)?.Texture?.ResourcePath ?? "";
+    private static string PathOf(Node node) => BackgroundImporter.ImageOfItem(node)?.Texture?.ResourcePath ?? "";
 
     /// <summary>手搭一个 Background（模拟你在编辑器里自己建的节点）。</summary>
     private Node2D BuildBackground(params Node[] children)
@@ -186,8 +190,12 @@ public partial class BackgroundTest : FlowTestBase
         {
             string line = $"{indent}{node.Name}:{node.GetClass()} owner={(node.Owner == Room ? "房间" : node.Owner?.Name ?? "无")}";
             if (node.HasMeta(BackgroundImporter.ToolMeta)) line += $" meta={node.GetMeta(BackgroundImporter.ToolMeta)}";
-            if (node is Sprite2D s) line += $" tex={s.Texture?.GetInstanceId()} pos={s.Position} scale={s.Scale} centered={s.Centered}";
-            if (node is Parallax2D p) line += $" scroll={p.ScrollScale}";
+            if (node.HasMeta(BackgroundImporter.VersionMeta)) line += $" version={node.GetMeta(BackgroundImporter.VersionMeta)}";
+            if (node is CanvasItem ci) line += $" z={ci.ZIndex}{(ci.ZAsRelative ? "相对" : "绝对")}";
+            // Parallax2D 的 position 运行时由镜头决定，不比；其余变换都比
+            if (node is Node2D n2) line += $" rot={n2.Rotation} scale={n2.Scale} skew={n2.Skew}" + (node is Parallax2D ? "" : $" pos={n2.Position}");
+            if (node is Sprite2D s) line += $" tex={s.Texture?.GetInstanceId()} centered={s.Centered}";
+            if (node is Parallax2D p) line += $" scroll={p.ScrollScale} offset={p.ScrollOffset}";
             lines.Add(line);
             foreach (Node child in node.GetChildren()) Walk(child, indent + "  ");
         }
@@ -303,8 +311,12 @@ public partial class BackgroundTest : FlowTestBase
                              && far != null && mid != null && front != null && bg.GetChildCount() == 3
                              && far.GetIndex() == 0 && mid.GetIndex() == 1 && front.GetIndex() == 2
                              && far.ScrollScale == _settings.FarScroll && mid.ScrollScale == _settings.MidScroll && front.ScrollScale == _settings.FrontScroll
+                             && far.ZIndex == _settings.FarZ && mid.ZIndex == _settings.MidZ && front.ZIndex == _settings.FrontZ
+                             && !far.ZAsRelative && !mid.ZAsRelative && !front.ZAsRelative
+                             && BackgroundImporter.ImageLayers.All(l => ImageOf(l).ZIndex == 0 && ImageOf(l).ZAsRelative)
+                             && bg.GetMeta(BackgroundImporter.VersionMeta, 0).AsInt32() == BackgroundImporter.CurrentVersion
                              && new Node[] { bg, far, mid, front, ImageOf("far"), ImageOf("mid"), ImageOf("front") }.All(n => n?.Owner == Room);
-            Check(structure, $"{roomId}【{name}】导入后：Background（z -100，第一个子节点）→ Far / Mid / Front（视差 0.15 / 0.5 / 0.8，按这个顺序）→ Image，所有者都是房间");
+            Check(structure, $"{roomId}【{name}】导入后：Background（z -100，第一个子节点，记新版本号）→ Far / Mid / Front（视差 0.15 / 0.5 / 0.8，层级 −100 / −80 / −60 绝对，按这个顺序）→ Image（相对 0），所有者都是房间");
             bool fitted = BackgroundImporter.ImageLayers.All(l =>
             {
                 Sprite2D image = ImageOf(l);
@@ -380,7 +392,7 @@ public partial class BackgroundTest : FlowTestBase
     }
 
     // =================================================================
-    // 物件层：每张图一个节点，记物件标识
+    // 物件：每张图一个 Parallax2D（各自的视差和层级）→ Image，记物件标识
     // =================================================================
 
     private async Task ToolImportChecks()
@@ -389,19 +401,23 @@ public partial class BackgroundTest : FlowTestBase
         RemoveBackground();
         var plan = Import(RoomToolRoot);
         await Frames(1);
-        var tool = ToolLayer as Parallax2D;
-        var cloud = tool?.GetNodeOrNull<Sprite2D>("BigCloud");
-        var tree = tool?.GetNodeOrNull<Sprite2D>("Tree");
-        Check(plan.NewBackground == Bg && tool != null && tool.Name == "Tool" && tool.ScrollScale == _settings.ToolScroll && tool.GetChildCount() == 2
+        Node tool = ToolLayer;
+        var cloud = tool?.GetNodeOrNull<Parallax2D>("BigCloud");
+        var tree = tool?.GetNodeOrNull<Parallax2D>("Tree");
+        Sprite2D treeImage = BackgroundImporter.ImageOfItem(tree);
+        Check(plan.NewBackground == Bg && tool != null && tool.GetType() == typeof(Node2D) && tool.Name == "Tool" && tool.GetChildCount() == 2
               && cloud != null && tree != null && cloud.GetIndex() == 0
               && PathOf(tree) == $"{RoomToolRoot}/s1/tex_bg_s1_03_tool_tree.png" && PathOf(cloud) == $"{RoomToolRoot}/s1/tex_bg_s1_03_tool_big_cloud.png"
               && tree.GetMeta(BackgroundImporter.ToolMeta).AsString() == "tree" && cloud.GetMeta(BackgroundImporter.ToolMeta).AsString() == "big_cloud"
-              && new Node[] { tool, tree, cloud }.All(n => n.Owner == Room),
-            $"物件：S1_03 导入成 Background/Tool（视差 {_settings.ToolScroll}）→ BigCloud、Tree，用房间专属图，记了物件标识，所有者是房间（{string.Join(" / ", plan.Messages)}）");
+              && new Node[] { tool, tree, cloud, treeImage }.All(n => n?.Owner == Room),
+            $"物件：S1_03 导入成 Background/Tool（收纳用的 Node2D）→ BigCloud、Tree（各自一个 Parallax2D）→ Image，用房间专属图，标识记在物件节点上，所有者是房间（{string.Join(" / ", plan.Messages)}）");
+        Check(new[] { tree, cloud }.All(i => i.ScrollScale == _settings.ToolScroll && i.ZIndex == _settings.ToolZ && !i.ZAsRelative)
+              && treeImage.ZIndex == 0 && treeImage.ZAsRelative && treeImage.Name == BackgroundImporter.ImageName,
+            $"物件：每个物件自己的视差 {_settings.ToolScroll}、层级 {_settings.ToolZ}（绝对）；Image 保持相对 0，跟随物件节点");
 
         Vector2 req = Required(BackgroundImporter.Tool);
-        Vector2 shown = tree.Texture.GetSize() * tree.Scale;
-        Check(!tree.Centered && tree.Scale.X == tree.Scale.Y && shown.X >= req.X - 0.01f && shown.Y >= req.Y - 0.01f
+        Vector2 shown = treeImage.Texture.GetSize() * treeImage.Scale;
+        Check(!treeImage.Centered && treeImage.Scale.X == treeImage.Scale.Y && shown.X >= req.X - 0.01f && shown.Y >= req.Y - 0.01f
               && (Mathf.Abs(shown.X - req.X) < 1.01f || Mathf.Abs(shown.Y - req.Y) < 1.01f),
             $"物件：初始按整张图等比盖满房间（{shown.Round()}，房间加余量需要 {req.Round()}）");
 
@@ -409,7 +425,7 @@ public partial class BackgroundTest : FlowTestBase
         packed.Pack(Room);
         SceneState state = packed.GetState();
         int toolNodes = Enumerable.Range(0, state.GetNodeCount()).Count(i => state.GetNodePath(i).ToString().Contains("Background/Tool/"));
-        Check(toolNodes == 2, $"物件：保存房间场景时物件节点会被写进去（{toolNodes} 个）");
+        Check(toolNodes == 4, $"物件：保存房间场景时物件节点和它们的 Image 都会被写进去（{toolNodes} 个）");
         RemoveBackground();
     }
 
@@ -420,22 +436,26 @@ public partial class BackgroundTest : FlowTestBase
         RemoveBackground();
         Import(FixtureRoot);
         await Frames(1);
-        Sprite2D tree = ItemsOf("tree").FirstOrDefault() as Sprite2D;
+        var tree = ItemsOf("tree").FirstOrDefault() as Parallax2D;
+        Sprite2D image = BackgroundImporter.ImageOfItem(tree);
         Check(tree != null && tree.Name == "Tree" && PathOf(tree) == $"{FixtureRoot}/s1/tex_bg_s1_tool_tree.png" && ItemsOf("rock").Count == 1,
             "区域图升级：只有区域图时导入，生成 Tree（区域图）和 Rock");
         if (tree == null) return;
 
         tree.Name = "tooltree";
-        tree.Position += new Vector2(321, -45);
-        tree.Scale *= 0.7f;
-        Vector2 pos = tree.Position, scale = tree.Scale;
+        tree.ZIndex = -70;
+        tree.ScrollScale = new Vector2(0.6f, 0.6f);
+        image.Position += new Vector2(321, -45);
+        image.Scale *= 0.7f;
+        Vector2 pos = image.Position, scale = image.Scale;
         int before = ToolLayer.GetChildCount();
 
         var plan = Import(RoomToolRoot);
         await Frames(1);
-        Check(ItemsOf("tree").Count == 1 && ItemsOf("tree")[0] == tree && tree.Name == "tooltree" && tree.Position == pos && tree.Scale == scale
-              && PathOf(tree) == $"{RoomToolRoot}/s1/tex_bg_s1_03_tool_tree.png" && plan.Retextures.Count(r => r.image == tree) == 1,
-            $"区域图升级：加上房间专属图再导入 → 原节点 tooltree 换成专属图，名字、位置、缩放都保留，没有第二棵树（{string.Join(" / ", plan.Messages)}）");
+        Check(ItemsOf("tree").Count == 1 && ItemsOf("tree")[0] == tree && tree.Name == "tooltree" && tree.ZIndex == -70 && tree.ScrollScale == new Vector2(0.6f, 0.6f)
+              && BackgroundImporter.ImageOfItem(tree) == image && image.Position == pos && image.Scale == scale
+              && PathOf(tree) == $"{RoomToolRoot}/s1/tex_bg_s1_03_tool_tree.png" && plan.Retextures.Count(r => r.image == image) == 1,
+            $"区域图升级：加上房间专属图再导入 → 原节点 tooltree 换成专属图，名字、层级、视差、位置、缩放都保留，没有第二棵树（{string.Join(" / ", plan.Messages)}）");
         Check(ToolLayer.GetChildCount() == before + 1 && ItemsOf("big_cloud").Count == 1 && ItemsOf("rock").Count == 1,
             "区域图升级：同时补上新的物件 BigCloud，新目录里没有的 Rock 原样保留");
 
@@ -447,16 +467,16 @@ public partial class BackgroundTest : FlowTestBase
         Error error = packed.Pack(Room);
         var reopened = packed.Instantiate<RoomRoot>();
         Node reTool = BackgroundImporter.FindLayer(reopened.GetNodeOrNull(BackgroundImporter.NodeName), BackgroundImporter.Tool);
-        var reTree = reTool?.GetNodeOrNull<Sprite2D>("tooltree");
+        var reTree = reTool?.GetNodeOrNull<Parallax2D>("tooltree");
         var replan = BackgroundImporter.PlanImport(reopened, At(RoomToolRoot));
-        Check(error == Error.Ok && reTree != null && reTree.GetMeta(BackgroundImporter.ToolMeta, "").AsString() == "tree" && reTree.Position == pos
-              && replan.Empty && reTool.GetChildCount() == before + 1,
-            $"区域图升级：保存后重新打开，物件标识还在，再点一次仍然不新增节点（{string.Join(" / ", replan.Messages)}）");
+        Check(error == Error.Ok && reTree != null && reTree.GetMeta(BackgroundImporter.ToolMeta, "").AsString() == "tree" && reTree.ZIndex == -70
+              && BackgroundImporter.ImageOfItem(reTree)?.Position == pos && replan.Empty && reTool.GetChildCount() == before + 1,
+            $"区域图升级：保存后重新打开，物件标识和层级都在，再点一次仍然不新增节点（{string.Join(" / ", replan.Messages)}）");
         reopened.Free();
         RemoveBackground();
     }
 
-    /// <summary>你在 S1_03 里那样手建的节点：小写的 front / tool，物件叫 tooltree、居中、没有标识。</summary>
+    /// <summary>你在 S1_03 里那样手建的旧版节点：小写的 front / tool，tool 是 Parallax2D，物件 tooltree 直接放在下面、居中、没有标识。</summary>
     private async Task HandBuiltChecks()
     {
         await Teleport("S1_03", SpawnPoint.DefaultId);
@@ -472,16 +492,136 @@ public partial class BackgroundTest : FlowTestBase
         var plan = Import(RoomToolRoot, l => l == "front" ? frontTex : null);
         await Frames(1);
         var names = Bg.GetChildren().Select(c => c.Name.ToString()).ToList();
-        Check(string.Join(",", names) == "front,tool,Notes" && front.ScrollScale == new Vector2(0.15f, 0.15f),
-            $"手建节点：小写的 front / tool 被认出来，没有重复建层；你设的视差不改；你自己的节点不动（{string.Join(",", names)}）");
-        Check(ItemsOf("tree").Count == 1 && handTree.GetMeta(BackgroundImporter.ToolMeta, "").AsString() == "tree" && handTree.Name == "tooltree"
-              && handTree.Centered && handTree.Position == new Vector2(3047, 658) && PathOf(handTree) == $"{RoomToolRoot}/s1/tex_bg_s1_03_tool_tree.png"
-              && plan.ToolTags.Count == 1,
-            $"手建节点：没有标识的 tooltree 按图片文件名认出是 tree，补记标识并换成专属图，其余不动（{string.Join(" / ", plan.Messages)}）");
-        Check(ItemsOf("big_cloud").Count == 1 && ItemsOf("big_cloud")[0].GetParent() == tool && ItemsOf("big_cloud")[0].Owner == Room,
-            "手建节点：缺的物件 BigCloud 补进你建的 tool 层");
-        Check(BackgroundImporter.PlanImport(Room, At(RoomToolRoot), l => l == "front" ? frontTex : null).Empty, "手建节点：再点一次没有变化");
+        Check(string.Join(",", names) == "front,tool,Notes" && front.ScrollScale == new Vector2(0.15f, 0.15f) && front.ZIndex == _settings.FrontZ && !front.ZAsRelative,
+            $"旧版手建节点：小写的 front / tool 被认出来，没有重复建层；视差不改；front 原来是旧默认的 0，补上层级 {_settings.FrontZ}；你自己的节点不动（{string.Join(",", names)}）");
+        var wrapper = tool.GetNodeOrNull<Parallax2D>("tooltree");
+        Check(wrapper != null && wrapper.GetIndex() == 0 && wrapper.GetMeta(BackgroundImporter.ToolMeta, "").AsString() == "tree"
+              && wrapper.ZIndex == _settings.ToolZ && !wrapper.ZAsRelative && wrapper.ScrollScale == Vector2.One
+              && handTree.GetParent() == wrapper && handTree.Name == BackgroundImporter.ImageName && !handTree.HasMeta(BackgroundImporter.ToolMeta)
+              && handTree.Centered && handTree.Position == new Vector2(3047, 658) && handTree.Owner == Room && wrapper.Owner == Room
+              && PathOf(wrapper) == $"{RoomToolRoot}/s1/tex_bg_s1_03_tool_tree.png" && plan.Wraps.Count == 1,
+            $"旧版手建节点：tooltree 包一层自己的视差节点（名字、位置不变，标识记在外层，层级 {_settings.ToolZ}），并换成专属图（{string.Join(" / ", plan.Messages)}）");
+        Check(ItemsOf("big_cloud").Count == 1 && ItemsOf("big_cloud")[0].GetParent() == tool && ItemsOf("big_cloud")[0].Owner == Room
+              && Bg.GetMeta(BackgroundImporter.VersionMeta, 0).AsInt32() == BackgroundImporter.CurrentVersion,
+            "旧版手建节点：缺的物件 BigCloud 补进你建的 tool；背景记上新版本号");
+        Check(BackgroundImporter.PlanImport(Room, At(RoomToolRoot), l => l == "front" ? frontTex : null).Empty, "旧版手建节点：再点一次没有变化");
         RemoveBackground();
+    }
+
+    /// <summary>审查 Minor：只在旧版第一次升级时把“0 且相对”当作旧默认补层级；你设的值不动；升级后不再自动补。</summary>
+    private async Task ZFillChecks()
+    {
+        await Teleport("S1_03", SpawnPoint.DefaultId);
+        var far = new Parallax2D { Name = "Far" };
+        var mid = new Parallax2D { Name = "Mid", ZIndex = -95, ZAsRelative = false };
+        var front = new Parallax2D { Name = "Front", ZIndex = 5 };
+        BuildBackground(far, mid, front);
+        var plan = Import(MissingRoot);
+        Check(far.ZIndex == _settings.FarZ && !far.ZAsRelative && mid.ZIndex == -95 && !mid.ZAsRelative && front.ZIndex == 5 && front.ZAsRelative
+              && Bg.GetMeta(BackgroundImporter.VersionMeta, 0).AsInt32() == BackgroundImporter.CurrentVersion,
+            $"补层级：旧版里还是 0 且相对的 Far 补成 {_settings.FarZ}；你设过的 Mid −95、Front 相对 5 都不动；记上版本号（{string.Join(" / ", plan.Messages)}）");
+
+        far.ZIndex = 0;
+        far.ZAsRelative = true;
+        var again = Import(MissingRoot);
+        Check(again.Empty && far.ZIndex == 0 && far.ZAsRelative, "补层级：升级过以后你再把 Far 改回 0（相对），再点按钮也不会被改掉");
+        RemoveBackground();
+    }
+
+    /// <summary>旧版 Tool 是有视差、偏移、缩放的 Parallax2D：升级后镜头在任何位置，物件在屏幕上的位置、大小都和原来一样。</summary>
+    private async Task MigrationFidelityChecks()
+    {
+        await Teleport("S1_03", SpawnPoint.DefaultId);
+        var tool = new Parallax2D { Name = "Tool", ScrollScale = new Vector2(0.4f, 0.3f), ScrollOffset = new Vector2(20, -10), Scale = new Vector2(1.1f, 1.1f) };
+        var rock = new Sprite2D { Name = "Rock", Centered = false, Texture = GD.Load<Texture2D>($"{FixtureRoot}/s1/tex_bg_s1_tool_rock.png"), Position = new Vector2(1500, 300), Scale = new Vector2(30, 30) };
+        var deco = new Sprite2D { Name = "Deco", Centered = false, Texture = Blank(new Vector2(40, 20)), Position = new Vector2(2600, 500), Scale = new Vector2(3, 3) };
+        tool.AddChild(rock);
+        tool.AddChild(deco);
+        BuildBackground(tool);
+        await Frames(1);
+
+        Vector2[] cams = { new(0, 0), new(900, 300), new(2400, 700) };
+        async Task<List<Rect2>> Sample()
+        {
+            var rects = new List<Rect2>();
+            Cam.SetProcess(false);
+            foreach (Vector2 c in cams)
+            {
+                Cam.Offset = Vector2.Zero;
+                Cam.GlobalPosition = Room.GlobalPosition + c + Screen.Size / 2;
+                Cam.ResetSmoothing();
+                await Frames(2);
+                rects.Add(ScreenRectOf(rock));
+                rects.Add(ScreenRectOf(deco));
+            }
+            Cam.SetProcess(true);
+            Cam.SnapToTarget();
+            return rects;
+        }
+
+        List<Rect2> before = await Sample();
+        var plan = Import(MissingRoot);
+        List<Rect2> after = await Sample();
+        float worst = before.Zip(after, (a, b) => Mathf.Max(a.Position.DistanceTo(b.Position), a.Size.DistanceTo(b.Size))).Max();
+        Check(worst <= 0.5f, $"旧版 Tool 升级：镜头在 3 个位置时，两个物件在屏幕上的位置和大小都和升级前一样（最大差 {worst:0.###} 像素）");
+        var rockWrapper = rock.GetParent() as Parallax2D;
+        var decoWrapper = deco.GetParent() as Parallax2D;
+        Check(rockWrapper != null && decoWrapper != null && rockWrapper.GetParent() == tool && decoWrapper.GetParent() == tool
+              && rockWrapper.Name == "Rock" && decoWrapper.Name == "Deco" && rockWrapper.GetIndex() == 0 && decoWrapper.GetIndex() == 1
+              && rockWrapper.ScrollScale == new Vector2(0.4f, 0.3f) && rockWrapper.ScrollOffset == new Vector2(20, -10) && rockWrapper.Scale == new Vector2(1.1f, 1.1f)
+              && rockWrapper.GetMeta(BackgroundImporter.ToolMeta, "").AsString() == "rock" && !decoWrapper.HasMeta(BackgroundImporter.ToolMeta)
+              && tool.ScrollScale == Vector2.One && tool.ScrollOffset == Vector2.Zero && tool.Scale == Vector2.One && plan.Wraps.Count == 2,
+            $"旧版 Tool 升级：原来 Tool 的视差 / 偏移 / 缩放搬到每个物件上（认不出的 Deco 也一样包，只是不记标识），Tool 自己恢复成不起作用的收纳节点（{string.Join(" / ", plan.Messages)}）");
+        RemoveBackground();
+    }
+
+    /// <summary>层级：按 Godot 的规则算出实际层级（绝对值直接用，相对值加上父节点的），核对谁画在谁前面；物件改层级 / 视差后生效。</summary>
+    private async Task DepthChecks()
+    {
+        await Teleport("S1_03", SpawnPoint.DefaultId);
+        RemoveBackground();
+        var textures = BackgroundImporter.ImageLayers.ToDictionary(l => l, l => Blank(Required(l)));
+        Import(RoomToolRoot, l => textures[l]);
+        await Frames(1);
+        var tree = ItemsOf("tree").First() as Parallax2D;
+        int far = EffectiveZ(ImageOf("far")), mid = EffectiveZ(ImageOf("mid")), front = EffectiveZ(ImageOf("front"));
+        int item = EffectiveZ(BackgroundImporter.ImageOfItem(tree)), player = EffectiveZ(Player), geometry = EffectiveZ(Room.GetNode<CanvasItem>("Geometry"));
+        Check(far == _settings.FarZ && mid == _settings.MidZ && front == _settings.FrontZ && item == _settings.ToolZ && far < mid && mid < front && front < item && item < player && player == 0 && geometry == 0,
+            $"层级：远景 {far} < 中景 {mid} < 近景 {front} < 物件 {item} < 主角 {player}（地形 {geometry}）");
+
+        tree.ZIndex = 10;
+        Check(EffectiveZ(BackgroundImporter.ImageOfItem(tree)) == 10 && EffectiveZ(BackgroundImporter.ImageOfItem(tree)) > player, "层级：物件改成 10 → 画在主角前面");
+
+        tree.ZIndex = -90;
+        tree.ScrollScale = new Vector2(0.3f, 0.3f);
+        int between = EffectiveZ(BackgroundImporter.ImageOfItem(tree));
+        Cam.SetProcess(false);
+        Cam.Offset = Vector2.Zero;
+        Cam.GlobalPosition = Room.GlobalPosition + new Vector2(900, 500);
+        Cam.ResetSmoothing();
+        await Frames(2);
+        Vector2 v1 = ViewTopLeft, p1 = ScreenRectOf(BackgroundImporter.ImageOfItem(tree)).Position;
+        Cam.GlobalPosition = Room.GlobalPosition + new Vector2(2100, 700);
+        Cam.ResetSmoothing();
+        await Frames(2);
+        Vector2 dc = ViewTopLeft - v1, moved = ScreenRectOf(BackgroundImporter.ImageOfItem(tree)).Position - p1, expected = -0.3f * dc;
+        Cam.SetProcess(true);
+        Cam.SnapToTarget();
+        Check(between > far && between < mid && dc.X > 500 && moved.DistanceTo(expected) <= 1f,
+            $"层级 + 视差：物件改成 −90、视差 0.3 → 夹在远景和中景之间（{between}），镜头移动 {dc.Round()} 时它移动 {moved.Round()}（应为 {expected.Round()}）");
+        RemoveBackground();
+    }
+
+    /// <summary>Godot 的实际层级：绝对的直接用自己的值；相对的加上父节点（一直往上到不是 CanvasItem 为止）。</summary>
+    private static int EffectiveZ(CanvasItem item)
+    {
+        int z = 0;
+        for (Node node = item; node is CanvasItem ci; node = node.GetParent())
+        {
+            z += ci.ZIndex;
+            if (!ci.ZAsRelative) break;
+        }
+        return z;
     }
 
     /// <summary>补层顺序：已有 Tool（前面还有你自己的节点），再补 Far / Mid / Front，必须是 Far → Mid → Front → Tool。</summary>
@@ -504,6 +644,91 @@ public partial class BackgroundTest : FlowTestBase
         string second = string.Join(",", Bg.GetChildren().Select(c => c.Name.ToString()));
         Check(first == "Far,Front,Tool" && second == "Far,Mid,Front,Tool", $"补层顺序：先补 Front 再补 Mid，每次都插到正确位置（{first} → {second}）");
         RemoveBackground();
+    }
+
+    // =================================================================
+    // 编辑器视差预览：和游戏里一致；保存时还原；预览里改的 Image 保留
+    // =================================================================
+
+    private async Task PreviewChecks()
+    {
+        // 1) 预览用的算法和游戏运行时一致：在真实房间里把镜头放到同一个位置，比各个 Parallax2D 的位置
+        await Teleport("S1_03", SpawnPoint.DefaultId);
+        RemoveBackground();
+        var textures = BackgroundImporter.ImageLayers.ToDictionary(l => l, l => Blank(Required(l)));
+        Import(RoomToolRoot, l => textures[l]);
+        var tree = ItemsOf("tree").First() as Parallax2D;
+        tree.ScrollScale = new Vector2(0.3f, 0.45f);
+        tree.ScrollOffset = new Vector2(15, -8);
+        Cam.SetProcess(false);
+        float worst = 0;
+        int samples = 0;
+        foreach (Vector2 c in new Vector2[] { new(0, 0), new(1100, 200), new(2304, 324) })
+        {
+            Cam.Offset = Vector2.Zero;
+            Cam.GlobalPosition = Room.GlobalPosition + c + Screen.Size / 2;
+            Cam.ResetSmoothing();
+            await Frames(2);
+            Vector2 local = ViewTopLeft - Room.GlobalPosition;
+            foreach (Parallax2D p in BackgroundImporter.ParallaxNodes(Bg))
+            {
+                worst = Mathf.Max(worst, p.Position.DistanceTo(BackgroundImporter.RuntimePosition(p, local)));
+                samples++;
+            }
+        }
+        Cam.SetProcess(true);
+        Cam.SnapToTarget();
+        Check(samples >= 15 && worst <= 0.5f, $"预览：用的算法和游戏里一致（镜头 3 个位置 × {samples / 3} 个视差节点，最大差 {worst:0.###} 像素）");
+        RemoveBackground();
+
+        // 2) 预览开关和保存：在房间场景的独立实例上做（和编辑器里打开的场景一样，不在游戏里）
+        var room = GD.Load<PackedScene>("res://assets/scenes/world/s1/S1_03.tscn").Instantiate<RoomRoot>();
+        Node oldBg = room.GetNodeOrNull(BackgroundImporter.NodeName);
+        if (oldBg != null) { room.RemoveChild(oldBg); oldBg.Free(); }
+        BackgroundImporter.Apply(room, BackgroundImporter.PlanImport(room, At(RoomToolRoot), l => textures[l]));
+        Node bg = room.GetNode(BackgroundImporter.NodeName);
+        List<Parallax2D> nodes = BackgroundImporter.ParallaxNodes(bg);
+        var original = nodes.ToDictionary(p => bg.GetPathTo(p).ToString(), p => p.Position);
+        Sprite2D treeImage = BackgroundImporter.ImageOfItem(BackgroundImporter.FindLayer(bg, BackgroundImporter.Tool).GetNode("Tree"));
+
+        room.SetPreview(true, 0.6f, 1f);
+        Vector2 cam = room.PreviewCameraTopLeft();
+        Vector2 travel = BackgroundImporter.TryRoomSize(room.RoomId, out Vector2 size) ? (size - BackgroundImporter.ProjectScreenSize()).Max(Vector2.Zero) : Vector2.Zero;
+        bool previewed = cam.IsEqualApprox(travel * new Vector2(0.6f, 1f)) && nodes.All(p => p.Position.IsEqualApprox(BackgroundImporter.RuntimePosition(p, cam)))
+                         && nodes.Any(p => !p.Position.IsEqualApprox(original[bg.GetPathTo(p).ToString()]))
+                         && room.Get("preview_parallax").AsBool() && Mathf.IsEqualApprox((float)room.Get("preview_camera_x").AsDouble(), 0.6f);
+        Check(previewed, $"预览：打开后各层按镜头位置 {cam.Round()} 显示视差效果");
+
+        treeImage.Position += new Vector2(37, 11);
+        Vector2 editedImage = treeImage.Position;
+        room.Notification((int)Node.NotificationEditorPreSave);
+        bool restoredForSave = nodes.All(p => p.Position == original[bg.GetPathTo(p).ToString()]);
+        var packed = new PackedScene();
+        Error error = packed.Pack(room);
+        room.Notification((int)Node.NotificationEditorPostSave);
+        bool previewBack = nodes.All(p => p.Position.IsEqualApprox(BackgroundImporter.RuntimePosition(p, cam)));
+
+        SceneState state = packed.GetState();
+        bool previewStored = Enumerable.Range(0, state.GetNodePropertyCount(0)).Any(i => state.GetNodePropertyName(0, i).ToString().StartsWith("preview_"));
+        var saved = packed.Instantiate<RoomRoot>();
+        Node savedBg = saved.GetNode(BackgroundImporter.NodeName);
+        bool savedPositions = BackgroundImporter.ParallaxNodes(savedBg).All(p => p.Position == original[savedBg.GetPathTo(p).ToString()]);
+        Vector2 savedImage = BackgroundImporter.ImageOfItem(BackgroundImporter.FindLayer(savedBg, BackgroundImporter.Tool).GetNode("Tree")).Position;
+        bool savedPreviewOff = !saved.PreviewOn;
+        saved.Free();
+        Check(error == Error.Ok && restoredForSave && previewBack && savedPositions && !previewStored && savedPreviewOff && savedImage == editedImage,
+            $"预览：保存前自动还原（{restoredForSave}），存下的场景里各层是原来的位置（{savedPositions}）、没有预览开关（{!previewStored}），预览里挪的 Image 保留（{savedImage}）；保存后继续预览（{previewBack}）");
+
+        var probe = new Parallax2D();
+        long usage = probe.GetPropertyList().First(d => d["name"].AsString() == "position")["usage"].AsInt64();
+        probe.Free();
+        Check((usage & (long)PropertyUsageFlags.Storage) == 0,
+            $"预览：Godot 本来就不把 Parallax2D 的位置存进场景（usage = {usage}），预览改的位置从机制上写不进场景文件；保存前还原是多一层保险");
+
+        room.SetPreview(false, 0.6f, 1f);
+        Check(nodes.All(p => p.Position == original[bg.GetPathTo(p).ToString()]) && treeImage.Position == editedImage,
+            "预览：关闭后各层回到原来的位置，预览时挪的 Image 保留");
+        room.Free();
     }
 
     // =================================================================
@@ -561,11 +786,24 @@ public partial class BackgroundTest : FlowTestBase
             RemoveBackground();
             Import(FixtureRoot);
         }, RoomToolRoot, null);
-        await Case("手建物件补记标识、换图", () =>
+        await Case("新版物件补记标识、换图", () =>
         {
-            var tool = new Parallax2D { Name = "tool" };
+            var item = new Parallax2D { Name = "tooltree", ZIndex = -40, ZAsRelative = false };
+            item.AddChild(new Sprite2D { Name = "Image", Texture = GD.Load<Texture2D>($"{FixtureRoot}/s1/tex_bg_s1_tool_tree.png") });
+            var tool = new Node2D { Name = "Tool" };
+            tool.AddChild(item);
+            BuildBackground(tool).SetMeta(BackgroundImporter.VersionMeta, BackgroundImporter.CurrentVersion);
+        }, RoomToolRoot, null);
+        await Case("旧版升级：补层级、物件包装、Tool 复位、换图", () =>
+        {
+            var front = new Parallax2D { Name = "front" };
+            front.AddChild(new Sprite2D { Name = "Image", Texture = textures["front"] });
+            var tool = new Parallax2D { Name = "tool", ScrollScale = new Vector2(0.4f, 0.4f), ScrollOffset = new Vector2(5, 5) };
             tool.AddChild(new Sprite2D { Name = "tooltree", Texture = GD.Load<Texture2D>($"{FixtureRoot}/s1/tex_bg_s1_tool_tree.png") });
-            BuildBackground(tool);
+            var deco = new Sprite2D { Name = "Deco", Texture = textures["front"] };
+            deco.SetMeta("note", "自己加的");
+            tool.AddChild(deco);
+            BuildBackground(front, tool);
         }, RoomToolRoot, null);
     }
 
