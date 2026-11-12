@@ -1,4 +1,5 @@
 using Godot;
+using SonOfMud.Core;
 
 namespace SonOfMud.Narrative.Data;
 
@@ -8,7 +9,7 @@ namespace SonOfMud.Narrative.Data;
 /// 只有策划案写了完整版的泥板才填 FullText；变量 FullAfterVar（默认 truth）为 true 后显示完整版。铭文只有一个版本。
 /// </summary>
 [GlobalClass]
-public partial class TabletData : Resource
+public partial class TabletData : KeptResource
 {
     [Export] public string Id { get; set; } = "";
     [Export] public string Title { get; set; } = "";

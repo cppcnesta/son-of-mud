@@ -1,10 +1,11 @@
 using Godot;
+using SonOfMud.Core;
 
 namespace SonOfMud.Combat;
 
 /// <summary>一种攻击的配置（玩家各攻击、下砸，敌人各技能，各一个 .tres）。</summary>
 [GlobalClass]
-public partial class HitSpec : Resource
+public partial class HitSpec : KeptResource
 {
     [Export] public float Damage { get; set; } = 10f;
     /// <summary>重击：只吃重击的物体（脆弱地面等）只认这种攻击。</summary>

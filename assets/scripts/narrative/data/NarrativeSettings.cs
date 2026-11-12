@@ -1,10 +1,11 @@
 using Godot;
+using SonOfMud.Core;
 
 namespace SonOfMud.Narrative.Data;
 
 /// <summary>剧情系统的可调参数和数据位置（assets/data/narrative/settings.tres）。</summary>
 [GlobalClass]
-public partial class NarrativeSettings : Resource
+public partial class NarrativeSettings : KeptResource
 {
     public const string DefaultPath = "res://assets/data/narrative/settings.tres";
 

@@ -1,10 +1,11 @@
 using Godot;
+using SonOfMud.Core;
 
 namespace SonOfMud.World;
 
 /// <summary>正式游戏入口用到的场景路径。主菜单是 UI 的新主菜单 title_menu.tscn（旧的 main_menu.tscn 只从调试入口进）。</summary>
 [GlobalClass]
-public partial class GameBootSettings : Resource
+public partial class GameBootSettings : KeptResource
 {
     public const string DefaultPath = "res://assets/data/world/game_boot_settings.tres";
 

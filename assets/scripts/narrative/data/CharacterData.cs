@@ -1,5 +1,6 @@
 using System;
 using Godot;
+using SonOfMud.Core;
 
 namespace SonOfMud.Narrative.Data;
 
@@ -8,7 +9,7 @@ namespace SonOfMud.Narrative.Data;
 /// 立绘还没有正式资源：HasPortrait 为 true 时对话框先画一块 PortraitColor 色块（技术占位），以后把 Portrait 换成贴图即可。
 /// </summary>
 [GlobalClass]
-public partial class CharacterData : Resource
+public partial class CharacterData : KeptResource
 {
     /// <summary>程序里用的名字（英文小写），拼资源文件名用，比如 mul_tukul。</summary>
     [Export] public string Id { get; set; } = "";

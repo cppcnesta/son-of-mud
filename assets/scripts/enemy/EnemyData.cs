@@ -1,5 +1,6 @@
 using Godot;
 using SonOfMud.Combat;
+using SonOfMud.Core;
 
 namespace SonOfMud.Enemy;
 
@@ -7,7 +8,7 @@ namespace SonOfMud.Enemy;
 /// 一种敌人的全部数值（assets/data/enemy/*.tres）。普通敌人没有接触伤害（Q8）：碰到身体不掉血，只有攻击判定伤人。
 /// </summary>
 [GlobalClass]
-public partial class EnemyData : Resource
+public partial class EnemyData : KeptResource
 {
     [ExportGroup("基本")]
     /// <summary>种类编号，EnemyKilled 事件带的就是它。</summary>

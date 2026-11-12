@@ -38,6 +38,7 @@ public partial class CoreSuite : Node
             InputLockChecks();
             PauseWriteScan();
             StaticGodotRefScan();
+            KeepAliveChecks();
             StoryValueChecks();
             ProgressChecks();
             EnsureAbilitiesChecks();
@@ -163,6 +164,41 @@ public partial class CoreSuite : Node
                 if (HoldsUnreleasedStaticGodotRef(FileAccess.GetFileAsString(path))) offenders.Add(path);
             });
         Check(offenders.Count == 0, "静态字段持有 Godot 对象的文件都登记了退出时释放" + (offenders.Count > 0 ? "，违规：" + string.Join(", ", offenders) : ""));
+    }
+
+    // ---------- 资源保活（终结器竞态，见 KeptResource） ----------
+
+    private void KeepAliveChecks()
+    {
+        var direct = new List<string>();
+        ScanDir("res://assets/scripts", path =>
+        {
+            if (path.EndsWith("/KeptResource.cs")) return;
+            string text = FileAccess.GetFileAsString(path);
+            foreach (Match m in Regex.Matches(text, @"class\s+(\w+)\s*:\s*(Resource)\b")) direct.Add($"{path.GetFile()}:{m.Groups[1].Value}");
+        });
+        Check(direct.Count == 0, "资源保活：assets/scripts 里所有 C# 资源类都继承 KeptResource，没有直接继承 Resource 的" +
+                                 (direct.Count > 0 ? "：" + string.Join("，", direct) : ""));
+
+        // 行为：从文件读一个 C# 资源，丢掉引用，强制回收并等终结器跑完——托管包装和本体都还在，再读拿到的是同一个
+        const string path = "res://assets/data/narrative/settings.tres";
+        ulong id = LoadAndForget(path, out string typeName);
+        GC.Collect();
+        GC.WaitForPendingFinalizers();
+        GC.Collect();
+        bool alive = GodotObject.IsInstanceIdValid(id);
+        Resource again = GD.Load<Resource>(path);
+        Check(typeName == "NarrativeSettings" && alive && again != null && again.GetInstanceId() == id && ResourceKeepAlive.Contains(again),
+            $"资源保活：{typeName} 读出来后丢掉引用、强制 GC 并等终结器，本体仍在、再读是同一个实例（在保活表里，共 {ResourceKeepAlive.Count} 个）");
+    }
+
+    /// <summary>单独一个方法，保证返回后这里的局部变量不再引用资源。</summary>
+    [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
+    private static ulong LoadAndForget(string path, out string typeName)
+    {
+        Resource r = GD.Load<Resource>(path);
+        typeName = r?.GetType().Name ?? "";
+        return r?.GetInstanceId() ?? 0;
     }
 
     private static void ScanDir(string dir, Action<string> onFile)

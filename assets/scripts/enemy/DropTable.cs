@@ -1,4 +1,5 @@
 using Godot;
+using SonOfMud.Core;
 
 namespace SonOfMud.Enemy;
 
@@ -7,7 +8,7 @@ namespace SonOfMud.Enemy;
 /// 敌人死亡时 Roll 一次，掉落通过 Events.ItemDropped 交给 World 生成拾取物。
 /// </summary>
 [GlobalClass]
-public partial class DropTable : Resource
+public partial class DropTable : KeptResource
 {
     /// <summary>物品编号，也是进度变量 count.&lt;编号&gt; 和拾取台词标签的名字。</summary>
     [Export] public StringName ItemId { get; set; } = "";
