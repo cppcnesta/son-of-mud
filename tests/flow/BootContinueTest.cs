@@ -71,7 +71,7 @@ public partial class BootContinueTest : FlowTestBase
         Check(AbilityList() == savedAbilities && AbilityList() == "block,switch_form,wall_climb", $"读档：能力恢复（{AbilityList()}）");
         Check(Saves.CheckpointSavePoint == "S1_04" && Saves.CheckpointRoom == "S1_04", "读档：最近存档点是 S1_04");
         Check(Player.GetNode<PlayerInteractor>("Interactor").CurrentPrompt == "存档", "读档：站在存档点上，交互提示是“存档”");
-        Check(Player.Stats.Health == 140 && Player.Forms.Form == FormController.Water, "读档：新玩家满血、水形态");
+        Check(Player.Stats.Health == 70 && Player.Stats.MaxHealth == 70 && Player.Forms.Form == FormController.Water, "读档：新玩家满血（没吃生命之面包，70/70）、水形态");
         Check(GameSession.PendingStart == StartMode.None && Boot.StartedWith == StartMode.Continue, "读档：GameBoot 按 Continue 开局，PendingStart 已清零");
         Check(SameBytes(savedBytes, ReadSaveBytes()), "读档：存档文件没有被改动");
         Check(NoPauseOrLock(), "读档后没有暂停、没有输入锁");

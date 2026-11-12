@@ -22,7 +22,7 @@ public partial class ChoicePanel : Control
 
     public override void _Ready()
     {
-        SetAnchorsPreset(LayoutPreset.FullRect);
+        SetAnchorsAndOffsetsPreset(LayoutPreset.FullRect); // 已在场景树里：只改锚点会保留原来 0 大小的矩形，必须连偏移一起设
         MouseFilter = MouseFilterEnum.Ignore;
         _list = new VBoxContainer { Name = "List", MouseFilter = MouseFilterEnum.Ignore };
         _list.SetAnchorsPreset(LayoutPreset.Center);

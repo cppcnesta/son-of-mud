@@ -31,13 +31,15 @@
 [ext_resource type="Texture2D" path="res://assets/art/ui/tex_ui_artifact_bracelet_removed.png" id="31_bracelet_r"]
 [ext_resource type="Texture2D" path="res://assets/art/ui/tex_ui_artifact_robe_worn.png" id="32_robe_w"]
 [ext_resource type="Texture2D" path="res://assets/art/ui/tex_ui_artifact_robe_removed.png" id="33_robe_r"]
+[ext_resource type="Script" path="res://assets/scripts/ui/LiverCounter.cs" id="34_liver"]
 
-[node name="Hud" type="CanvasLayer" node_paths=PackedStringArray("Root", "Beads", "Artifacts", "Boss", "Prompt", "Toast", "Minimap")]
+[node name="Hud" type="CanvasLayer" node_paths=PackedStringArray("Root", "Beads", "Livers", "Artifacts", "Boss", "Prompt", "Toast", "Minimap")]
 process_mode = 3
 layer = 10
 script = ExtResource("1_hud")
 Root = NodePath("Root")
 Beads = NodePath("Root/HpBeadBar")
+Livers = NodePath("Root/LiverCounter")
 Artifacts = NodePath("Root/ArtifactRing")
 Boss = NodePath("Root/BossBar")
 Prompt = NodePath("Root/InteractPrompt")
@@ -80,6 +82,31 @@ visible = false
 texture = ExtResource("7_bbreak")
 centered = false
 hframes = 6
+
+[node name="LiverCounter" type="HBoxContainer" parent="Root" node_paths=PackedStringArray("Icon", "CountLabel")]
+visible = false
+layout_mode = 0
+offset_left = 24.0
+offset_top = 58.0
+offset_right = 124.0
+offset_bottom = 86.0
+mouse_filter = 2
+theme_override_constants/separation = 6
+script = ExtResource("34_liver")
+Icon = NodePath("Icon")
+CountLabel = NodePath("Count")
+
+[node name="Icon" type="ColorRect" parent="Root/LiverCounter"]
+custom_minimum_size = Vector2(22, 22)
+layout_mode = 2
+size_flags_vertical = 4
+mouse_filter = 2
+color = Color(0.55, 0.2, 0.16, 1)
+
+[node name="Count" type="Label" parent="Root/LiverCounter"]
+layout_mode = 2
+text = "×0"
+vertical_alignment = 1
 
 [node name="ArtifactRing" type="Control" parent="Root"]
 layout_mode = 1

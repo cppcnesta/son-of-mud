@@ -89,7 +89,7 @@ public partial class KeeperFlowTest : EnemyFlowBase
         bool lockOpened = await WaitUntil(() => GodotObject.IsInstanceValid(firstLock) && !firstLock.IsClosed, 5);
         bool stillThere = RoomId == "S1_05";
         Check(died && lockOpened && stillThere, $"战斗中死亡：守坑人真实攻击打死玩家，PlayerDied 后入口门打开（还在 S1_05 时就打开）");
-        bool respawned = await WaitUntil(() => RoomId == "S1_04" && !World.IsTransitioning && Player.Stats.Health == 140, 600);
+        bool respawned = await WaitUntil(() => RoomId == "S1_04" && !World.IsTransitioning && Player.Stats.Health == Player.Stats.MaxHealth, 600);
         await Frames(10);
         Check(respawned && Deaths == 1 && Defeats.Count == 0 && !GameSession.Progress.Flag("boss_keeper"), "战斗中死亡：在 S1_04 复活、满血，守坑人没被记为击败");
         Check(!_bar.Showing && !_bar.Visible, "战斗中死亡：复活后 Boss 血条已收起，不再挂着（审查 Minor）");

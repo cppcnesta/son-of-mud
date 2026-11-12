@@ -12,10 +12,10 @@ using SonOfMud.World;
 
 /// <summary>
 /// 第 4 轮（Enemy）的单元检查：
-/// ① SkillCooldown 的有阻回规则（计划第 6 节第 1 步）；② 掉落表用固定随机种子测概率；
-/// ③ 正式 .tres 的数值（Q1、Q2、Q7、Q8、Q9、E2 的算术）；④ PlayerRegistry 的登记规则；
+/// ① SkillCooldown 的有阻回规则（计划第 6 节第 1 步）；② 掉落表用固定随机种子测概率（祈祷泥人泥坑 30% / 占卜之城 100% 泥瓶，虔诚泥人 30% 泥肝）；
+/// ③ 正式 .tres 的数值（新设定的四种小怪、拾取物定义、守坑人、E2 的算术）；④ PlayerRegistry 的登记规则；
 /// ⑤ 依赖方向和代码约定（Enemy 只依赖 Core、Combat；World 新增类不认识 Enemy；一个文件一个类；节点脚本 partial）；
-/// ⑥ 拾取台词剧本；⑦ 各房间的敌人摆在设计的位置。
+/// ⑥ 拾取台词剧本（旧的小泥偶、石头段落已删，泥瓶、泥肝暂时没有台词）；⑦ 各房间的敌人摆在设计的位置。
 /// </summary>
 public partial class EnemyUnitTest : LabSuiteBase
 {
@@ -69,44 +69,89 @@ public partial class EnemyUnitTest : LabSuiteBase
 
     private void DropChecks()
     {
-        var pilgrim = GD.Load<EnemyData>("res://assets/data/enemy/pilgrim.tres");
-        var kneeler = GD.Load<EnemyData>("res://assets/data/enemy/kneeler.tres");
+        var prayer = GD.Load<EnemyData>("res://assets/data/enemy/prayer.tres");
+        var devout = GD.Load<EnemyData>("res://assets/data/enemy/devout.tres");
         var rng = new RandomNumberGenerator { Seed = 20261111 };
-        int pilgrimDrops = 0, kneelerDrops = 0;
+        int prayerDrops = 0, devoutDrops = 0;
         const int rolls = 2000;
-        for (int i = 0; i < rolls; i++) if (pilgrim.Drops.Roll(rng)) pilgrimDrops++;
-        for (int i = 0; i < rolls; i++) if (kneeler.Drops.Roll(rng)) kneelerDrops++;
-        float ratio = pilgrimDrops / (float)rolls;
-        Check(ratio > 0.27f && ratio < 0.33f, $"掉落：固定种子 20261111 掷 {rolls} 次，朝圣者掉小泥偶的比例 {ratio:P1}（配置 30%）");
-        Check(kneelerDrops == rolls, $"掉落：跪拜泥人 100% 掉小泥偶（Q9，{kneelerDrops}/{rolls}）");
+        for (int i = 0; i < rolls; i++) if (prayer.Drops.Roll(rng)) prayerDrops++;
+        for (int i = 0; i < rolls; i++) if (devout.Drops.Roll(rng)) devoutDrops++;
+        float ratio = prayerDrops / (float)rolls, liverRatio = devoutDrops / (float)rolls;
+        Check(prayer.Drops.ItemId == "泥瓶" && ratio > 0.27f && ratio < 0.33f, $"掉落：固定种子 20261111 掷 {rolls} 次，泥坑的祈祷泥人掉泥瓶的比例 {ratio:P1}（配置 30%）");
+        Check(devout.Drops.ItemId == "泥肝" && liverRatio > 0.27f && liverRatio < 0.33f, $"掉落：虔诚泥人掉泥肝的比例 {liverRatio:P1}（配置 30%）");
+
+        Node city = GD.Load<PackedScene>(RoomPath("S3_02")).Instantiate();
+        var cityPrayers = city.GetNode("Objects").GetChildren().OfType<EnemyBody>().ToList();
+        int cityDrops = 0;
+        foreach (EnemyBody p in cityPrayers)
+            for (int i = 0; i < rolls / 4; i++) if (p.Drops != null && p.Drops.ItemId == "泥瓶" && p.Drops.Roll(rng)) cityDrops++;
+        Check(cityPrayers.Count == 4 && cityPrayers.All(p => p.DropsOverride != null && p.Drops == p.DropsOverride) && cityDrops == cityPrayers.Count * (rolls / 4),
+            $"掉落：占卜之城（S3_02）的祈祷泥人用摆放点的掉落表覆盖，100% 掉泥瓶（{cityDrops}/{cityPrayers.Count * (rolls / 4)}，保留“杀掉跪拜泥人奖励更丰厚”）");
+        city.Free();
+        Node pit = GD.Load<PackedScene>(RoomPath("S1_03")).Instantiate();
+        var pitPrayers = pit.GetNode("Objects").GetChildren().OfType<EnemyBody>().Where(e => e.Data.Kind == "prayer").ToList();
+        Check(pitPrayers.Count == 5 && pitPrayers.All(p => p.DropsOverride == null && p.Drops == prayer.Drops),
+            "掉落：泥坑（S1_03）的祈祷泥人不覆盖，用数据里的 30%");
+        pit.Free();
 
         var a = new RandomNumberGenerator { Seed = 77 };
         var b = new RandomNumberGenerator { Seed = 77 };
-        bool same = Enumerable.Range(0, 50).All(_ => pilgrim.Drops.Roll(a) == pilgrim.Drops.Roll(b));
+        bool same = Enumerable.Range(0, 50).All(_ => prayer.Drops.Roll(a) == prayer.Drops.Roll(b));
         Check(same, "掉落：同一个种子掷出的结果完全一样（测试可以用固定种子保证掉落）");
+
+        bool noOldItems = true;
+        foreach (string dir in new[] { "res://assets/data/enemy", "res://assets/scenes/world/s1", "res://assets/scenes/world/s2", "res://assets/scenes/world/s3", "res://assets/scenes/tests" })
+            foreach (string f in DirAccess.GetFilesAt(dir).Where(f => f.EndsWith(".tres") || f.EndsWith(".tscn")))
+            {
+                string text = FileAccess.GetFileAsString($"{dir}/{f}");
+                noOldItems &= !text.Contains("小泥偶") && !text.Contains("石头");
+            }
+        Check(noOldItems, "掉落：敌人数据、房间和测试场里都不再有小泥偶、石头");
     }
 
     // ---------- ③ 数值 ----------
 
     private void DataChecks()
     {
-        var pilgrim = GD.Load<EnemyData>("res://assets/data/enemy/pilgrim.tres");
-        var kneeler = GD.Load<EnemyData>("res://assets/data/enemy/kneeler.tres");
-        var hammer = GD.Load<EnemyData>("res://assets/data/enemy/worker_hammer.tres");
-        var shovel = GD.Load<EnemyData>("res://assets/data/enemy/worker_shovel.tres");
-        var guard = GD.Load<EnemyData>("res://assets/data/enemy/guard.tres");
+        var prayer = GD.Load<EnemyData>("res://assets/data/enemy/prayer.tres");
+        var devout = GD.Load<EnemyData>("res://assets/data/enemy/devout.tres");
+        var mason = GD.Load<EnemyData>("res://assets/data/enemy/mason.tres");
+        var guard = GD.Load<EnemyData>("res://assets/data/enemy/temple_guard.tres");
         var keeper = GD.Load<EnemyData>("res://assets/data/enemy/keeper/KeeperData.tres") as KeeperData;
 
-        Check(pilgrim.MaxHealth == 30 && pilgrim.Behaviour == EnemyBehaviour.Passive && pilgrim.ReactsToHits && pilgrim.DisplayName == "塔姆图之子"
-              && pilgrim.Drops?.ItemId == "小泥偶" && Mathf.IsEqualApprox(pilgrim.Drops.Chance, 0.3f),
-            "数值：朝圣者「塔姆图之子」血 30、被动、受击有反应、30% 掉小泥偶");
-        Check(kneeler.MaxHealth == 10 && kneeler.Behaviour == EnemyBehaviour.Passive && !kneeler.ReactsToHits && kneeler.Drops?.Chance == 1f,
-            "数值：跪拜泥人血 10、被动、被打也没反应、100% 掉小泥偶");
-        Check(hammer.MaxHealth == 40 && hammer.AttackSpec?.Damage == 20f && hammer.Behaviour == EnemyBehaviour.Melee && hammer.AttackSpec.Blockable
-              && hammer.DisplayName == "持锤的塔姆图之子" && shovel.DisplayName == "持铲的塔姆图之子" && shovel.MaxHealth == 40 && hammer.Drops?.ItemId == "石头",
-            "数值：工人（持锤 / 持铲）血 40、伤害 20、近战、可格挡、掉石头");
-        Check(guard.MaxHealth == 60 && guard.AttackSpec?.Damage == 20f && guard.Behaviour == EnemyBehaviour.Charge && guard.DisplayName == "塔姆图之子·守卫" && guard.Drops == null,
-            "数值：守卫血 60、伤害 20、冲锋、不掉落");
+        string[] files = DirAccess.GetFilesAt("res://assets/data/enemy").Where(f => f.EndsWith(".tres")).OrderBy(f => f, System.StringComparer.Ordinal).ToArray();
+        string[] scenes = DirAccess.GetFilesAt("res://assets/scenes/enemy").Where(f => f.EndsWith(".tscn")).OrderBy(f => f, System.StringComparer.Ordinal).ToArray();
+        Check(files.SequenceEqual(new[] { "devout.tres", "devout_liver.tres", "mason.tres", "mason_strike.tres", "prayer.tres", "prayer_swipe.tres", "temple_guard.tres", "temple_guard_spear.tres" })
+              && scenes.SequenceEqual(new[] { "devout.tscn", "keeper.tscn", "mason.tscn", "prayer.tscn", "temple_guard.tscn" }),
+            $"改名：小怪数据和场景都换成新 id（朝圣者 + 跪拜泥人 → prayer，持铲工人 → devout，持锤工人 → mason，守卫 → temple_guard）：{string.Join(",", files)} / {string.Join(",", scenes)}");
+
+        Check(prayer.Kind == "prayer" && prayer.DisplayName == "祈祷泥人" && prayer.MaxHealth == 30 && prayer.Behaviour == EnemyBehaviour.Passive && prayer.VisionRange == 0f
+              && Mathf.IsEqualApprox(prayer.FleeChance, 0.5f) && prayer.AttackSpec?.Damage == 10f && prayer.AttackSpec.Blockable && prayer.AttackWindup >= 0.4f,
+            $"数值：祈祷泥人血 30、被动（看不见玩家，不主动出手）、被打后 50% 逃跑，否则泥手挥击反击：伤害 10、可格挡、前摇 {prayer.AttackWindup} 秒看得出来");
+        Check(devout.Kind == "devout" && devout.DisplayName == "虔诚泥人" && devout.MaxHealth == 40 && devout.AttackSpec?.Damage == 15f && devout.AttackSpec.Blockable
+              && devout.FleeChance == 0f && devout.PatrolDistance > 0f && Mathf.IsEqualApprox(devout.AttackWindup, 0.6f)
+              && devout.Behaviour == EnemyBehaviour.Ranged && devout.AttackRange == 300f && devout.VisionRange > devout.AttackRange && devout.ThrowSpec != null && devout.ThrowSpec.Gravity > 0f,
+            $"数值：虔诚泥人血 40、远程扔泥肝（伤害 15、可格挡、抛物线重力 {devout.ThrowSpec?.Gravity}）、前摇 0.6 秒、看见玩家走到 300 像素停下、会巡逻、不逃跑");
+        Node devoutNode = GD.Load<PackedScene>("res://assets/scenes/enemy/devout.tscn").Instantiate();
+        Check(devoutNode.GetNodeOrNull("HitBox") == null, "虔诚泥人：场景里没有近战判定，伤害只来自扔出去的泥肝");
+        devoutNode.Free();
+        Check(mason.Kind == "mason" && mason.DisplayName == "塔庙泥匠" && mason.MaxHealth == 40 && mason.AttackSpec?.Damage == 20f && mason.Behaviour == EnemyBehaviour.Melee
+              && mason.AttackSpec.Blockable && mason.FleeChance == 0f && mason.Drops == null && mason.PatrolDistance > 0f,
+            "数值：塔庙泥匠血 40、挥锤伤害 20、近战、可格挡、巡逻、不逃跑、不掉落");
+        Check(guard.Kind == "temple_guard" && guard.DisplayName == "塔庙泥卫" && guard.MaxHealth == 60 && guard.AttackSpec?.Damage == 20f && guard.Behaviour == EnemyBehaviour.Charge
+              && guard.Drops == null && guard.FleeChance == 0f && guard.PatrolDistance > 0f,
+            $"数值：塔庙泥卫血 60、突刺伤害 20、冲锋、巡逻距离 {guard.PatrolDistance}、不逃跑、不掉落");
+
+        var bottle = GD.Load<SonOfMud.World.PickupItem>("res://assets/data/world/items/mud_bottle.tres");
+        var liver = GD.Load<SonOfMud.World.PickupItem>("res://assets/data/world/items/mud_liver.tres");
+        Check(bottle.ItemId == "泥瓶" && bottle.HealAmount == 30 && !bottle.Counted && !bottle.PlaysLine,
+            "拾取物：泥瓶碰到回 30 血（不计数），没有拾取台词");
+        Check(liver.ItemId == "泥肝" && liver.HealAmount == 0 && liver.Counted && liver.MaxCount == 5 && !liver.PlaysLine,
+            "拾取物：泥肝计数 count.泥肝，最多 5 个，没有拾取台词");
+        Node game = GD.Load<PackedScene>("res://assets/scenes/world/game.tscn").Instantiate();
+        var spawner = game.GetNode<SonOfMud.World.DropSpawner>("DropSpawner");
+        Check(spawner.Find("泥瓶")?.HealAmount == 30 && spawner.Find("泥肝")?.MaxCount == 5, "拾取物：正式游戏的 DropSpawner 登记了泥瓶和泥肝");
+        game.Free();
 
         Check(keeper != null && keeper.MaxHealth == 150 && keeper.DisplayName == "守坑人：蝎" && Mathf.IsEqualApprox(keeper.MoveSpeed, 120f),
             "数值：守坑人血 150，中速 120px/s（D1、Q7）");
@@ -119,26 +164,23 @@ public partial class EnemyUnitTest : LabSuiteBase
         Check(keeper.Stagger != null && keeper.Stagger.Duration == 5f && keeper.Stagger.DamageMultiplier == 2f && keeper.Stagger.ReducePerHit == 1f && keeper.TransformFlash == 1f,
             "数值：反制僵直 5 秒 / 2 倍 / 每次受伤减 1 秒；变身闪白 1 秒");
 
-        // E2：基础攻击（水 10 / 泥 24）打朝圣者
+        // E2：基础攻击（水 10 / 泥 24）打祈祷泥人
         var water = GD.Load<FormConfig>("res://assets/data/player_v2/water.tres");
         var mud = GD.Load<FormConfig>("res://assets/data/player_v2/mud.tres");
         int w = DamageMath.Final(water.AttackSpec.Damage), m = DamageMath.Final(mud.AttackSpec.Damage), mBonus = DamageMath.Final(mud.AttackSpec.Damage, mud.BlockBonusMultiplier);
         Check(w == 10 && m == 24 && 30 - w == 20 && 30 - m == 6 && (30 + w - 1) / w == 3 && (30 + m - 1) / m == 2 && mBonus == 38 && mBonus >= 30,
-            $"数值（E2）：基础攻击第一刀打不死朝圣者（水剩 {30 - w}、泥剩 {30 - m}），水 3 刀、泥 2 刀；泥增伤一刀 {mBonus} 可以打死");
+            $"数值（E2）：基础攻击第一刀打不死祈祷泥人（水剩 {30 - w}、泥剩 {30 - m}），水 3 刀、泥 2 刀；泥增伤一刀 {mBonus} 可以打死");
 
-        foreach (string scene in new[] { "pilgrim", "kneeler" })
+        foreach (string scene in new[] { "prayer", "devout", "mason", "temple_guard" })
         {
             Node node = GD.Load<PackedScene>($"res://assets/scenes/enemy/{scene}.tscn").Instantiate();
-            bool noHit = node.GetChildren().OfType<HitBox>().Count() == 0;
-            Check(noHit && node is CharacterBody2D body && body.CollisionLayer == Layers.EnemyBody && (body.CollisionMask & Layers.PlayerBody) == 0,
-                $"没有接触伤害（Q8）：{scene} 没有攻击判定，身体只在敌人层、不和玩家身体碰撞");
+            HitBox hit = node.GetNodeOrNull<HitBox>("HitBox");
+            bool hitOk = hit == null || (hit.CollisionLayer == Layers.EnemyHit && hit.CollisionMask == Layers.PlayerHurt);
+            bool noCower = node.GetNodeOrNull("StateMachine/Cower") == null;
+            Check(hitOk && noCower && node is CharacterBody2D body && body.CollisionLayer == Layers.EnemyBody && (body.CollisionMask & Layers.PlayerBody) == 0,
+                $"没有接触伤害（Q8）：{scene} 身体只在敌人层、不和玩家身体碰撞，只有出手时打开的攻击判定伤人；没有“举手”状态");
             node.Free();
         }
-        Node worker = GD.Load<PackedScene>("res://assets/scenes/enemy/worker.tscn").Instantiate();
-        HitBox workerHit = worker.GetNode<HitBox>("HitBox");
-        Check(workerHit.CollisionLayer == Layers.EnemyHit && workerHit.CollisionMask == Layers.PlayerHurt && worker is CharacterBody2D wb && (wb.CollisionMask & Layers.PlayerBody) == 0,
-            "没有接触伤害（Q8）：工人只有出手时打开的攻击判定，身体不和玩家碰撞");
-        worker.Free();
     }
 
     // ---------- ④ PlayerRegistry ----------
@@ -229,11 +271,10 @@ public partial class EnemyUnitTest : LabSuiteBase
     {
         string text = FileAccess.GetFileAsString("res://assets/story/pickups.orph");
         var script = SonOfMud.Narrative.Parsing.OrphParser.Parse(text, "pickups");
-        int doll = script.FindLabel("小泥偶"), stone = script.FindLabel("石头");
-        bool subtitles = doll >= 0 && stone >= 0 && script.Entries[doll].Command == "字幕" && script.Entries[stone].Command == "字幕";
-        bool line = script.Entries.Any(e => e.Command == "说" && e.Args[0] == "？？？" && e.Args[2] == "母神的土偶！打碎它！");
-        Check(script.Errors.Count == 0 && script.Warnings.Count == 0 && subtitles && line,
-            "拾取台词：pickups.orph 有「小泥偶」「石头」两个标签，都走字幕条；小泥偶照抄策划案“？？？：母神的土偶！打碎它！”");
+        var pit = SonOfMud.Narrative.Parsing.OrphParser.Parse(FileAccess.GetFileAsString("res://assets/story/m_pit.orph"), "m_pit");
+        Check(script.Errors.Count == 0 && script.Warnings.Count == 0 && script.FindLabel("小泥偶") < 0 && script.FindLabel("石头") < 0 && pit.FindLabel("小泥偶") < 0
+              && script.FindLabel("泥瓶") < 0 && script.FindLabel("泥肝") < 0,
+            "拾取台词：pickups.orph、m_pit.orph 里小泥偶、石头的拾取台词段都删了；泥瓶、泥肝暂时没有台词");
     }
 
     // ---------- ⑦ 摆放 ----------
@@ -244,15 +285,15 @@ public partial class EnemyUnitTest : LabSuiteBase
     /// </summary>
     public static readonly (string room, string node, string scene)[] Layout =
     {
-        ("S1_03", "Pilgrim1", "pilgrim"), ("S1_03", "Pilgrim2", "pilgrim"), ("S1_03", "Pilgrim3", "pilgrim"),
-        ("S1_03", "Pilgrim4", "pilgrim"), ("S1_03", "Pilgrim5", "pilgrim"),
+        ("S1_03", "Prayer1", "prayer"), ("S1_03", "Prayer2", "prayer"), ("S1_03", "Prayer3", "prayer"),
+        ("S1_03", "Prayer4", "prayer"), ("S1_03", "Prayer5", "prayer"), ("S1_03", "Devout1", "devout"),
         ("S1_05", "Keeper", "keeper"),
-        ("S2_01", "WorkerHammer", "worker"), ("S2_01", "WorkerShovel", "worker"),
-        ("S2_02", "WorkerShovel", "worker"),
-        ("S2_03", "WorkerHammer", "worker"),
-        ("S3_01", "Guard", "guard"),
-        ("S3_02", "Kneeler1", "kneeler"), ("S3_02", "Kneeler2", "kneeler"),
-        ("S3_02", "Kneeler3", "kneeler"), ("S3_02", "Kneeler4", "kneeler"),
+        ("S2_01", "Mason1", "mason"), ("S2_01", "Devout1", "devout"),
+        ("S2_02", "Devout1", "devout"),
+        ("S2_03", "TempleGuard1", "temple_guard"), ("S2_03", "Mason1", "mason"), ("S2_03", "Devout1", "devout"),
+        ("S3_01", "TempleGuard1", "temple_guard"),
+        ("S3_02", "Prayer1", "prayer"), ("S3_02", "Prayer2", "prayer"),
+        ("S3_02", "Prayer3", "prayer"), ("S3_02", "Prayer4", "prayer"),
     };
 
     /// <summary>房间文字图里，名为 node 的锚点所在那一格（房间局部像素）；找不到返回 null。</summary>
@@ -315,7 +356,7 @@ public partial class EnemyUnitTest : LabSuiteBase
             scene.Free();
         }
         Check(problems.Count == 0 && found.Count == Layout.Length,
-            $"摆放：S1_03 朝圣者 5、S1_05 守坑人、S2_01–S2_03 工人 4、S3_01 守卫、S3_02 跪拜泥人 4，都站在文字图的锚点格里；其他房间没有敌人" + (problems.Count > 0 ? "：" + string.Join("; ", problems.Take(6)) : ""));
+            $"摆放：S1_03 祈祷泥人 5 + 末端虔诚泥人 1、S1_05 守坑人、S2_01–S2_03 塔庙泥匠 2 + 虔诚泥人 3 + 塔庙泥卫 1、S3_01 塔庙泥卫、S3_02 祈祷泥人 4，都站在文字图的锚点格里；其他房间没有敌人" + (problems.Count > 0 ? "：" + string.Join("; ", problems.Take(6)) : ""));
 
         Node s105 = GD.Load<PackedScene>(RoomPath("S1_05")).Instantiate();
         var lockNode = s105.GetNodeOrNull<SonOfMud.World.ArenaLock>("Objects/ArenaLock");

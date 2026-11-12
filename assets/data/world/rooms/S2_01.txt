@@ -2,8 +2,8 @@
 # 由 BuildWorld --export-text 从 64 像素瓦片原样转换：补天花板 50 格，地面以下补满 54 格，房间外丢弃 0 格
 @room S2_01
 @size 54x31
-@anchor a WorkerHammer
-@anchor b WorkerShovel
+@anchor a Mason1
+@anchor b Devout1
 @spawn 1 From_S1_07
 @spawn 2 From_S2_02
 ---

@@ -5,7 +5,9 @@
 
 [resource]
 script = ExtResource("1")
-MaxHealth = 140
+MaxHealth = 70
+LifeBreadFlag = &"item.生命之面包"
+LifeBreadBonus = 70
 HurtDuration = 0.18
 KnockbackDamping = 4.0
 CoyoteTime = 0.1

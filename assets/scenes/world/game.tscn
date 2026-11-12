@@ -9,6 +9,9 @@
 [ext_resource type="Resource" path="res://assets/data/ui/fade_settings.tres" id="7_fadeset"]
 [ext_resource type="Resource" path="res://assets/data/core/ability_table.tres" id="8_abilities"]
 [ext_resource type="Script" path="res://assets/scripts/world/DropSpawner.cs" id="9_drops"]
+[ext_resource type="Resource" path="res://assets/data/world/items/mud_bottle.tres" id="10_bottle"]
+[ext_resource type="Resource" path="res://assets/data/world/items/mud_liver.tres" id="11_liver"]
+[ext_resource type="Script" path="res://assets/scripts/world/PickupItem.cs" id="12_item"]
 
 [node name="Game" type="Node"]
 
@@ -33,3 +36,4 @@ Settings = ExtResource("7_fadeset")
 [node name="DropSpawner" type="Node" parent="." node_paths=PackedStringArray("World")]
 script = ExtResource("9_drops")
 World = NodePath("../WorldGame")
+Items = Array[ExtResource("12_item")]([ExtResource("10_bottle"), ExtResource("11_liver")])

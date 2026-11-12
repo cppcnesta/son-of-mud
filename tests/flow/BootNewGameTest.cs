@@ -8,7 +8,7 @@ using SonOfMud.World;
 /// <summary>
 /// 正式入口开新游戏：PendingStart = NewGame → 切到 main_game.tscn。
 /// 有且只有一个真实玩家、WorldGame 和镜头都拿到它；能力正好是能力表里的初始两项；人在 S1_01 的 Default 出生点，
-/// 140 血、水形态；GameStartFinished(true) 恰好一次；PendingStart 清零；新游戏不碰存档文件。
+/// 70 血（起始上限）、水形态；GameStartFinished(true) 恰好一次；PendingStart 清零；新游戏不碰存档文件。
 /// 另外确认测试容器 game.tscn 不会自动开局；最后发 QuitToMenuRequested：清掉暂停和输入锁、回到主菜单场景。
 /// </summary>
 public partial class BootNewGameTest : FlowTestBase
@@ -40,7 +40,7 @@ public partial class BootNewGameTest : FlowTestBase
         Check(spawn != null && Mathf.Abs(Player.GlobalPosition.X - spawn.GlobalPosition.X) < 1f && Mathf.Abs(Player.GlobalPosition.Y - spawn.GlobalPosition.Y) < 32f,
             $"人在 S1_01 的 Default 出生点（玩家 {Player.GlobalPosition}，出生点 {spawn?.GlobalPosition}）");
         Check(Player.IsOnFloor(), "站在地面上");
-        Check(Player.Stats.Health == 140 && Player.Stats.MaxHealth == 140, $"血量 140/140（实际 {Player.Stats.Health}/{Player.Stats.MaxHealth}）");
+        Check(Player.Stats.Health == 70 && Player.Stats.MaxHealth == 70, $"血量 70/70（实际 {Player.Stats.Health}/{Player.Stats.MaxHealth}）");
         Check(Player.Forms.Form == FormController.Water, "水形态");
 
         Check(Starts.Count == 1 && Starts[0].success && Starts[0].error == "", $"收到 GameStartFinished(true) 恰好一次（实际 {Starts.Count} 次）");

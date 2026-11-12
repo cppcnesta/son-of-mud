@@ -48,7 +48,7 @@ try {
     $worldCode = 0
     if ($Suite -eq 'all' -or $Suite -eq 'world' -or $Suite -eq 'new') {
         # World / Save / Camera 测试：每个场景单独运行，结果写到 tests/output/world_<名字>_results.json
-        $worldScenes = @('tests/world/map_check.tscn', 'tests/world/slice_test.tscn', 'tests/world/door_test.tscn', 'tests/world/gate_test.tscn', 'tests/world/room_grid_test.tscn', 'tests/world/geometry_sync_test.tscn', 'tests/world/geometry_validate_test.tscn', 'tests/world/terrain_test.tscn', 'tests/save/save_roundtrip.tscn', 'tests/save/respawn_test.tscn', 'tests/integration/real_player_test.tscn')
+        $worldScenes = @('tests/world/map_check.tscn', 'tests/world/slice_test.tscn', 'tests/world/door_test.tscn', 'tests/world/gate_test.tscn', 'tests/world/room_grid_test.tscn', 'tests/world/geometry_sync_test.tscn', 'tests/world/geometry_validate_test.tscn', 'tests/world/terrain_test.tscn', 'tests/save/save_roundtrip.tscn', 'tests/save/respawn_test.tscn', 'tests/integration/real_player_test.tscn', 'tests/world/background_test.tscn')
         foreach ($worldScene in $worldScenes) {
             $worldName = [System.IO.Path]::GetFileNameWithoutExtension($worldScene)
             $worldArguments = @('--path', $projectPath, '--scene', "res://$worldScene", '--audio-driver', 'Dummy', '--fixed-fps', '60', '--log-file', (Join-Path $outputPath "world_$worldName.log"))
@@ -58,13 +58,14 @@ try {
             if ($LASTEXITCODE -ne 0 -and $worldCode -eq 0) { $worldCode = $LASTEXITCODE }
         }
     }
-    # 新玩家 / 战斗验收测试：结果写到 tests/output/player_results.json、combat_results.json、player_feel_results.json
+    # 新玩家 / 战斗验收测试：结果写到 tests/output/player_results.json、combat_results.json、player_feel_results.json、player_art_results.json
     $newCode = 0
     $newScenes = [ordered]@{
         'player' = 'res://tests/player/player_suite.tscn'
         'combat' = 'res://tests/combat/combat_suite.tscn'
         'player-feel' = 'res://tests/player/feel_checks.tscn'
         'wall-surface' = 'res://tests/player/wall_surface_test.tscn'
+        'player-art' = 'res://tests/player/player_art.tscn'
     }
     foreach ($name in $newScenes.Keys) {
         if ($Suite -ne 'all' -and $Suite -ne 'new' -and $Suite -ne $name) { continue }
@@ -78,7 +79,7 @@ try {
     # 开局流程测试（一律从正式入口 main_game.tscn 启动）：每个场景单独运行，结果写到 tests/output/flow_<名字>_results.json
     $flowCode = 0
     if ($Suite -eq 'all' -or $Suite -eq 'flow' -or $Suite -eq 'new') {
-        $flowScenes = @('tests/flow/input_bindings.tscn', 'tests/flow/boot_new_game.tscn', 'tests/flow/boot_continue.tscn', 'tests/flow/boot_corrupt_save.tscn', 'tests/flow/boot_unsupported_version.tscn', 'tests/flow/restart_run.tscn', 'tests/player/interact_test.tscn', 'tests/flow/region_map_test.tscn')
+        $flowScenes = @('tests/flow/input_bindings.tscn', 'tests/flow/boot_new_game.tscn', 'tests/flow/boot_continue.tscn', 'tests/flow/boot_corrupt_save.tscn', 'tests/flow/boot_unsupported_version.tscn', 'tests/flow/restart_run.tscn', 'tests/player/interact_test.tscn', 'tests/flow/region_map_test.tscn', 'tests/player/bread_health.tscn')
         foreach ($flowScene in $flowScenes) {
             $flowName = [System.IO.Path]::GetFileNameWithoutExtension($flowScene)
             $flowArguments = @('--path', $projectPath, '--scene', "res://$flowScene", '--audio-driver', 'Dummy', '--fixed-fps', '60', '--log-file', (Join-Path $outputPath "flow_$flowName.log"))
@@ -115,11 +116,12 @@ try {
             if ($LASTEXITCODE -ne 0 -and $narrativeCode -eq 0) { $narrativeCode = $LASTEXITCODE }
         }
     }
-    # 敌人测试（第 4 轮）：enemy_unit / enemy_lab / keeper_lab 结果写到 tests/output/<名字>_results.json；
-    # enemy_flow / keeper_flow 从正式入口 main_game.tscn 启动，结果写到 tests/output/enemy_flow_results.json、enemy_keeper_flow_results.json
+    # 敌人测试（第 4 轮）：enemy_unit / enemy_lab / keeper_lab 结果写到 tests/output/<名字>_results.json，devout_lab 写到 enemy_devout_lab_results.json；
+    # enemy_flow / keeper_flow 从正式入口 main_game.tscn 启动，结果写到 tests/output/enemy_flow_results.json、enemy_keeper_flow_results.json；
+    # 扔泥肝 liver_throw 也从正式入口启动（真实玩家、真实按键），结果写到 enemy_liver_throw_results.json
     $enemyCode = 0
     if ($Suite -eq 'all' -or $Suite -eq 'enemy' -or $Suite -eq 'new') {
-        $enemyScenes = @('tests/enemy/enemy_unit.tscn', 'tests/enemy/enemy_lab.tscn', 'tests/enemy/keeper_lab.tscn', 'tests/enemy/enemy_flow.tscn', 'tests/enemy/keeper_flow.tscn', 'tests/enemy/arena_lock_climb.tscn')
+        $enemyScenes = @('tests/enemy/enemy_unit.tscn', 'tests/enemy/enemy_lab.tscn', 'tests/enemy/keeper_lab.tscn', 'tests/enemy/enemy_flow.tscn', 'tests/enemy/keeper_flow.tscn', 'tests/enemy/arena_lock_climb.tscn', 'tests/enemy/devout_lab.tscn', 'tests/player/liver_throw.tscn')
         foreach ($enemyScene in $enemyScenes) {
             $enemyName = [System.IO.Path]::GetFileNameWithoutExtension($enemyScene)
             $enemyArguments = @('--path', $projectPath, '--scene', "res://$enemyScene", '--rendering-method', 'gl_compatibility', '--audio-driver', 'Dummy', '--fixed-fps', '60', '--log-file', (Join-Path $outputPath "enemy_$enemyName.log"))

@@ -61,6 +61,9 @@ public partial class Events : Node
     // 重开一局：一律重建整个游戏实例（World 的 GameBoot 负责切回正式入口场景），不在当前实例里重置。
     // NewGameRequested 只能由 GameBoot 发；其他系统要重开一局，发这个事件。
     [Signal] public delegate void RestartRunRequestedEventHandler();
+    // 整份进度被换掉之后（新游戏清空、读档恢复都算）由 SaveService 发出，这时 GameSession.Progress 已经是最终内容。
+    // 这种整体替换不会为每个变量发 VariableChanged，需要按进度推导状态的系统（例如玩家的血量上限）在这里重新计算。
+    [Signal] public delegate void ProgressRestoredEventHandler();
 
     // 进度（ProgressStore 发出）
     [Signal] public delegate void AbilityUnlockedEventHandler(StringName abilityId);

@@ -1,6 +1,6 @@
 namespace SonOfMud.Player.States;
 
-/// <summary>Rise / Fall 共用：空中移动、重力、攀墙、空中攻击 / 下砸 / 格挡 / 闪避、落地。</summary>
+/// <summary>Rise / Fall 共用：空中移动、重力、攀墙、空中攻击 / 下砸 / 格挡 / 闪避 / 扔泥肝、落地。</summary>
 public abstract partial class AirState : PlayerState
 {
     public override bool CanSwitchForm => true;
@@ -14,7 +14,7 @@ public abstract partial class AirState : PlayerState
             Machine.TransitionTo<WallClimbState>();
             return;
         }
-        if (P.TryStartAttack() || P.TryStartBlock() || P.TryStartDodge()) return;
+        if (P.TryStartAttack() || P.TryStartBlock() || P.TryStartDodge() || ThrowState.TryEnter(Machine)) return;
         P.Walk(P.Axis);
         P.ApplyAirGravity((float)delta);
     }
