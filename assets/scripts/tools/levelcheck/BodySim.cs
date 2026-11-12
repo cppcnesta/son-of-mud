@@ -41,6 +41,14 @@ public struct SimInput
 public sealed class BodySim
 {
     private const double Eps = 1e-4;
+    /// <summary>
+    /// 碰撞后停在离接触面这么远的地方。真实的 CharacterBody2D（安全边距 0.08）碰撞后不是正好贴着，而是留一点缝
+    /// （校准实测：站地 y=583.9252 对 584、贴墙 x=1415.9253 对 1416，多数是 0.0748）。这条缝决定了“恰好落到面上”算不算碰撞：
+    /// 真实规则是这一帧的运动要碰到或穿进面才算碰撞（离面还差一点就不算，下一帧再由安全边距内的接触补上）。
+    /// 例如泥从站立处起跳、离散轨迹回到起跳高度时，真实身体离地还差 0.075，这一帧仍是 Fall，下一帧才落地；
+    /// 模拟如果正好贴着面停，就会提前一帧落地（缓冲的跳就会多消费一次）。所以模拟也留同样的缝。
+    /// </summary>
+    public const double Skin = 0.0748;
     private const int MaxSlides = 4;
 
     public SimConfig Cfg { get; }
@@ -209,8 +217,10 @@ public sealed class BodySim
                 if (TryAirJump()) return;
                 if (CanStartWallClimb())
                 {
+                    // WallClimbState.Enter：横向速度先设成朝墙走，保证进入这一帧仍然贴着墙
                     State = SimState.WallClimb;
                     EverClimbed = true;
+                    VX = _in.Axis * Cur.MoveSpeed;
                     return;
                 }
                 Walk(_in.Axis);
@@ -219,9 +229,9 @@ public sealed class BodySim
             }
             case SimState.WallClimb:
             {
-                if (Cfg.NoClimbRule && TouchNoClimb)
+                if (!CanUseWall)
                 {
-                    State = SimState.Fall;
+                    DropOff();
                     return;
                 }
                 if (ConsumeJump())
@@ -230,7 +240,7 @@ public sealed class BodySim
                     return;
                 }
                 int axis = _in.Axis;
-                if (!_in.Up || axis == 0 || !HasWallClimb)
+                if (!_in.Up || axis == 0)
                 {
                     State = SimState.Fall;
                     return;
@@ -282,8 +292,16 @@ public sealed class BodySim
             case SimState.WallClimb:
                 if (OnFloor && VY >= 0f) ToFreeState();
                 else if (!OnWall) State = SimState.Fall;
+                else if (Cfg.NoClimbRule && TouchNoClimb) DropOff();
                 return;
         }
+    }
+
+    /// <summary>WallClimbState.DropOff：墙不能用了，去掉向上的速度再转为下落。</summary>
+    private void DropOff()
+    {
+        if (VY < 0f) VY = 0f;
+        State = SimState.Fall;
     }
 
     // ---------- MoveAndSlide ----------
@@ -312,11 +330,11 @@ public sealed class BodySim
             }
             X += mx * t;
             Y += my * t;
-            // 贴到接触面上，避免浮点误差积累成穿透
-            if (nx < 0) X = tile.X0 - Cfg.HalfW;
-            else if (nx > 0) X = tile.X1 + Cfg.HalfW;
-            if (ny < 0) Y = tile.Y0 - Cfg.HalfH;
-            else if (ny > 0) Y = tile.Y1 + Cfg.HalfH;
+            // 停在离接触面 Skin 的地方（见 Skin），也避免浮点误差积累成穿透
+            if (nx < 0) X = tile.X0 - Cfg.HalfW - Skin;
+            else if (nx > 0) X = tile.X1 + Cfg.HalfW + Skin;
+            if (ny < 0) Y = tile.Y0 - Cfg.HalfH - Skin;
+            else if (ny > 0) Y = tile.Y1 + Cfg.HalfH + Skin;
 
             if (!anyHit)
             {
@@ -355,7 +373,7 @@ public sealed class BodySim
             double snap = Math.Max(Cfg.FloorSnapLength, 0.08f);
             if (Sweep(0, snap, out double t, out _, out double ny, out SimTile tile) && ny < 0)
             {
-                Y = tile.Y0 - Cfg.HalfH;
+                Y = tile.Y0 - Cfg.HalfH - Skin;
                 OnFloor = true;
             }
         }
@@ -386,7 +404,7 @@ public sealed class BodySim
         {
             if (t.Kind is TileKind.Empty or TileKind.OneWay) continue;
             double face = side > 0 ? t.X0 : t.X1;
-            if (Math.Abs(face - edge) > 0.01) continue;
+            if (Math.Abs(face - edge) > Skin + 0.01) continue;
             if (t.Y1 <= y0 + Eps || t.Y0 >= y1 - Eps) continue;
             return true;
         }
@@ -459,7 +477,9 @@ public sealed class BodySim
                 double enter = Math.Max(txIn, tyIn), exit = Math.Min(txOut, tyOut);
                 if (enter >= exit || enter > 1) continue;
                 // 已经在内部（深度超过容差）的瓦片不算碰撞，避免卡死
-                if (enter < 0 && -enter * len > 0.01) continue;
+                // 深度按进入的那个轴算：进入时间 × 那个轴的位移
+                double depth = enter >= 0 ? 0 : tyIn >= txIn ? -tyIn * Math.Abs(my) : -txIn * Math.Abs(mx);
+                if (depth > 0.01) continue;
                 t = Math.Max(0, enter);
                 if (tyIn >= txIn - 1e-9) ny = my > 0 ? -1 : 1;
                 else nx = mx > 0 ? -1 : 1;
