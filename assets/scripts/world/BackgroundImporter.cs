@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Godot;
@@ -9,17 +9,25 @@ namespace SonOfMud.World;
 /// 房间背景“按命名导入一次，之后手动调”。导入在房间场景里建普通节点（存进场景文件）：
 /// <code>
 /// Background（Node2D，z -100，第一个子节点）
-///   Far  （Parallax2D，远景系数）→ Image（Sprite2D，不居中）      tex_bg_s1_03_far.png
-///   Mid  （Parallax2D，中景系数）→ Image                         tex_bg_s1_03_mid.png
-///   Front（Parallax2D，近景系数）→ Image                         tex_bg_s1_03_front.png
-///   Tool （Parallax2D，物件系数）→ Tree / Cloud / …（每张图一个） tex_bg_s1_03_tool_tree.png …
+///   Far  （Parallax2D，远景视差，Z −100）→ Image（Sprite2D，不居中）   tex_bg_s1_03_far.png
+///   Mid  （Parallax2D，中景视差，Z −80） → Image                      tex_bg_s1_03_mid.png
+///   Front（Parallax2D，近景视差，Z −60） → Image                      tex_bg_s1_03_front.png
+///   Tool （Node2D，只是收纳）
+///     Tree（Parallax2D，物件视差，Z −40）→ Image                      tex_bg_s1_03_tool_tree.png
+///     Cloud …（每张物件图一个，各自的视差和层级）
 /// </code>
+/// 层级都是绝对值（Z As Relative 关掉），直接和地形、主角的 0 比；Image 保持相对 0，跟随所在的层。
 /// 先找房间专属图（s1_03），再找区域通用图（s1）。导入后这些节点完全归人手动调整。
 ///
 /// 再次导入只补缺的、只换图：
 /// - 层按名字认（不分大小写），Image 同理；补层时插到 Far → Mid → Front → Tool 的正确位置；
-/// - 物件按“物件标识”认（节点元数据 <see cref="ToolMeta"/>，没有时按它当前图片的文件名认出并补记），
+/// - 物件按“物件标识”认（节点元数据 <see cref="ToolMeta"/>，没有时按它的图片文件名认出并补记），
 ///   和节点名、当前用哪张图无关，所以区域图换成房间专属图时是原节点换图，位置、缩放、名字都保留。
+///
+/// 旧版背景（Background 上没有 <see cref="VersionMeta"/> = <see cref="CurrentVersion"/>）第一次再导入时升级一次，之后不再自动补值：
+/// - Far / Mid / Front 还是“0 且相对层级”的，补上默认层级（视为旧默认值）；
+/// - 直接放在 Tool 下的物件（Sprite2D 等），各包一层自己的 Parallax2D：原来 Tool 的视差、偏移、变换搬到每个物件上，
+///   Tool 本身变成不起作用的收纳节点，所以镜头在任何位置时画面都和原来一样。
 ///
 /// 位置约定（C = 实际画面左上角，含平滑和震屏；S = 屏幕；R = 房间；M = 震屏余量；p = 视差系数）：
 ///   运行时 Parallax2D.position = scroll_offset + (1 − p)·C（实测 Godot 4.7；在编辑器里挪层节点本身，运行时会被覆盖）；
@@ -37,12 +45,22 @@ public static class BackgroundImporter
     public const string Tool = "tool";
     /// <summary>物件节点上记的元数据：物件标识（如 "tree"）。</summary>
     public const string ToolMeta = "bg_tool";
+    /// <summary>Background 上记的版本号。没有或小于 <see cref="CurrentVersion"/> 的旧版背景，再导入时升级一次。</summary>
+    public const string VersionMeta = "bg_version";
+    public const int CurrentVersion = 2;
     public const int BackgroundZ = -100;
 
     /// <summary>所有层，按绘制顺序（后面的盖住前面的）。</summary>
     public static readonly string[] Layers = { Far, Mid, Front, Tool };
     /// <summary>一层一张图（Image）的层。</summary>
     public static readonly string[] ImageLayers = { Far, Mid, Front };
+
+    /// <summary>旧版 Tool（Parallax2D）迁移时搬到每个物件上、然后在 Tool 上恢复成默认值的属性。</summary>
+    private static readonly string[] ParallaxProperties =
+    {
+        "scroll_scale", "scroll_offset", "repeat_size", "repeat_times", "autoscroll", "screen_offset",
+        "limit_begin", "limit_end", "follow_viewport", "ignore_camera_scroll", "position", "rotation", "scale", "skew",
+    };
 
     public static string LayerNodeName(string layer) => layer switch
     {
@@ -68,11 +86,19 @@ public static class BackgroundImporter
         public Node ExistingBackground;
         /// <summary>往已有节点里加的新节点：补层（Index = 插入位置）或往已有 Tool 里补物件（Index = −1，加在最后）。</summary>
         public readonly List<(Node parent, Node node, int index)> NewNodes = new();
+        /// <summary>旧版物件包一层自己的 Parallax2D（oldMeta：物件节点原来记的标识，撤销时还原）。</summary>
+        public readonly List<(Node2D item, Parallax2D wrapper, string oldMeta)> Wraps = new();
+        /// <summary>属性改动：升级时补层级、把旧 Tool 恢复成不起作用的收纳节点。</summary>
+        public readonly List<(GodotObject target, StringName property, Variant value, Variant old)> Properties = new();
         public readonly List<(Sprite2D image, Texture2D texture)> Retextures = new();
         /// <summary>给已有的物件节点补记物件标识。</summary>
         public readonly List<(Node node, string key)> ToolTags = new();
+        /// <summary>要记上版本号的已有 Background（旧版升级）。</summary>
+        public Node UpgradeBackground;
         public readonly List<string> Messages = new();
-        public bool Empty => NewBackground == null && NewNodes.Count == 0 && Retextures.Count == 0 && ToolTags.Count == 0;
+
+        public bool Empty => NewBackground == null && NewNodes.Count == 0 && Wraps.Count == 0 && Properties.Count == 0
+                             && Retextures.Count == 0 && ToolTags.Count == 0 && UpgradeBackground == null;
     }
 
     // =================================================================
@@ -96,6 +122,12 @@ public static class BackgroundImporter
         Node existing = room.GetNodeOrNull(NodeName);
         plan.ExistingBackground = existing;
         TryParseRoom(room.RoomId, out string region, out string roomKey);
+        bool upgrade = existing != null && existing.GetMeta(VersionMeta, 0).AsInt32() < CurrentVersion;
+        if (upgrade)
+        {
+            plan.UpgradeBackground = existing;
+            plan.Messages.Add($"{room.RoomId} 的背景是旧版，这次顺带升级（只做这一次）：补默认层级、物件各包一层自己的视差节点。");
+        }
 
         // 模拟 Background 的子节点顺序，算出补层时的插入位置（各步按顺序执行，所以位置在执行时也成立）
         List<Node> order = existing?.GetChildren().ToList() ?? new List<Node>();
@@ -108,7 +140,11 @@ public static class BackgroundImporter
             known[layer] = node;
             if (existing == null)
             {
-                plan.NewBackground ??= new Node2D { Name = NodeName, ZIndex = BackgroundZ };
+                if (plan.NewBackground == null)
+                {
+                    plan.NewBackground = new Node2D { Name = NodeName, ZIndex = BackgroundZ };
+                    plan.NewBackground.SetMeta(VersionMeta, CurrentVersion);
+                }
                 plan.NewBackground.AddChild(node);
                 return;
             }
@@ -119,6 +155,13 @@ public static class BackgroundImporter
 
         foreach (string layer in ImageLayers)
         {
+            if (upgrade && known.TryGetValue(layer, out Node old) && old is CanvasItem item && item.ZIndex == 0 && item.ZAsRelative)
+            {
+                plan.Properties.Add((item, CanvasItem.PropertyName.ZIndex, settings.ZOf(layer), 0));
+                plan.Properties.Add((item, CanvasItem.PropertyName.ZAsRelative, false, true));
+                plan.Messages.Add($"{room.RoomId} 的 {NodeName}/{old.Name} 补上层级 {settings.ZOf(layer)}。");
+            }
+
             Texture2D texture = textureOverride?.Invoke(layer);
             string source = texture != null ? "测试注入" : ResolvePath(settings, room.RoomId, layer);
             if (texture == null && source != null) texture = GD.Load<Texture2D>(source);
@@ -138,27 +181,48 @@ public static class BackgroundImporter
             }
 
             Vector2 p = settings.ScrollOf(layer);
-            var parallax = new Parallax2D { Name = LayerNodeName(layer), ScrollScale = p };
+            var parallax = new Parallax2D { Name = LayerNodeName(layer), ScrollScale = p, ZIndex = settings.ZOf(layer), ZAsRelative = false };
             (Sprite2D image, float scale) = Fitted(ImageName, texture, roomSize, screen, p, settings.ShakeMargin);
             parallax.AddChild(image);
-            plan.Messages.Add($"{room.RoomId} 导入{LayerTitle(layer)} {source}（{texture.GetWidth()}×{texture.GetHeight()}，缩放到 {scale:0.###} 倍刚好盖满）。");
+            plan.Messages.Add($"{room.RoomId} 导入{LayerTitle(layer)} {source}（{texture.GetWidth()}×{texture.GetHeight()}，缩放到 {scale:0.###} 倍刚好盖满，层级 {settings.ZOf(layer)}）。");
             AddLayer(layer, parallax);
         }
 
-        // 物件：每张图一个节点
-        SortedDictionary<string, string> tools = ResolveTools(settings, room.RoomId);
-        if (tools.Count == 0) return plan;
+        // 物件：每张图一个 Parallax2D（各自的视差和层级）→ Image
         Node toolLayer = known.GetValueOrDefault(Tool);
-        var items = new Dictionary<string, Node>();
+        var items = new Dictionary<string, (Node node, Sprite2D image)>();
         var names = new HashSet<string>();
         if (toolLayer != null)
+        {
+            bool neutral = toolLayer is not Parallax2D container || IsNeutral(container);
             foreach (Node child in toolLayer.GetChildren())
             {
                 names.Add(child.Name);
-                if (ToolKeyOf(child) is string key && !items.ContainsKey(key)) items[key] = child;
+                string key = ToolKeyOf(child);
+                if (upgrade && child is Node2D legacy && child is not Parallax2D && (key != null || !neutral))
+                {
+                    Parallax2D wrapper = WrapperFor(legacy, toolLayer as Parallax2D, key, settings);
+                    plan.Wraps.Add((legacy, wrapper, legacy.HasMeta(ToolMeta) ? legacy.GetMeta(ToolMeta).AsString() : ""));
+                    plan.Messages.Add($"{room.RoomId} 的物件 {legacy.Name} 包一层自己的视差节点（视差 {wrapper.ScrollScale}，层级 {wrapper.ZIndex}{(wrapper.ZAsRelative ? "（相对）" : "")}），画面上的位置、大小不变。");
+                    if (key != null && !items.ContainsKey(key)) items[key] = (wrapper, legacy as Sprite2D);
+                    continue;
+                }
+                if (key != null && !items.ContainsKey(key)) items[key] = (child, ImageOfItem(child));
             }
+            if (upgrade && toolLayer is Parallax2D oldContainer && !neutral)
+            {
+                Dictionary<string, Variant> defaults = ParallaxDefaults();
+                foreach (string property in ParallaxProperties)
+                {
+                    Variant now = oldContainer.Get(property), fresh = defaults[property];
+                    if (!SameValue(now, fresh)) plan.Properties.Add((oldContainer, property, fresh, now));
+                }
+                plan.Messages.Add($"{room.RoomId} 的 {NodeName}/{toolLayer.Name} 原来的视差搬到了每个物件上，它自己恢复成不起作用的收纳节点。");
+            }
+        }
 
-        Parallax2D newToolLayer = null;
+        SortedDictionary<string, string> tools = ResolveTools(settings, room.RoomId);
+        Node2D newToolLayer = null;
         Vector2 toolScroll = settings.ScrollOf(Tool);
         foreach ((string key, string path) in tools)
         {
@@ -168,29 +232,95 @@ public static class BackgroundImporter
                 plan.Messages.Add($"物件图 {path} 加载失败，跳过。");
                 continue;
             }
-            if (items.TryGetValue(key, out Node item))
+            if (items.TryGetValue(key, out var found))
             {
-                if (!item.HasMeta(ToolMeta))
+                bool wrapped = plan.Wraps.Any(w => w.wrapper == found.node);
+                if (!wrapped && !found.node.HasMeta(ToolMeta))
                 {
-                    plan.ToolTags.Add((item, key));
-                    plan.Messages.Add($"{room.RoomId} 认出物件节点 {item.Name} 是 {key}，记上物件标识。");
+                    plan.ToolTags.Add((found.node, key));
+                    plan.Messages.Add($"{room.RoomId} 认出物件节点 {found.node.Name} 是 {key}，记上物件标识。");
                 }
-                if (item is Sprite2D sprite) PlanRetexture(plan, sprite, texture, $"{room.RoomId} 的物件 {key}（{item.Name}）", path);
-                else plan.Messages.Add($"{room.RoomId} 的物件 {key}（{item.Name}）不是 Sprite2D，没有换图。");
+                if (found.image != null) PlanRetexture(plan, found.image, texture, $"{room.RoomId} 的物件 {key}（{found.node.Name}）", path);
+                else plan.Messages.Add($"{room.RoomId} 的物件 {key}（{found.node.Name}）下面没有 {ImageName}，没有换图。");
                 continue;
             }
 
             string name = UniqueName(ToolNodeName(key), names);
             names.Add(name);
-            (Sprite2D created, float scale) = Fitted(name, texture, roomSize, screen, toolScroll, settings.ShakeMargin);
-            created.SetMeta(ToolMeta, key);
-            if (toolLayer != null) plan.NewNodes.Add((toolLayer, created, -1));
-            else (newToolLayer ??= new Parallax2D { Name = LayerNodeName(Tool), ScrollScale = toolScroll }).AddChild(created);
-            plan.Messages.Add($"{room.RoomId} 导入物件 {key} {path}（节点 {name}，缩放到 {scale:0.###} 倍，整张图盖满房间）。");
+            var item = new Parallax2D { Name = name, ScrollScale = toolScroll, ZIndex = settings.ToolZ, ZAsRelative = false };
+            item.SetMeta(ToolMeta, key);
+            (Sprite2D image, float scale) = Fitted(ImageName, texture, roomSize, screen, toolScroll, settings.ShakeMargin);
+            item.AddChild(image);
+            if (toolLayer != null) plan.NewNodes.Add((toolLayer, item, -1));
+            else (newToolLayer ??= new Node2D { Name = LayerNodeName(Tool) }).AddChild(item);
+            plan.Messages.Add($"{room.RoomId} 导入物件 {key} {path}（节点 {name}，视差 {toolScroll}，层级 {settings.ToolZ}，缩放到 {scale:0.###} 倍，整张图盖满房间）。");
         }
         if (newToolLayer != null) AddLayer(Tool, newToolLayer);
         return plan;
     }
+
+    /// <summary>
+    /// 旧版物件的包装节点：原来 Tool（Parallax2D）的视差、偏移、变换都搬过来，物件自己的变换不动，所以画面上和原来一模一样。
+    /// 层级：物件原来是“0 且相对”（旧默认）就用默认物件层级（绝对）；否则保持相对 0，层级算法和原来一样。
+    /// </summary>
+    private static Parallax2D WrapperFor(Node2D legacy, Parallax2D container, string key, BackgroundSettings settings)
+    {
+        var wrapper = new Parallax2D { Name = legacy.Name };
+        if (container != null)
+            foreach (string property in ParallaxProperties) wrapper.Set(property, container.Get(property));
+        bool oldDefault = legacy.ZIndex == 0 && legacy.ZAsRelative;
+        wrapper.ZIndex = oldDefault ? settings.ToolZ : 0;
+        wrapper.ZAsRelative = !oldDefault;
+        if (key != null) wrapper.SetMeta(ToolMeta, key);
+        return wrapper;
+    }
+
+    private static bool IsNeutral(Parallax2D container)
+    {
+        Dictionary<string, Variant> defaults = ParallaxDefaults();
+        return ParallaxProperties.All(p => SameValue(container.Get(p), defaults[p]));
+    }
+
+    private static Dictionary<string, Variant> _parallaxDefaults;
+
+    /// <summary>Parallax2D 各属性的默认值（建一个临时节点读完就释放）。</summary>
+    private static Dictionary<string, Variant> ParallaxDefaults()
+    {
+        if (_parallaxDefaults != null) return _parallaxDefaults;
+        var probe = new Parallax2D();
+        try { _parallaxDefaults = ParallaxProperties.ToDictionary(p => p, p => probe.Get(p)); }
+        finally { probe.Free(); }
+        return _parallaxDefaults;
+    }
+
+    private static bool SameValue(Variant a, Variant b) => GD.VarToStr(a) == GD.VarToStr(b);
+
+    /// <summary>物件节点下的图：包装节点（Parallax2D）找它的 Image；Sprite2D 本身就是图。</summary>
+    public static Sprite2D ImageOfItem(Node item) => item switch
+    {
+        Sprite2D sprite => sprite,
+        null => null,
+        _ => FindChild(item, ImageName) as Sprite2D,
+    };
+
+    /// <summary>Background 下所有的 Parallax2D（各层、各物件），按树顺序。</summary>
+    public static List<Parallax2D> ParallaxNodes(Node background)
+    {
+        var result = new List<Parallax2D>();
+        void Walk(Node node)
+        {
+            foreach (Node child in node.GetChildren())
+            {
+                if (child is Parallax2D p) result.Add(p);
+                Walk(child);
+            }
+        }
+        if (background != null) Walk(background);
+        return result;
+    }
+
+    /// <summary>镜头画面左上角在 C（房间坐标）时，这个 Parallax2D 在运行时的位置（编辑器预览用同一个算法）。</summary>
+    public static Vector2 RuntimePosition(Parallax2D parallax, Vector2 c) => parallax.ScrollOffset + (Vector2.One - parallax.ScrollScale) * c;
 
     private static void PlanRetexture(ImportPlan plan, Sprite2D image, Texture2D texture, string what, string source)
     {
@@ -236,12 +366,12 @@ public static class BackgroundImporter
         return null;
     }
 
-    /// <summary>物件节点的标识：有元数据用元数据，没有就按当前图片文件名认（…_tool_tree.png → tree）。认不出返回 null。</summary>
+    /// <summary>物件节点的标识：有元数据用元数据，没有就按它的图片文件名认（…_tool_tree.png → tree；包装节点看它的 Image）。认不出返回 null。</summary>
     public static string ToolKeyOf(Node node)
     {
         if (node == null) return null;
         if (node.HasMeta(ToolMeta)) return node.GetMeta(ToolMeta).AsString().ToLowerInvariant();
-        return node is Sprite2D sprite ? ToolKeyOfPath(sprite.Texture?.ResourcePath) : null;
+        return ToolKeyOfPath(ImageOfItem(node)?.Texture?.ResourcePath);
     }
 
     /// <summary>tex_bg_s1_03_tool_tree.png / tex_bg_s1_tool_tree.png → tree；不是物件图返回 null。</summary>
@@ -295,7 +425,8 @@ public static class BackgroundImporter
     }
 
     /// <summary>
-    /// 把导入写成一组撤销 / 重做操作。各条撤销操作互不依赖（谁先执行都一样）：移除新加的节点、换回原来的图、去掉补记的标识。
+    /// 把导入写成一组撤销 / 重做操作。各条撤销操作互不依赖（谁先执行都一样）：移除新加的节点、拆掉包装节点（放回它原来的位置）、
+    /// 换回原来的属性和图、去掉补记的标识和版本号。
     /// </summary>
     public static void Record(RoomRoot room, ImportPlan plan, IUndoSink sink)
     {
@@ -314,6 +445,22 @@ public static class BackgroundImporter
             sink.DoMethod(room, RoomRoot.MethodName.AssignOwner, node);
             sink.DoReference(node);
             sink.UndoMethod(parent, Node.MethodName.RemoveChild, node);
+        }
+        foreach ((Node2D item, Parallax2D wrapper, string oldMeta) in plan.Wraps)
+        {
+            sink.DoMethod(room, RoomRoot.MethodName.WrapToolItem, item, wrapper);
+            sink.DoReference(wrapper);
+            sink.UndoMethod(room, RoomRoot.MethodName.UnwrapToolItem, item, wrapper, oldMeta);
+        }
+        foreach ((GodotObject target, StringName property, Variant value, Variant old) in plan.Properties)
+        {
+            sink.DoProperty(target, property, value);
+            sink.UndoProperty(target, property, old);
+        }
+        if (plan.UpgradeBackground != null)
+        {
+            sink.DoMethod(plan.UpgradeBackground, GodotObject.MethodName.SetMeta, VersionMeta, CurrentVersion);
+            sink.UndoMethod(plan.UpgradeBackground, GodotObject.MethodName.RemoveMeta, VersionMeta);
         }
         foreach ((Sprite2D image, Texture2D texture) in plan.Retextures)
         {
@@ -345,10 +492,10 @@ public static class BackgroundImporter
         settings ??= BackgroundSettings.LoadDefault();
         if (room?.GetNodeOrNull(NodeName) is not Node2D background) return problems;
         if (checkNodeMoves ?? Engine.IsEditorHint())
-            foreach (string layer in Layers)
-                if (FindLayer(background, layer) is Parallax2D moved && !moved.Position.IsEqualApprox(moved.ScrollOffset))
-                    problems.Add($"{NodeName}/{moved.Name} 节点本身被挪到了 {moved.Position.Round()}，游戏运行时它会被视差重置回 {moved.ScrollOffset.Round()}。"
-                                 + $"要挪动背景，请调它下面的 {ImageName} 或物件节点（或改 Scroll Offset）。");
+            foreach (Parallax2D moved in ParallaxNodes(background))
+                if (!moved.Position.IsEqualApprox(moved.ScrollOffset))
+                    problems.Add($"{NodeName}/{background.GetPathTo(moved)} 节点本身被挪到了 {moved.Position.Round()}，游戏运行时它会被视差重置回 {moved.ScrollOffset.Round()}。"
+                                 + $"要挪动它，请调它下面的 {ImageName}（或改 Scroll Offset）。");
         if (FindLayer(background, Far) is not Parallax2D far) return problems;
         Sprite2D image = FindChild(far, ImageName) as Sprite2D;
         if (image?.Texture == null)

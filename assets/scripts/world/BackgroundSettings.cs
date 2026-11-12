@@ -26,6 +26,15 @@ public partial class BackgroundSettings : KeptResource
     [Export] public Vector2 ToolScroll { get; set; } = new(1f, 1f);
 
     /// <summary>
+    /// 导入时各层的 Z Index（绝对层级，关掉 Z As Relative，直接和地形、主角的 0 比）。层与层之间留 20 的空当；
+    /// 物件导入后可以随时改成任意值（比如 10 就挡在主角前面）。
+    /// </summary>
+    [Export] public int FarZ { get; set; } = -100;
+    [Export] public int MidZ { get; set; } = -80;
+    [Export] public int FrontZ { get; set; } = -60;
+    [Export] public int ToolZ { get; set; } = -40;
+
+    /// <summary>
     /// 震屏余量（像素）。Camera2D.Offset 会越过镜头范围，背景要多盖这么多。
     /// World 不能引用 Camera 系统，这个值由测试保证不小于 CameraSettings.MaxShakeOffset。
     /// </summary>
@@ -40,5 +49,13 @@ public partial class BackgroundSettings : KeptResource
         BackgroundImporter.Mid => MidScroll,
         BackgroundImporter.Front => FrontScroll,
         _ => ToolScroll,
+    };
+
+    public int ZOf(string layer) => layer switch
+    {
+        BackgroundImporter.Far => FarZ,
+        BackgroundImporter.Mid => MidZ,
+        BackgroundImporter.Front => FrontZ,
+        _ => ToolZ,
     };
 }
