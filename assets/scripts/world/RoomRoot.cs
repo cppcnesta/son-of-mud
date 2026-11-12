@@ -17,7 +17,7 @@ public partial class RoomRoot : Node2D
     [Export] public string RoomId { get; set; } = "";
     [Export] public string DisplayName { get; set; } = "";
 
-    /// <summary>按命名把最远景 / 中景导入成场景里的普通节点；已经导入过的只换图，不动缩放和位置。可以 Ctrl+Z 撤销。</summary>
+    /// <summary>按命名把最远景 / 中景 / 近景 / 物件导入成场景里的普通节点；已经导入过的只补缺的、只换图，不动缩放和位置。可以 Ctrl+Z 撤销。</summary>
     [ExportToolButton("按命名导入背景")]
     public Callable ImportBackgroundButton => Callable.From(ImportBackgroundInEditor);
 
@@ -60,26 +60,7 @@ public partial class RoomRoot : Node2D
         {
             EditorUndoRedoManager undo = EditorInterface.Singleton.GetEditorUndoRedo();
             undo.CreateAction($"导入背景 {RoomId}", UndoRedo.MergeMode.Disable, this);
-            if (plan.NewBackground != null)
-            {
-                undo.AddDoMethod(this, Node.MethodName.AddChild, plan.NewBackground);
-                undo.AddDoMethod(this, Node.MethodName.MoveChild, plan.NewBackground, 0);
-                undo.AddDoMethod(this, MethodName.AssignOwner, plan.NewBackground);
-                undo.AddDoReference(plan.NewBackground);
-                undo.AddUndoMethod(this, Node.MethodName.RemoveChild, plan.NewBackground);
-            }
-            foreach (Parallax2D layer in plan.NewLayers)
-            {
-                undo.AddDoMethod(plan.ExistingBackground, Node.MethodName.AddChild, layer);
-                undo.AddDoMethod(this, MethodName.AssignOwner, layer);
-                undo.AddDoReference(layer);
-                undo.AddUndoMethod(plan.ExistingBackground, Node.MethodName.RemoveChild, layer);
-            }
-            foreach ((Sprite2D image, Texture2D texture) in plan.Retextures)
-            {
-                undo.AddDoProperty(image, Sprite2D.PropertyName.Texture, texture);
-                undo.AddUndoProperty(image, Sprite2D.PropertyName.Texture, image.Texture);
-            }
+            BackgroundImporter.Record(this, plan, new EditorSink(undo));
             undo.CommitAction();
             _checkLeft = 0;
             return;
@@ -87,6 +68,20 @@ public partial class RoomRoot : Node2D
 #endif
         BackgroundImporter.Apply(this, plan);
     }
+
+#if TOOLS
+    /// <summary>把导入操作交给编辑器的撤销管理器（Ctrl+Z / Ctrl+Y）。</summary>
+    private sealed class EditorSink : BackgroundImporter.IUndoSink
+    {
+        private readonly EditorUndoRedoManager _undo;
+        public EditorSink(EditorUndoRedoManager undo) => _undo = undo;
+        public void DoMethod(GodotObject target, StringName method, params Variant[] args) => _undo.AddDoMethod(target, method, args);
+        public void UndoMethod(GodotObject target, StringName method, params Variant[] args) => _undo.AddUndoMethod(target, method, args);
+        public void DoProperty(GodotObject target, StringName property, Variant value) => _undo.AddDoProperty(target, property, value);
+        public void UndoProperty(GodotObject target, StringName property, Variant value) => _undo.AddUndoProperty(target, property, value);
+        public void DoReference(GodotObject target) => _undo.AddDoReference(target);
+    }
+#endif
 
     /// <summary>按 SpawnId 找出生点；找不到时退回 Default，再找不到返回 null。</summary>
     public SpawnPoint FindSpawn(StringName spawnId)
