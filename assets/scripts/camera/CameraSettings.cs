@@ -1,10 +1,11 @@
 using Godot;
+using SonOfMud.Core;
 
 namespace SonOfMud.Camera;
 
 /// <summary>镜头的可调数值。数值放在 assets/data/camera/camera_settings.tres。</summary>
 [GlobalClass]
-public partial class CameraSettings : Resource
+public partial class CameraSettings : KeptResource
 {
     /// <summary>固定缩放。房间最小 2×2 格 = 一屏，缩放 1 时不会看到房间外面。</summary>
     [Export] public Vector2 Zoom { get; set; } = Vector2.One;

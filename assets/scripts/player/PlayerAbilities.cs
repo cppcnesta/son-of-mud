@@ -3,7 +3,8 @@ using Godot;
 namespace SonOfMud.Player;
 
 /// <summary>
-/// 玩家能力 ID（D8：只剩这四项）。格挡、切形态开局就有；攀墙 S2_02 获得；重压下砸 S3_03 获得。
+/// 玩家能力 ID（D8：只剩这四项）。格挡、切形态、攀墙开局就有（初始能力见 ability_table.tres 的 Initial）；
+/// 重压下砸本轮不发放，代码（SlamState）保留，可破坏物改用普通攻击打碎。
 /// 旧代码里的 form_switch 在新代码里统一写成 switch_form。
 /// </summary>
 public static class PlayerAbilities

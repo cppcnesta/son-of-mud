@@ -1,4 +1,5 @@
 using Godot;
+using SonOfMud.Core;
 
 namespace SonOfMud.World;
 
@@ -9,7 +10,7 @@ namespace SonOfMud.World;
 /// </summary>
 [Tool]
 [GlobalClass]
-public partial class BackgroundSettings : Resource
+public partial class BackgroundSettings : KeptResource
 {
     public const string DefaultPath = "res://assets/data/world/background_settings.tres";
 

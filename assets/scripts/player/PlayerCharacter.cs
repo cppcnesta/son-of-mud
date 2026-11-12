@@ -35,6 +35,7 @@ public partial class PlayerCharacter : CharacterBody2D
 
     private int _attackSequence;
     private uint _bodyMask;
+    private CollisionShape2D _bodyShape;
     /// <summary>正在按进度调整血量上限：期间 Stats 的 HealthChanged 不单独转发，调整完统一报一次。</summary>
     private bool _applyingMaxHealth;
 
@@ -176,8 +177,84 @@ public partial class PlayerCharacter : CharacterBody2D
     }
 
     public bool CanStartWallClimb() =>
-        HasAbility(PlayerAbilities.WallClimb) && IsOnWall() && Held(PlayerActions.Up) &&
-        Axis != 0f && Axis * GetWallNormal().X < 0f;
+        CanUseWall() && Held(PlayerActions.Up) && Axis != 0f && Axis * GetWallNormal().X < 0f;
+
+    // ---------- 墙面（关卡几何计划 v3 第 2.1 节） ----------
+
+    /// <summary>
+    /// 这面墙能不能用（开始攀墙、攀墙过程中、蹬墙跳三条路径共用）：有攀墙能力、正贴着墙，
+    /// 并且上一次 MoveAndSlide 接触到的墙面里没有任何一个不可攀（见 TouchesNoClimbWall）。
+    /// </summary>
+    public bool CanUseWall() => HasAbility(PlayerAbilities.WallClimb) && IsOnWall() && !TouchesNoClimbWall();
+
+    /// <summary>
+    /// 上一次 MoveAndSlide 的滑动碰撞里，有没有接触到不可攀的墙面（只看墙，地面和天花板不算）。
+    /// - 碰撞体是 TileMapLayer：用碰撞点（沿法线往墙里退半个像素）找到瓦片坐标；再把身体侧面贴着的那一列瓦片
+    ///   （覆盖身体整个高度）也算进来，因为一次滑动碰撞只报告一个接触点，而身体同时贴着两三块瓦片。
+    ///   瓦片集有 Surfaces.NoClimbData 自定义数据层、值为 true 就是不可攀。
+    ///   不用 GetCoordsForBodyRid：Godot 4.7.2 的 TileMapLayer 默认 physics_quadrant_size = 16，同一象限的瓦片合成一个物理体，
+    ///   这时它返回的是象限坐标（实测贴着第 (30,17) 格的墙返回 (1,1)），不是瓦片坐标。
+    /// - 其他碰撞体：在 Surfaces.NoClimbGroup 分组里就是不可攀（ArenaLock 门体等）。
+    /// 只要有一个不可攀的接触就返回 true。
+    /// </summary>
+    public bool TouchesNoClimbWall()
+    {
+        int count = GetSlideCollisionCount();
+        for (int i = 0; i < count; i++)
+        {
+            KinematicCollision2D collision = GetSlideCollision(i);
+            Vector2 normal = collision.GetNormal();
+            if (!IsWallNormal(normal)) continue;
+            GodotObject collider = collision.GetCollider();
+            if (collider is TileMapLayer layer)
+            {
+                Vector2 inside = collision.GetPosition() - normal * 0.5f;
+                if (NoClimbTile(layer, layer.LocalToMap(layer.ToLocal(inside)))) return true;
+                if (NoClimbColumn(layer, normal)) return true;
+            }
+            else if (collider is Node node && node.IsInGroup(Surfaces.NoClimbGroup)) return true;
+        }
+        return false;
+    }
+
+    /// <summary>和 CharacterBody2D 的分类一致：法线与“上”或“下”的夹角都大于 FloorMaxAngle 的才是墙。</summary>
+    private bool IsWallNormal(Vector2 normal)
+    {
+        float limit = FloorMaxAngle + 0.01f;
+        return Mathf.Abs(normal.AngleTo(UpDirection)) > limit && Mathf.Abs(normal.AngleTo(-UpDirection)) > limit;
+    }
+
+    private static bool NoClimbTile(TileMapLayer layer, Vector2I cell)
+    {
+        TileSet tileSet = layer.TileSet;
+        if (tileSet == null || tileSet.GetCustomDataLayerByName(Surfaces.NoClimbData) < 0) return false;
+        TileData data = layer.GetCellTileData(cell);
+        return data != null && data.GetCustomData(Surfaces.NoClimbData).AsBool();
+    }
+
+    /// <summary>身体侧面贴着的那一列瓦片：墙在法线反方向，竖直范围是身体的上下边（各内缩 1 像素，不算脚下和头顶的角）。</summary>
+    private bool NoClimbColumn(TileMapLayer layer, Vector2 normal)
+    {
+        if (layer.TileSet == null || layer.TileSet.GetCustomDataLayerByName(Surfaces.NoClimbData) < 0) return false;
+        Rect2 body = BodyRect();
+        float x = normal.X > 0f ? body.Position.X - 1f : body.End.X + 1f;
+        float top = body.Position.Y + 1f, bottom = body.End.Y - 1f;
+        float step = Mathf.Max(1f, layer.TileSet.TileSize.Y / 2f);
+        for (float y = top; ; y = Mathf.Min(y + step, bottom))
+        {
+            if (NoClimbTile(layer, layer.LocalToMap(layer.ToLocal(new Vector2(x, y))))) return true;
+            if (y >= bottom) return false;
+        }
+    }
+
+    /// <summary>身体碰撞矩形（全局坐标）。player_v2 的身体是 48×48 的 RectangleShape2D。</summary>
+    private Rect2 BodyRect()
+    {
+        _bodyShape ??= GetNodeOrNull<CollisionShape2D>("CollisionShape2D");
+        Vector2 size = _bodyShape?.Shape is RectangleShape2D rect ? rect.Size : new Vector2(48f, 48f);
+        Vector2 center = _bodyShape?.GlobalPosition ?? GlobalPosition;
+        return new Rect2(center - size / 2f, size);
+    }
 
     public string NextAttackId(string kind) => $"player_{GetInstanceId()}_{kind}_{++_attackSequence}";
 

@@ -1,11 +1,12 @@
 using Godot;
 using Godot.Collections;
+using SonOfMud.Core;
 
 namespace SonOfMud.World;
 
 /// <summary>房间清单里的一个房间：位置和尺寸都以 MetSys 格为单位（1 格 = MetSysSettings.in_game_cell_size）。</summary>
 [GlobalClass]
-public partial class RoomDef : Resource
+public partial class RoomDef : KeptResource
 {
     [Export] public string Id { get; set; } = "";
     [Export] public string DisplayName { get; set; } = "";

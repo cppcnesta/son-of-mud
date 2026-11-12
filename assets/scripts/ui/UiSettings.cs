@@ -6,7 +6,7 @@ namespace SonOfMud.UI;
 
 /// <summary>UI 的可调数值和文案，放在 assets/data/ui/ui_settings.tres。</summary>
 [GlobalClass]
-public partial class UiSettings : Resource
+public partial class UiSettings : KeptResource
 {
     public const string DefaultPath = "res://assets/data/ui/ui_settings.tres";
 

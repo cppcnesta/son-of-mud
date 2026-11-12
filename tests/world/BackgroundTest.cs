@@ -260,9 +260,25 @@ public partial class BackgroundTest : FlowTestBase
     // 不再自动生成
     // =================================================================
 
+    /// <summary>房间表里第一个还没导入过背景的房间（场景里没有 Background 节点）。美术陆续加进来，挑到的房间会变。</summary>
+    private static string FirstRoomWithoutBackground()
+    {
+        foreach (RoomDef def in GD.Load<WorldLayout>(WorldLayout.DefaultPath).Rooms)
+        {
+            Node scene = GD.Load<PackedScene>(def.ScenePath).Instantiate();
+            bool has = scene.GetNodeOrNull(BackgroundImporter.NodeName.ToString()) != null;
+            scene.Free();
+            if (!has) return def.Id;
+        }
+        return null;
+    }
+
     private async Task NoAutoBackground()
     {
-        await Teleport("S1_03", SpawnPoint.DefaultId);
+        string room = FirstRoomWithoutBackground();
+        Check(room != null, $"房间表里有还没导入背景的房间可以测（挑到 {room}）");
+        if (room == null) return;
+        await Teleport(room, SpawnPoint.DefaultId);
         Check(Bg == null && Room.GetChildren(true).All(c => c.Name != BackgroundImporter.NodeName) && !Room.IsProcessing(),
             "没导入过的房间不会自动生成背景；游戏里房间节点不跑编辑器检查");
         Check(BackgroundImporter.CoverageProblems(Room, _settings).Count == 0, "没有背景的房间不报露底");

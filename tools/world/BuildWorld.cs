@@ -9,17 +9,23 @@ using SonOfMud.World;
 namespace SonOfMud.Tools;
 
 /// <summary>
-/// 地图生成器（无界面运行）：读 world_layout.tres →
-/// 1) 缺的房间场景生成骨架（已存在的场景不覆盖）；
-/// 2) 重写 MetSys 的 MapData.txt（每格四个方向：同一房间 -1、墙 0、通道 1，外加场景 UID）。
-/// 运行：godot --headless --path . --scene res://tools/world/BuildWorld.tscn
+/// 地图生成器（无界面运行）。用 -- 之后的参数选模式：
+/// 默认（不带参数）：读 world_layout.tres → 1) 缺的房间场景生成骨架（已存在的场景不覆盖，新骨架是 32 像素瓦片）；
+///   2) 重写 MetSys 的 MapData.txt（每格四个方向：同一房间 -1、墙 0、通道 1，外加场景 UID）。
+/// --export-text [--force]：把房间场景原样转成文字图 assets/data/world/rooms/&lt;房间&gt;.txt（已有的文字图不覆盖，除非 --force）。
+/// --geometry：按文字图重写各房间的地形、条件地形、可破坏物、出生点、锚点物件、条件门位置、出口箭头（见 GeometryBuilder）。
+/// --geometry --check：干跑，只报告哪些房间、哪些节点会变化，不写文件。
+/// 任何模式出错时退出码为 1，且不写文件。
+/// 运行：godot --headless --path . --scene res://tools/world/BuildWorld.tscn -- --geometry
 /// </summary>
 public partial class BuildWorld : Node
 {
-    public const string TileSetPath = "res://assets/data/world/world_tileset.tres";
+    public const string TileSetPath = TerrainTiles.TileSetPath;
     public const string RoomInstanceScene = "res://addons/MetroidvaniaSystem/Nodes/RoomInstance.tscn";
-    public const int Tile = 64;
-    private const int LedgeTiles = 4;
+    public const int Tile = RoomGrid.Tile;
+    private const int LedgeTiles = 8;
+    /// <summary>新骨架里条件门的宽度（和旧骨架一样 64 像素）。</summary>
+    private const int GateWidth = 64;
 
     private Vector2I _cell;
     private TileSet _tileSet;
@@ -27,6 +33,39 @@ public partial class BuildWorld : Node
     public override void _Ready() => Callable.From(Run).CallDeferred();
 
     private void Run()
+    {
+        var args = new HashSet<string>(OS.GetCmdlineUserArgs().Concat(OS.GetCmdlineArgs()));
+        int code;
+        if (args.Contains("--export-text")) code = RunExport(args.Contains("--force"));
+        else if (args.Contains("--geometry")) code = RunGeometry(!args.Contains("--check"));
+        else code = RunSkeleton();
+        GetTree().Quit(code);
+    }
+
+    private static int RunExport(bool force)
+    {
+        GeometryBuilder builder = GeometryBuilder.ForProject();
+        bool ok = builder.ExportAll(write: true, overwrite: force);
+        foreach (string note in builder.Notes) GD.Print("BuildWorld --export-text：" + note);
+        foreach (string error in builder.Errors) GD.PushError("BuildWorld --export-text：" + error);
+        GD.Print(ok ? $"BuildWorld --export-text：已写 {builder.Written.Count} 个文字图。" : $"BuildWorld --export-text 失败：{builder.Errors.Count} 个错误，没有写任何文件。");
+        return ok ? 0 : 1;
+    }
+
+    private static int RunGeometry(bool write)
+    {
+        GeometryBuilder builder = GeometryBuilder.ForProject();
+        bool ok = builder.RunGeometry(write);
+        foreach (string note in builder.Notes) GD.Print("BuildWorld --geometry：" + note);
+        foreach (string change in builder.Changes) GD.Print((write ? "BuildWorld --geometry 改动：" : "BuildWorld --geometry --check 会改：") + change);
+        foreach (string error in builder.Errors) GD.PushError("BuildWorld --geometry：" + error);
+        if (!ok) GD.Print($"BuildWorld --geometry 失败：{builder.Errors.Count} 个错误，没有写任何文件。");
+        else if (write) GD.Print($"BuildWorld --geometry：写了 {builder.Written.Count} 个文件（{string.Join(", ", builder.Written)}）。");
+        else GD.Print(builder.Changes.Count == 0 ? "BuildWorld --geometry --check：没有任何变化。" : $"BuildWorld --geometry --check：{builder.Changes.Count} 处会变化。");
+        return ok ? 0 : 1;
+    }
+
+    private int RunSkeleton()
     {
         int code = 0;
         try
@@ -55,7 +94,7 @@ public partial class BuildWorld : Node
             GD.PushError("BuildWorld 失败：" + exception);
             code = 1;
         }
-        GetTree().Quit(code);
+        return code;
     }
 
     // ---------- MapData.txt ----------
@@ -98,23 +137,8 @@ public partial class BuildWorld : Node
     private static TileSet EnsureTileSet()
     {
         if (ResourceLoader.Exists(TileSetPath)) return GD.Load<TileSet>(TileSetPath);
-        var gradient = new Gradient();
-        gradient.SetColor(0, new Color(0.36f, 0.31f, 0.26f));
-        gradient.SetColor(1, new Color(0.30f, 0.26f, 0.22f));
-        var texture = new GradientTexture2D { Gradient = gradient, Width = Tile, Height = Tile, FillTo = new Vector2(0f, 1f) };
-        var tileSet = new TileSet { TileSize = new Vector2I(Tile, Tile) };
-        tileSet.AddPhysicsLayer();
-        tileSet.SetPhysicsLayerCollisionLayer(0, Layers.World);
-        tileSet.SetPhysicsLayerCollisionMask(0, 0);
-        var source = new TileSetAtlasSource { Texture = texture, TextureRegionSize = new Vector2I(Tile, Tile) };
-        tileSet.AddSource(source, 0);
-        source.CreateTile(Vector2I.Zero);
-        TileData data = source.GetTileData(Vector2I.Zero, 0);
-        data.SetCollisionPolygonsCount(0, 1);
-        float h = Tile / 2f;
-        data.SetCollisionPolygonPoints(0, 0, new[] { new Vector2(-h, -h), new Vector2(h, -h), new Vector2(h, h), new Vector2(-h, h) });
         MakeDir(TileSetPath.GetBaseDir());
-        Error result = ResourceSaver.Save(tileSet, TileSetPath);
+        Error result = ResourceSaver.Save(TerrainTiles.Build(), TileSetPath);
         if (result != Error.Ok) throw new System.Exception($"保存 {TileSetPath} 失败：{result}");
         EnsureUid(TileSetPath);
         return GD.Load<TileSet>(TileSetPath);
@@ -122,7 +146,7 @@ public partial class BuildWorld : Node
 
     // ---------- 房间骨架 ----------
 
-    /// <summary>瓦片网格按全局 64 像素对齐：房间顶边全局 Y 不是 64 的倍数时，Geometry 整体上移 shift 像素，相邻房间的地面才能对齐。</summary>
+    /// <summary>瓦片网格按全局 32 像素对齐：房间顶边全局 Y 不是 64 的倍数时，Geometry 整体上移 shift 像素，相邻房间的地面才能对齐。</summary>
     private int Shift(RoomDef room) => Mathf.PosMod(room.Origin.Y * _cell.Y, Tile);
 
     /// <summary>覆盖某个局部像素 Y（不含）之上的最后一行瓦片：这一行的顶边就是站立面。</summary>
@@ -172,7 +196,7 @@ public partial class BuildWorld : Node
             else if (exit.Side == ExitSide.Down)
             {
                 int first = exit.Offset * (_cell.X / Tile);
-                for (int c = first + 2; c < first + _cell.X / Tile - 2; c++) solid.Remove(new Vector2I(c, floorRow));
+                for (int c = first + 4; c < first + _cell.X / Tile - 4; c++) solid.Remove(new Vector2I(c, floorRow));
             }
         }
         foreach (Vector2I tile in solid) geometry.SetCell(tile, 0, Vector2I.Zero);
@@ -181,11 +205,11 @@ public partial class BuildWorld : Node
         bool OnFloor(float x) => solid.Contains(new Vector2I((int)(x / Tile), floorRow));
         float FloorX(params float[] candidates)
         {
-            foreach (float x in candidates) if (x > Tile && x < width - Tile && OnFloor(x)) return x;
-            return Tile * 2.5f;
+            foreach (float x in candidates) if (x > 2 * Tile && x < width - 2 * Tile && OnFloor(x)) return x;
+            return Tile * 5f;
         }
 
-        AddSpawn(root, spawns, SpawnPoint.DefaultId, new Vector2(FloorX(width / 2f, width / 2f - 256, width / 2f + 256, Tile * 2.5f), floorTop));
+        AddSpawn(root, spawns, SpawnPoint.DefaultId, new Vector2(FloorX(width / 2f, width / 2f - 256, width / 2f + 256, Tile * 5f), floorTop));
 
         foreach (ExitDef exit in room.Exits)
         {
@@ -193,7 +217,7 @@ public partial class BuildWorld : Node
             Vector2 at;
             if (exit.Kind == ExitKind.Door)
             {
-                float doorX = FloorX(exit.Offset * _cell.X + _cell.X / 2f, width / 2f, Tile * 2.5f);
+                float doorX = FloorX(exit.Offset * _cell.X + _cell.X / 2f, width / 2f, Tile * 5f);
                 AddDoor(root, objects, exit, room, new Vector2(doorX, floorTop));
                 at = new Vector2(FloorX(doorX + 128, doorX - 128, doorX), floorTop);
             }
@@ -201,7 +225,7 @@ public partial class BuildWorld : Node
             {
                 int ledgeRow = Mathf.Min(RowEndingAt(room, (exit.Offset + 1) * _cell.Y), floorRow);
                 at = new Vector2(exit.Side == ExitSide.Left ? 96 : width - 96, RowTop(room, ledgeRow));
-                if (exit.HasBarrier) AddBarrier(root, objects, exit, new Vector2(exit.Side == ExitSide.Left ? Tile / 2f : width - Tile / 2f, RowTop(room, ledgeRow)), exit.Offset * _cell.Y);
+                if (exit.HasBarrier) AddBarrier(root, objects, exit, new Vector2(exit.Side == ExitSide.Left ? GateWidth / 2f : width - GateWidth / 2f, RowTop(room, ledgeRow)), exit.Offset * _cell.Y);
             }
             else
             {
@@ -249,7 +273,7 @@ public partial class BuildWorld : Node
 
     private void AddBarrier(Node root, Node parent, ExitDef exit, Vector2 standOn, int cellTop)
     {
-        float openingHeight = standOn.Y - (cellTop - Tile);
+        float openingHeight = standOn.Y - (cellTop - GateWidth);
         var barrier = new GateBarrier
         {
             Name = "GateTo" + exit.Target,
@@ -257,8 +281,8 @@ public partial class BuildWorld : Node
             Position = standOn,
         };
         Add(root, parent, barrier);
-        AddShape(root, barrier, new Vector2(Tile, openingHeight));
-        AddVisual(root, barrier, new Vector2(Tile, openingHeight), new Color(0.75f, 0.2f, 0.2f, 0.85f));
+        AddShape(root, barrier, new Vector2(GateWidth, openingHeight));
+        AddVisual(root, barrier, new Vector2(GateWidth, openingHeight), new Color(0.75f, 0.2f, 0.2f, 0.85f));
     }
 
     /// <summary>矩形碰撞形状，底边落在父节点原点（脚底）上。</summary>

@@ -6,7 +6,7 @@ namespace SonOfMud.Player;
 
 /// <summary>和形态无关的玩家规则（assets/data/player_v2/rules.tres）。</summary>
 [GlobalClass]
-public partial class PlayerRules : Resource
+public partial class PlayerRules : KeptResource
 {
     [ExportGroup("形态切换")]
     [Export(PropertyHint.Enum, "水,泥")] public int InitialForm { get; set; }

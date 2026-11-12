@@ -279,8 +279,38 @@ public partial class WorldGame : Node
         }
         previous?.QueueFree();
 
+        RevealRegion(def);
         if (teleported) Events.Instance?.EmitSignal(Events.SignalName.PlayerTeleported, spawnId);
         Events.Instance?.EmitSignal(Events.SignalName.RoomEntered, def.Id);
         return true;
+    }
+
+    // ---------- 区域地图（关卡几何计划 G2） ----------
+
+    /// <summary>区域 = 房间编号里“_”前面的部分（S1_03 → S1）。</summary>
+    public static string RegionOf(string roomId)
+    {
+        int at = roomId?.IndexOf('_') ?? -1;
+        return at > 0 ? roomId[..at] : roomId ?? "";
+    }
+
+    /// <summary>
+    /// 进入一个区域时，把这个区域所有房间的格子标成“已知”：地图上显示轮廓，去过的才算“已探索”。
+    /// 已经知道或探索过的格子不再重复标记；结果存在 MetSys 的存档数据里，读档后照样保留。
+    /// </summary>
+    private void RevealRegion(RoomDef entered)
+    {
+        if (!MetSysApi.Available || !MetSysApi.HasSaveData || Layout == null) return;
+        string region = RegionOf(entered.Id);
+        foreach (RoomDef room in Layout.Rooms)
+        {
+            if (RegionOf(room.Id) != region) continue;
+            for (int y = room.Origin.Y; y < room.Origin.Y + room.Size.Y; y++)
+                for (int x = room.Origin.X; x < room.Origin.X + room.Size.X; x++)
+                {
+                    var cell = new Vector3I(x, y, room.Layer);
+                    if (!MetSysApi.IsCellDiscovered(cell)) MetSysApi.DiscoverCell(cell);
+                }
+        }
     }
 }

@@ -2,7 +2,6 @@
 
 [ext_resource type="Script" path="res://assets/scripts/world/RoomRoot.cs" id="1_u5ry8"]
 [ext_resource type="PackedScene" path="res://addons/MetroidvaniaSystem/Nodes/RoomInstance.tscn" id="2_j2iaj"]
-[ext_resource type="Script" path="res://addons/MetroidvaniaSystem/Scripts/RoomInstance.gd" id="3_n4s7e"]
 [ext_resource type="TileSet" path="res://assets/data/world/world_tileset.tres" id="4_gxail"]
 [ext_resource type="Script" path="res://assets/scripts/world/SpawnPoint.cs" id="5_8qafu"]
 [ext_resource type="Script" path="res://assets/scripts/save/SavePoint.cs" id="6_neb4k"]
@@ -19,44 +18,60 @@ script = ExtResource("1_u5ry8")
 RoomId = "S1_04"
 DisplayName = "供桌"
 
-[node name="RoomInstance" type="Node2D" parent="." unique_id=1246059462 instance=ExtResource("2_j2iaj")]
-script = ExtResource("3_n4s7e")
+[node name="RoomInstance" parent="." unique_id=1246059462 instance=ExtResource("2_j2iaj")]
 
 [node name="Geometry" type="TileMapLayer" parent="." unique_id=2038241503]
 position = Vector2(0, -12)
-tile_map_data = PackedByteArray("AAAAAAkAAAAAAAAAAAABAAkAAAAAAAAAAAACAAkAAAAAAAAAAAADAAkAAAAAAAAAAAAEAAkAAAAAAAAAAAAFAAkAAAAAAAAAAAAGAAkAAAAAAAAAAAAHAAkAAAAAAAAAAAAIAAkAAAAAAAAAAAAJAAkAAAAAAAAAAAAKAAkAAAAAAAAAAAALAAkAAAAAAAAAAAAMAAkAAAAAAAAAAAANAAkAAAAAAAAAAAAOAAkAAAAAAAAAAAAPAAkAAAAAAAAAAAAQAAkAAAAAAAAAAAARAAkAAAAAAAAAAAAAAAAAAAAAAAAAAAARAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAARAAEAAAAAAAAAAAAAAAIAAAAAAAAAAAARAAIAAAAAAAAAAAAAAAMAAAAAAAAAAAARAAMAAAAAAAAAAAAAAAQAAAAAAAAAAAARAAQAAAAAAAAAAAA=")
+tile_map_data = PackedByteArray("AAAAAAkAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAIAAAAAAAAAAAAAAAMAAAAAAAAAAAAAAAQAAAAAAAAAAAABAAAAAAAAAAAAAAASAAAAAAAAAAAAAAATAAAAAAAAAAAAAAAUAAAAAAAAAAAAAAAVAAAAAAAAAAAAAAAWAAAAAAAAAAAAAAAXAAAAAAAAAAAAAAAYAAAAAAAAAAAAAAAZAAAAAAAAAAAAAAAaAAAAAAAAAAAAAAAbAAAAAAAAAAAAAAAcAAAAAAAAAAAAAAAdAAAAAAAAAAAAAAAeAAAAAAAAAAAAAAAfAAAAAAAAAAAAAAAgAAAAAAAAAAAAAAAhAAAAAAAAAAAAAAAiAAAAAAAAAAAAAAAjAAAAAAAAAAAAAAAjAAEAAAAAAAAAAAAjAAIAAAAAAAAAAAAjAAMAAAAAAAAAAAAjAAQAAAAAAAAAAAAAAAUAAAAAAAAAAAAjAAUAAAAAAAAAAAAAAAYAAAAAAAAAAAAjAAYAAAAAAAAAAAAAAAcAAAAAAAAAAAAjAAcAAAAAAAAAAAAAAAgAAAAAAAAAAAAjAAgAAAAAAAAAAAAjAAkAAAAAAAAAAAAAABQAAAAAAAAAAAABABQAAAAAAAAAAAACABQAAAAAAAAAAAADABQAAAAAAAAAAAAEABQAAAAAAAAAAAAFABQAAAAAAAAAAAAGABQAAAAAAAAAAAAHABQAAAAAAAAAAAAIABQAAAAAAAAAAAAJABQAAAAAAAAAAAAKABQAAAAAAAAAAAALABQAAAAAAAAAAAAMABQAAAAAAAAAAAANABQAAAAAAAAAAAAOABQAAAAAAAAAAAAPABQAAAAAAAAAAAAQABQAAAAAAAAAAAARABQAAAAAAAAAAAASABQAAAAAAAAAAAATABQAAAAAAAAAAAAUABQAAAAAAAAAAAAVABQAAAAAAAAAAAAWABQAAAAAAAAAAAAXABQAAAAAAAAAAAAYABQAAAAAAAAAAAAZABQAAAAAAAAAAAAaABQAAAAAAAAAAAAbABQAAAAAAAAAAAAcABQAAAAAAAAAAAAdABQAAAAAAAAAAAAeABQAAAAAAAAAAAAfABQAAAAAAAAAAAAgABQAAAAAAAAAAAAhABQAAAAAAAAAAAAiABQAAAAAAAAAAAAjABQAAAAAAAAAAAACAAAAAAAAAAAAAAADAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAFAAAAAAAAAAAAAAAGAAAAAAAAAAAAAAAHAAAAAAAAAAAAAAAIAAAAAAAAAAAAAAAJAAAAAAAAAAAAAAAKAAAAAAAAAAAAAAALAAAAAAAAAAAAAAAMAAAAAAAAAAAAAAANAAAAAAAAAAAAAAASAAEAAAAAAAAAAAATAAEAAAAAAAAAAAASAAIAAAAAAAAAAAATAAIAAAAAAAAAAAASAAMAAAAAAAAAAAATAAMAAAAAAAAAAAASAAQAAAAAAAAAAAATAAQAAAAAAAAAAAASAAUAAAAAAAAAAAATAAUAAAAAAAAAAAASAAYAAAAAAAAAAAATAAYAAAAAAAAAAAASAAcAAAAAAAAAAAATAAcAAAAAAAAAAAASAAgAAAAAAAAAAAATAAgAAAAAAAAAAAASAAkAAAAAAAAAAAATAAkAAAAAAAAAAAAAAAoAAAAAAAAAAAASAAoAAAAAAAAAAAATAAoAAAAAAAAAAAAjAAoAAAAAAAAAAAASAAsAAAAAAAAAAAATAAsAAAAAAAAAAAASAAwAAAAAAAAAAAATAAwAAAAAAAAAAAASAA0AAAAAAAAAAAATAA0AAAAAAAAAAAASAA4AAAAAAAAAAAATAA4AAAAAAAAAAAASAA8AAAAAAAAAAAATAA8AAAAAAAAAAAASABAAAAAAAAAAAAATABAAAAAAAAAAAAA=")
 tile_set = ExtResource("4_gxail")
+
+[node name="ExitMarkers" type="Node2D" parent="." unique_id=449509032]
+
+[node name="To_S1_03" type="Polygon2D" parent="ExitMarkers" unique_id=207622298]
+position = Vector2(64, 588)
+color = Color(1, 1, 1, 0.35)
+polygon = PackedVector2Array(16, 6, -4, 6, -4, 14, -18, 0, -4, -14, -4, -6, 16, -6)
+
+[node name="To_S1_05" type="Polygon2D" parent="ExitMarkers" unique_id=731783147]
+position = Vector2(1088, 588)
+color = Color(1, 1, 1, 0.35)
+polygon = PackedVector2Array(-16, -6, 4, -6, 4, -14, 18, 0, 4, 14, 4, 6, -16, 6)
+
+[node name="To_S1_08" type="Polygon2D" parent="ExitMarkers" unique_id=2079808963]
+position = Vector2(512, 76)
+color = Color(1, 1, 1, 0.35)
+polygon = PackedVector2Array(-6, 16, -6, -4, -14, -4, 0, -18, 14, -4, 6, -4, 6, 16)
 
 [node name="Spawns" type="Node2D" parent="." unique_id=603144492]
 
 [node name="Default" type="Marker2D" parent="Spawns" unique_id=869345624]
-position = Vector2(576, 563)
+position = Vector2(912, 627)
 script = ExtResource("5_8qafu")
 
 [node name="From_S1_03" type="Marker2D" parent="Spawns" unique_id=1019489178]
-position = Vector2(96, 563)
+position = Vector2(112, 627)
 script = ExtResource("5_8qafu")
 SpawnId = &"From_S1_03"
 
 [node name="From_S1_05" type="Marker2D" parent="Spawns" unique_id=1132731095]
-position = Vector2(1056, 563)
+position = Vector2(1040, 627)
 script = ExtResource("5_8qafu")
 SpawnId = &"From_S1_05"
 
 [node name="From_S1_08" type="Marker2D" parent="Spawns" unique_id=1276220126]
-position = Vector2(288, 563)
+position = Vector2(496, 627)
 script = ExtResource("5_8qafu")
 SpawnId = &"From_S1_08"
 
 [node name="Save" type="Marker2D" parent="Spawns" unique_id=1864390612]
-position = Vector2(768, 563)
+position = Vector2(784, 627)
 script = ExtResource("5_8qafu")
 SpawnId = &"Save"
 
 [node name="Objects" type="Node2D" parent="." unique_id=196076308]
 
 [node name="SavePoint" type="Area2D" parent="Objects" unique_id=1765671407]
-position = Vector2(768, 564)
+position = Vector2(784, 628)
 script = ExtResource("6_neb4k")
 SavePointId = &"S1_04"
 
@@ -71,21 +86,21 @@ offset_right = 24.0
 mouse_filter = 2
 color = Color(0.85, 0.7, 0.25, 1)
 
-[node name="Story_Offering" type="Area2D" parent="Objects"]
-position = Vector2(384, 563)
+[node name="Story_Offering" type="Area2D" parent="Objects" unique_id=1208984743]
+position = Vector2(400, 628)
 script = ExtResource("n_story")
 ScriptId = "m_pit"
 Label = "供桌"
 PromptText = "供桌"
 HideFlag = &"item.生命之面包"
 
-[node name="Shape" type="CollisionShape2D" parent="Objects/Story_Offering"]
+[node name="Shape" type="CollisionShape2D" parent="Objects/Story_Offering" unique_id=585418203]
 position = Vector2(0, -48)
 shape = SubResource("Shape_Story_Offering")
 
-[node name="Placeholder" type="ColorRect" parent="Objects/Story_Offering"]
-offset_left = -29
-offset_top = -77
-offset_right = 29
+[node name="Placeholder" type="ColorRect" parent="Objects/Story_Offering" unique_id=415011256]
+offset_left = -29.0
+offset_top = -77.0
+offset_right = 29.0
 mouse_filter = 2
 color = Color(0.55, 0.5, 0.45, 1)

@@ -1,11 +1,12 @@
 using Godot;
 using Godot.Collections;
+using SonOfMud.Core;
 
 namespace SonOfMud.Narrative.Data;
 
 /// <summary>全部角色（assets/data/narrative/characters.tres）。HiddenNames 里的说话人（旁白）不显示名牌。</summary>
 [GlobalClass]
-public partial class CharacterDatabase : Resource
+public partial class CharacterDatabase : KeptResource
 {
     [Export] public Array<CharacterData> Characters { get; set; } = new();
     [Export] public string[] HiddenNames { get; set; } = { "旁白" };

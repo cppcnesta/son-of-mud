@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Godot;
@@ -37,8 +38,10 @@ public partial class CoreSuite : Node
             InputLockChecks();
             PauseWriteScan();
             StaticGodotRefScan();
+            KeepAliveChecks();
             StoryValueChecks();
             ProgressChecks();
+            EnsureAbilitiesChecks();
             await StateMachineChecks();
             MetSysChecks();
         }
@@ -163,6 +166,41 @@ public partial class CoreSuite : Node
         Check(offenders.Count == 0, "静态字段持有 Godot 对象的文件都登记了退出时释放" + (offenders.Count > 0 ? "，违规：" + string.Join(", ", offenders) : ""));
     }
 
+    // ---------- 资源保活（终结器竞态，见 KeptResource） ----------
+
+    private void KeepAliveChecks()
+    {
+        var direct = new List<string>();
+        ScanDir("res://assets/scripts", path =>
+        {
+            if (path.EndsWith("/KeptResource.cs")) return;
+            string text = FileAccess.GetFileAsString(path);
+            foreach (Match m in Regex.Matches(text, @"class\s+(\w+)\s*:\s*(Resource)\b")) direct.Add($"{path.GetFile()}:{m.Groups[1].Value}");
+        });
+        Check(direct.Count == 0, "资源保活：assets/scripts 里所有 C# 资源类都继承 KeptResource，没有直接继承 Resource 的" +
+                                 (direct.Count > 0 ? "：" + string.Join("，", direct) : ""));
+
+        // 行为：从文件读一个 C# 资源，丢掉引用，强制回收并等终结器跑完——托管包装和本体都还在，再读拿到的是同一个
+        const string path = "res://assets/data/narrative/settings.tres";
+        ulong id = LoadAndForget(path, out string typeName);
+        GC.Collect();
+        GC.WaitForPendingFinalizers();
+        GC.Collect();
+        bool alive = GodotObject.IsInstanceIdValid(id);
+        Resource again = GD.Load<Resource>(path);
+        Check(typeName == "NarrativeSettings" && alive && again != null && again.GetInstanceId() == id && ResourceKeepAlive.Contains(again),
+            $"资源保活：{typeName} 读出来后丢掉引用、强制 GC 并等终结器，本体仍在、再读是同一个实例（在保活表里，共 {ResourceKeepAlive.Count} 个）");
+    }
+
+    /// <summary>单独一个方法，保证返回后这里的局部变量不再引用资源。</summary>
+    [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
+    private static ulong LoadAndForget(string path, out string typeName)
+    {
+        Resource r = GD.Load<Resource>(path);
+        typeName = r?.GetType().Name ?? "";
+        return r?.GetInstanceId() ?? 0;
+    }
+
     private static void ScanDir(string dir, Action<string> onFile)
     {
         foreach (string file in DirAccess.GetFilesAt(dir))
@@ -243,6 +281,54 @@ public partial class CoreSuite : Node
         Check(loaded.HasAbility("switch_form") && !loaded.HasAbility("double_jump") && !loaded.HasVar("truth"), "新游戏：清空后只剩初始能力");
 
         Events.Instance.Disconnect(Events.SignalName.VariableChanged, recorder);
+    }
+
+    // ---------- 旧存档补齐初始能力（关卡几何计划 v3 第 2.2 节） ----------
+
+    private void EnsureAbilitiesChecks()
+    {
+        var table = GD.Load<AbilityTable>(AbilityTable.DefaultPath);
+        Check(table != null && table.Initial.Contains("wall_climb") && table.Initial.Contains("block") && table.Initial.Contains("switch_form")
+              && !table.Initial.Contains("heavy_slam") && table.Initial.Count == 3,
+            "正式能力表：初始能力是 block、switch_form、wall_climb，不含 heavy_slam");
+        if (table == null) return;
+
+        // 旧存档的进度：只有 block、switch_form，外加几个变量
+        var old = new GDictionary
+        {
+            ["version"] = ProgressStore.SaveVersion,
+            ["abilities"] = new GArray { "block", "switch_form" },
+            ["vars"] = new GDictionary { ["boss_keeper"] = true, ["tablets"] = 2, ["speaker"] = "伊吉" },
+        };
+        var store = new ProgressStore();
+        store.FromSave(GD.StrToVar(GD.VarToStr(old)).AsGodotDictionary());
+        var unlocked = new List<string>();
+        var changed = new List<string>();
+        Callable onUnlock = Callable.From<StringName>(id => unlocked.Add(id));
+        Callable onVar = Callable.From<StringName, Variant>((key, _) => changed.Add(key));
+        Events.Instance.Connect(Events.SignalName.AbilityUnlocked, onUnlock);
+        Events.Instance.Connect(Events.SignalName.VariableChanged, onVar);
+        Check(!store.HasAbility("wall_climb"), "补齐前：旧存档读出来没有 wall_climb");
+        int added = store.EnsureAbilities(table.Initial);
+        Check(added == 1 && store.HasAbility("wall_climb") && store.HasAbility("block") && store.HasAbility("switch_form") && store.Abilities.Count() == 3,
+            $"补齐：只补上缺的 wall_climb（补了 {added} 个，现有 {string.Join(",", store.Abilities)}）");
+        Check(unlocked.Count == 1 && unlocked[0] == "wall_climb", $"补齐：每补一个发一次 AbilityUnlocked（实际 {string.Join(",", unlocked)}）");
+        Variant keeper = store.GetVar("boss_keeper"), tablets = store.GetVar("tablets"), speaker = store.GetVar("speaker");
+        Check(changed.Count == 0 && store.VariableKeys.Count() == 3 && keeper.VariantType == Variant.Type.Bool && keeper.AsBool()
+              && tablets.VariantType == Variant.Type.Int && tablets.AsInt64() == 2 && speaker.VariantType == Variant.Type.String && speaker.AsString() == "伊吉",
+            "补齐：进度变量原样不变（不发 VariableChanged，值和类型都一样）");
+        Check(store.EnsureAbilities(table.Initial) == 0 && unlocked.Count == 1, "补齐：再补一次什么也不加、不再发 AbilityUnlocked");
+
+        // 存档里有初始表以外的能力：保留
+        var extra = new ProgressStore();
+        extra.FromSave(new GDictionary { ["abilities"] = new GArray { "block", "switch_form", "heavy_slam" }, ["vars"] = new GDictionary() });
+        unlocked.Clear();
+        extra.EnsureAbilities(table.Initial);
+        Check(extra.HasAbility("heavy_slam") && extra.HasAbility("wall_climb") && extra.Abilities.Count() == 4 && unlocked.SequenceEqual(new[] { "wall_climb" }),
+            "补齐：存档里额外的能力（heavy_slam）保留，只补 wall_climb");
+        Check(new ProgressStore().EnsureAbilities(null) == 0, "补齐：传 null 不出错");
+        Events.Instance.Disconnect(Events.SignalName.AbilityUnlocked, onUnlock);
+        Events.Instance.Disconnect(Events.SignalName.VariableChanged, onVar);
     }
 
     // ---------- 状态机 ----------

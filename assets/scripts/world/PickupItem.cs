@@ -1,4 +1,5 @@
 using Godot;
+using SonOfMud.Core;
 
 namespace SonOfMud.World;
 
@@ -9,7 +10,7 @@ namespace SonOfMud.World;
 /// - PlaysLine：第一次拾取时请求 pickups.orph 里同名标签的拾取台词（泥瓶、泥肝暂时没有）。
 /// </summary>
 [GlobalClass]
-public partial class PickupItem : Resource
+public partial class PickupItem : KeptResource
 {
     [Export] public StringName ItemId { get; set; } = "";
     [Export] public int HealAmount { get; set; }

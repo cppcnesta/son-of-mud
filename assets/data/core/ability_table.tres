@@ -19,15 +19,15 @@ Description = "开局就有。在水形态和泥形态之间切换。"
 script = ExtResource("2_def")
 Id = &"wall_climb"
 DisplayName = "攀墙"
-Description = "在 S2_02 获得。贴墙按住上可以向上爬。"
+Description = "开局就有。贴墙按住上可以向上爬；贴墙按跳是蹬墙跳。不能攀爬的墙（no_climb）上两者都不能用。"
 
 [sub_resource type="Resource" id="ability_heavy_slam"]
 script = ExtResource("2_def")
 Id = &"heavy_slam"
 DisplayName = "重压下砸"
-Description = "在 S3_03 获得。空中按住下再攻击，向下重砸并造成落地范围伤害。"
+Description = "本轮不发放（代码保留）。空中按住下再攻击，向下重砸并造成落地范围伤害。可破坏物改用普通攻击打碎。"
 
 [resource]
 script = ExtResource("1_table")
 All = Array[ExtResource("2_def")]([SubResource("ability_block"), SubResource("ability_switch_form"), SubResource("ability_wall_climb"), SubResource("ability_heavy_slam")])
-Initial = Array[StringName]([&"block", &"switch_form"])
+Initial = Array[StringName]([&"block", &"switch_form", &"wall_climb"])

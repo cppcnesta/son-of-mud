@@ -1,6 +1,6 @@
 ﻿param(
     [string]$GodotPath = $env:GODOT_DOTNET,
-    [ValidateSet('all','core','world','player','combat','player-feel','flow','ui','narrative','enemy','new')][string]$Suite = 'all',
+    [ValidateSet('all','core','world','player','combat','player-feel','wall-surface','flow','ui','narrative','enemy','levelcheck','new')][string]$Suite = 'all',
     [switch]$Headless
 )
 $ErrorActionPreference = 'Stop'
@@ -48,7 +48,7 @@ try {
     $worldCode = 0
     if ($Suite -eq 'all' -or $Suite -eq 'world' -or $Suite -eq 'new') {
         # World / Save / Camera 测试：每个场景单独运行，结果写到 tests/output/world_<名字>_results.json
-        $worldScenes = @('tests/world/map_check.tscn', 'tests/world/slice_test.tscn', 'tests/world/door_test.tscn', 'tests/world/gate_test.tscn', 'tests/save/save_roundtrip.tscn', 'tests/save/respawn_test.tscn', 'tests/integration/real_player_test.tscn', 'tests/world/background_test.tscn')
+        $worldScenes = @('tests/world/map_check.tscn', 'tests/world/slice_test.tscn', 'tests/world/door_test.tscn', 'tests/world/gate_test.tscn', 'tests/world/room_grid_test.tscn', 'tests/world/geometry_sync_test.tscn', 'tests/world/geometry_validate_test.tscn', 'tests/world/terrain_test.tscn', 'tests/save/save_roundtrip.tscn', 'tests/save/respawn_test.tscn', 'tests/integration/real_player_test.tscn', 'tests/world/background_test.tscn')
         foreach ($worldScene in $worldScenes) {
             $worldName = [System.IO.Path]::GetFileNameWithoutExtension($worldScene)
             $worldArguments = @('--path', $projectPath, '--scene', "res://$worldScene", '--audio-driver', 'Dummy', '--fixed-fps', '60', '--log-file', (Join-Path $outputPath "world_$worldName.log"))
@@ -64,6 +64,7 @@ try {
         'player' = 'res://tests/player/player_suite.tscn'
         'combat' = 'res://tests/combat/combat_suite.tscn'
         'player-feel' = 'res://tests/player/feel_checks.tscn'
+        'wall-surface' = 'res://tests/player/wall_surface_test.tscn'
         'player-art' = 'res://tests/player/player_art.tscn'
     }
     foreach ($name in $newScenes.Keys) {
@@ -78,7 +79,7 @@ try {
     # 开局流程测试（一律从正式入口 main_game.tscn 启动）：每个场景单独运行，结果写到 tests/output/flow_<名字>_results.json
     $flowCode = 0
     if ($Suite -eq 'all' -or $Suite -eq 'flow' -or $Suite -eq 'new') {
-        $flowScenes = @('tests/flow/input_bindings.tscn', 'tests/flow/boot_new_game.tscn', 'tests/flow/boot_continue.tscn', 'tests/flow/boot_corrupt_save.tscn', 'tests/flow/boot_unsupported_version.tscn', 'tests/flow/restart_run.tscn', 'tests/player/interact_test.tscn', 'tests/player/bread_health.tscn')
+        $flowScenes = @('tests/flow/input_bindings.tscn', 'tests/flow/boot_new_game.tscn', 'tests/flow/boot_continue.tscn', 'tests/flow/boot_corrupt_save.tscn', 'tests/flow/boot_unsupported_version.tscn', 'tests/flow/restart_run.tscn', 'tests/player/interact_test.tscn', 'tests/flow/region_map_test.tscn', 'tests/player/bread_health.tscn')
         foreach ($flowScene in $flowScenes) {
             $flowName = [System.IO.Path]::GetFileNameWithoutExtension($flowScene)
             $flowArguments = @('--path', $projectPath, '--scene', "res://$flowScene", '--audio-driver', 'Dummy', '--fixed-fps', '60', '--log-file', (Join-Path $outputPath "flow_$flowName.log"))
@@ -91,7 +92,7 @@ try {
     # UI 测试（HUD 假事件、暂停菜单 / 地图、新主菜单流程、读档失败、真实玩家集成）：结果写到 tests/output/ui_<名字>_results.json
     $uiCode = 0
     if ($Suite -eq 'all' -or $Suite -eq 'ui' -or $Suite -eq 'new') {
-        $uiScenes = @('tests/ui/ui_hud_test.tscn', 'tests/ui/ui_pause_map_test.tscn', 'tests/ui/title_menu_test.tscn', 'tests/ui/title_menu_failure_test.tscn', 'tests/ui/ui_integration_test.tscn', 'tests/ui/quit_from_pause_test.tscn', 'tests/ui/quit_from_title_test.tscn')
+        $uiScenes = @('tests/ui/ui_hud_test.tscn', 'tests/ui/ui_pause_map_test.tscn', 'tests/ui/title_menu_test.tscn', 'tests/ui/title_menu_failure_test.tscn', 'tests/ui/ui_integration_test.tscn', 'tests/ui/quit_from_pause_test.tscn', 'tests/ui/quit_from_title_test.tscn', 'tests/ui/legacy_save_climb_test.tscn')
         foreach ($uiScene in $uiScenes) {
             $uiName = [System.IO.Path]::GetFileNameWithoutExtension($uiScene)
             $uiArguments = @('--path', $projectPath, '--scene', "res://$uiScene", '--audio-driver', 'Dummy', '--fixed-fps', '60', '--log-file', (Join-Path $outputPath "ui_$uiName.log"))
@@ -120,7 +121,7 @@ try {
     # 扔泥肝 liver_throw 也从正式入口启动（真实玩家、真实按键），结果写到 enemy_liver_throw_results.json
     $enemyCode = 0
     if ($Suite -eq 'all' -or $Suite -eq 'enemy' -or $Suite -eq 'new') {
-        $enemyScenes = @('tests/enemy/enemy_unit.tscn', 'tests/enemy/enemy_lab.tscn', 'tests/enemy/devout_lab.tscn', 'tests/enemy/keeper_lab.tscn', 'tests/enemy/enemy_flow.tscn', 'tests/enemy/keeper_flow.tscn', 'tests/player/liver_throw.tscn')
+        $enemyScenes = @('tests/enemy/enemy_unit.tscn', 'tests/enemy/enemy_lab.tscn', 'tests/enemy/keeper_lab.tscn', 'tests/enemy/enemy_flow.tscn', 'tests/enemy/keeper_flow.tscn', 'tests/enemy/arena_lock_climb.tscn', 'tests/enemy/devout_lab.tscn', 'tests/player/liver_throw.tscn')
         foreach ($enemyScene in $enemyScenes) {
             $enemyName = [System.IO.Path]::GetFileNameWithoutExtension($enemyScene)
             $enemyArguments = @('--path', $projectPath, '--scene', "res://$enemyScene", '--rendering-method', 'gl_compatibility', '--audio-driver', 'Dummy', '--fixed-fps', '60', '--log-file', (Join-Path $outputPath "enemy_$enemyName.log"))
@@ -130,11 +131,25 @@ try {
             if ($LASTEXITCODE -ne 0 -and $enemyCode -eq 0) { $enemyCode = $LASTEXITCODE }
         }
     }
+    # 关卡几何：静态可达性检查（fixtures）和模拟器校准 + 路线机器人（真实玩家、真实按键）。
+    # 结果写到 tests/output/levelcheck_results.json、levelcheck_calibration_results.json
+    $levelCode = 0
+    if ($Suite -eq 'all' -or $Suite -eq 'levelcheck' -or $Suite -eq 'new') {
+        $levelScenes = @('tests/levelcheck/levelcheck_suite.tscn', 'tests/levelcheck/levelcheck_calibration.tscn', 'tests/levelcheck/levelcheck_map1.tscn', 'tests/levelcheck/levelcheck_map1_walk.tscn')
+        foreach ($levelScene in $levelScenes) {
+            $levelName = [System.IO.Path]::GetFileNameWithoutExtension($levelScene)
+            $levelArguments = @('--path', $projectPath, '--scene', "res://$levelScene", '--rendering-method', 'gl_compatibility', '--audio-driver', 'Dummy', '--fixed-fps', '60', '--log-file', (Join-Path $outputPath "$levelName.log"))
+            if ($Headless) { $levelArguments += '--headless' }
+            & $GodotPath @levelArguments
+            Add-SceneExit "res://$levelScene" $LASTEXITCODE
+            if ($LASTEXITCODE -ne 0 -and $levelCode -eq 0) { $levelCode = $LASTEXITCODE }
+        }
+    }
     $badExits = @($sceneExits | Where-Object { $_.Code -ne 0 })
     ($sceneExits | ForEach-Object { "$($_.Code)`t$($_.Scene)" }) | Set-Content -Path (Join-Path $outputPath 'scene_exit_codes.txt') -Encoding utf8
     Write-Host "Scenes run: $($sceneExits.Count), non-zero exit codes: $($badExits.Count)"
     foreach ($bad in $badExits) { Write-Host "  EXIT $($bad.Code): $($bad.Scene)" -ForegroundColor Red }
-    $resultCode = if ($coreCode -ne 0) { $coreCode } elseif ($worldCode -ne 0) { $worldCode } elseif ($flowCode -ne 0) { $flowCode } elseif ($uiCode -ne 0) { $uiCode } elseif ($narrativeCode -ne 0) { $narrativeCode } elseif ($enemyCode -ne 0) { $enemyCode } else { $newCode }
+    $resultCode = if ($coreCode -ne 0) { $coreCode } elseif ($worldCode -ne 0) { $worldCode } elseif ($flowCode -ne 0) { $flowCode } elseif ($uiCode -ne 0) { $uiCode } elseif ($narrativeCode -ne 0) { $narrativeCode } elseif ($enemyCode -ne 0) { $enemyCode } elseif ($levelCode -ne 0) { $levelCode } else { $newCode }
     if ($resultCode -eq 0 -and $badExits.Count -gt 0) { $resultCode = $badExits[0].Code }
     if ($resultCode -eq 0 -and $importIssues) { $resultCode = 3 }
 }

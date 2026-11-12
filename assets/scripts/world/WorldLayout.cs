@@ -1,5 +1,6 @@
 using Godot;
 using Godot.Collections;
+using SonOfMud.Core;
 
 namespace SonOfMud.World;
 
@@ -8,7 +9,7 @@ namespace SonOfMud.World;
 /// 不要在 MetSys 编辑器里手改地图，否则两边会不一致。
 /// </summary>
 [GlobalClass]
-public partial class WorldLayout : Resource
+public partial class WorldLayout : KeptResource
 {
     public const string DefaultPath = "res://assets/data/world/world_layout.tres";
 

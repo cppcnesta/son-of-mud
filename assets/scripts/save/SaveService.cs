@@ -7,7 +7,7 @@ namespace SonOfMud.Save;
 /// <summary>
 /// 唯一的存档服务（规格第 3 节），三个操作各自独立：
 /// - SaveToDisk(savePointId)：在存档点交互时写盘，同时更新“最近存档点”。
-/// - LoadFromDisk(slot)：清空内存 → 读盘 → 恢复 MetSys 和进度 → 进入存档点所在房间。
+/// - LoadFromDisk(slot)：清空内存 → 读盘 → 恢复 MetSys 和进度 → 补齐这个版本的初始能力 → 进入存档点所在房间。
 /// - RespawnAtCheckpoint()：玩家死亡（D4）。不读盘，保留内存里的进度，回到最近存档点。
 /// 只依赖 Core：换房通过 Events.TravelRequested 交给 World，当前房间从 Events.RoomEntered 得知。
 /// 新游戏清空进度、读档恢复进度之后各发一次 Events.ProgressRestored（在换房请求之前）。
@@ -124,6 +124,8 @@ public partial class SaveService : Node
             MetSysApi.SetSaveData(data.MetSys);
         }
         GameSession.Progress.FromSave(data.Progress);
+        // FromSave 完全按存档恢复能力；旧存档里没有这个版本新加的初始能力（例如攀墙），在这里补齐。存档格式和版本号不变。
+        if (InitialAbilities != null) GameSession.Progress.EnsureAbilities(InitialAbilities.Initial);
         // 只在进度完全恢复之后发一次（不在上面的 Reset 之后发），玩家的血量上限一步到位，不会先按空进度算一遍。
         Events.Instance?.EmitSignal(Events.SignalName.ProgressRestored);
         CheckpointRoom = data.Room;

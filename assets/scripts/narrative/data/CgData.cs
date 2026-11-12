@@ -1,4 +1,5 @@
 using Godot;
+using SonOfMud.Core;
 
 namespace SonOfMud.Narrative.Data;
 
@@ -7,7 +8,7 @@ namespace SonOfMud.Narrative.Data;
 /// 正式图还没交付时 Texture 为空：CG 层铺一块 PlaceholderColor 色块，中间写 Title（技术占位）。
 /// </summary>
 [GlobalClass]
-public partial class CgData : Resource
+public partial class CgData : KeptResource
 {
     [Export] public string Id { get; set; } = "";
     /// <summary>占位时显示的标题，比如 CG1「七夜」。黑屏这类纯色 CG 留空。</summary>

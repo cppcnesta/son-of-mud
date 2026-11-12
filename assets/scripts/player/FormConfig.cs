@@ -1,5 +1,6 @@
 using Godot;
 using SonOfMud.Combat;
+using SonOfMud.Core;
 
 namespace SonOfMud.Player;
 
@@ -8,7 +9,7 @@ namespace SonOfMud.Player;
 /// 数值沿用白盒 water.tres / mud.tres，伤害按机制文档：水 10、泥 24。
 /// </summary>
 [GlobalClass]
-public partial class FormConfig : Resource
+public partial class FormConfig : KeptResource
 {
     [ExportGroup("形态")]
     [Export] public string DisplayName { get; set; } = "水";

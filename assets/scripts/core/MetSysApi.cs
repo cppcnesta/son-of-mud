@@ -29,6 +29,7 @@ public static class MetSysApi
         public static readonly StringName GetExploredRatio = "get_explored_ratio";
         public static readonly StringName GetGroupByName = "get_group_by_name";
         public static readonly StringName DiscoverCellGroup = "discover_cell_group";
+        public static readonly StringName DiscoverCell = "discover_cell";
         public static readonly StringName CurrentLayer = "current_layer";
         public static readonly StringName LastPlayerPosition = "last_player_position";
         public static readonly StringName Settings = "settings";
@@ -118,6 +119,9 @@ public static class MetSysApi
     public static float GetExploredRatio(int layer = -1) => Require().Call(M.GetExploredRatio, layer).AsSingle();
     public static int GetGroupByName(string group) => Require().Call(M.GetGroupByName, group).AsInt32();
     public static void DiscoverCellGroup(int groupId) => Require().Call(M.DiscoverCellGroup, groupId);
+
+    /// <summary>把一格标成“已知”（地图上显示轮廓，还没去过）。格子必须存在于地图数据里。</summary>
+    public static void DiscoverCell(Vector3I coords) => Require().Call(M.DiscoverCell, coords);
 
     // ---- 地图控件（MetSys 模板 Template/Nodes/Minimap.tscn 的实例） ----
     // UI 的大地图要自己决定显示哪一格、哪一层（小地图则由控件自己跟随玩家，不需要这里）。

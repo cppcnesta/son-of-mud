@@ -71,6 +71,23 @@ public sealed class ProgressStore
         foreach (StringName id in table.Initial) _abilities.Add(id);
     }
 
+    /// <summary>
+    /// 补齐能力（关卡几何计划 v3 第 2.2 节）：读档之后用这个版本的初始能力调用，旧存档里缺的就补上。
+    /// 只添加缺少的，已有的能力和所有进度变量原样保留；每补一个发一次 AbilityUnlocked。返回补了几个。
+    /// </summary>
+    public int EnsureAbilities(IEnumerable<StringName> ids)
+    {
+        if (ids == null) return 0;
+        int added = 0;
+        foreach (StringName id in ids)
+        {
+            if (!_abilities.Add(id)) continue;
+            added++;
+            Events.Instance?.EmitSignal(Events.SignalName.AbilityUnlocked, id);
+        }
+        return added;
+    }
+
     /// <summary>导出为只含 Variant 的字典，交给 Save 系统写盘。</summary>
     public GDictionary ToSave()
     {
