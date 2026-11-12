@@ -7,6 +7,4 @@ script = ExtResource("1_bg")
 ArtRoot = "res://assets/art/world/bg"
 FarScroll = Vector2(0.15, 0.15)
 MidScroll = Vector2(0.5, 0.5)
-FarSeamless = true
-MidSeamless = false
 ShakeMargin = 24.0
