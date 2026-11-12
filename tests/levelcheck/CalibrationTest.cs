@@ -19,10 +19,10 @@ using SonOfMud.World;
 public partial class CalibrationTest : LabSuiteBase
 {
     /// <summary>
-    /// 不可攀墙（X）和真实玩家的比对：玩家代码里的规则（CanUseWall）在 feat/geo-wall 分支，合并之前这里的玩家还能爬 X，
-    /// 所以这一组先写好、只跑模拟器一侧的断言，真实比对等合并后把它改成 true 启用。
+    /// 不可攀墙（X）和真实玩家的比对开关。玩家代码里的规则（CanUseWall）已随 feat/geo-wall 合并，现在启用；
+    /// 关掉时只跑模拟器一侧的断言。
     /// </summary>
-    public static readonly bool NoClimbRealEnabled = false;
+    public static readonly bool NoClimbRealEnabled = true;
 
     public const float LandTolerance = 4f;
     public const float PathTolerance = 8f;
