@@ -14,6 +14,8 @@ public interface ILineSurface
     /// <summary>现在框里是不是这个人的一段话，可以接着往下加。</summary>
     bool CanAppend(string name);
     void AppendLine(string text);
+    /// <summary>把这句接在后面还放得下吗（放不下时 AppendLine 会翻页，翻页前要先等玩家看完这一页）。</summary>
+    bool FitsAppend(string text) => true;
     /// <summary>下一句前面空一行。</summary>
     void BreakParagraph();
     void Rush();
