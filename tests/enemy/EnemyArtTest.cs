@@ -205,13 +205,13 @@ public partial class EnemyArtTest : LabSuiteBase
               && sprite.Offset.X == 0f && sprite.Modulate == Colors.White && !enemy.DrawsPlaceholder,
             $"待机：512 的图显示为 128 高，帧底边在脚底（{BottomOf(sprite, 512):F2}），不染色，本体不画色块");
 
-        // 翻转
-        enemy.Facing = -1f;
-        await ProcessFrames(1);
-        bool left = sprite.FlipH;
+        // 翻转：敌人的图画朝左（主角相反）
         enemy.Facing = 1f;
         await ProcessFrames(1);
-        Check(left && !sprite.FlipH, "朝左时水平翻转，朝右时不翻");
+        bool right = sprite.FlipH;
+        enemy.Facing = -1f;
+        await ProcessFrames(1);
+        Check(right && !sprite.FlipH, "敌人的图画朝左：朝右时水平翻转，朝左时不翻");
 
         // 前摇：3 帧，拉伸到 AttackWindup；前摇偏黄染在图上；本体不画
         enemy.Machine.TransitionTo<AttackWindupState>();
@@ -421,21 +421,37 @@ public partial class EnemyArtTest : LabSuiteBase
             $"编辑器显示（仓库的图）：祈祷泥人、虔诚泥人、塔庙泥卫显示 idle，泥匠和守坑人没有图不显示（{string.Join(", ", repoShown)}）");
 
         {
+            // 朝向：默认朝左（InitialFacing = -1）不翻；初始朝右的翻过来
+            Node2D left = SceneOf("prayer").Instantiate<Node2D>();
+            var leftSprite = left.GetNode<EnemySprite>("Sprite");
+            leftSprite.ArtDirectory = Fixture;
+            leftSprite.ShowPreview();
+            Check(leftSprite.PreviewShown && !leftSprite.FlipH, "编辑器显示：默认朝左的敌人不翻转（图本来就画朝左）");
+            left.Free();
+        }
+
+        {
             Node2D enemy = SceneOf("prayer").Instantiate<Node2D>();
+            enemy.Set("InitialFacing", 1f);
             var sprite = enemy.GetNode<EnemySprite>("Sprite");
             sprite.ArtDirectory = Fixture;
             sprite.ShowPreview();
+            bool facedRight = sprite.FlipH;
+            enemy.Set("InitialFacing", -1f);
+            bool followsLeft = !sprite.PreviewFlip();
+            enemy.Set("InitialFacing", 1f);
+            Check(facedRight && followsLeft, "编辑器显示：初始朝右的敌人水平翻转；初始朝向改回朝左，算出来的就是不翻");
             bool generated = sprite.PreviewShown && sprite.PreviewFrames != null && sprite.SpriteFrames == sprite.PreviewFrames;
             sprite.Notification((int)Node.NotificationEditorPreSave);
             var packed = new PackedScene();
             Error error = packed.Pack(enemy);
             HashSet<string> stored = StoredSpriteProperties(packed);
-            bool cleared = sprite.SpriteFrames == null && sprite.Scale == Vector2.One && sprite.Offset == Vector2.Zero && !sprite.PreviewShown;
+            bool cleared = sprite.SpriteFrames == null && sprite.Scale == Vector2.One && sprite.Offset == Vector2.Zero && !sprite.FlipH && !sprite.PreviewShown;
             Check(generated && error == Error.Ok && cleared && stored != null && !stored.Contains("sprite_frames") && !stored.Contains("scale") && !stored.Contains("offset")
-                  && !stored.Contains("animation"),
-                $"保存前还原：自动生成的帧和缩放都拿掉，场景里 Sprite 只存了 {(stored == null ? "（没找到）" : string.Join(", ", stored))}");
+                  && !stored.Contains("animation") && !stored.Contains("flip_h"),
+                $"保存前还原：自动生成的帧、缩放和翻转都拿掉，场景里 Sprite 只存了 {(stored == null ? "（没找到）" : string.Join(", ", stored))}");
             sprite.ShowPreview();
-            Check(sprite.PreviewShown && sprite.SpriteFrames == sprite.PreviewFrames, "保存后重新显示 idle");
+            Check(sprite.PreviewShown && sprite.SpriteFrames == sprite.PreviewFrames && sprite.FlipH, "保存后重新显示 idle，仍按初始朝右翻转");
             enemy.Free();
         }
 
