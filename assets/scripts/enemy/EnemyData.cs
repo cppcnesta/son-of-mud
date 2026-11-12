@@ -22,6 +22,11 @@ public partial class EnemyData : KeptResource
     /// <summary>身体碰撞框尺寸（脚底中心为原点）。</summary>
     [Export] public Vector2 BodySize { get; set; } = new(48f, 64f);
     [Export] public Color Tint { get; set; } = new("8a6a4a");
+    /// <summary>
+    /// 美术图一帧在游戏里显示的边长（像素）。标准：普通敌人 128（源图每帧 512×512），守坑人 256（源图每帧 1024×1024），
+    /// 和主角同一个比例（源图 4 像素 = 游戏里 1 像素）。源图不是标准尺寸也照样缩放到这个大小，但会给警告。
+    /// </summary>
+    [Export] public float ArtCanvas { get; set; } = 128f;
 
     [ExportGroup("感知与巡逻")]
     /// <summary>水平方向看得见玩家的距离。</summary>

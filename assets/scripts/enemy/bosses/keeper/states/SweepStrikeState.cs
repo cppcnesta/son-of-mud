@@ -13,6 +13,8 @@ public partial class SweepStrikeState : KeeperState
     public HitOutcome? LastOutcome { get; private set; }
 
     public override string DisplayName => "横扫";
+    public override string AnimName => "sweep_strike";
+    public override float AnimDuration => D.SweepActive;
 
     public override void Enter(StateMsg msg)
     {

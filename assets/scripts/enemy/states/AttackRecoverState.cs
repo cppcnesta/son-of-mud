@@ -8,6 +8,8 @@ public partial class AttackRecoverState : EnemyState
     public float Remaining { get; private set; }
 
     public override string DisplayName => "攻击收招";
+    public override string AnimName => "attack_recover";
+    public override float AnimDuration => E.Data.AttackRecover;
 
     public override void Enter(StateMsg msg)
     {

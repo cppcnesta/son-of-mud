@@ -35,6 +35,10 @@ public partial class EnemyBody : CharacterBody2D
     public HurtBox HurtBox { get; private set; }
     public HitBox AttackHitBox { get; private set; }
     public StateMachine Machine { get; private set; }
+    /// <summary>美术图（见 EnemyAnimator）；_Ready 里挂上。</summary>
+    public EnemyAnimator Animator { get; private set; }
+    /// <summary>本体自己画占位外观（色块、攻击红框、死亡红泥）：当前动作没有美术图时为 true；有图时本体什么都不画。</summary>
+    public bool DrawsPlaceholder => Animator == null || !Animator.CurrentIsArt;
     public EnemyState State => Machine?.Current as EnemyState;
 
     /// <summary>当前玩家（来自 PlayerRegistry）；没有时为 null。</summary>
@@ -140,6 +144,7 @@ public partial class EnemyBody : CharacterBody2D
         }
         if (AttackHitBox != null) RegisterAttackHitBox(AttackHitBox);
         if (Machine != null) Machine.SetPhysicsProcess(false);
+        Animator = EnemyAnimator.Attach(this);
     }
 
     /// <summary>登记一个攻击判定框：设好碰撞层、把结算结果转给当前状态；flip 为 true 时记下形状的基准位置，出手时按朝向左右翻转。</summary>
@@ -336,20 +341,32 @@ public partial class EnemyBody : CharacterBody2D
         else Machine.TransitionTo<IdleState>();
     }
 
-    // ---------- 技术占位外观 ----------
+    // ---------- 外观 ----------
+
+    /// <summary>状态颜色：逃跑变浅、攻击前摇偏黄。色块用 Data.Tint 作底色，美术图用白色作底色（染在 Sprite 的 Modulate 上）。</summary>
+    public virtual Color StateTint(Color baseColor)
+    {
+        if (State is FleeState) baseColor = baseColor.Lightened(0.3f);
+        if (State is AttackWindupState) baseColor = baseColor.Lerp(new Color(1f, 0.85f, 0.3f), 0.5f);
+        return baseColor;
+    }
+
+    /// <summary>美术图闪白的程度（0~1）；普通敌人没有，守坑人变身时闪。</summary>
+    public virtual float FlashAmount => 0f;
+
+    // ---------- 技术占位外观（当前动作没有美术图时） ----------
 
     public override void _Draw()
     {
+        if (!DrawsPlaceholder) return;
         Vector2 size = BodySize;
-        Color tint = Data?.Tint ?? new Color("8a6a4a");
         if (IsDead)
         {
             // 死亡时流出红色的泥土（占位）
             DrawRect(new Rect2(-size.X * 0.8f, -6f, size.X * 1.6f, 6f), new Color(0.6f, 0.1f, 0.08f));
             return;
         }
-        if (State is FleeState) tint = tint.Lightened(0.3f);
-        if (State is AttackWindupState) tint = tint.Lerp(new Color(1f, 0.85f, 0.3f), 0.5f);
+        Color tint = StateTint(Data?.Tint ?? new Color("8a6a4a"));
         // 被动型待着时是跪坐祈祷的姿势（矮一截、双手合在胸前）；逃跑和反击时站起来。
         bool kneeling = Data?.Behaviour == EnemyBehaviour.Passive && State is IdleState;
         float height = kneeling ? size.Y * 0.7f : size.Y;

@@ -15,6 +15,8 @@ public partial class AttackActiveState : EnemyState
     public HitOutcome? LastOutcome { get; private set; }
 
     public override string DisplayName => "攻击判定";
+    public override string AnimName => "attack_active";
+    public override float AnimDuration => E.Data.AttackActive;
 
     public override void Enter(StateMsg msg)
     {

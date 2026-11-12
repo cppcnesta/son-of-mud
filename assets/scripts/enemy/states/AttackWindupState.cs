@@ -8,6 +8,8 @@ public partial class AttackWindupState : EnemyState
     public float Remaining { get; private set; }
 
     public override string DisplayName => "攻击前摇";
+    public override string AnimName => "attack_windup";
+    public override float AnimDuration => E.Data.AttackWindup;
 
     public override void Enter(StateMsg msg)
     {

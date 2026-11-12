@@ -6,6 +6,7 @@ namespace SonOfMud.Enemy.States;
 public partial class DeadState : EnemyState
 {
     public override string DisplayName => "死亡";
+    public override string AnimName => "dead";
 
     public override void Enter(StateMsg msg)
     {

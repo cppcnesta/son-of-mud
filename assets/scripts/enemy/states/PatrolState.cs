@@ -6,6 +6,7 @@ namespace SonOfMud.Enemy.States;
 public partial class PatrolState : EnemyState
 {
     public override string DisplayName => "巡逻";
+    public override string AnimName => "patrol";
 
     public override void PhysicsUpdate(double delta)
     {

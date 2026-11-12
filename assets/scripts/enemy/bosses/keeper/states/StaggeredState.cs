@@ -9,6 +9,7 @@ namespace SonOfMud.Enemy.Bosses.Keeper.States;
 public partial class StaggeredState : KeeperState
 {
     public override string DisplayName => "反制僵直";
+    public override string AnimName => "staggered";
 
     public override void Enter(StateMsg msg)
     {

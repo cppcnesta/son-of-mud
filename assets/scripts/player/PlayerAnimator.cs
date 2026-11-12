@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Godot;
+using SonOfMud.Core;
 using SonOfMud.Player.States;
 
 namespace SonOfMud.Player;
@@ -57,12 +58,10 @@ public partial class PlayerAnimator : Node
     /// <summary>身体碰撞框底边在玩家本地坐标里的 y（脚底）。</summary>
     public float FootY { get; private set; }
 
-    public static float SpeedScaleFor(int frames, float baseFps, float seconds) =>
-        frames <= 0 || baseFps <= 0f || seconds <= 0f ? 1f : frames / (baseFps * seconds);
+    public static float SpeedScaleFor(int frames, float baseFps, float seconds) => SpriteStrip.SpeedScaleFor(frames, baseFps, seconds);
 
     /// <summary>横排图的帧数：帧是正方形，帧数 = 宽 ÷ 高（至少 1；竖长的单张图也算 1 帧）。</summary>
-    public static int FrameCountFor(int width, int height) =>
-        width <= 0 || height <= 0 ? 0 : Mathf.Max(1, width / height);
+    public static int FrameCountFor(int width, int height) => SpriteStrip.FrameCountFor(width, height);
 
     public void Bind(PlayerCharacter player)
     {
@@ -111,10 +110,9 @@ public partial class PlayerAnimator : Node
         string prefixed = $"{_player.Forms.Current.AnimPrefix}_{name}";
         string chosen = Sprite.SpriteFrames.HasAnimation(prefixed) ? prefixed : Sprite.SpriteFrames.HasAnimation(name) ? name : null;
         if (chosen == null) return;
-        int frames = Sprite.SpriteFrames.GetFrameCount(chosen);
-        float fps = (float)Sprite.SpriteFrames.GetAnimationSpeed(chosen);
         Sprite.Play(chosen);
-        Sprite.SpeedScale = SpeedScaleFor(frames, fps, state.AnimDuration);
+        // 实际 FPS 和各帧相对时长都算进去：手动做的 SpriteFrames 也能刚好播满动作时长
+        Sprite.SpeedScale = SpriteStrip.SpeedScaleFor(Sprite.SpriteFrames, chosen, state.AnimDuration);
         Sprite.FlipH = _player.Facing < 0f;
         Sprite.Centered = true;
         if (_artHeight.TryGetValue(chosen, out int height))
@@ -154,8 +152,8 @@ public partial class PlayerAnimator : Node
             foreach (var (anim, info) in Placeholder)
             {
                 string name = $"{form}_{anim}";
-                Texture2D art = LoadArt($"spr_player_{form}_{anim}.png") ?? LoadArt($"spr_player_{anim}.png");
-                if (art != null && AddStrip(frames, name, art, info.loop, ArtFps.TryGetValue(anim, out float f) ? f : BaseFps))
+                Texture2D art = SpriteStrip.Load(ArtDirectory, $"spr_player_{form}_{anim}.png") ?? SpriteStrip.Load(ArtDirectory, $"spr_player_{anim}.png");
+                if (art != null && SpriteStrip.AddStrip(frames, name, art, info.loop, ArtFps.TryGetValue(anim, out float f) ? f : BaseFps, "主角美术图"))
                 {
                     _artHeight[name] = art.GetHeight();
                     continue;
@@ -169,34 +167,6 @@ public partial class PlayerAnimator : Node
             }
         }
         return frames;
-    }
-
-    private Texture2D LoadArt(string file)
-    {
-        if (string.IsNullOrEmpty(ArtDirectory)) return null;
-        string path = $"{ArtDirectory.TrimEnd('/')}/{file}";
-        return ResourceLoader.Exists(path) ? GD.Load<Texture2D>(path) : null;
-    }
-
-    /// <summary>把一张横排图切成正方形帧加成动画。图宽不是图高的整数倍时，多出来的部分不用，并给出警告。</summary>
-    private static bool AddStrip(SpriteFrames frames, string name, Texture2D strip, bool loop, float fps)
-    {
-        int w = strip.GetWidth(), h = strip.GetHeight();
-        int count = FrameCountFor(w, h);
-        if (count <= 0) return false;
-        if (w > h && w % h != 0)
-            GD.PushWarning($"主角美术图 {strip.ResourcePath}：宽 {w} 不是高 {h} 的整数倍，按 {count} 帧切，右边多出的部分不用。");
-        frames.AddAnimation(name);
-        frames.SetAnimationLoop(name, loop);
-        frames.SetAnimationSpeed(name, fps);
-        if (count == 1 && w <= h)
-        {
-            frames.AddFrame(name, strip);
-            return true;
-        }
-        for (int i = 0; i < count; i++)
-            frames.AddFrame(name, new AtlasTexture { Atlas = strip, Region = new Rect2(i * h, 0, h, h) });
-        return true;
     }
 
     /// <summary>48×48 的灰度色块，每帧亮度略有不同，方便肉眼看出动画在播。实际颜色由 Modulate 着色。</summary>

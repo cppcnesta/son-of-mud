@@ -9,6 +9,7 @@ namespace SonOfMud.Enemy.Bosses.Keeper.States;
 public partial class ApproachState : KeeperState
 {
     public override string DisplayName => "逼近";
+    public override string AnimName => "approach";
 
     public override void PhysicsUpdate(double delta)
     {

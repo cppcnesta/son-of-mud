@@ -4,6 +4,7 @@ namespace SonOfMud.Enemy.Bosses.Keeper.States;
 public partial class DormantState : KeeperState
 {
     public override string DisplayName => "等待";
+    public override string AnimName => "dormant";
 
     public override void PhysicsUpdate(double delta)
     {

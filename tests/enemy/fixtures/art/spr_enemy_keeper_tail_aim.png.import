@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bgbcjlbm67ejw"
-path="res://.godot/imported/祈祷泥人.png-033317753795e978d480fc0bfa17cba6.ctex"
+uid="uid://vtprpttiqqe5"
+path="res://.godot/imported/spr_enemy_keeper_tail_aim.png-c84d6127d5663c154b3a5738823ebbf6.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/art/enemy/祈祷泥人.png"
-dest_files=["res://.godot/imported/祈祷泥人.png-033317753795e978d480fc0bfa17cba6.ctex"]
+source_file="res://tests/enemy/fixtures/art/spr_enemy_keeper_tail_aim.png"
+dest_files=["res://.godot/imported/spr_enemy_keeper_tail_aim.png-c84d6127d5663c154b3a5738823ebbf6.ctex"]
 
 [params]
 

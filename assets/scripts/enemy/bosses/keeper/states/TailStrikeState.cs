@@ -15,6 +15,8 @@ public partial class TailStrikeState : KeeperState
     private bool _countered;
 
     public override string DisplayName => Striking ? "蝎尾判定" : "蝎尾出手";
+    public override string AnimName => "tail_strike";
+    public override float AnimDuration => D.TailDelay + D.TailActive;
 
     public override void Enter(StateMsg msg)
     {

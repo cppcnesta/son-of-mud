@@ -11,6 +11,8 @@ namespace SonOfMud.Enemy.Bosses.Keeper.States;
 public partial class TransformState : KeeperState
 {
     public override string DisplayName => "变身";
+    public override string AnimName => "transform";
+    public override float AnimDuration => D.TransformFlash;
 
     public override void Enter(StateMsg msg)
     {
