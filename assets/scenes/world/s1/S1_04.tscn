@@ -1,11 +1,11 @@
 [gd_scene format=4 uid="uid://dm7g7kysegv7j"]
 
-[ext_resource type="Script" path="res://assets/scripts/world/RoomRoot.cs" id="1_u5ry8"]
-[ext_resource type="PackedScene" path="res://addons/MetroidvaniaSystem/Nodes/RoomInstance.tscn" id="2_j2iaj"]
-[ext_resource type="TileSet" path="res://assets/data/world/world_tileset.tres" id="4_gxail"]
-[ext_resource type="Script" path="res://assets/scripts/world/SpawnPoint.cs" id="5_8qafu"]
-[ext_resource type="Script" path="res://assets/scripts/save/SavePoint.cs" id="6_neb4k"]
-[ext_resource type="Script" path="res://assets/scripts/narrative/world/StoryTrigger.cs" id="n_story"]
+[ext_resource type="Script" uid="uid://bp6qc4ftue0bq" path="res://assets/scripts/world/RoomRoot.cs" id="1_u5ry8"]
+[ext_resource type="PackedScene" uid="uid://bsg0351mx3b4u" path="res://addons/MetroidvaniaSystem/Nodes/RoomInstance.tscn" id="2_j2iaj"]
+[ext_resource type="TileSet" uid="uid://cjutdcfket0jk" path="res://assets/data/world/world_tileset.tres" id="4_gxail"]
+[ext_resource type="Script" uid="uid://170bxbdwtr2a" path="res://assets/scripts/world/SpawnPoint.cs" id="5_8qafu"]
+[ext_resource type="Script" uid="uid://8xspa70en46t" path="res://assets/scripts/save/SavePoint.cs" id="6_neb4k"]
+[ext_resource type="Script" uid="uid://gcj5me3gasqr" path="res://assets/scripts/narrative/world/StoryTrigger.cs" id="n_story"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_5gylj"]
 size = Vector2(96, 128)
