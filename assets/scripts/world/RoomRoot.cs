@@ -175,7 +175,8 @@ public partial class RoomRoot : Node2D
 
     public override string[] _GetConfigurationWarnings() => _warnings;
 
-    private void ExportTextInEditor()
+    /// <summary>「导出文字图」按钮做的事（测试也直接调它）。</summary>
+    public void ExportTextInEditor()
     {
 #if TOOLS
         List<string> problems = RoomRules.AuditScene(this);
@@ -201,6 +202,8 @@ public partial class RoomRoot : Node2D
             return;
         }
         string path = RoomGrid.PathFor(room.Id);
+        // 保留原来文字图开头写的说明（和命令行 --export-text 一样）
+        if (FileAccess.FileExists(path)) text = SonOfMud.Tools.GeometryBuilder.KeepDescription(FileAccess.GetFileAsString(path), text);
         using FileAccess file = FileAccess.Open(path, FileAccess.ModeFlags.Write);
         if (file == null)
         {
