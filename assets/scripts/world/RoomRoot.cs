@@ -11,6 +11,8 @@ namespace SonOfMud.World;
 /// 场景树里这个节点旁会出现警告图标（只提醒，不阻止）。游戏里这个节点不做任何背景相关的事。
 /// 检查器里还有「背景视差预览」：按镜头在房间里的位置显示各层的视差效果，并画出这一刻屏幕能看到的范围；
 /// 只改编辑器里的显示，保存场景前自动还原，预览开关和位置本身也不存进场景。
+/// 关卡检查（见 <see cref="RoomRules.AuditScene"/>）：房间边缘有缺口但没有出口、出口被堵、出生点悬空或卡在砖里、砖铺到房间外，
+/// 都会在这个节点旁给警告。「导出文字图」按钮把这个房间场景写回 assets/data/world/rooms/&lt;房间&gt;.txt（关卡检查和测试读它）。
 /// </summary>
 [Tool]
 [GlobalClass]
@@ -22,6 +24,10 @@ public partial class RoomRoot : Node2D
     /// <summary>按命名把最远景 / 中景 / 近景 / 物件导入成场景里的普通节点；已经导入过的只补缺的、只换图，不动缩放和位置。可以 Ctrl+Z 撤销。</summary>
     [ExportToolButton("按命名导入背景")]
     public Callable ImportBackgroundButton => Callable.From(ImportBackgroundInEditor);
+
+    /// <summary>把这个房间场景（地形、出生点、敌人和剧情触发器的位置）写回文字图。房间还有关卡警告时不导出。</summary>
+    [ExportToolButton("导出文字图")]
+    public Callable ExportTextButton => Callable.From(ExportTextInEditor);
 
     private string[] _warnings = Array.Empty<string>();
     private double _checkLeft;
@@ -46,7 +52,8 @@ public partial class RoomRoot : Node2D
         _checkLeft -= delta;
         if (_checkLeft > 0) return;
         _checkLeft = 0.5;
-        string[] now = BackgroundImporter.CoverageProblems(this, BackgroundSettings.LoadDefault(), checkNodeMoves: !_previewOn).ToArray();
+        string[] now = RoomRules.AuditScene(this).Select(p => "关卡：" + p)
+            .Concat(BackgroundImporter.CoverageProblems(this, BackgroundSettings.LoadDefault(), checkNodeMoves: !_previewOn)).ToArray();
         if (now.SequenceEqual(_warnings)) return;
         _warnings = now;
         UpdateConfigurationWarnings();
@@ -167,6 +174,43 @@ public partial class RoomRoot : Node2D
     }
 
     public override string[] _GetConfigurationWarnings() => _warnings;
+
+    private void ExportTextInEditor()
+    {
+#if TOOLS
+        List<string> problems = RoomRules.AuditScene(this);
+        if (problems.Count > 0)
+        {
+            GD.PushWarning($"[文字图] {RoomId} 还有 {problems.Count} 条关卡警告，先修好再导出：" + string.Join(" | ", problems));
+            return;
+        }
+        RestorePreview();
+        var layout = GD.Load<WorldLayout>(WorldLayout.DefaultPath);
+        RoomDef room = layout?.Find(RoomId);
+        if (room == null)
+        {
+            GD.PushWarning($"[文字图] 房间清单里找不到 {RoomId}。");
+            return;
+        }
+        var builder = new SonOfMud.Tools.GeometryBuilder(layout, RoomRules.CellSize());
+        string text = builder.ExportRoom(room, this);
+        foreach (string note in builder.Notes) GD.Print("[文字图] " + note);
+        if (text == null)
+        {
+            GD.PushWarning("[文字图] 导出失败：" + string.Join(" | ", builder.Errors));
+            return;
+        }
+        string path = RoomGrid.PathFor(room.Id);
+        using FileAccess file = FileAccess.Open(path, FileAccess.ModeFlags.Write);
+        if (file == null)
+        {
+            GD.PushWarning($"[文字图] 写 {path} 失败：{FileAccess.GetOpenError()}");
+            return;
+        }
+        file.StoreString(text);
+        GD.Print($"[文字图] 已写 {path}。");
+#endif
+    }
 
     /// <summary>把 node 及其所有子节点的 owner 设成这个房间，保存场景时才会写进去（编辑器撤销管理器也会调用）。</summary>
     public void AssignOwner(Node node)

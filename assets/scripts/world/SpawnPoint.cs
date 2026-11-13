@@ -3,6 +3,7 @@ using Godot;
 namespace SonOfMud.World;
 
 /// <summary>出生点。每个出口一个（From_来源房间），另加 Default；有存档点的房间还有一个 Save。</summary>
+[Tool]
 [GlobalClass]
 public partial class SpawnPoint : Marker2D
 {

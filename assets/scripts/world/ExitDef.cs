@@ -9,6 +9,7 @@ namespace SonOfMud.World;
 /// Door：Side / Offset 只决定门在房间里的大致位置，不写进 MetSys 通道。
 /// Requirement：只有变量（Flags）时生成 GateBarrier 实体门；含能力（Abilities）的门靠地形高度挡住，生成器不放实体门。
 /// </summary>
+[Tool]
 [GlobalClass]
 public partial class ExitDef : KeptResource
 {

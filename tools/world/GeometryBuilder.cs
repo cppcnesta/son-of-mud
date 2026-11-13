@@ -26,11 +26,10 @@ public sealed class GeometryBuilder
     public const int Tile = RoomGrid.Tile;
     public const string GeometryName = "Geometry";
     public const string MarkersName = "ExitMarkers";
-    /// <summary>出生点检查用的玩家碰撞体（脚在出生点）和它与实心瓦片之间至少要留的间隙。</summary>
-    public static readonly Vector2 BodySize = new(48, 48);
-    public const float BodyGap = 2f;
-    /// <summary>跨房间对齐：两边开口至少要重叠 2 格。</summary>
-    public const int MinOverlap = 2 * Tile;
+    /// <summary>出生点检查用的玩家碰撞体和间隙、跨房间开口最少重叠（规则本身在 World 的 RoomRules，编辑器里的房间检查也用它）。</summary>
+    public static readonly Vector2 BodySize = RoomRules.BodySize;
+    public const float BodyGap = RoomRules.BodyGap;
+    public const int MinOverlap = RoomRules.MinOverlap;
     public static readonly Color MarkerColor = new(1f, 1f, 1f, 0.35f);
 
     public WorldLayout Layout { get; }
@@ -340,45 +339,10 @@ public sealed class GeometryBuilder
     // ---------- 校验 ----------
 
     /// <summary>出口开口、非出口边界封闭（只看文字图）。出生点的检查在 Plan 里做（要用节点的最终位置）。</summary>
-    public void ValidateRoom(RoomDef room, RoomGrid grid)
-    {
-        foreach (ExitDef exit in room.Exits.Where(e => e.Kind == ExitKind.Edge))
-        {
-            var (from, to) = ExitRange(room, grid, exit);
-            var runs = OpenRuns(grid, exit.Side, from, to);
-            if (!runs.Any(r => r.B - r.A + 1 >= 2))
-            {
-                string axis = exit.Side is ExitSide.Left or ExitSide.Right ? $"第 {from}～{to} 行" : $"第 {from}～{to} 列";
-                Errors.Add($"{room.Id}：{SideName(exit.Side)}出口（通往 {exit.Target}）所在那一格的{SideName(exit.Side)}边（{axis}）没有至少 2 格的开口");
-            }
-            else if (exit.Side is ExitSide.Left or ExitSide.Right && FloorRow(grid, exit.Side, MainOpening(grid, exit.Side, from, to).Value) == null)
-                Errors.Add($"{room.Id}：{SideName(exit.Side)}出口（通往 {exit.Target}）的开口下面没有地面");
-        }
-
-        var leaks = BoundaryLeaks(room, grid).Select(l => $"{SideName(l.Side)}边 ({l.Cell.X},{l.Cell.Y})“{grid.At(l.Cell.X, l.Cell.Y)}”").ToList();
-        if (leaks.Count > 0)
-            Errors.Add($"{room.Id}：非出口的边界没有封闭（必须是 # 或 X），共 {leaks.Count} 格：{string.Join("、", leaks.Take(8))}");
-    }
+    public void ValidateRoom(RoomDef room, RoomGrid grid) => Errors.AddRange(RoomRules.ValidateRoom(room, grid, Cell));
 
     /// <summary>边界上不是 # / X、又不在出口那一格范围里的格子（角上的格子要同时在两条边的出口范围里才算出口）。</summary>
-    public List<(Vector2I Cell, ExitSide Side)> BoundaryLeaks(RoomDef room, RoomGrid grid)
-    {
-        var leaks = new List<(Vector2I, ExitSide)>();
-        for (int r = 0; r < grid.Rows; r++)
-            for (int c = 0; c < grid.Cols; c++)
-            {
-                if (r != 0 && r != grid.Rows - 1 && c != 0 && c != grid.Cols - 1) continue;
-                if (IsPermanent(grid.At(c, r))) continue;
-                var sides = new List<(ExitSide Side, int Index)>();
-                if (c == 0) sides.Add((ExitSide.Left, r));
-                if (c == grid.Cols - 1) sides.Add((ExitSide.Right, r));
-                if (r == 0) sides.Add((ExitSide.Up, c));
-                if (r == grid.Rows - 1) sides.Add((ExitSide.Down, c));
-                var notAllowed = sides.Where(s => !InExitRange(room, grid, s.Side, s.Index)).ToList();
-                if (notAllowed.Count > 0) leaks.Add((new Vector2I(c, r), notAllowed[0].Side));
-            }
-        return leaks;
-    }
+    public List<(Vector2I Cell, ExitSide Side)> BoundaryLeaks(RoomDef room, RoomGrid grid) => RoomRules.BoundaryLeaks(room, grid, Cell);
 
     /// <summary>跨房间对齐：边缘换房保持全局坐标，所以两边的开口要在全局坐标上对得上。</summary>
     public void ValidateAlignment(IReadOnlyDictionary<string, RoomGrid> grids)
@@ -436,20 +400,7 @@ public sealed class GeometryBuilder
     private float GlobalX(RoomDef room, int col) => room.Origin.X * Cell.X + col * Tile;
 
     /// <summary>出生点：放得下 48×48 的身体（脚在 feet，左右上和实心瓦片至少留 2 像素），并且脚下是实心或单向平台。返回问题描述，没问题返回 null。</summary>
-    public static string SpawnProblem(RoomGrid grid, Vector2 feet)
-    {
-        var body = new Rect2(feet.X - BodySize.X / 2f - BodyGap, feet.Y - BodySize.Y - BodyGap, BodySize.X + BodyGap * 2f, BodySize.Y + BodyGap);
-        int c0 = Mathf.FloorToInt(body.Position.X / Tile), c1 = Mathf.FloorToInt(body.End.X / Tile);
-        int r0 = Mathf.FloorToInt((body.Position.Y + grid.Shift) / Tile), r1 = Mathf.FloorToInt((body.End.Y + grid.Shift) / Tile);
-        for (int r = r0; r <= r1; r++)
-            for (int c = c0; c <= c1; c++)
-                if (RoomGrid.IsSolidChar(grid.At(c, r), true) && grid.TileRect(c, r).Intersects(body))
-                    return $"身体和实心格 ({c},{r})“{grid.At(c, r)}”之间不到 {BodyGap} 像素";
-        Vector2I at = CellOf(grid, feet);
-        char below = grid.At(Mathf.FloorToInt(feet.X / Tile), at.Y + 1);
-        if (!Standable(below)) return $"脚下 ({Mathf.FloorToInt(feet.X / Tile)},{at.Y + 1})“{below}”不是实心或单向平台";
-        return null;
-    }
+    public static string SpawnProblem(RoomGrid grid, Vector2 feet) => RoomRules.SpawnProblem(grid, feet);
 
     // ---------- 生成（改节点） ----------
 
@@ -771,8 +722,7 @@ public sealed class GeometryBuilder
     // ---------- 网格工具 ----------
 
     /// <summary>脚底位置所在的格子：x 所在列；y 落在哪一格的底边（含底边上方 1 像素以内）就是哪一行。</summary>
-    public static Vector2I CellOf(RoomGrid grid, Vector2 feet) =>
-        new(Mathf.FloorToInt(feet.X / Tile), Mathf.CeilToInt((feet.Y + grid.Shift) / Tile) - 1);
+    public static Vector2I CellOf(RoomGrid grid, Vector2 feet) => RoomRules.CellOf(grid, feet);
 
     /// <summary>就近不动：x 在格子左右边界内（含左不含右），y 在底边或底边上方 1 像素以内。</summary>
     public static bool InPlace(RoomGrid grid, Vector2 pos, Vector2I cell)
@@ -782,76 +732,23 @@ public sealed class GeometryBuilder
     }
 
     /// <summary>永久的墙（边界封闭只认这两种；B / H 会被打碎，R 可能不出现）。</summary>
-    public static bool IsPermanent(char ch) => ch is RoomGrid.Solid or RoomGrid.NoClimb;
+    public static bool IsPermanent(char ch) => RoomRules.IsPermanent(ch);
 
-    public static bool Standable(char ch) => RoomGrid.IsSolidChar(ch, false) || ch == RoomGrid.OneWay;
+    public static bool Standable(char ch) => RoomRules.Standable(ch);
 
     /// <summary>出口所在那一格沿边界的范围：左右出口是行号（和这一格高度范围相交的行），上下出口是列号。</summary>
-    public (int From, int To) ExitRange(RoomDef room, RoomGrid grid, ExitDef exit)
-    {
-        if (exit.Side is ExitSide.Up or ExitSide.Down)
-        {
-            int perCell = Cell.X / Tile;
-            return (exit.Offset * perCell, exit.Offset * perCell + perCell - 1);
-        }
-        int top = exit.Offset * Cell.Y, bottom = top + Cell.Y;
-        int from = -1, to = -1;
-        for (int r = 0; r < grid.Rows; r++)
-        {
-            float y0 = r * Tile - grid.Shift;
-            if (y0 < bottom && y0 + Tile > top)
-            {
-                if (from < 0) from = r;
-                to = r;
-            }
-        }
-        return (from, to);
-    }
+    public (int From, int To) ExitRange(RoomDef room, RoomGrid grid, ExitDef exit) => RoomRules.ExitRange(grid, exit, Cell);
 
-    private bool InExitRange(RoomDef room, RoomGrid grid, ExitSide side, int index) =>
-        room.Exits.Any(e => e.Kind == ExitKind.Edge && e.Side == side && ExitRange(room, grid, e) is var (from, to) && index >= from && index <= to);
-
-    private static Vector2I BoundaryCell(RoomGrid grid, ExitSide side, int index) => side switch
-    {
-        ExitSide.Left => new Vector2I(0, index),
-        ExitSide.Right => new Vector2I(grid.Cols - 1, index),
-        ExitSide.Up => new Vector2I(index, 0),
-        _ => new Vector2I(index, grid.Rows - 1),
-    };
+    private bool InExitRange(RoomDef room, RoomGrid grid, ExitSide side, int index) => RoomRules.InExitRange(room, grid, side, index, Cell);
 
     /// <summary>边界上 from..to 之间能通过的连续段（不是 # / X 的格子）。</summary>
-    public static List<(int A, int B)> OpenRuns(RoomGrid grid, ExitSide side, int from, int to)
-    {
-        var runs = new List<(int, int)>();
-        int start = -1;
-        for (int i = from; i <= to + 1; i++)
-        {
-            bool open = i <= to && BoundaryCell(grid, side, i) is var cell && !IsPermanent(grid.At(cell.X, cell.Y));
-            if (open && start < 0) start = i;
-            if (!open && start >= 0) { runs.Add((start, i - 1)); start = -1; }
-        }
-        return runs;
-    }
+    public static List<(int A, int B)> OpenRuns(RoomGrid grid, ExitSide side, int from, int to) => RoomRules.OpenRuns(grid, side, from, to);
 
     /// <summary>左右出口的主开口：最低的、至少 2 格高的一段。</summary>
-    public static (int A, int B)? MainOpening(RoomGrid grid, ExitSide side, int from, int to)
-    {
-        var runs = OpenRuns(grid, side, from, to).Where(r => r.B - r.A + 1 >= 2).ToList();
-        return runs.Count == 0 ? null : runs.OrderByDescending(r => r.B).First();
-    }
+    public static (int A, int B)? MainOpening(RoomGrid grid, ExitSide side, int from, int to) => RoomRules.MainOpening(grid, side, from, to);
 
     /// <summary>左右出口开口处的地面：开口最下一格的下面一格（在边界那一列），能站才算。</summary>
-    public static int? FloorRow(RoomGrid grid, ExitSide side, (int A, int B) run)
-    {
-        Vector2I cell = BoundaryCell(grid, side, run.B + 1);
-        return grid.InBounds(cell.X, cell.Y) && Standable(grid.At(cell.X, cell.Y)) ? cell.Y : null;
-    }
+    public static int? FloorRow(RoomGrid grid, ExitSide side, (int A, int B) run) => RoomRules.FloorRow(grid, side, run);
 
-    private static string SideName(ExitSide side) => side switch
-    {
-        ExitSide.Left => "左",
-        ExitSide.Right => "右",
-        ExitSide.Up => "上",
-        _ => "下",
-    };
+    private static string SideName(ExitSide side) => RoomRules.SideName(side);
 }
