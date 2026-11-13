@@ -1,39 +1,38 @@
-[gd_scene format=3]
+[gd_scene format=3 uid="uid://csx0c2je3m2b3"]
 
-[ext_resource type="Script" path="res://assets/scripts/ui/Hud.cs" id="1_hud"]
-[ext_resource type="Script" path="res://assets/scripts/ui/HpBead.cs" id="2_bead"]
-[ext_resource type="Theme" path="res://assets/data/ui/ui_theme.tres" id="3_theme"]
-[ext_resource type="Script" path="res://assets/scripts/ui/HpBeadBar.cs" id="4_beads"]
-[ext_resource type="Texture2D" path="res://assets/art/ui/tex_ui_bead_full.png" id="5_bfull"]
-[ext_resource type="Texture2D" path="res://assets/art/ui/tex_ui_bead_empty.png" id="6_bempty"]
-[ext_resource type="Texture2D" path="res://assets/art/ui/tex_ui_bead_break.png" id="7_bbreak"]
-[ext_resource type="Script" path="res://assets/scripts/ui/ArtifactRing.cs" id="8_ring"]
-[ext_resource type="Texture2D" path="res://assets/art/ui/tex_ui_artifact_ring.png" id="9_ringtex"]
-[ext_resource type="Script" path="res://assets/scripts/ui/ArtifactSlot.cs" id="10_slot"]
-[ext_resource type="Script" path="res://assets/scripts/ui/BossBar.cs" id="11_boss"]
-[ext_resource type="Texture2D" path="res://assets/art/ui/tex_ui_bossbar_frame.png" id="12_bframe"]
-[ext_resource type="Texture2D" path="res://assets/art/ui/tex_ui_bossbar_fill.png" id="13_bfill"]
-[ext_resource type="Texture2D" path="res://assets/art/ui/tex_ui_bossbar_fill_delay.png" id="14_bdelay"]
-[ext_resource type="Script" path="res://assets/scripts/ui/InteractPrompt.cs" id="15_prompt"]
-[ext_resource type="Script" path="res://assets/scripts/ui/Toast.cs" id="16_toast"]
-[ext_resource type="PackedScene" path="res://addons/MetroidvaniaSystem/Template/Nodes/Minimap.tscn" id="17_minimap"]
-[ext_resource type="Texture2D" path="res://assets/art/ui/tex_ui_artifact_crown_worn.png" id="20_crown_w"]
-[ext_resource type="Texture2D" path="res://assets/art/ui/tex_ui_artifact_crown_removed.png" id="21_crown_r"]
-[ext_resource type="Texture2D" path="res://assets/art/ui/tex_ui_artifact_earring_worn.png" id="22_earring_w"]
-[ext_resource type="Texture2D" path="res://assets/art/ui/tex_ui_artifact_earring_removed.png" id="23_earring_r"]
-[ext_resource type="Texture2D" path="res://assets/art/ui/tex_ui_artifact_necklace_worn.png" id="24_necklace_w"]
-[ext_resource type="Texture2D" path="res://assets/art/ui/tex_ui_artifact_necklace_removed.png" id="25_necklace_r"]
-[ext_resource type="Texture2D" path="res://assets/art/ui/tex_ui_artifact_pectoral_worn.png" id="26_pectoral_w"]
-[ext_resource type="Texture2D" path="res://assets/art/ui/tex_ui_artifact_pectoral_removed.png" id="27_pectoral_r"]
-[ext_resource type="Texture2D" path="res://assets/art/ui/tex_ui_artifact_belt_worn.png" id="28_belt_w"]
-[ext_resource type="Texture2D" path="res://assets/art/ui/tex_ui_artifact_belt_removed.png" id="29_belt_r"]
-[ext_resource type="Texture2D" path="res://assets/art/ui/tex_ui_artifact_bracelet_worn.png" id="30_bracelet_w"]
-[ext_resource type="Texture2D" path="res://assets/art/ui/tex_ui_artifact_bracelet_removed.png" id="31_bracelet_r"]
-[ext_resource type="Texture2D" path="res://assets/art/ui/tex_ui_artifact_robe_worn.png" id="32_robe_w"]
-[ext_resource type="Texture2D" path="res://assets/art/ui/tex_ui_artifact_robe_removed.png" id="33_robe_r"]
-[ext_resource type="Script" path="res://assets/scripts/ui/LiverCounter.cs" id="34_liver"]
+[ext_resource type="Script" uid="uid://c0pd2ldv6blpt" path="res://assets/scripts/ui/Hud.cs" id="1_hud"]
+[ext_resource type="Script" uid="uid://br1y71s8o6bc5" path="res://assets/scripts/ui/HpBead.cs" id="2_bead"]
+[ext_resource type="Theme" uid="uid://dcggxhi52el0x" path="res://assets/data/ui/ui_theme.tres" id="3_theme"]
+[ext_resource type="Script" uid="uid://cud7x7vano0gc" path="res://assets/scripts/ui/HpBeadBar.cs" id="4_beads"]
+[ext_resource type="Texture2D" uid="uid://461ihhd58ybu" path="res://assets/art/ui/tex_ui_bead_full.png" id="5_bfull"]
+[ext_resource type="Texture2D" uid="uid://dbvterygrrm22" path="res://assets/art/ui/tex_ui_bead_empty.png" id="6_bempty"]
+[ext_resource type="Texture2D" uid="uid://cohbg13ok57d8" path="res://assets/art/ui/tex_ui_bead_break.png" id="7_bbreak"]
+[ext_resource type="Script" uid="uid://bpbbq7nshyvxc" path="res://assets/scripts/ui/ArtifactRing.cs" id="8_ring"]
+[ext_resource type="Script" uid="uid://chvecxe17mg1r" path="res://assets/scripts/ui/ArtifactSlot.cs" id="10_slot"]
+[ext_resource type="Script" uid="uid://bnol082le3oc" path="res://assets/scripts/ui/BossBar.cs" id="11_boss"]
+[ext_resource type="Texture2D" uid="uid://b8g1bbehossba" path="res://assets/art/ui/tex_ui_bossbar_frame.png" id="12_bframe"]
+[ext_resource type="Texture2D" uid="uid://c5yjv6hvgtuw7" path="res://assets/art/ui/tex_ui_bossbar_fill.png" id="13_bfill"]
+[ext_resource type="Texture2D" uid="uid://bjwkrwasmk73x" path="res://assets/art/ui/tex_ui_bossbar_fill_delay.png" id="14_bdelay"]
+[ext_resource type="Script" uid="uid://bxkmyvd6rn0kp" path="res://assets/scripts/ui/InteractPrompt.cs" id="15_prompt"]
+[ext_resource type="Script" uid="uid://bo5blsnumb26d" path="res://assets/scripts/ui/Toast.cs" id="16_toast"]
+[ext_resource type="PackedScene" uid="uid://dch8dyylb7526" path="res://addons/MetroidvaniaSystem/Template/Nodes/Minimap.tscn" id="17_minimap"]
+[ext_resource type="Texture2D" uid="uid://biux767ephpdn" path="res://assets/art/ui/tex_ui_artifact_crown_worn.png" id="20_crown_w"]
+[ext_resource type="Texture2D" uid="uid://c65e15p7vqcfc" path="res://assets/art/ui/tex_ui_artifact_crown_removed.png" id="21_crown_r"]
+[ext_resource type="Texture2D" uid="uid://b3um58ekot6qu" path="res://assets/art/ui/tex_ui_artifact_earring_worn.png" id="22_earring_w"]
+[ext_resource type="Texture2D" uid="uid://b6il2rt8pde0j" path="res://assets/art/ui/tex_ui_artifact_earring_removed.png" id="23_earring_r"]
+[ext_resource type="Texture2D" uid="uid://c6gyhbyva2ew4" path="res://assets/art/ui/tex_ui_artifact_necklace_worn.png" id="24_necklace_w"]
+[ext_resource type="Texture2D" uid="uid://bpn8uusciycou" path="res://assets/art/ui/tex_ui_artifact_necklace_removed.png" id="25_necklace_r"]
+[ext_resource type="Texture2D" uid="uid://dkigk3nngthqo" path="res://assets/art/ui/tex_ui_artifact_pectoral_worn.png" id="26_pectoral_w"]
+[ext_resource type="Texture2D" uid="uid://bah3y60yaa8m8" path="res://assets/art/ui/tex_ui_artifact_pectoral_removed.png" id="27_pectoral_r"]
+[ext_resource type="Texture2D" uid="uid://djd4y440fq83i" path="res://assets/art/ui/tex_ui_artifact_belt_worn.png" id="28_belt_w"]
+[ext_resource type="Texture2D" uid="uid://brxhqe7ofk0ha" path="res://assets/art/ui/tex_ui_artifact_belt_removed.png" id="29_belt_r"]
+[ext_resource type="Texture2D" uid="uid://q2vkagww76j4" path="res://assets/art/ui/tex_ui_artifact_bracelet_worn.png" id="30_bracelet_w"]
+[ext_resource type="Texture2D" uid="uid://bl0w425jp2xet" path="res://assets/art/ui/tex_ui_artifact_bracelet_removed.png" id="31_bracelet_r"]
+[ext_resource type="Texture2D" uid="uid://bipg052b54yoy" path="res://assets/art/ui/tex_ui_artifact_robe_worn.png" id="32_robe_w"]
+[ext_resource type="Texture2D" uid="uid://b4bcxcicbk5de" path="res://assets/art/ui/tex_ui_artifact_robe_removed.png" id="33_robe_r"]
+[ext_resource type="Script" uid="uid://bsjiy8x8gexfd" path="res://assets/scripts/ui/LiverCounter.cs" id="34_liver"]
 
-[node name="Hud" type="CanvasLayer" node_paths=PackedStringArray("Root", "Beads", "Livers", "Artifacts", "Boss", "Prompt", "Toast", "Minimap")]
+[node name="Hud" type="CanvasLayer" unique_id=1197222111 node_paths=PackedStringArray("Root", "Beads", "Livers", "Artifacts", "Boss", "Prompt", "Toast", "Minimap")]
 process_mode = 3
 layer = 10
 script = ExtResource("1_hud")
@@ -46,17 +45,21 @@ Prompt = NodePath("Root/InteractPrompt")
 Toast = NodePath("Root/Toast")
 Minimap = NodePath("Root/Minimap")
 
-[node name="Root" type="Control" parent="."]
+[node name="Root" type="Control" parent="." unique_id=1413335974]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
+offset_left = 7.0
+offset_top = 22.0
+offset_right = 7.0
+offset_bottom = 22.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 theme = ExtResource("3_theme")
 
-[node name="HpBeadBar" type="HBoxContainer" parent="Root" node_paths=PackedStringArray("Template")]
+[node name="HpBeadBar" type="HBoxContainer" parent="Root" unique_id=660170120 node_paths=PackedStringArray("Template")]
 layout_mode = 0
 offset_left = 24.0
 offset_top = 20.0
@@ -66,7 +69,7 @@ mouse_filter = 2
 script = ExtResource("4_beads")
 Template = NodePath("BeadTemplate")
 
-[node name="BeadTemplate" type="TextureProgressBar" parent="Root/HpBeadBar"]
+[node name="BeadTemplate" type="TextureProgressBar" parent="Root/HpBeadBar" unique_id=683506413]
 visible = false
 custom_minimum_size = Vector2(32, 32)
 layout_mode = 2
@@ -77,13 +80,13 @@ texture_under = ExtResource("6_bempty")
 texture_progress = ExtResource("5_bfull")
 script = ExtResource("2_bead")
 
-[node name="Break" type="Sprite2D" parent="Root/HpBeadBar/BeadTemplate"]
+[node name="Break" type="Sprite2D" parent="Root/HpBeadBar/BeadTemplate" unique_id=892466086]
 visible = false
 texture = ExtResource("7_bbreak")
 centered = false
 hframes = 6
 
-[node name="LiverCounter" type="HBoxContainer" parent="Root" node_paths=PackedStringArray("Icon", "CountLabel")]
+[node name="LiverCounter" type="HBoxContainer" parent="Root" unique_id=1006557441 node_paths=PackedStringArray("Icon", "CountLabel")]
 visible = false
 layout_mode = 0
 offset_left = 24.0
@@ -96,19 +99,19 @@ script = ExtResource("34_liver")
 Icon = NodePath("Icon")
 CountLabel = NodePath("Count")
 
-[node name="Icon" type="ColorRect" parent="Root/LiverCounter"]
+[node name="Icon" type="ColorRect" parent="Root/LiverCounter" unique_id=1876857655]
 custom_minimum_size = Vector2(22, 22)
 layout_mode = 2
 size_flags_vertical = 4
 mouse_filter = 2
 color = Color(0.55, 0.2, 0.16, 1)
 
-[node name="Count" type="Label" parent="Root/LiverCounter"]
+[node name="Count" type="Label" parent="Root/LiverCounter" unique_id=1850711208]
 layout_mode = 2
 text = "×0"
 vertical_alignment = 1
 
-[node name="ArtifactRing" type="Control" parent="Root"]
+[node name="ArtifactRing" type="Control" parent="Root" unique_id=489860242]
 layout_mode = 1
 anchors_preset = 2
 anchor_top = 1.0
@@ -121,31 +124,25 @@ grow_vertical = 0
 mouse_filter = 2
 script = ExtResource("8_ring")
 
-[node name="Ring" type="TextureRect" parent="Root/ArtifactRing"]
-layout_mode = 0
-offset_right = 192.0
-offset_bottom = 192.0
-mouse_filter = 2
-texture = ExtResource("9_ringtex")
-
-[node name="Slot0" type="Control" parent="Root/ArtifactRing"]
-layout_mode = 0
+[node name="Slot0" type="Control" parent="Root/ArtifactRing" unique_id=601428172]
+anchors_preset = 0
 offset_left = 76.0
 offset_top = 6.0
 offset_right = 116.0
 offset_bottom = 46.0
 mouse_filter = 2
 script = ExtResource("10_slot")
-Index = 0
 
-[node name="Worn" type="TextureRect" parent="Root/ArtifactRing/Slot0"]
+[node name="Worn" type="TextureRect" parent="Root/ArtifactRing/Slot0" unique_id=1056504486]
 layout_mode = 0
-offset_right = 40.0
-offset_bottom = 40.0
+offset_left = -63.0
+offset_top = -365.0
+offset_right = -23.0
+offset_bottom = -325.0
 mouse_filter = 2
 texture = ExtResource("20_crown_w")
 
-[node name="Removed" type="TextureRect" parent="Root/ArtifactRing/Slot0"]
+[node name="Removed" type="TextureRect" parent="Root/ArtifactRing/Slot0" unique_id=1509177135]
 visible = false
 layout_mode = 0
 offset_right = 40.0
@@ -153,8 +150,8 @@ offset_bottom = 40.0
 mouse_filter = 2
 texture = ExtResource("21_crown_r")
 
-[node name="Slot1" type="Control" parent="Root/ArtifactRing"]
-layout_mode = 0
+[node name="Slot1" type="Control" parent="Root/ArtifactRing" unique_id=1139891966]
+anchors_preset = 0
 offset_left = 130.7
 offset_top = 32.4
 offset_right = 170.7
@@ -163,14 +160,16 @@ mouse_filter = 2
 script = ExtResource("10_slot")
 Index = 1
 
-[node name="Worn" type="TextureRect" parent="Root/ArtifactRing/Slot1"]
+[node name="Worn" type="TextureRect" parent="Root/ArtifactRing/Slot1" unique_id=454991131]
 layout_mode = 0
-offset_right = 40.0
-offset_bottom = 40.0
+offset_left = -67.7
+offset_top = -392.4
+offset_right = -27.699997
+offset_bottom = -352.4
 mouse_filter = 2
 texture = ExtResource("22_earring_w")
 
-[node name="Removed" type="TextureRect" parent="Root/ArtifactRing/Slot1"]
+[node name="Removed" type="TextureRect" parent="Root/ArtifactRing/Slot1" unique_id=291736538]
 visible = false
 layout_mode = 0
 offset_right = 40.0
@@ -178,8 +177,8 @@ offset_bottom = 40.0
 mouse_filter = 2
 texture = ExtResource("23_earring_r")
 
-[node name="Slot2" type="Control" parent="Root/ArtifactRing"]
-layout_mode = 0
+[node name="Slot2" type="Control" parent="Root/ArtifactRing" unique_id=134982984]
+anchors_preset = 0
 offset_left = 144.2
 offset_top = 91.6
 offset_right = 184.2
@@ -188,14 +187,16 @@ mouse_filter = 2
 script = ExtResource("10_slot")
 Index = 2
 
-[node name="Worn" type="TextureRect" parent="Root/ArtifactRing/Slot2"]
+[node name="Worn" type="TextureRect" parent="Root/ArtifactRing/Slot2" unique_id=1322063687]
 layout_mode = 0
-offset_right = 40.0
-offset_bottom = 40.0
+offset_left = -33.199997
+offset_top = -451.59998
+offset_right = 6.800003
+offset_bottom = -411.59998
 mouse_filter = 2
 texture = ExtResource("24_necklace_w")
 
-[node name="Removed" type="TextureRect" parent="Root/ArtifactRing/Slot2"]
+[node name="Removed" type="TextureRect" parent="Root/ArtifactRing/Slot2" unique_id=780965680]
 visible = false
 layout_mode = 0
 offset_right = 40.0
@@ -203,8 +204,8 @@ offset_bottom = 40.0
 mouse_filter = 2
 texture = ExtResource("25_necklace_r")
 
-[node name="Slot3" type="Control" parent="Root/ArtifactRing"]
-layout_mode = 0
+[node name="Slot3" type="Control" parent="Root/ArtifactRing" unique_id=91805892]
+anchors_preset = 0
 offset_left = 106.4
 offset_top = 139.1
 offset_right = 146.4
@@ -213,14 +214,16 @@ mouse_filter = 2
 script = ExtResource("10_slot")
 Index = 3
 
-[node name="Worn" type="TextureRect" parent="Root/ArtifactRing/Slot3"]
+[node name="Worn" type="TextureRect" parent="Root/ArtifactRing/Slot3" unique_id=2146664982]
 layout_mode = 0
-offset_right = 40.0
-offset_bottom = 40.0
+offset_left = 53.6
+offset_top = -499.09998
+offset_right = 93.6
+offset_bottom = -459.09998
 mouse_filter = 2
 texture = ExtResource("26_pectoral_w")
 
-[node name="Removed" type="TextureRect" parent="Root/ArtifactRing/Slot3"]
+[node name="Removed" type="TextureRect" parent="Root/ArtifactRing/Slot3" unique_id=1345583964]
 visible = false
 layout_mode = 0
 offset_right = 40.0
@@ -228,8 +231,8 @@ offset_bottom = 40.0
 mouse_filter = 2
 texture = ExtResource("27_pectoral_r")
 
-[node name="Slot4" type="Control" parent="Root/ArtifactRing"]
-layout_mode = 0
+[node name="Slot4" type="Control" parent="Root/ArtifactRing" unique_id=1154628179]
+anchors_preset = 0
 offset_left = 45.6
 offset_top = 139.1
 offset_right = 85.6
@@ -238,14 +241,16 @@ mouse_filter = 2
 script = ExtResource("10_slot")
 Index = 4
 
-[node name="Worn" type="TextureRect" parent="Root/ArtifactRing/Slot4"]
+[node name="Worn" type="TextureRect" parent="Root/ArtifactRing/Slot4" unique_id=1650129266]
 layout_mode = 0
-offset_right = 40.0
-offset_bottom = 40.0
+offset_left = 164.4
+offset_top = -498.09998
+offset_right = 204.4
+offset_bottom = -458.09998
 mouse_filter = 2
 texture = ExtResource("28_belt_w")
 
-[node name="Removed" type="TextureRect" parent="Root/ArtifactRing/Slot4"]
+[node name="Removed" type="TextureRect" parent="Root/ArtifactRing/Slot4" unique_id=362714994]
 visible = false
 layout_mode = 0
 offset_right = 40.0
@@ -253,8 +258,8 @@ offset_bottom = 40.0
 mouse_filter = 2
 texture = ExtResource("29_belt_r")
 
-[node name="Slot5" type="Control" parent="Root/ArtifactRing"]
-layout_mode = 0
+[node name="Slot5" type="Control" parent="Root/ArtifactRing" unique_id=427515018]
+anchors_preset = 0
 offset_left = 7.8
 offset_top = 91.6
 offset_right = 47.8
@@ -263,14 +268,16 @@ mouse_filter = 2
 script = ExtResource("10_slot")
 Index = 5
 
-[node name="Worn" type="TextureRect" parent="Root/ArtifactRing/Slot5"]
+[node name="Worn" type="TextureRect" parent="Root/ArtifactRing/Slot5" unique_id=1476712973]
 layout_mode = 0
-offset_right = 40.0
-offset_bottom = 40.0
+offset_left = 256.2
+offset_top = -450.59998
+offset_right = 296.2
+offset_bottom = -410.59998
 mouse_filter = 2
 texture = ExtResource("30_bracelet_w")
 
-[node name="Removed" type="TextureRect" parent="Root/ArtifactRing/Slot5"]
+[node name="Removed" type="TextureRect" parent="Root/ArtifactRing/Slot5" unique_id=1922414562]
 visible = false
 layout_mode = 0
 offset_right = 40.0
@@ -278,8 +285,8 @@ offset_bottom = 40.0
 mouse_filter = 2
 texture = ExtResource("31_bracelet_r")
 
-[node name="Slot6" type="Control" parent="Root/ArtifactRing"]
-layout_mode = 0
+[node name="Slot6" type="Control" parent="Root/ArtifactRing" unique_id=1397232552]
+anchors_preset = 0
 offset_left = 21.3
 offset_top = 32.4
 offset_right = 61.3
@@ -288,14 +295,16 @@ mouse_filter = 2
 script = ExtResource("10_slot")
 Index = 6
 
-[node name="Worn" type="TextureRect" parent="Root/ArtifactRing/Slot6"]
+[node name="Worn" type="TextureRect" parent="Root/ArtifactRing/Slot6" unique_id=264448920]
 layout_mode = 0
-offset_right = 40.0
-offset_bottom = 40.0
+offset_left = 294.7
+offset_top = -392.40002
+offset_right = 334.7
+offset_bottom = -352.40002
 mouse_filter = 2
 texture = ExtResource("32_robe_w")
 
-[node name="Removed" type="TextureRect" parent="Root/ArtifactRing/Slot6"]
+[node name="Removed" type="TextureRect" parent="Root/ArtifactRing/Slot6" unique_id=1942040453]
 visible = false
 layout_mode = 0
 offset_right = 40.0
@@ -303,7 +312,7 @@ offset_bottom = 40.0
 mouse_filter = 2
 texture = ExtResource("33_robe_r")
 
-[node name="BossBar" type="Control" parent="Root" node_paths=PackedStringArray("NameLabel", "Fill", "Delay")]
+[node name="BossBar" type="Control" parent="Root" unique_id=1155148167 node_paths=PackedStringArray("NameLabel", "Fill", "Delay")]
 visible = false
 layout_mode = 1
 anchors_preset = 7
@@ -323,13 +332,13 @@ NameLabel = NodePath("Name")
 Fill = NodePath("Fill")
 Delay = NodePath("Delay")
 
-[node name="Name" type="Label" parent="Root/BossBar"]
+[node name="Name" type="Label" parent="Root/BossBar" unique_id=974516281]
 layout_mode = 0
 offset_right = 640.0
 offset_bottom = 32.0
 horizontal_alignment = 1
 
-[node name="Delay" type="TextureProgressBar" parent="Root/BossBar"]
+[node name="Delay" type="TextureProgressBar" parent="Root/BossBar" unique_id=1182171747]
 layout_mode = 0
 offset_top = 36.0
 offset_right = 640.0
@@ -339,7 +348,7 @@ step = 0.0
 value = 100.0
 texture_progress = ExtResource("14_bdelay")
 
-[node name="Fill" type="TextureProgressBar" parent="Root/BossBar"]
+[node name="Fill" type="TextureProgressBar" parent="Root/BossBar" unique_id=853854017]
 layout_mode = 0
 offset_top = 36.0
 offset_right = 640.0
@@ -349,7 +358,7 @@ step = 0.0
 value = 100.0
 texture_progress = ExtResource("13_bfill")
 
-[node name="Frame" type="TextureRect" parent="Root/BossBar"]
+[node name="Frame" type="TextureRect" parent="Root/BossBar" unique_id=332931871]
 layout_mode = 0
 offset_top = 36.0
 offset_right = 640.0
@@ -357,7 +366,7 @@ offset_bottom = 60.0
 mouse_filter = 2
 texture = ExtResource("12_bframe")
 
-[node name="InteractPrompt" type="Label" parent="Root"]
+[node name="InteractPrompt" type="Label" parent="Root" unique_id=756077711]
 layout_mode = 1
 anchors_preset = 7
 anchor_left = 0.5
@@ -374,7 +383,7 @@ horizontal_alignment = 1
 vertical_alignment = 1
 script = ExtResource("15_prompt")
 
-[node name="Toast" type="Label" parent="Root"]
+[node name="Toast" type="Label" parent="Root" unique_id=531928954]
 visible = false
 layout_mode = 1
 anchors_preset = 5
@@ -389,15 +398,15 @@ horizontal_alignment = 1
 vertical_alignment = 1
 script = ExtResource("16_toast")
 
-[node name="Minimap" parent="Root" instance=ExtResource("17_minimap")]
+[node name="Minimap" parent="Root" unique_id=2104332086 instance=ExtResource("17_minimap")]
 layout_mode = 1
 anchors_preset = 1
 anchor_left = 1.0
 anchor_right = 1.0
-offset_left = -160.0
-offset_top = 16.0
-offset_right = -16.0
-offset_bottom = 112.0
+offset_left = -162.0
+offset_top = 5.0
+offset_right = -18.0
+offset_bottom = 101.0
 grow_horizontal = 0
 mouse_filter = 2
 display_player_location = true

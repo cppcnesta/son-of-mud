@@ -1,7 +1,7 @@
-[gd_resource type="Resource" script_class="LiverThrowConfig" format=3]
+[gd_resource type="Resource" script_class="LiverThrowConfig" format=3 uid="uid://c1gudqymtkblk"]
 
-[ext_resource type="Script" path="res://assets/scripts/player/LiverThrowConfig.cs" id="1"]
-[ext_resource type="Script" path="res://assets/scripts/combat/HitSpec.cs" id="2"]
+[ext_resource type="Script" uid="uid://bthprd4ck4n8n" path="res://assets/scripts/player/LiverThrowConfig.cs" id="1"]
+[ext_resource type="Script" uid="uid://ceutld80lj56u" path="res://assets/scripts/combat/HitSpec.cs" id="2"]
 [ext_resource type="Resource" path="res://assets/data/combat/mud_liver_projectile.tres" id="3"]
 
 [sub_resource type="Resource" id="liver_hit"]
@@ -10,11 +10,8 @@ Damage = 15.0
 
 [resource]
 script = ExtResource("1")
-ItemId = &"泥肝"
 Hit = SubResource("liver_hit")
 Projectile = ExtResource("3")
-Range = 300.0
 FlightTime = 0.45
-LaunchOffset = Vector2(20, 0)
 Duration = 0.2
 Interval = 0.4

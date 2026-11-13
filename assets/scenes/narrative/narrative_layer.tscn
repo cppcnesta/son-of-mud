@@ -1,6 +1,6 @@
-[gd_scene load_steps=9 format=3]
+[gd_scene format=3 uid="uid://bcjqyrae3cjdk"]
 
-[ext_resource type="Script" path="res://assets/scripts/narrative/NarrativeDirector.cs" id="1_director"]
+[ext_resource type="Script" uid="uid://df6w3mltslp4d" path="res://assets/scripts/narrative/NarrativeDirector.cs" id="1_director"]
 [ext_resource type="Resource" path="res://assets/data/narrative/settings.tres" id="2_settings"]
 [ext_resource type="PackedScene" path="res://assets/scenes/narrative/views/cg_layer.tscn" id="3_cg"]
 [ext_resource type="PackedScene" path="res://assets/scenes/narrative/views/dialog_box.tscn" id="4_dialog"]
@@ -9,20 +9,20 @@
 [ext_resource type="PackedScene" path="res://assets/scenes/narrative/views/tablet_view.tscn" id="7_tablet"]
 [ext_resource type="PackedScene" path="res://assets/scenes/narrative/views/fade_layer.tscn" id="8_fade"]
 
-[node name="NarrativeLayer" type="CanvasLayer"]
+[node name="NarrativeLayer" type="CanvasLayer" unique_id=419066300]
 process_mode = 3
 layer = 90
 script = ExtResource("1_director")
 Settings = ExtResource("2_settings")
 
-[node name="Cg" parent="." instance=ExtResource("3_cg")]
+[node name="Cg" parent="." unique_id=114201867 instance=ExtResource("3_cg")]
 
-[node name="Dialog" parent="." instance=ExtResource("4_dialog")]
+[node name="Dialog" parent="." unique_id=1041561146 instance=ExtResource("4_dialog")]
 
-[node name="Subtitle" parent="." instance=ExtResource("5_subtitle")]
+[node name="Subtitle" parent="." unique_id=2039909782 instance=ExtResource("5_subtitle")]
 
-[node name="Choice" parent="." instance=ExtResource("6_choice")]
+[node name="Choice" parent="." unique_id=451727126 instance=ExtResource("6_choice")]
 
-[node name="Tablet" parent="." instance=ExtResource("7_tablet")]
+[node name="Tablet" parent="." unique_id=1154642865 instance=ExtResource("7_tablet")]
 
-[node name="Fade" parent="." instance=ExtResource("8_fade")]
+[node name="Fade" parent="." unique_id=1614782004 instance=ExtResource("8_fade")]
