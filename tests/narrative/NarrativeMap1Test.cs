@@ -7,7 +7,7 @@ using SonOfMud.Player;
 
 /// <summary>
 /// 计划第 4 节第 8 步：地图一剧本的集成测试。从正式入口 main_game.tscn 开新游戏，真实玩家用真实按键从 S1_01 走到 S1_07：
-/// 开场 → 走进 S1_02 拾取泥板「当天还没有名字」、照倒影 → S1_03 朝圣者插话（字幕）→ S1_04 供桌（选吃下）
+/// 开场 → 走进 S1_02 坑里自动播“倒影”、坑底拾取泥板「当天还没有名字」 → S1_03 朝圣者插话（字幕）→ S1_04 供桌（选吃下）
 /// → S1_05 守坑人（打 Boss 用设变量 boss_keeper 代替）→ S1_06 七夜雕像（CG1）→ S1_07 两河源头（字幕）；
 /// 然后回溯 S1_08：重塑雕像（CG2）和泥板「手与刃」。所有剧情按顺序触发，零报错。
 /// 房间骨架里还没有平台：出口在高处的房间（S1_02、S1_03、S1_05、S1_06）先把人放到出口平台的出生点，再按住方向键走过房间边缘。
@@ -35,11 +35,11 @@ public partial class NarrativeMap1Test : NarrativeFlowBase
             await Walk();
 
             string[] mains = Started.ToArray();
-            string[] expectedMains = { "m_pit:开场", "tablets:nameless_day", "m_pit:倒影", "m_pit:供桌", "m_pit:守坑人", "m_pit:七夜", "m_pit:重塑", "tablets:hand_blade" };
+            string[] expectedMains = { "m_pit:开场", "m_pit:倒影", "tablets:nameless_day", "m_pit:供桌", "m_pit:守坑人", "m_pit:七夜", "m_pit:重塑", "tablets:hand_blade" };
             Check(mains.SequenceEqual(expectedMains), $"顺序：对话框剧情依次是 {string.Join(" → ", expectedMains)}（实际 {string.Join(" → ", mains)}）");
             Check(Ended.SequenceEqual(expectedMains), $"顺序：每段都正常播完，Finished 与 Started 一一对应（{string.Join(",", Ended)}）");
             string[] requests = Requests.ToArray();
-            string[] expectedRequests = { "tablets:nameless_day", "m_pit:倒影", "m_pit:朝圣者之路", "m_pit:供桌", "m_pit:守坑人", "m_pit:七夜", "m_pit:两河源头", "m_pit:重塑", "tablets:hand_blade" };
+            string[] expectedRequests = { "m_pit:倒影", "tablets:nameless_day", "m_pit:朝圣者之路", "m_pit:供桌", "m_pit:守坑人", "m_pit:七夜", "m_pit:两河源头", "m_pit:重塑", "tablets:hand_blade" };
             Check(requests.SequenceEqual(expectedRequests), $"顺序：房间里的触发器依次发出请求（含两段字幕）：{string.Join(" → ", requests)}");
             string[] seen = { "seen.opening", "seen.m_pit.开场", "seen.tablets.nameless_day", "seen.m_pit.倒影", "seen.m_pit.朝圣者之路", "seen.m_pit.供桌", "seen.m_pit.守坑人",
                               "seen.m_pit.七夜", "seen.m_pit.两河源头", "seen.m_pit.重塑", "tablet.nameless_day", "tablet.hand_blade", "item.生命之面包", "talked.keeper" };
@@ -80,17 +80,17 @@ public partial class NarrativeMap1Test : NarrativeFlowBase
         // S1_01 → S1_02：走过房间右边缘
         bool inS102 = await HoldUntil(PlayerActions.Right, () => World.CurrentRoomDef?.Id == "S1_02", 300);
         Check(inS102, "S1_01 → S1_02：真实玩家按住右键走过房间边缘");
+        // 走进坑里：“倒影”自动触发（不用按 E）
+        bool reflected = await HoldUntil(PlayerActions.Right, () => Narr.MainActive, 600);
+        await WaitUntil(() => Narr.Dialog.IsOpen, 60);
+        Check(reflected && Narr.MainLabel == "倒影" && Narr.Dialog.CurrentText == "……水太浑了。", $"S1_02：走进坑里自动播“倒影” → “……水太浑了。”（{Narr.MainLabel}：{Narr.Dialog.CurrentText}）");
+        Check(await FinishDialog(), "S1_02：倒影播完");
         bool atTablet = await WalkToPrompt("拾取泥板", PlayerActions.Right);
-        Check(atTablet, "S1_02：走到泥板「当天还没有名字」旁");
+        Check(atTablet, "S1_02：走到坑底的泥板「当天还没有名字」旁");
         await KeyTap(Key.E);
         await WaitUntil(() => Narr.Tablet.IsOpen, 30);
         Check(Narr.Tablet.CurrentTitle == "当天还没有名字", "S1_02：按 E 拾取，显示泥板");
         Check(await FinishDialog(5), "S1_02：按 E 收起泥板");
-        bool atWater = await WalkToPrompt("照倒影", PlayerActions.Right);
-        await KeyTap(Key.E);
-        await WaitUntil(() => Narr.MainActive, 10);
-        Check(atWater && Narr.MainLabel == "倒影" && Narr.Dialog.CurrentText == "……水太浑了。", "S1_02：走到河口水边按 E → “……水太浑了。”");
-        Check(await FinishDialog(), "S1_02：倒影播完");
 
         // S1_02 → S1_03：出口在右侧高处，放到出口平台再走过去；朝圣者插话是字幕
         bool inS103 = await CrossEdge("S1_02", "From_S1_03", "S1_03");

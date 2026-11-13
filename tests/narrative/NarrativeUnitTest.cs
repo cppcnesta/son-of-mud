@@ -327,7 +327,7 @@ public partial class NarrativeUnitTest : Node
             }
             scene.Free();
         }
-        string expected = "S1_02:泥板:nameless_day,S1_02:按E:倒影,S1_03:进入:朝圣者之路,S1_04:按E:供桌,S1_05:NPC:守坑人,S1_06:按E:七夜,S1_07:进入:两河源头,S1_08:按E:重塑,S1_08:泥板:hand_blade";
+        string expected = "S1_02:泥板:nameless_day,S1_02:进入:倒影,S1_03:进入:朝圣者之路,S1_04:按E:供桌,S1_05:NPC:守坑人,S1_06:按E:七夜,S1_07:进入:两河源头,S1_08:按E:重塑,S1_08:泥板:hand_blade";
         Check(string.Join(",", found) == expected, $"房间：地图一 S1_02–S1_08 摆好了 9 个剧情节点（{string.Join(",", found)}）");
         Check(problems.Count == 0, "房间：每个剧情节点都在 Objects 下，指向存在的剧本标签" + (problems.Count > 0 ? "：" + string.Join("; ", problems) : ""));
     }

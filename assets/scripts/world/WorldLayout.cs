@@ -8,6 +8,7 @@ namespace SonOfMud.World;
 /// 整张地图的唯一清单：房间、尺寸、出口、条件。MetSys 的 MapData.txt 和房间场景骨架都由它生成（tools/world/BuildWorld.tscn），
 /// 不要在 MetSys 编辑器里手改地图，否则两边会不一致。
 /// </summary>
+[Tool]
 [GlobalClass]
 public partial class WorldLayout : KeptResource
 {

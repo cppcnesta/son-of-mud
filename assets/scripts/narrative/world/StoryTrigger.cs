@@ -56,6 +56,7 @@ public partial class StoryTrigger : Area2D, IInteractable
             Monitoring = true;
             Monitorable = false;
             BodyEntered += OnBodyEntered;
+            _readyFrame = Engine.GetPhysicsFrames();
         }
         Refresh();
     }
@@ -79,9 +80,29 @@ public partial class StoryTrigger : Area2D, IInteractable
         if (CanInteract(actor)) Request();
     }
 
+    private ulong _readyFrame;
+
     private void OnBodyEntered(Node2D body)
     {
-        if (Mode == TriggerMode.Enter && Active) Request();
+        if (Mode != TriggerMode.Enter || !Active) return;
+        // 房间刚放进场景的头几个物理帧：物理系统里玩家可能还在传送前的旧位置（比如在坑底复活 / 读档后挪到了出口），
+        // 会误报“走进来了”。等两帧再确认玩家是不是真的在区域里。
+        if (Engine.GetPhysicsFrames() - _readyFrame <= 2)
+        {
+            _ = ConfirmLater(body);
+            return;
+        }
+        Request();
+    }
+
+    private async System.Threading.Tasks.Task ConfirmLater(Node2D body)
+    {
+        for (int i = 0; i < 2; i++)
+        {
+            await ToSignal(GetTree(), SceneTree.SignalName.PhysicsFrame);
+            if (!IsInstanceValid(this) || !IsInsideTree()) return;
+        }
+        if (Active && IsInstanceValid(body) && OverlapsBody(body)) Request();
     }
 
     private void Request()

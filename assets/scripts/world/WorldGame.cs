@@ -90,7 +90,83 @@ public partial class WorldGame : Node
     public override void _PhysicsProcess(double delta)
     {
         if (IsTransitioning || CurrentRoom == null || !IsInstanceValid(Player) || !MetSysApi.Available) return;
+        GuardBounds((float)delta);
+        if (IsTransitioning) return;
         MetSysApi.SetPlayerPosition(Player.GlobalPosition - CurrentRoom.GlobalPosition);
+    }
+
+    // ---------- 掉出房间的保险 ----------
+
+    /// <summary>玩家离开房间范围（不是从出口走的）多久后送回去。走出口时 MetSys 当帧就会换房，不会在房间外停留。</summary>
+    public const float OutsideGrace = 0.4f;
+    /// <summary>房间范围往外放宽多少才算“离开”（上方放宽多一些：跳得高一点不算）。</summary>
+    public const float SideMargin = 32f, BottomMargin = 64f, TopMargin = 256f;
+
+    /// <summary>被送回站稳处的次数。</summary>
+    public int Rescues { get; private set; }
+    /// <summary>最近一次是从哪里掉出去的（给人看的说明）。</summary>
+    public string LastRescue { get; private set; } = "";
+    /// <summary>最近一次站稳的位置（全局坐标）；还没站稳过时为 null。</summary>
+    public Vector2? LastSafePosition { get; private set; }
+
+    private float _outside;
+    private string _safeRoom;
+
+    /// <summary>当前房间的范围（房间本地坐标）。</summary>
+    public Rect2 CurrentRoomRect()
+    {
+        if (CurrentRoomDef == null) return new Rect2();
+        Vector2 cell = MetSysApi.Available ? MetSysApi.CellSize : new Vector2(576, 324);
+        return new Rect2(Vector2.Zero, new Vector2(CurrentRoomDef.Size.X * cell.X, CurrentRoomDef.Size.Y * cell.Y));
+    }
+
+    private void GuardBounds(float delta)
+    {
+        Vector2 local = Player.GlobalPosition - CurrentRoom.GlobalPosition;
+        Rect2 rect = CurrentRoomRect();
+        if (rect.Size == Vector2.Zero) return;
+        if (Player is CharacterBody2D body && body.IsOnFloor() && rect.HasPoint(local))
+        {
+            LastSafePosition = Player.GlobalPosition;
+            _safeRoom = CurrentRoomDef.Id;
+        }
+        bool outside = local.X < -SideMargin || local.X > rect.End.X + SideMargin || local.Y > rect.End.Y + BottomMargin || local.Y < -TopMargin;
+        _outside = outside ? _outside + delta : 0f;
+        if (_outside < OutsideGrace) return;
+        _outside = 0f;
+        string side = local.X < 0 ? "左边" : local.X > rect.End.X ? "右边" : local.Y > rect.End.Y ? "下面" : "上面";
+        LastRescue = $"在 {CurrentRoomDef.Id} 从{side}掉出房间（位置 {local.Round()}），送回最近站稳的地方";
+        GD.PushWarning($"WorldGame：{LastRescue}。房间边缘这里可能缺了墙。");
+        _ = RescueAsync();
+    }
+
+    /// <summary>黑屏一下，把玩家送回这个房间里最近站稳的位置（没有就送到 Default 出生点），不扣血。</summary>
+    private async Task RescueAsync()
+    {
+        IsTransitioning = true;
+        InputLock.Request(InputLock.RoomTransition, true);
+        try
+        {
+            await Fade(true);
+            if (!IsInstanceValid(this) || !IsInstanceValid(Player) || CurrentRoom == null) return;
+            Vector2 target = LastSafePosition is Vector2 safe && _safeRoom == CurrentRoomDef?.Id
+                ? safe
+                : CurrentRoom.FindSpawn(SpawnPoint.DefaultId)?.GlobalPosition ?? CurrentRoom.GlobalPosition;
+            Player.GlobalPosition = target;
+            if (Player is CharacterBody2D body) body.Velocity = Vector2.Zero;
+            Rescues++;
+            Events.Instance?.EmitSignal(Events.SignalName.PlayerTeleported, (StringName)"Rescue");
+            await Fade(false);
+        }
+        finally
+        {
+            InputLock.Request(InputLock.RoomTransition, false);
+            if (IsInstanceValid(this))
+            {
+                IsTransitioning = false;
+                Callable.From(ProcessTravelQueue).CallDeferred();
+            }
+        }
     }
 
     // ---------- 直接载入（开局，不淡入淡出） ----------

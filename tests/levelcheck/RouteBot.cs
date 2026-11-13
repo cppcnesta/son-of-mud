@@ -182,6 +182,7 @@ public sealed class RouteBot
         if (_room().id != step.Room)
         {
             result.Message = $"不在起始房间 {step.Room}（现在在 {_room().id}）";
+            Log.Add($"{step.Text}：{result.Message}");
             return result;
         }
         if (P.Forms.Form != step.Form)
@@ -193,12 +194,14 @@ public sealed class RouteBot
             if (P.Forms.Form != step.Form)
             {
                 result.Message = "切形态失败";
+                Log.Add($"{step.Text}：{result.Message}");
                 return result;
             }
         }
         if (step.Kind != EdgeKind.Break && !await WalkTo(step.StartX, step.WallSide))
         {
-            result.Message = $"走不到起点 x={step.StartX}";
+            result.Message = $"走不到起点 x={step.StartX}（现在 {P.GlobalPosition - _room().origin}，在地上 {P.IsOnFloor()}，状态 {P.Machine.Current?.Name}）";
+            Log.Add($"{step.Text}：{result.Message}");
             return result;
         }
         switch (step.Kind)

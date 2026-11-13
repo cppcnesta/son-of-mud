@@ -187,6 +187,24 @@ public abstract partial class NarrativeFlowBase : FlowTestBase
     }
 
     /// <summary>朝一个方向走，直到交互提示变成 prompt；停稳后如果走过了头，往回挪一点。</summary>
+    /// <summary>
+    /// 往一个方向走到出现 prompt 提示为止；路上走进自动触发的剧情（比如 S1_02 的“倒影”）就按推进键看完再接着走。
+    /// seen 记下路上看完的剧情（脚本:标签）。
+    /// </summary>
+    protected async Task<bool> WalkToPromptThroughDialogs(string prompt, StringName direction, List<string> seen = null, int maxFrames = 600)
+    {
+        for (int round = 0; round < 4; round++)
+        {
+            bool stopped = await HoldUntil(direction, () => Interactor.CurrentPrompt == prompt || (Narr != null && Narr.MainActive), maxFrames);
+            if (Interactor.CurrentPrompt == prompt) return true;
+            if (!stopped || Narr == null || !Narr.MainActive) return false;
+            seen?.Add($"{Narr.MainScript}:{Narr.MainLabel}");
+            await AdvanceUntil(() => !Narr.MainActive, 60);
+            await WaitUntil(() => !PauseService.IsPaused, 60);
+        }
+        return Interactor.CurrentPrompt == prompt;
+    }
+
     protected async Task<bool> WalkToPrompt(string prompt, StringName direction, int maxFrames = 600)
     {
         await HoldUntil(direction, () => Interactor.CurrentPrompt == prompt, maxFrames);
