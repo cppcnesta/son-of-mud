@@ -286,7 +286,7 @@ public partial class EnemyUnitTest : LabSuiteBase
     public static readonly (string room, string node, string scene)[] Layout =
     {
         ("S1_03", "Prayer1", "prayer"), ("S1_03", "Prayer2", "prayer"), ("S1_03", "Prayer3", "prayer"),
-        ("S1_03", "Prayer4", "prayer"), ("S1_03", "Prayer5", "prayer"), ("S1_03", "Devout1", "devout"),
+        ("S1_03", "Prayer4", "prayer"), ("S1_03", "Prayer5", "prayer"), ("S1_03", "Devout1", "devout"), ("S1_03", "Devout2", "devout"),
         ("S1_05", "Keeper", "keeper"),
         ("S2_01", "Mason1", "mason"), ("S2_01", "Devout1", "devout"),
         ("S2_02", "Devout1", "devout"),
@@ -356,7 +356,7 @@ public partial class EnemyUnitTest : LabSuiteBase
             scene.Free();
         }
         Check(problems.Count == 0 && found.Count == Layout.Length,
-            $"摆放：S1_03 祈祷泥人 5 + 末端虔诚泥人 1、S1_05 守坑人、S2_01–S2_03 塔庙泥匠 2 + 虔诚泥人 3 + 塔庙泥卫 1、S3_01 塔庙泥卫、S3_02 祈祷泥人 4，都站在文字图的锚点格里；其他房间没有敌人" + (problems.Count > 0 ? "：" + string.Join("; ", problems.Take(6)) : ""));
+            $"摆放：S1_03 祈祷泥人 5 + 虔诚泥人 2、S1_05 守坑人、S2_01–S2_03 塔庙泥匠 2 + 虔诚泥人 3 + 塔庙泥卫 1、S3_01 塔庙泥卫、S3_02 祈祷泥人 4，都站在文字图的锚点格里；其他房间没有敌人" + (problems.Count > 0 ? "：" + string.Join("; ", problems.Take(6)) : ""));
 
         Node s105 = GD.Load<PackedScene>(RoomPath("S1_05")).Instantiate();
         var lockNode = s105.GetNodeOrNull<SonOfMud.World.ArenaLock>("Objects/ArenaLock");

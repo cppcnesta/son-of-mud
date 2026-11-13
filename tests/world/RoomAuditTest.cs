@@ -114,6 +114,16 @@ public partial class RoomAuditTest : WorldTestBase
         bool outReported = Has("铺到了房间外面");
         geometry.EraseCell(outside);
         Check(outReported && !Has("铺到了房间外面"), "房间外：在房间右边外面铺一格砖 → 警告“铺到了房间外面”；删掉后消失");
+        // 判定框被拖离节点（挪的是判定框，不是节点本身）
+        var pit = GD.Load<PackedScene>("res://assets/scenes/world/s1/S1_02.tscn").Instantiate<RoomRoot>();
+        var tabletShape = pit.GetNode<CollisionShape2D>("Objects/Tablet_nameless_day/Shape");
+        Vector2 shapeAt = tabletShape.Position;
+        tabletShape.Position = shapeAt + new Vector2(383, 0);
+        bool drift = RoomRules.AuditScene(pit, layout).Any(p => p.Contains("Tablet_nameless_day 的判定框") && p.Contains("节点本身"));
+        tabletShape.Position = shapeAt;
+        bool driftGone = RoomRules.AuditScene(pit, layout).Count == 0;
+        pit.Free();
+        Check(drift && driftGone, "判定框：把泥板的判定框拖离节点 383 像素 → 提醒“要挪节点本身”；放回后消失");
         _ = tile; _ = shift;
         room.Free();
         System.GC.Collect();

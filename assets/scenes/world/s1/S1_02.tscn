@@ -76,26 +76,25 @@ script = ExtResource("5_bnf51")
 SpawnId = &"From_S1_01"
 
 [node name="From_S1_03" type="Marker2D" parent="Spawns" unique_id=1651558602]
-position = Vector2(1520, 875)
+position = Vector2(1696, 619)
 script = ExtResource("5_bnf51")
 SpawnId = &"From_S1_03"
 
 [node name="Objects" type="Node2D" parent="." unique_id=717430575]
 
 [node name="Tablet_nameless_day" type="Area2D" parent="Objects" unique_id=1649357158]
-position = Vector2(688, 908)
+position = Vector2(1071, 940)
 script = ExtResource("n_tablet")
 TabletId = "nameless_day"
 
 [node name="Shape" type="CollisionShape2D" parent="Objects/Tablet_nameless_day" unique_id=24575693]
-position = Vector2(383, -26)
+position = Vector2(0, -48)
 shape = SubResource("Shape_Tablet_nameless_day")
 
 [node name="Placeholder" type="ColorRect" parent="Objects/Tablet_nameless_day" unique_id=1570376268]
-offset_left = 357.0
-offset_top = -69.0
-offset_right = 405.0
-offset_bottom = 8.0
+offset_left = -24.0
+offset_top = -77.0
+offset_right = 24.0
 mouse_filter = 2
 color = Color(0.75, 0.6, 0.4, 1)
 

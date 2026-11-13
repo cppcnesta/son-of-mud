@@ -59,13 +59,13 @@ public partial class EnemyFlowTest : EnemyFlowBase
         bool inS102 = await HoldKeyUntil(RealKeys.Right, () => RoomId == "S1_02", 400);
         bool inS103 = inS102 && await CrossEdgeRight("S1_02", "From_S1_03", "S1_03");
         List<EnemyBody> enemies = InRoom<EnemyBody>();
-        Check(inS103 && Prayers().Count == 5 && enemies.Count == 6 && enemies.All(p => p.TargetAtEnterTree == Player && p.Target == Player),
-            $"晚加载：玩家在 S1_01 出生后真实走进 S1_03，{enemies.Count} 个敌人（祈祷泥人 5、虔诚泥人 1）进入场景树时就从 PlayerRegistry 拿到了玩家");
+        Check(inS103 && Prayers().Count == 5 && enemies.Count == 7 && enemies.All(p => p.TargetAtEnterTree == Player && p.Target == Player),
+            $"晚加载：玩家在 S1_01 出生后真实走进 S1_03，{enemies.Count} 个敌人（祈祷泥人 5、虔诚泥人 2）进入场景树时就从 PlayerRegistry 拿到了玩家");
         var firstIds = enemies.Select(p => p.GetInstanceId()).ToHashSet();
 
         bool back = await CrossEdgeRight("S1_02", "From_S1_03", "S1_03");
         List<EnemyBody> again = InRoom<EnemyBody>();
-        Check(back && again.Count == 6 && again.All(p => !firstIds.Contains(p.GetInstanceId()) && p.TargetAtEnterTree == Player && p.Target == Player)
+        Check(back && again.Count == 7 && again.All(p => !firstIds.Contains(p.GetInstanceId()) && p.TargetAtEnterTree == Player && p.Target == Player)
               && firstIds.All(id => !GodotObject.IsInstanceIdValid(id)),
             "晚加载：离开 S1_03 再回来，旧的敌人已释放，新生成的同样在进入场景树时拿到玩家");
         Check(PlayerSpawnedCount == 0, $"晚加载：开局之后没有任何地方重新发 PlayerSpawned（{PlayerSpawnedCount} 次）");
@@ -169,6 +169,9 @@ public partial class EnemyFlowTest : EnemyFlowBase
             Check(false, "虔诚泥人：S1_03 里找不到虔诚泥人");
             return;
         }
+        // S1_03 现在有两个虔诚泥人：只看第一个，另一个先停住，免得两块泥肝一起打中
+        foreach (EnemyBody other in InRoom<EnemyBody>().Where(e => e != devout && e.Data?.Kind == "devout"))
+            other.ProcessMode = ProcessModeEnum.Disabled;
         var thrown = new List<Projectile>();
         devout.ProjectileThrown += p => thrown.Add(p);
         bool spotted = await HoldKeyUntil(RealKeys.Right, () => devout.State is SonOfMud.Enemy.States.ChaseState or SonOfMud.Enemy.States.AttackWindupState, 900);
@@ -208,7 +211,7 @@ public partial class EnemyFlowTest : EnemyFlowBase
         Check(PlayerRegistry.Current == Player, "生命周期（读档）：开局完成后 PlayerRegistry.Current 指向新场景里的真实玩家（不是 null、不是旧玩家）");
         Check(GameSession.Progress.GetVar(Pickup.CountKey("泥肝"), 0).AsInt64() == 5, "拾取：读档后 count.泥肝 仍是 5");
         await Teleport("S1_03", "From_S1_02");
-        Check(InRoom<EnemyBody>().Count == 6 && InRoom<EnemyBody>().All(p => p.TargetAtEnterTree == Player), "读档之后才加载的 S1_03 里，敌人拿到的是新玩家");
+        Check(InRoom<EnemyBody>().Count == 7 && InRoom<EnemyBody>().All(p => p.TargetAtEnterTree == Player), "读档之后才加载的 S1_03 里，敌人拿到的是新玩家");
     }
 
     // ---------- ② 重开一局 ----------
@@ -227,7 +230,7 @@ public partial class EnemyFlowTest : EnemyFlowBase
             "重开一局：重新载入正式入口，玩家是新实例，旧玩家已释放");
         Check(PlayerRegistry.Current == Player, "生命周期（重开）：开局完成后 PlayerRegistry.Current 指向新玩家，旧玩家已经注销");
         await Teleport("S1_03", "From_S1_02");
-        Check(InRoom<EnemyBody>().Count == 6 && InRoom<EnemyBody>().All(p => p.TargetAtEnterTree == Player && p.Target == Player), "重开之后才加载的 S1_03 里，敌人拿到的是新玩家");
+        Check(InRoom<EnemyBody>().Count == 7 && InRoom<EnemyBody>().All(p => p.TargetAtEnterTree == Player && p.Target == Player), "重开之后才加载的 S1_03 里，敌人拿到的是新玩家");
     }
 
     // ---------- ④ 摆放（运行中） ----------

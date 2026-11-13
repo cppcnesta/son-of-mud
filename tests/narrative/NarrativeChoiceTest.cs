@@ -108,7 +108,7 @@ public partial class NarrativeChoiceTest : NarrativeFlowBase
     private async Task TabletChecks()
     {
         await Teleport("S1_02", "From_S1_01");
-        bool atTablet = await WalkToPrompt("拾取泥板", PlayerActions.Right);
+        bool atTablet = await WalkToPromptThroughDialogs("拾取泥板", PlayerActions.Right);   // 泥板在坑底，路上会先自动播“倒影”
         Check(atTablet, $"泥板：真实玩家走到 S1_02 的泥板旁，提示“拾取泥板”（x={LocalX:F0}）");
         if (!atTablet) return;
         int collected = Collected.Count;

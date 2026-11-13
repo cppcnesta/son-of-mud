@@ -16,6 +16,8 @@ public static class RoomRules
     public const float BodyGap = 2f;
     /// <summary>跨房间对齐：两边开口至少要重叠 2 格。</summary>
     public const int MinOverlap = 2 * Tile;
+    /// <summary>物件的判定框横向离开节点超过这么多像素，就提醒“挪的是判定框，不是节点”。</summary>
+    public const float MaxShapeDrift = 64f;
 
     // ---------- 网格工具 ----------
 
@@ -218,6 +220,12 @@ public static class RoomRules
         foreach (string error in ValidateRoom(room, grid, cellSize))
             problems.Add(Readable(error, room));
         if (outside > 0) problems.Add($"有 {outside} 格砖铺到了房间外面（不影响游戏，多半是误操作，可以删掉）。");
+        // 物件的判定框被拖离了节点：画面上看着在那里，但节点（以及按节点位置找它的提示、测试、文字图）还在原处
+        if (root.GetNodeOrNull("Objects") is Node objects)
+            foreach (Node2D item in objects.GetChildren().OfType<Node2D>())
+                foreach (CollisionShape2D shape in item.GetChildren().OfType<CollisionShape2D>())
+                    if (Mathf.Abs(shape.Position.X) > MaxShapeDrift)
+                        problems.Add($"{item.Name} 的判定框 {shape.Name} 被拖离了节点 {Mathf.Abs(shape.Position.X):0} 像素：要挪位置请选中 {item.Name} 节点本身来挪，判定框放回节点上。");
         if (root.GetNodeOrNull("Spawns") is Node spawns)
             foreach (SpawnPoint spawn in spawns.GetChildren().OfType<SpawnPoint>())
             {
