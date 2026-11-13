@@ -23,6 +23,8 @@ config/icon="res://icon.svg"
 
 MetSys="*res://addons/MetroidvaniaSystem/Nodes/Singleton.tscn"
 Events="*res://assets/scripts/core/Events.cs"
+Juicee="*res://addons/juicee/core/juicee.gd"
+Feedback="*res://assets/scripts/feel/FeedbackService.cs"
 
 [display]
 
@@ -134,7 +136,7 @@ map={
 
 [editor_plugins]
 
-enabled=PackedStringArray("res://addons/MetroidvaniaSystem/plugin.cfg")
+enabled=PackedStringArray("res://addons/MetroidvaniaSystem/plugin.cfg", "res://addons/juicee/plugin.cfg")
 
 [layer_names]
 

@@ -50,6 +50,8 @@ public partial class FormConfig : KeptResource
     [Export] public float DownAttackWidth { get; set; } = 72f;
     /// <summary>空中下劈、下落中命中时的倍率（泥 1.8，水 1）。</summary>
     [Export] public float DownAttackMultiplier { get; set; } = 1f;
+    /// <summary>下劈的打击感（伤害规则仍用 AttackSpec）；不填就用 AttackSpec.Feel。</summary>
+    [Export] public SonOfMud.Combat.HitFeel DownAttackFeel { get; set; }
 
     [ExportGroup("攻击后摇衔接")]
     /// <summary>true：后摇可以移动、曲线恢复速度（泥 1.5 秒）。</summary>

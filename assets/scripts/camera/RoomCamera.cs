@@ -4,7 +4,9 @@ using SonOfMud.Core;
 namespace SonOfMud.Camera;
 
 /// <summary>
-/// 房间镜头：固定缩放、跟随玩家；进入房间时按 MetSys 房间尺寸设边界并重置平滑；响应 Events.CameraShakeRequested 震屏。
+/// 房间镜头：固定缩放、跟随玩家；进入房间时按 MetSys 房间尺寸设边界并重置平滑。
+/// 震屏：Events.CameraShakeRequested 由打击感服务（Feel/FeedbackService，经 Juicee）处理，它只晃镜头下的震动挂点 ShakeRig；
+/// 镜头每帧读挂点位置，按 Settings.MaxShakeOffset 截断长度后写到自己的 Offset（Offset 只有镜头自己写）。
 /// 玩家从 Events.PlayerSpawned 得到（只当 Node2D 用）。
 /// </summary>
 [GlobalClass]
@@ -14,17 +16,14 @@ public partial class RoomCamera : Camera2D
 
     public Node2D Target { get; private set; }
 
-    private float _shakeStrength;
-    private float _shakeDuration;
-    private float _shakeLeft;
-    private readonly RandomNumberGenerator _rng = new();
+    /// <summary>震动挂点：震屏效果只改它的位置，镜头读它、截断后作为 Offset。</summary>
+    public Node2D ShakeRig { get; private set; }
 
     public override void _EnterTree()
     {
         if (Events.Instance == null) return;
         Events.Instance.PlayerSpawned += SetTarget;
         Events.Instance.RoomEntered += OnRoomEntered;
-        Events.Instance.CameraShakeRequested += Shake;
     }
 
     public override void _ExitTree()
@@ -32,7 +31,6 @@ public partial class RoomCamera : Camera2D
         if (Events.Instance == null) return;
         Events.Instance.PlayerSpawned -= SetTarget;
         Events.Instance.RoomEntered -= OnRoomEntered;
-        Events.Instance.CameraShakeRequested -= Shake;
     }
 
     public override void _Ready()
@@ -41,6 +39,8 @@ public partial class RoomCamera : Camera2D
         Zoom = Settings.Zoom;
         PositionSmoothingEnabled = Settings.SmoothingEnabled;
         PositionSmoothingSpeed = Settings.SmoothingSpeed;
+        ShakeRig = new Node2D { Name = "ShakeRig" };
+        AddChild(ShakeRig);
         MakeCurrent();
     }
 
@@ -63,28 +63,20 @@ public partial class RoomCamera : Camera2D
         ResetSmoothing();
     }
 
+    /// <summary>震屏（转成 Events.CameraShakeRequested，由打击感服务处理）。</summary>
     public void Shake(float strength, float duration)
     {
         if (duration <= 0f || strength <= 0f) return;
-        _shakeStrength = Mathf.Min(Mathf.Max(strength, _shakeLeft > 0f ? _shakeStrength : 0f), Settings.MaxShakeOffset);
-        _shakeDuration = duration;
-        _shakeLeft = duration;
+        Events.Instance?.EmitSignal(Events.SignalName.CameraShakeRequested, strength, duration);
     }
 
-    public bool IsShaking => _shakeLeft > 0f;
+    /// <summary>挂点还没回到原位（震屏进行中）。</summary>
+    public bool IsShaking => ShakeRig != null && ShakeRig.Position != Vector2.Zero;
 
     public override void _Process(double delta)
     {
         if (IsInstanceValid(Target)) GlobalPosition = Target.GlobalPosition;
-        if (_shakeLeft > 0f)
-        {
-            _shakeLeft = Mathf.Max(0f, _shakeLeft - (float)delta);
-            float amount = _shakeStrength * Mathf.Pow(_shakeLeft / _shakeDuration, Settings.ShakeFalloff);
-            Offset = amount > 0f ? new Vector2(_rng.RandfRange(-1f, 1f), _rng.RandfRange(-1f, 1f)) * amount : Vector2.Zero;
-        }
-        else if (Offset != Vector2.Zero)
-        {
-            Offset = Vector2.Zero;
-        }
+        Vector2 shake = ShakeRig?.Position ?? Vector2.Zero;
+        Offset = shake.LimitLength(Settings.MaxShakeOffset);
     }
 }

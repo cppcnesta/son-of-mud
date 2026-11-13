@@ -11,7 +11,9 @@ namespace SonOfMud.Enemy;
 ///
 /// - 找玩家：_EnterTree 里先读 PlayerRegistry.Current，再订阅 Changed，_ExitTree 取消订阅。
 ///   房间比玩家晚加载也能拿到玩家；只当 Node2D 用，不认识玩家类。
-/// - 每个物理帧：当前状态 PhysicsUpdate（设速度、切状态）→ MoveAndSlide。
+/// - 每个物理帧：当前状态 PhysicsUpdate（设速度、切状态）→ 加上击退速度 MoveAndSlide → 速度还原成状态自己的值。
+/// - 打击感（Hit.Feel）：被打中（受伤 / 打死）都闪白；没打死时被推开（击退是独立的速度分量，不属于任何状态，
+///   逃跑、反击、受击硬直、不理会都照常发生），打死时清掉还没结束的击退。
 /// - 受击：HurtBox 结算后，没死 → 按行为组合反应（逃跑 / 起身反击 / 受击硬直）；
 ///   死了 → 关掉判定、发 EnemyKilled 恰好一次，按掉落表（摆放点可以覆盖）发 ItemDropped，进入 Dead。
 /// - 攻击结果：HitBox.HitLanded 转给当前状态（只用来分支，收招一律按状态自己的计时器）。
@@ -170,10 +172,48 @@ public partial class EnemyBody : CharacterBody2D
     public override void _PhysicsProcess(double delta)
     {
         State?.PhysicsUpdate(delta);
+        float own = Velocity.X;
+        if (KnockbackVelocity != 0f && LedgeAhead(Mathf.Sign(KnockbackVelocity))) KnockbackVelocity = 0f;
+        Velocity = new Vector2(own + KnockbackVelocity, Velocity.Y);
         MoveAndSlide();
+        if (KnockbackVelocity != 0f && IsOnWall() && GetWallNormal().X * KnockbackVelocity < 0f) KnockbackVelocity = 0f;
+        // 状态下一帧看到的仍是自己算的速度：击退不会被状态覆盖，也不会累积
+        Velocity = new Vector2(own, Velocity.Y);
+        KnockbackVelocity = Mathf.MoveToward(KnockbackVelocity, 0f, _knockbackDecay * (float)delta);
     }
 
-    public override void _Process(double delta) => QueueRedraw();
+    public override void _Process(double delta)
+    {
+        if (_hitFlashLeft > 0f) _hitFlashLeft = Mathf.Max(0f, _hitFlashLeft - (float)delta);
+        QueueRedraw();
+    }
+
+    // ---------- 打击感：闪白、击退 ----------
+
+    /// <summary>击退速度（水平，像素 / 秒）：独立于状态，每帧加在状态的速度上，逐渐减到 0。</summary>
+    public float KnockbackVelocity { get; private set; }
+    /// <summary>被打中闪白还剩多少秒。</summary>
+    public float HitFlashRemaining => _hitFlashLeft;
+    /// <summary>不会被击退（守坑人）。</summary>
+    protected virtual bool KnockbackImmune => false;
+
+    private float _knockbackDecay;
+    private float _hitFlashLeft;
+
+    private void StartHitFlash(Hit hit)
+    {
+        if (hit?.Feel != null) _hitFlashLeft = Mathf.Max(_hitFlashLeft, hit.Feel.FlashSeconds);
+    }
+
+    /// <summary>沿「攻击来源 → 自己」的水平方向推开；新的一下替换旧的，不叠加。不改朝向。</summary>
+    private void StartKnockback(Hit hit)
+    {
+        if (KnockbackImmune || hit?.Feel == null || hit.Feel.Knockback <= 0f) return;
+        float dir = Mathf.Sign(GlobalPosition.X - hit.SourcePosition.X);
+        if (dir == 0f) dir = -Facing;
+        KnockbackVelocity = dir * hit.Feel.Knockback;
+        _knockbackDecay = Mathf.Max(0f, hit.Feel.KnockbackDecay);
+    }
 
     // ---------- 感知与移动（各状态共用） ----------
 
@@ -277,10 +317,17 @@ public partial class EnemyBody : CharacterBody2D
     private void OnHurtDamaged(Hit hit, int dealt)
     {
         if (IsDead || Stats.IsDepleted) return; // 打死的情况由 Killed 处理
+        StartHitFlash(hit);
+        StartKnockback(hit); // 在反应之前；反应规则（React / Boss 覆盖）不变
         OnDamaged(hit, dealt);
     }
 
-    private void OnHurtKilled(Hit hit) => OnKilled(hit);
+    private void OnHurtKilled(Hit hit)
+    {
+        StartHitFlash(hit);
+        KnockbackVelocity = 0f; // 死了就不再滑
+        OnKilled(hit);
+    }
 
     /// <summary>受到没打死自己的攻击。普通敌人按行为组合反应；Boss 覆盖。</summary>
     protected virtual void OnDamaged(Hit hit, int dealt) => React();
@@ -351,8 +398,11 @@ public partial class EnemyBody : CharacterBody2D
         return baseColor;
     }
 
-    /// <summary>美术图闪白的程度（0~1）；普通敌人没有，守坑人变身时闪。</summary>
-    public virtual float FlashAmount => 0f;
+    /// <summary>闪白的程度（0~1）：被打中的闪白和状态自己的闪白（守坑人变身）取较大的。</summary>
+    public float FlashAmount => Mathf.Max(_hitFlashLeft > 0f ? 1f : 0f, StateFlashAmount);
+
+    /// <summary>状态自己的闪白；普通敌人没有，守坑人变身时闪。</summary>
+    protected virtual float StateFlashAmount => 0f;
 
     // ---------- 技术占位外观（当前动作没有美术图时） ----------
 
@@ -367,6 +417,7 @@ public partial class EnemyBody : CharacterBody2D
             return;
         }
         Color tint = StateTint(Data?.Tint ?? new Color("8a6a4a"));
+        if (FlashAmount > 0f) tint = Colors.White;
         // 被动型待着时是跪坐祈祷的姿势（矮一截、双手合在胸前）；逃跑和反击时站起来。
         bool kneeling = Data?.Behaviour == EnemyBehaviour.Passive && State is IdleState;
         float height = kneeling ? size.Y * 0.7f : size.Y;

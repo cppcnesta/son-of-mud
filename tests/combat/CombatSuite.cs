@@ -388,7 +388,9 @@ public partial class CombatSuite : LabSuiteBase
         float before = _a.Stagger.Remaining;
         ulong startFrame = Engine.GetPhysicsFrames();
         int dealt = await SwingAt(_a, 1);
-        float ticked = (Engine.GetPhysicsFrames() - startFrame) * Dt;
+        ulong endFrame = Engine.GetPhysicsFrames();
+        // 顿帧期间游戏时间不走，僵直计时也不走：只算没顿帧的帧
+        float ticked = ((long)(endFrame - startFrame) - FrozenBetween(startFrame, endFrame)) * Dt;
         float reduced = before - _a.Stagger.Remaining - ticked;
         Check(dealt == 48, $"僵直中泥形态一刀：增伤 1.6 与易伤 ×2 取大 → 48（实际 {dealt}）");
         Check(Mathf.Abs(reduced - 1f) < 0.02f, $"每受一次伤剩余时间额外减 1 秒（扣除自然流逝 {ticked:F3} 秒后减少 {reduced:F3} 秒）");

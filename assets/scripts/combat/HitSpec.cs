@@ -17,4 +17,6 @@ public partial class HitSpec : KeptResource
     /// <summary>被格挡时攻击方进入反制僵直（蝎尾）。</summary>
     [Export] public bool CounterOnBlock { get; set; }
     [Export] public string[] Tags { get; set; } = System.Array.Empty<string>();
+    /// <summary>打击感（顿帧、震屏、闪白、击退、粒子、音效）；不填就没有。</summary>
+    [Export] public HitFeel Feel { get; set; }
 }
