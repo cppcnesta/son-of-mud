@@ -70,11 +70,34 @@ public partial class Map1WalkTest : EnemyFlowBase
         }
         List<RouteStep> steps = RoutePlan.From(edges);
         _bot.Log.Clear();
+        // 路上走进自动触发的剧情（比如 S1_02 的“倒影”）时，像玩家一样按推进键看完，再接着走
+        _walking = true;
+        Task advancing = AdvanceDialogsWhileWalking();
         var (ok, done) = await _bot.RunRoute(steps);
+        _walking = false;
+        await advancing;
         foreach (string line in _bot.Log) GD.Print("    " + line);
         Check(ok, $"{phase}：路线机器人用真实按键走完 {done}/{steps.Count} 步（{edges.Count(e => e.Kind == EdgeKind.Move)} 次移动、" +
-                  $"{edges.Count(e => e.Climb)} 次攀墙、{edges.Count(e => e.Kind == EdgeKind.Exit)} 次出房间），现在在 {RoomId}");
+                  $"{edges.Count(e => e.Climb)} 次攀墙、{edges.Count(e => e.Kind == EdgeKind.Exit)} 次出房间），现在在 {RoomId}" +
+                  (_dialogsSeen.Count > 0 ? $"；路上看完剧情：{string.Join("、", _dialogsSeen)}" : ""));
         return ok;
+    }
+
+    private bool _walking;
+    private readonly List<string> _dialogsSeen = new();
+
+    private async Task AdvanceDialogsWhileWalking()
+    {
+        while (_walking && IsInstanceValid(this))
+        {
+            if (Narr != null && Narr.MainActive)
+            {
+                _dialogsSeen.Add($"{Narr.MainScript}:{Narr.MainLabel}");
+                await AdvanceUntil(() => !Narr.MainActive, 60);
+                await WaitUntil(() => !PauseService.IsPaused, 60);
+            }
+            await ToSignal(GetTree(), SceneTree.SignalName.ProcessFrame);
+        }
     }
 
     private async Task Run(Callable onTeleport)
