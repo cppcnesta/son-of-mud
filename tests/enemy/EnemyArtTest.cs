@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Godot;
+using SonOfMud.Combat;
 using SonOfMud.Core;
 using SonOfMud.Enemy;
 using SonOfMud.Enemy.Bosses.Keeper;
@@ -35,6 +36,9 @@ public partial class EnemyArtTest : LabSuiteBase
         await RepoArtChecks();
         await SpriteNodeChecks();
         await FixtureChecks();
+        await GridChecks();
+        await DevoutArtChecks();
+        await ProjectileArtChecks();
         await KeeperChecks();
         await PlaybackChecks();
         EditorPreviewChecks();
@@ -153,8 +157,9 @@ public partial class EnemyArtTest : LabSuiteBase
         }
         string prayerPath = EnemyAnimator.DefaultArtDirectory + "/spr_enemy_prayer_idle.png";
         string devoutPath = EnemyAnimator.DefaultArtDirectory + "/spr_enemy_devout_idle.png";
-        Check(EnemyAnimator.WarnedSizes.Contains(prayerPath) && !EnemyAnimator.WarnedSizes.Contains(devoutPath),
-            "尺寸警告：祈祷泥人 373×485 不是标准 512×512，给了警告（照样显示）；虔诚泥人 512×512 没有警告");
+        string guardPath = EnemyAnimator.DefaultArtDirectory + "/spr_enemy_temple_guard_idle.png";
+        Check(EnemyAnimator.WarnedSizes.Contains(prayerPath) && EnemyAnimator.WarnedSizes.Contains(devoutPath) && !EnemyAnimator.WarnedSizes.Contains(guardPath),
+            "尺寸警告：祈祷泥人 373×485 比一格小、虔诚泥人 2219×2564 不是 512 的整数倍，都给了警告（照样显示）；塔庙泥卫 512×512 没有警告");
     }
 
     // ---------- ② 显示节点 ----------
@@ -194,9 +199,9 @@ public partial class EnemyArtTest : LabSuiteBase
         SpriteFrames frames = sprite.SpriteFrames;
         EnemyData data = enemy.Data;
 
-        Check(frames.GetFrameCount("idle") == 1 && frames.GetFrameCount("attack_windup") == 3 && frames.GetFrameCount("dead") == 2 && frames.GetFrameCount("hurt") == 1
+        Check(frames.GetFrameCount("idle") == 2 && frames.GetFrameCount("attack_windup") == 3 && frames.GetFrameCount("dead") == 2 && frames.GetFrameCount("hurt") == 1
               && !frames.HasAnimation("attack_active") && !frames.HasAnimation("patrol"),
-            "命名查找：spr_enemy_prayer_<动作>.png 有的动作才有动画；帧数 = 宽 ÷ 高（前摇 1536×512 → 3，死亡 → 2，竖长单张 300×400 → 1）");
+            "命名查找：有图的动作才有动画；待机先找美术名 pray（1024×512 → 2 帧，优先于 idle 的图），死亡美术名 death 没有图就退回 dead（→ 2 帧）；前摇 1536×512 → 3；比一格小的 300×400 → 整张 1 帧");
         Check(frames.GetAnimationLoop("idle") && !frames.GetAnimationLoop("attack_windup") && Mathf.IsEqualApprox((float)frames.GetAnimationSpeed("attack_windup"), 12f),
             "循环和速度：待机循环，前摇不循环，12 帧/秒");
 
@@ -263,6 +268,99 @@ public partial class EnemyArtTest : LabSuiteBase
         Check(sprite.SpriteFrames == null && !anim.CurrentIsArt && !sprite.Visible && enemy.DrawsPlaceholder,
             "没有图的文件夹：全部是色块，死亡画红泥（和接入美术前一样）");
         await Despawn(enemy);
+    }
+
+    // ---------- ③ 严格按 512 格子切：网格、空格子、不是整数倍；美术名对照表 ----------
+
+    private async Task GridChecks()
+    {
+        // 纯切图：3 列 × 2 行、最后一格空 → 5 帧按行排；1300×600 → 2 列 × 1 行，丢掉多出来的部分并警告
+        var walk = GD.Load<Texture2D>(Fixture + "/spr_enemy_mason_walk.png");
+        Rect2[] cells = SpriteStrip.GridRegions(walk, 512, "测试");
+        var expected = new[] { new Vector2(0, 0), new Vector2(512, 0), new Vector2(1024, 0), new Vector2(0, 512), new Vector2(512, 512) };
+        Check(cells.Length == 5 && cells.Select(c => c.Position).SequenceEqual(expected) && cells.All(c => c.Size == new Vector2(512, 512)),
+            $"网格切图：1536×1024 按 512 切成 3 列 × 2 行，最后一格整格透明跳过 → 5 帧，从左到右、从上到下（{string.Join(" ", cells.Select(c => c.Position))}）");
+        var odd = GD.Load<Texture2D>(Fixture + "/spr_enemy_mason_attack.png");
+        Rect2[] oddCells = SpriteStrip.GridRegions(odd, 512, "测试");
+        Check(oddCells.Length == 2 && oddCells[1].Position == new Vector2(512, 0) && oddCells.All(c => c.Size == new Vector2(512, 512)),
+            "网格切图：1300×600 不是 512 的整数倍 → 严格切成 2 列 × 1 行，每格仍是 512×512，右边 / 下边多出来的不用");
+
+        // 泥匠：走路用美术名 walk（巡逻和追击同一张），攻击生效用 attack
+        EnemyBody mason = await Spawn("mason");
+        mason.Animator.UseArtDirectory(Fixture);
+        await ProcessFrames(1);
+        SpriteFrames frames = mason.Animator.Sprite.SpriteFrames;
+        bool shared = frames != null && frames.GetFrameCount("patrol") == 5 && frames.GetFrameCount("chase") == 5
+                      && ((AtlasTexture)frames.GetFrameTexture("patrol", 0)).Atlas == walk && ((AtlasTexture)frames.GetFrameTexture("chase", 0)).Atlas == walk;
+        Check(shared && frames.GetFrameCount("attack_active") == 2 && EnemyAnimator.WarnedSizes.Contains(odd.ResourcePath),
+            "美术名对照表：泥匠巡逻、追击都找 spr_enemy_mason_walk.png（5 帧），攻击生效找 spr_enemy_mason_attack.png（2 帧，尺寸不整给了警告）");
+
+        mason.Machine.TransitionTo<PatrolState>();
+        await ProcessFrames(1);
+        AnimatedSprite2D sprite = mason.Animator.Sprite;
+        Check(mason.Animator.CurrentAnimation == "patrol" && mason.Animator.CurrentIsArt && Mathf.IsEqualApprox(512f * sprite.Scale.Y, 128f) && Mathf.Abs(BottomOf(sprite, 512)) < 0.01f,
+            "网格图的每一格同样缩放到 128、格子底边在脚底");
+        await Despawn(mason);
+
+        Check(EnemyAnimator.ArtFileNames("prayer", "idle", new Dictionary<string, string> { ["idle"] = "pray" }).SequenceEqual(new[] { "spr_enemy_prayer_pray.png", "spr_enemy_prayer_idle.png" })
+              && EnemyAnimator.ArtFileNames("prayer", "hurt", null).SequenceEqual(new[] { "spr_enemy_prayer_hurt.png" }),
+            "找图顺序：先美术名，再动作名；没有对照的动作只找动作名");
+        var tables = new Dictionary<string, (string action, string art)[]>
+        {
+            ["prayer"] = new[] { ("idle", "pray"), ("attack_windup", "counter_windup"), ("attack_active", "counter"), ("attack_recover", "counter_recover"), ("dead", "death") },
+            ["devout"] = new[] { ("patrol", "walk"), ("chase", "walk"), ("attack_windup", "throw_windup"), ("attack_active", "throw"), ("attack_recover", "throw_recover"), ("dead", "death") },
+            ["temple_guard"] = new[] { ("patrol", "walk"), ("chase", "walk"), ("attack_windup", "charge_windup"), ("attack_active", "charge"), ("attack_recover", "charge_recover"), ("dead", "death") },
+            ["mason"] = new[] { ("patrol", "walk"), ("chase", "walk"), ("attack_active", "attack"), ("dead", "death") },
+        };
+        var wrong = new List<string>();
+        foreach (var (kind, pairs) in tables)
+        {
+            var data = GD.Load<EnemyData>($"res://assets/data/enemy/{kind}.tres");
+            foreach (var (action, art) in pairs)
+                if (!data.ArtNames.TryGetValue(action, out string got) || got != art) wrong.Add($"{kind}.{action}");
+        }
+        Check(wrong.Count == 0, "对照表：四种敌人的数据里按美术表填好了（祈祷泥人 pray / counter…，虔诚泥人 throw…，泥卫 charge…，泥匠 attack，走路 walk，死亡 death）"
+            + (wrong.Count > 0 ? "：缺 " + string.Join(", ", wrong) : ""));
+    }
+
+    /// <summary>仓库里虔诚泥人的正式序列帧（美术交来的这一套，文件名已改对）：严格按 512 切出来的帧数。</summary>
+    private async Task DevoutArtChecks()
+    {
+        EnemyBody devout = await Spawn("devout");
+        SpriteFrames frames = devout.Animator.Sprite.SpriteFrames;
+        var expected = new Dictionary<string, int>
+        {
+            ["idle"] = 17, ["patrol"] = 20, ["chase"] = 20, ["attack_windup"] = 30, ["attack_active"] = 2, ["attack_recover"] = 18, ["hurt"] = 11,
+        };
+        var got = expected.Keys.ToDictionary(a => a, a => frames != null && frames.HasAnimation(a) ? frames.GetFrameCount(a) : 0);
+        Check(expected.All(e => got[e.Key] == e.Value) && frames != null && !frames.HasAnimation("dead"),
+            "虔诚泥人正式图：严格按 512 切，空格子跳过 → " + string.Join("、", got.Select(g => $"{g.Key} {g.Value}"))
+            + "（walk 用于巡逻和追击；还没有 death 图，死亡仍是色块）");
+        devout.Machine.TransitionTo<HurtState>();
+        await ProcessFrames(1);
+        float scale = 11f / (12f * devout.Data.HurtStun);
+        Check(devout.Animator.CurrentIsArt && Mathf.Abs(devout.Animator.CurrentSpeedScale - scale) < 0.0001f,
+            $"虔诚泥人受伤：11 帧整段压进 {devout.Data.HurtStun} 秒（速度倍率 {devout.Animator.CurrentSpeedScale:F2}）");
+        await Despawn(devout);
+    }
+
+    /// <summary>虔诚泥人扔出去的泥肝用美术的图；主角扔的泥肝不受影响。</summary>
+    private async Task ProjectileArtChecks()
+    {
+        var devoutData = GD.Load<EnemyData>("res://assets/data/enemy/devout.tres");
+        var playerSpec = GD.Load<SonOfMud.Combat.ProjectileSpec>("res://assets/data/combat/mud_liver_projectile.tres");
+        Check(devoutData.ThrowSpec?.Texture?.ResourcePath == "res://assets/art/enemy/spr_enemy_devout_projectile.png" && playerSpec.Texture == null
+              && devoutData.ThrowSpec != playerSpec && Mathf.IsEqualApprox(devoutData.ThrowSpec.Gravity, playerSpec.Gravity) && Mathf.IsEqualApprox(devoutData.ThrowSpec.Radius, playerSpec.Radius),
+            "泥肝：虔诚泥人用自己的投掷物设置（带图 spr_enemy_devout_projectile.png，飞行参数和原来一样），主角的泥肝设置没有图、不受影响");
+
+        Hit hit = Hit.From(devoutData.AttackSpec, "test_throw", new Vector2(100, 100), 1f, null);
+        var flying = SonOfMud.Combat.Projectile.Launch(_stage, new Vector2(100, 100), new Vector2(300, -200), hit, SonOfMud.Combat.ProjectileTeam.Enemy, devoutData.ThrowSpec);
+        var plain = SonOfMud.Combat.Projectile.Launch(_stage, new Vector2(300, 100), new Vector2(300, -200), hit, SonOfMud.Combat.ProjectileTeam.Enemy, playerSpec);
+        await ProcessFrames(1);
+        Check(flying.DrawsTexture && !plain.DrawsTexture, "泥肝：虔诚泥人扔出的泥肝飞行时画图，用主角设置扔出的仍画圆");
+        flying.QueueFree();
+        plain.QueueFree();
+        await ProcessFrames(1);
     }
 
     // ---------- ③ 测试图：守坑人 ----------
@@ -397,9 +495,11 @@ public partial class EnemyArtTest : LabSuiteBase
             if (sprite.PreviewShown)
             {
                 string preview = kind == "keeper" ? "dormant" : "idle";
-                var art = GD.Load<Texture2D>($"{Fixture}/spr_enemy_{kind}_{preview}.png");
+                // 祈祷泥人的待机按美术名找到 pray（测试图 1024×512 → 2 帧）
+                var art = GD.Load<Texture2D>(kind == "prayer" ? $"{Fixture}/spr_enemy_prayer_pray.png" : $"{Fixture}/spr_enemy_{kind}_{preview}.png");
                 int h = EnemyAnimator.FrameHeight(sprite.SpriteFrames, sprite.Animation);
-                if (sprite.PreviewAction == preview && sprite.SpriteFrames.GetFrameTexture(sprite.Animation, 0) == art
+                Texture2D first = sprite.SpriteFrames.GetFrameTexture(sprite.Animation, 0);
+                if (sprite.PreviewAction == preview && (first == art || (first as AtlasTexture)?.Atlas == art)
                     && Mathf.IsEqualApprox(h * sprite.Scale.Y, canvas) && Mathf.Abs(BottomOf(sprite, h)) < 0.01f) shown.Add(kind);
                 else shown.Add(kind + "(尺寸不对)");
             }

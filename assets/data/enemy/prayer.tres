@@ -12,6 +12,7 @@ Chance = 0.3
 [resource]
 script = ExtResource("1")
 Kind = &"prayer"
+ArtNames = Dictionary[String, String]({"idle": "pray", "attack_windup": "counter_windup", "attack_active": "counter", "attack_recover": "counter_recover", "dead": "death"})
 DisplayName = "祈祷泥人"
 MoveSpeed = 0.0
 BodySize = Vector2(48, 56)

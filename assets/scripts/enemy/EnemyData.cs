@@ -27,6 +27,12 @@ public partial class EnemyData : KeptResource
     /// 和主角同一个比例（源图 4 像素 = 游戏里 1 像素）。源图不是标准尺寸也照样缩放到这个大小，但会给警告。
     /// </summary>
     [Export] public float ArtCanvas { get; set; } = 128f;
+    /// <summary>
+    /// 动作名 → 美术名：文件名先按美术名找 spr_enemy_&lt;Kind&gt;_&lt;美术名&gt;.png，没有再按动作名找。
+    /// 动作名：idle / patrol / chase / attack_windup / attack_active / attack_recover / hurt / flee / dead（守坑人另有自己的）。
+    /// 例：祈祷泥人 idle → pray、attack_active → counter；所有敌人 dead → death；走路的 patrol、chase → walk。
+    /// </summary>
+    [Export] public Godot.Collections.Dictionary<string, string> ArtNames { get; set; } = new();
 
     [ExportGroup("感知与巡逻")]
     /// <summary>水平方向看得见玩家的距离。</summary>
