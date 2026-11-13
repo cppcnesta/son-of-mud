@@ -7,6 +7,7 @@
 script = ExtResource("1")
 AttackSpec = ExtResource("2")
 Kind = &"mason"
+ArtNames = Dictionary[String, String]({"patrol": "walk", "chase": "walk", "attack_active": "attack", "dead": "death"})
 DisplayName = "塔庙泥匠"
 MaxHealth = 40
 Behaviour = 1

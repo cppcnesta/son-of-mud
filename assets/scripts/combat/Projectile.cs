@@ -30,6 +30,10 @@ public partial class Projectile : HitBox
     public float MaxLifetime { get; set; } = 4f;
     public ProjectileTeam Team { get; private set; } = ProjectileTeam.Enemy;
     public Color Tint { get; set; } = new(0.55f, 0.2f, 0.16f);
+    /// <summary>飞行时显示的图（见 ProjectileSpec.Texture）；为空画圆。</summary>
+    public Texture2D Texture { get; set; }
+    /// <summary>源图像素 ÷ 游戏像素（和角色美术一样）。</summary>
+    public const float TextureSourceScale = 4f;
 
     /// <summary>已经飞了多久（秒）。</summary>
     public float Age { get; private set; }
@@ -61,6 +65,7 @@ public partial class Projectile : HitBox
             Gravity = spec?.Gravity ?? 1200f,
             MaxLifetime = spec?.MaxLifetime ?? 4f,
             Tint = spec?.Tint ?? new Color(0.55f, 0.2f, 0.16f),
+            Texture = spec?.Texture,
         };
         projectile.Setup(team, spec?.Radius ?? DefaultRadius, hit);
         parent.AddChild(projectile);
@@ -187,6 +192,20 @@ public partial class Projectile : HitBox
 
     public override void _Draw()
     {
-        if (!Ended) DrawCircle(Vector2.Zero, Radius, Tint);
+        if (Ended) return;
+        if (Texture == null)
+        {
+            DrawCircle(Vector2.Zero, Radius, Tint);
+            return;
+        }
+        // 图画朝左：朝飞行方向转（速度为 0 时朝左不转）
+        float angle = Velocity.LengthSquared() > 0.01f ? Velocity.Angle() + Mathf.Pi : 0f;
+        float scale = 1f / TextureSourceScale;
+        DrawSetTransform(Vector2.Zero, angle, new Vector2(scale, scale));
+        DrawTexture(Texture, -Texture.GetSize() * 0.5f);
+        DrawSetTransform(Vector2.Zero, 0f, Vector2.One);
     }
+
+    /// <summary>现在画的是图（不是占位圆）。</summary>
+    public bool DrawsTexture => !Ended && Texture != null;
 }
