@@ -16,6 +16,8 @@ namespace SonOfMud.World;
 ///     Tree（Parallax2D，物件视差，Z −40）→ Image                      tex_bg_s1_03_tool_tree.png
 ///     Cloud …（每张物件图一个，各自的视差和层级）
 /// </code>
+/// 一层也可以分成几张图（tex_bg_s1_03_front_01.png、_front_02.png …）：这一层的节点变成收纳用的 Node2D，
+/// 下面 Front01、Front02 …各一个 Parallax2D，默认视差同这一层，层级 −60、−61 …（01 在最上面，编号越大越靠后）。见 <see cref="PlanPieces"/>。
 /// 层级都是绝对值（Z As Relative 关掉），直接和地形、主角的 0 比；Image 保持相对 0，跟随所在的层。
 /// 先找房间专属图（s1_03），再找区域通用图（s1）。导入后这些节点完全归人手动调整。
 ///
@@ -45,6 +47,10 @@ public static class BackgroundImporter
     public const string Tool = "tool";
     /// <summary>物件节点上记的元数据：物件标识（如 "tree"）。</summary>
     public const string ToolMeta = "bg_tool";
+    /// <summary>分张节点上记的元数据：层和编号（如 "front_01"）。</summary>
+    public const string PieceMeta = "bg_piece";
+    /// <summary>一层最多分几张：默认层级每张差 1，19 张以内不会碰到下一层（层与层之间差 20）。</summary>
+    public const int MaxPieces = 19;
     /// <summary>Background 上记的版本号。没有或小于 <see cref="CurrentVersion"/> 的旧版背景，再导入时升级一次。</summary>
     public const string VersionMeta = "bg_version";
     public const int CurrentVersion = 2;
@@ -93,12 +99,14 @@ public static class BackgroundImporter
         public readonly List<(Sprite2D image, Texture2D texture)> Retextures = new();
         /// <summary>给已有的物件节点补记物件标识。</summary>
         public readonly List<(Node node, string key)> ToolTags = new();
+        /// <summary>给已有的分张节点补记分张标识（front_01）。</summary>
+        public readonly List<(Node node, string label)> PieceTags = new();
         /// <summary>要记上版本号的已有 Background（旧版升级）。</summary>
         public Node UpgradeBackground;
         public readonly List<string> Messages = new();
 
         public bool Empty => NewBackground == null && NewNodes.Count == 0 && Wraps.Count == 0 && Properties.Count == 0
-                             && Retextures.Count == 0 && ToolTags.Count == 0 && UpgradeBackground == null;
+                             && Retextures.Count == 0 && ToolTags.Count == 0 && PieceTags.Count == 0 && UpgradeBackground == null;
     }
 
     // =================================================================
@@ -160,6 +168,14 @@ public static class BackgroundImporter
                 plan.Properties.Add((item, CanvasItem.PropertyName.ZIndex, settings.ZOf(layer), 0));
                 plan.Properties.Add((item, CanvasItem.PropertyName.ZAsRelative, false, true));
                 plan.Messages.Add($"{room.RoomId} 的 {NodeName}/{old.Name} 补上层级 {settings.ZOf(layer)}。");
+            }
+
+            // 分张：tex_bg_s1_03_front_01.png、_front_02.png …，每张一个节点
+            SortedDictionary<int, string> pieces = ResolvePieces(settings, room.RoomId, layer, plan.Messages);
+            if (pieces.Count > 0)
+            {
+                PlanPieces(plan, room.RoomId, layer, pieces, settings, roomSize, screen, known, AddLayer);
+                continue;
             }
 
             Texture2D texture = textureOverride?.Invoke(layer);
@@ -257,6 +273,160 @@ public static class BackgroundImporter
         }
         if (newToolLayer != null) AddLayer(Tool, newToolLayer);
         return plan;
+    }
+
+    /// <summary>
+    /// 一层分成几张图：这一层的节点（Front 等）只是收纳用的 Node2D，下面每张一个 Parallax2D（Front01、Front02 …）→ Image。
+    /// 第 n 张默认层级 = 这一层的层级 −(n−1)：01 在最上面，编号越大越靠后；视差默认都用这一层的。
+    /// 已有的分张按 <see cref="PieceMeta"/> 认（没有时按图片文件名），只换图；缺的补上，按编号插到对的位置。
+    /// 这一层已经是单张图（Parallax2D 下面直接是 Image）时不自动拆，只提示。
+    /// </summary>
+    private static void PlanPieces(ImportPlan plan, string roomId, string layer, SortedDictionary<int, string> pieces, BackgroundSettings settings,
+                                   Vector2 roomSize, Vector2 screen, Dictionary<string, Node> known, Action<string, Node> addLayer)
+    {
+        string title = LayerTitle(layer);
+        if (ResolvePath(settings, roomId, layer) is string single)
+            plan.Messages.Add($"{roomId} 的{title}有分张图，单张的 {single.GetFile()} 没用上。");
+
+        Node container = known.GetValueOrDefault(layer);
+        if (container != null && (container is Parallax2D || FindChild(container, ImageName) is Sprite2D))
+        {
+            plan.Messages.Add($"{roomId} 的 {NodeName}/{container.Name} 已经是单张图，没有自动拆成分张（会丢掉你调好的位置）。"
+                              + $"要按分张导入，先删掉 {container.Name} 节点再点导入。");
+            return;
+        }
+
+        // 模拟收纳节点的子节点顺序：新的一张插到编号比它大的第一张前面
+        var order = container?.GetChildren().ToList() ?? new List<Node>();
+        var existing = new Dictionary<int, Node>();
+        var names = new HashSet<string>(order.Select(n => n.Name.ToString()));
+        foreach (Node child in order)
+            if (PieceNumberOf(child, layer) is int n && !existing.ContainsKey(n)) existing[n] = child;
+        var numbers = order.ToDictionary(n => n, n => PieceNumberOf(n, layer) ?? int.MaxValue);
+
+        Node2D fresh = null;
+        Vector2 p = settings.ScrollOf(layer);
+        foreach ((int number, string path) in pieces)
+        {
+            Texture2D texture = GD.Load<Texture2D>(path);
+            if (texture == null)
+            {
+                plan.Messages.Add($"分张图 {path} 加载失败，跳过。");
+                continue;
+            }
+            string label = $"{layer}_{number:00}";
+            if (existing.TryGetValue(number, out Node found))
+            {
+                if (!found.HasMeta(PieceMeta))
+                {
+                    plan.PieceTags.Add((found, label));
+                    plan.Messages.Add($"{roomId} 认出 {found.Name} 是{title}第 {number:00} 张，记上分张标识。");
+                }
+                if (ImageOfItem(found) is Sprite2D image) PlanRetexture(plan, image, texture, $"{roomId} 的{title}第 {number:00} 张（{found.Name}）", path);
+                else plan.Messages.Add($"{roomId} 的{title}第 {number:00} 张（{found.Name}）下面没有 {ImageName}，没有换图。");
+                continue;
+            }
+
+            string name = UniqueName($"{LayerNodeName(layer)}{number:00}", names);
+            names.Add(name);
+            int z = settings.ZOf(layer) - (number - 1);
+            var piece = new Parallax2D { Name = name, ScrollScale = p, ZIndex = z, ZAsRelative = false };
+            piece.SetMeta(PieceMeta, label);
+            (Sprite2D sprite, float scale) = Fitted(ImageName, texture, roomSize, screen, p, settings.ShakeMargin);
+            piece.AddChild(sprite);
+            plan.Messages.Add($"{roomId} 导入{title}第 {number:00} 张 {path}（节点 {name}，视差 {p}，层级 {z}，缩放到 {scale:0.###} 倍刚好盖满）。");
+
+            if (container == null)
+            {
+                fresh ??= new Node2D { Name = LayerNodeName(layer) };
+                fresh.AddChild(piece);
+                continue;
+            }
+            int at = order.FindIndex(n => numbers[n] > number);
+            if (at < 0) at = order.Count;
+            order.Insert(at, piece);
+            numbers[piece] = number;
+            plan.NewNodes.Add((container, piece, at));
+        }
+        if (fresh != null) addLayer(layer, fresh);
+    }
+
+    /// <summary>分张节点的编号：有元数据（far_02）用元数据，没有就按它的图片文件名认。认不出返回 null。</summary>
+    public static int? PieceNumberOf(Node node, string layer)
+    {
+        if (node == null) return null;
+        if (node.HasMeta(PieceMeta))
+        {
+            string meta = node.GetMeta(PieceMeta).AsString().ToLowerInvariant();
+            string prefix = layer + "_";
+            return meta.StartsWith(prefix) && int.TryParse(meta[prefix.Length..], out int n) ? n : null;
+        }
+        return PieceOfPath(ImageOfItem(node)?.Texture?.ResourcePath) is (string l, int number) && l == layer ? number : null;
+    }
+
+    private static readonly System.Text.RegularExpressions.Regex PiecePattern =
+        new(@"^tex_bg_([a-z0-9]+(?:_[a-z0-9]+)?)_(far|mid|front)_(\d{1,2})\.png$", System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+
+    /// <summary>tex_bg_s1_03_front_01.png → (front, 1)；tex_bg_s1_mid_2.png → (mid, 2)；不是分张图（含物件图）返回 null。</summary>
+    public static (string layer, int number)? PieceOfPath(string path)
+    {
+        var match = PiecePattern.Match((path ?? "").GetFile());
+        if (!match.Success) return null;
+        int number = int.Parse(match.Groups[3].Value);
+        return number >= 1 && number <= MaxPieces ? (match.Groups[2].Value.ToLowerInvariant(), number) : null;
+    }
+
+    /// <summary>
+    /// 一层的分张图：区域通用的 tex_bg_s1_front_01.png 和房间专属的 tex_bg_s1_03_front_01.png，按编号排序；同一个编号两边都有时用房间专属的。
+    /// 同一边同一个编号写法重复（front_1 和 front_01）时用两位数的写法，其余的提示没用上，不看文件顺序。
+    /// </summary>
+    public static SortedDictionary<int, string> ResolvePieces(BackgroundSettings settings, string roomId, string layer, List<string> messages = null)
+    {
+        var result = new SortedDictionary<int, string>();
+        if (settings == null || !TryParseRoom(roomId, out string region, out string roomKey)) return result;
+        string dir = $"{settings.ArtRoot.TrimEnd('/')}/{region}";
+        SortedSet<string> files = PngFiles(dir);
+        foreach (string owner in new[] { region, roomKey }) // 后面的覆盖前面的：房间专属优先
+        {
+            var mine = new SortedDictionary<int, List<string>>();
+            foreach (string file in files)
+            {
+                var match = PiecePattern.Match(file);
+                if (!match.Success || !string.Equals(match.Groups[1].Value, owner, StringComparison.OrdinalIgnoreCase)
+                    || !string.Equals(match.Groups[2].Value, layer, StringComparison.OrdinalIgnoreCase)) continue;
+                int number = int.Parse(match.Groups[3].Value);
+                if (number < 1 || number > MaxPieces)
+                {
+                    messages?.Add($"分张图 {file} 的编号要在 01–{MaxPieces:00} 之间，跳过。");
+                    continue;
+                }
+                (mine.TryGetValue(number, out var list) ? list : mine[number] = new List<string>()).Add(file);
+            }
+            foreach ((int number, List<string> list) in mine)
+            {
+                string standard = $"tex_bg_{owner}_{layer}_{number:00}.png";
+                string pick = list.FirstOrDefault(f => string.Equals(f, standard, StringComparison.OrdinalIgnoreCase)) ?? list.Min(StringComparer.Ordinal);
+                if (list.Count > 1)
+                    messages?.Add($"{LayerTitle(layer)}第 {number:00} 张有 {list.Count} 个文件（{string.Join("、", list)}），用 {pick}，其余没用上。");
+                result[number] = $"{dir}/{pick}";
+            }
+        }
+        return result;
+    }
+
+    /// <summary>目录里的 png 文件名（导出后的游戏里只剩 .import / .remap，去掉后缀还原），按名字排序；目录不存在时为空。</summary>
+    private static SortedSet<string> PngFiles(string dir)
+    {
+        var files = new SortedSet<string>(StringComparer.Ordinal);
+        if (!DirAccess.DirExistsAbsolute(dir)) return files;
+        foreach (string file in DirAccess.GetFilesAt(dir))
+        {
+            string name = file;
+            foreach (string suffix in new[] { ".import", ".remap" })
+                if (name.EndsWith(suffix, StringComparison.OrdinalIgnoreCase)) name = name[..^suffix.Length];
+            if (name.EndsWith(".png", StringComparison.OrdinalIgnoreCase)) files.Add(name);
+        }
+        return files;
     }
 
     /// <summary>
@@ -472,6 +642,11 @@ public static class BackgroundImporter
             sink.DoMethod(node, GodotObject.MethodName.SetMeta, ToolMeta, key);
             sink.UndoMethod(node, GodotObject.MethodName.RemoveMeta, ToolMeta);
         }
+        foreach ((Node node, string label) in plan.PieceTags)
+        {
+            sink.DoMethod(node, GodotObject.MethodName.SetMeta, PieceMeta, label);
+            sink.UndoMethod(node, GodotObject.MethodName.RemoveMeta, PieceMeta);
+        }
     }
 
     /// <summary>直接执行导入（游戏里 / 测试用；编辑器里由 RoomRoot 通过撤销管理器执行同样的步骤）。</summary>
@@ -496,11 +671,20 @@ public static class BackgroundImporter
                 if (!moved.Position.IsEqualApprox(moved.ScrollOffset))
                     problems.Add($"{NodeName}/{background.GetPathTo(moved)} 节点本身被挪到了 {moved.Position.Round()}，游戏运行时它会被视差重置回 {moved.ScrollOffset.Round()}。"
                                  + $"要挪动它，请调它下面的 {ImageName}（或改 Scroll Offset）。");
-        if (FindLayer(background, Far) is not Parallax2D far) return problems;
+        Node farLayer = FindLayer(background, Far);
+        string what = "最远景";
+        Parallax2D far = farLayer as Parallax2D;
+        if (far == null && farLayer != null)
+        {
+            // 远景分张：用编号最大的那张兜底（默认它在最后面），它要能盖满画面
+            far = farLayer.GetChildren().OfType<Parallax2D>().Where(c => PieceNumberOf(c, Far) != null).MaxBy(c => PieceNumberOf(c, Far));
+            if (far != null) what = $"最远景的兜底图 {far.Name}";
+        }
+        if (far == null) return problems;
         Sprite2D image = FindChild(far, ImageName) as Sprite2D;
         if (image?.Texture == null)
         {
-            problems.Add($"{NodeName}/{far.Name} 下面没有带图的 {ImageName}，没法检查会不会露底。");
+            problems.Add($"{NodeName}/{background.GetPathTo(far)} 下面没有带图的 {ImageName}，没法检查会不会露底。");
             return problems;
         }
         if (!TryRoomSize(room.RoomId, out Vector2 roomSize)) return problems;
@@ -517,7 +701,8 @@ public static class BackgroundImporter
         {
             var c = new Vector2(sx < 0 ? -m : travel.X + m, sy < 0 ? -m : travel.Y + m);
             Vector2 parallaxPos = far.ScrollOffset + (Vector2.One - far.ScrollScale) * c;
-            Rect2 onScreen = TransformRect(background.Transform, new Rect2(local.Position + parallaxPos, local.Size));
+            Rect2 onScreen = TransformRect(background.Transform * (far.GetParent() is Node2D holder && holder != background ? holder.Transform : Transform2D.Identity),
+                                           new Rect2(local.Position + parallaxPos, local.Size));
             onScreen.Position -= c;
             float left = onScreen.Position.X, top = onScreen.Position.Y;
             float right = screen.X - onScreen.End.X, bottom = screen.Y - onScreen.End.Y;
@@ -527,7 +712,7 @@ public static class BackgroundImporter
             if (top > 0.5f) gaps.Add($"上边 {Mathf.CeilToInt(top)}");
             if (bottom > 0.5f) gaps.Add($"下边 {Mathf.CeilToInt(bottom)}");
             if (gaps.Count > 0)
-                problems.Add($"镜头在房间{corners[index]}角{(withShake ? "（含震屏）" : "")}时，最远景{string.Join("、", gaps)} 像素露底。");
+                problems.Add($"镜头在房间{corners[index]}角{(withShake ? "（含震屏）" : "")}时，{what}{string.Join("、", gaps)} 像素露底。");
             index++;
         }
         return problems;
@@ -587,15 +772,7 @@ public static class BackgroundImporter
         var result = new SortedDictionary<string, string>(StringComparer.Ordinal);
         if (settings == null || !TryParseRoom(roomId, out string region, out string roomKey)) return result;
         string dir = $"{settings.ArtRoot.TrimEnd('/')}/{region}";
-        if (!DirAccess.DirExistsAbsolute(dir)) return result;
-        var files = new SortedSet<string>(StringComparer.Ordinal);
-        foreach (string file in DirAccess.GetFilesAt(dir))
-        {
-            string name = file;
-            foreach (string suffix in new[] { ".import", ".remap" })
-                if (name.EndsWith(suffix, StringComparison.OrdinalIgnoreCase)) name = name[..^suffix.Length];
-            if (name.EndsWith(".png", StringComparison.OrdinalIgnoreCase)) files.Add(name);
-        }
+        SortedSet<string> files = PngFiles(dir);
         foreach (string prefix in new[] { $"tex_bg_{region}_{Tool}_", $"tex_bg_{roomKey}_{Tool}_" }) // 后面的覆盖前面的：房间专属优先
             foreach (string file in files)
                 if (file.StartsWith(prefix, StringComparison.OrdinalIgnoreCase) && ToolKeyOfPath(file) is string key)

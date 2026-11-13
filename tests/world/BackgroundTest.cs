@@ -22,6 +22,12 @@ public partial class BackgroundTest : FlowTestBase
     /// <summary>s1 下有区域通用的 tool_tree，以及 S1_03 专属的 tool_tree（更大）和 tool_big_cloud。</summary>
     private const string RoomToolRoot = "res://tests/world/fixtures/bg_room";
     private const string MissingRoot = "res://tests/world/fixtures/bg_none";
+    /// <summary>分张：S1_03 专属 front_01/02/03、单张 front、far_01/02；区域通用 front_02。</summary>
+    private const string PiecesRoot = "res://tests/world/fixtures/bg_pieces";
+    /// <summary>分张：S1_03 专属 front_01–04（和 PiecesRoot 不同的图）。</summary>
+    private const string PiecesMoreRoot = "res://tests/world/fixtures/bg_pieces_more";
+    /// <summary>分张写法重复：front_1 和 front_01，另有 front_3、编号超出范围的 front_20。</summary>
+    private const string PiecesDupRoot = "res://tests/world/fixtures/bg_pieces_dup";
 
     private Rect2 Screen => GetViewport().GetVisibleRect();
     private Vector2 ViewTopLeft => -GetViewport().GetCanvasTransform().Origin;
@@ -42,6 +48,7 @@ public partial class BackgroundTest : FlowTestBase
         await ReimportChecks();
         await FileLookupChecks();
         await ToolImportChecks();
+        await PieceChecks();
         await UpgradeChecks();
         await HandBuiltChecks();
         await ZFillChecks();
@@ -111,6 +118,31 @@ public partial class BackgroundTest : FlowTestBase
         Check(string.Join(",", otherRoom.Keys) == "tree" && otherRoom["tree"] == $"{RoomToolRoot}/s1/tex_bg_s1_tool_tree.png",
             "查物件图：别的房间的专属图不会被拿来用，只用区域图");
         Check(BackgroundImporter.ResolveTools(new BackgroundSettings { ArtRoot = MissingRoot }, "S1_03").Count == 0, "查物件图：目录不存在时没有物件");
+
+        // 分张命名
+        Check(BackgroundImporter.PieceOfPath("res://a/s1/tex_bg_s1_03_front_01.png") == ("front", 1)
+              && BackgroundImporter.PieceOfPath("res://a/s1/tex_bg_s1_mid_2.png") == ("mid", 2)
+              && BackgroundImporter.PieceOfPath("res://a/s1/tex_bg_s1_03_far_19.png") == ("far", 19)
+              && BackgroundImporter.PieceOfPath("res://a/s1/tex_bg_s1_03_tool_front_01.png") == null
+              && BackgroundImporter.PieceOfPath("res://a/s1/tex_bg_s1_03_front_20.png") == null
+              && BackgroundImporter.PieceOfPath("res://a/s1/tex_bg_s1_03_front.png") == null
+              && BackgroundImporter.PieceOfPath(null) == null,
+            "分张命名：front_01 → 近景第 1 张，mid_2 → 中景第 2 张；物件图 tool_front_01、编号 20、不带编号的都不算分张");
+        var pieces = new BackgroundSettings { ArtRoot = PiecesRoot };
+        var roomPieces = BackgroundImporter.ResolvePieces(pieces, "S1_03", BackgroundImporter.Front);
+        var regionPieces = BackgroundImporter.ResolvePieces(pieces, "S1_02", BackgroundImporter.Front);
+        Check(string.Join(",", roomPieces.Keys) == "1,2,3" && roomPieces[2] == $"{PiecesRoot}/s1/tex_bg_s1_03_front_02.png",
+            $"查分张图：同一个编号区域图和房间专属图都有时用房间专属的（{string.Join(" / ", roomPieces.Values)}）");
+        Check(string.Join(",", regionPieces.Keys) == "2" && regionPieces[2] == $"{PiecesRoot}/s1/tex_bg_s1_front_02.png",
+            "查分张图：别的房间只用区域通用的分张图");
+        var dupMessages = new List<string>();
+        var dup = BackgroundImporter.ResolvePieces(new BackgroundSettings { ArtRoot = PiecesDupRoot }, "S1_03", BackgroundImporter.Front, dupMessages);
+        var dupAgain = BackgroundImporter.ResolvePieces(new BackgroundSettings { ArtRoot = PiecesDupRoot }, "S1_03", BackgroundImporter.Front);
+        Check(string.Join(",", dup.Keys) == "1,3" && dup[1].EndsWith("tex_bg_s1_03_front_01.png") && dup[3].EndsWith("tex_bg_s1_03_front_3.png")
+              && dup.SequenceEqual(dupAgain)
+              && dupMessages.Any(m => m.Contains("第 01 张有 2 个文件") && m.Contains("用 tex_bg_s1_03_front_01.png"))
+              && dupMessages.Any(m => m.Contains("tex_bg_s1_03_front_20.png") && m.Contains("01–19")),
+            $"查分张图：front_1 和 front_01 重复时用两位数的 front_01 并提示；只有 front_3 时照样用；编号 20 超范围跳过并提示（{string.Join(" | ", dupMessages)}）");
     }
 
     // =================================================================
@@ -190,6 +222,7 @@ public partial class BackgroundTest : FlowTestBase
         {
             string line = $"{indent}{node.Name}:{node.GetClass()} owner={(node.Owner == Room ? "房间" : node.Owner?.Name ?? "无")}";
             if (node.HasMeta(BackgroundImporter.ToolMeta)) line += $" meta={node.GetMeta(BackgroundImporter.ToolMeta)}";
+            if (node.HasMeta(BackgroundImporter.PieceMeta)) line += $" piece={node.GetMeta(BackgroundImporter.PieceMeta)}";
             if (node.HasMeta(BackgroundImporter.VersionMeta)) line += $" version={node.GetMeta(BackgroundImporter.VersionMeta)}";
             if (node is CanvasItem ci) line += $" z={ci.ZIndex}{(ci.ZAsRelative ? "相对" : "绝对")}";
             // Parallax2D 的 position 运行时由镜头决定，不比；其余变换都比
@@ -426,6 +459,111 @@ public partial class BackgroundTest : FlowTestBase
         SceneState state = packed.GetState();
         int toolNodes = Enumerable.Range(0, state.GetNodeCount()).Count(i => state.GetNodePath(i).ToString().Contains("Background/Tool/"));
         Check(toolNodes == 4, $"物件：保存房间场景时物件节点和它们的 Image 都会被写进去（{toolNodes} 个）");
+        RemoveBackground();
+    }
+
+    // =================================================================
+    // 分张：一层拆成几张图（front_01 在最上面，编号越大越靠后）
+    // =================================================================
+
+    private Node LayerNode(string layer) => BackgroundImporter.FindLayer(Bg, layer);
+    private Parallax2D Piece(string layer, int n) => LayerNode(layer)?.GetChildren().OfType<Parallax2D>().FirstOrDefault(c => BackgroundImporter.PieceNumberOf(c, layer) == n);
+
+    private async Task PieceChecks()
+    {
+        await Teleport("S1_03", SpawnPoint.DefaultId);
+        RemoveBackground();
+        var plan = Import(PiecesRoot);
+        await Frames(1);
+        Node front = LayerNode(BackgroundImporter.Front);
+        Parallax2D f1 = Piece("front", 1), f2 = Piece("front", 2), f3 = Piece("front", 3);
+        string P(int n) => $"{PiecesRoot}/s1/tex_bg_s1_03_front_{n:00}.png";
+        Check(front != null && front.GetType() == typeof(Node2D) && front.GetChildCount() == 3
+              && f1?.Name == "Front01" && f2?.Name == "Front02" && f3?.Name == "Front03" && f1.GetIndex() == 0 && f2.GetIndex() == 1 && f3.GetIndex() == 2
+              && PathOf(f1) == P(1) && PathOf(f2) == P(2) && PathOf(f3) == P(3)
+              && f1.GetMeta(BackgroundImporter.PieceMeta).AsString() == "front_01" && f3.GetMeta(BackgroundImporter.PieceMeta).AsString() == "front_03"
+              && new Node[] { front, f1, f2, f3, BackgroundImporter.ImageOfItem(f2) }.All(n => n?.Owner == Room),
+            $"分张：近景三张导入成 Background/Front（收纳用的 Node2D）→ Front01、Front02、Front03（各一个 Parallax2D）→ Image，场景树里 01 在最上面，所有者是房间（{string.Join(" / ", plan.Messages)}）");
+        Check(new[] { f1, f2, f3 }.All(f => f.ScrollScale == _settings.FrontScroll && !f.ZAsRelative)
+              && f1.ZIndex == _settings.FrontZ && f2.ZIndex == _settings.FrontZ - 1 && f3.ZIndex == _settings.FrontZ - 2
+              && EffectiveZ(BackgroundImporter.ImageOfItem(f1)) > EffectiveZ(BackgroundImporter.ImageOfItem(f2))
+              && EffectiveZ(BackgroundImporter.ImageOfItem(f2)) > EffectiveZ(BackgroundImporter.ImageOfItem(f3))
+              && EffectiveZ(BackgroundImporter.ImageOfItem(f3)) > _settings.MidZ,
+            $"分张：视差都是近景的 {_settings.FrontScroll}；层级 {f1.ZIndex}/{f2.ZIndex}/{f3.ZIndex}，01 画在最上面，03 最靠后，仍在中景前面");
+        Parallax2D far1 = Piece("far", 1), far2 = Piece("far", 2);
+        Check(LayerNode(BackgroundImporter.Far)?.GetType() == typeof(Node2D) && far1 != null && far2 != null
+              && far1.ZIndex == _settings.FarZ && far2.ZIndex == _settings.FarZ - 1 && far1.ScrollScale == _settings.FarScroll
+              && plan.Messages.Any(m => m.Contains("tex_bg_s1_03_front.png 没用上")),
+            "分张：远景同样能分张（Far01 −100、Far02 −101）；同时有单张 front.png 时用分张，提示单张没用上");
+
+        // 手调 Front02 后用另一套图再导入：只换图，补一张 04，调过的都保留
+        Sprite2D f2Image = BackgroundImporter.ImageOfItem(f2);
+        f2.ScrollScale = new Vector2(0.7f, 0.7f);
+        f2.ZIndex = -50;
+        f2Image.Position += new Vector2(33, -12);
+        f2Image.Scale *= 1.25f;
+        Vector2 tunedPos = f2Image.Position, tunedScale = f2Image.Scale;
+        var more = Import(PiecesMoreRoot);
+        await Frames(1);
+        Parallax2D f4 = Piece("front", 4);
+        string M(int n) => $"{PiecesMoreRoot}/s1/tex_bg_s1_03_front_{n:00}.png";
+        Check(Piece("front", 2) == f2 && f2.ScrollScale == new Vector2(0.7f, 0.7f) && f2.ZIndex == -50 && f2Image.Position == tunedPos && f2Image.Scale == tunedScale
+              && PathOf(f1) == M(1) && PathOf(f2) == M(2) && PathOf(f3) == M(3)
+              && f4 != null && f4.Name == "Front04" && f4.GetIndex() == 3 && f4.ZIndex == _settings.FrontZ - 3 && front.GetChildCount() == 4
+              && more.Retextures.Count == 3 && more.NewNodes.Count == 1,
+            $"分张再导入：三张原节点换图（Front02 调过的视差 0.7、层级 −50、位置、缩放都保留），补一张 Front04（层级 {f4?.ZIndex}，排在最后）（{string.Join(" / ", more.Messages)}）");
+        var again = BackgroundImporter.PlanImport(Room, At(PiecesMoreRoot));
+        Check(again.NewNodes.Count == 0 && again.Retextures.Count == 0 && again.PieceTags.Count == 0,
+            "分张再导入：图都一样时什么都不做，不重复建节点");
+
+        // 保存后重新打开，再导入也不重复建
+        var packed = new PackedScene();
+        packed.Pack(Room);
+        var reopened = packed.Instantiate<RoomRoot>();
+        Node reFront = BackgroundImporter.FindLayer(reopened.GetNodeOrNull(BackgroundImporter.NodeName), BackgroundImporter.Front);
+        var replan = BackgroundImporter.PlanImport(reopened, At(PiecesMoreRoot));
+        Check(reFront?.GetChildCount() == 4 && reFront.GetChildren().All(c => c.HasMeta(BackgroundImporter.PieceMeta))
+              && replan.NewNodes.Count == 0 && replan.PieceTags.Count == 0 && replan.Retextures.Count == 0,
+            "分张：保存、重新打开后分张标识都在，再导入不重复建节点");
+        reopened.Free();
+
+        // 露底检查：远景分张时看编号最大的兜底图
+        var settings = At(PiecesRoot);
+        Sprite2D far2Image = BackgroundImporter.ImageOfItem(far2), far1Image = BackgroundImporter.ImageOfItem(far1);
+        bool clean = BackgroundImporter.CoverageProblems(Room, settings, checkNodeMoves: false).Count == 0;
+        Vector2 far1Scale = far1Image.Scale;
+        far1Image.Scale = far1Scale * 0.3f;
+        bool firstIgnored = BackgroundImporter.CoverageProblems(Room, settings, checkNodeMoves: false).Count == 0;
+        far1Image.Scale = far1Scale;
+        Vector2 far2Scale = far2Image.Scale;
+        far2Image.Scale = far2Scale * 0.3f;
+        List<string> shrunk = BackgroundImporter.CoverageProblems(Room, settings, checkNodeMoves: false);
+        far2Image.Scale = far2Scale;
+        Check(clean && firstIgnored && shrunk.Count > 0 && shrunk.All(p => p.Contains("兜底图 Far02")),
+            $"露底检查：远景分张时用编号最大的 Far02 兜底；缩小 Far01 不报，缩小 Far02 报“兜底图 Far02 露底”（{shrunk.FirstOrDefault()}）");
+
+        // 已经是单张的 Front：不自动拆
+        RemoveBackground();
+        var single = new Parallax2D { Name = "Front", ZIndex = -60, ZAsRelative = false };
+        single.AddChild(new Sprite2D { Name = "Image", Texture = Blank(new Vector2(64, 36)) });
+        BuildBackground(single).SetMeta(BackgroundImporter.VersionMeta, BackgroundImporter.CurrentVersion);
+        var kept = Import(PiecesRoot);
+        Check(LayerNode(BackgroundImporter.Front) == single && single.GetChildCount() == 1 && single.GetChild(0).Name == "Image"
+              && kept.Messages.Any(m => m.Contains("已经是单张图") && m.Contains("先删掉 Front")),
+            $"分张：房间里已经是单张的 Front 时不自动拆，提示先删掉再导入（{kept.Messages.FirstOrDefault(m => m.Contains("单张图"))}）");
+
+        // 自己摆的分张（没有标识）：按图片文件名认出编号，补记标识；缺的按编号插到对的位置
+        RemoveBackground();
+        var mine = new Parallax2D { Name = "Mine", ZIndex = -70, ZAsRelative = false };
+        mine.AddChild(new Sprite2D { Name = "Image", Texture = GD.Load<Texture2D>(P(2)) });
+        var holder = new Node2D { Name = "Front" };
+        holder.AddChild(mine);
+        BuildBackground(holder).SetMeta(BackgroundImporter.VersionMeta, BackgroundImporter.CurrentVersion);
+        var tagged = Import(PiecesMoreRoot);
+        string order = string.Join(",", holder.GetChildren().Select(c => c.Name.ToString()));
+        Check(order == "Front01,Mine,Front03,Front04" && mine.GetMeta(BackgroundImporter.PieceMeta, "").AsString() == "front_02" && mine.ZIndex == -70 && PathOf(mine) == M(2)
+              && tagged.PieceTags.Count == 1,
+            $"分张：自己摆的 Mine 按图片认出是第 02 张，补记标识、换图、层级不动；缺的 01、03、04 按编号插到它前后（{order}）");
         RemoveBackground();
     }
 
@@ -794,6 +932,16 @@ public partial class BackgroundTest : FlowTestBase
             tool.AddChild(item);
             BuildBackground(tool).SetMeta(BackgroundImporter.VersionMeta, BackgroundImporter.CurrentVersion);
         }, RoomToolRoot, null);
+        await Case("分张：新建 Front、Far 收纳节点和各张", RemoveBackground, PiecesRoot, null);
+        await Case("分张：已有分张手调后换图，并补一张 04", () =>
+        {
+            RemoveBackground();
+            Import(PiecesRoot);
+            Parallax2D f2 = Piece("front", 2);
+            f2.ScrollScale = new Vector2(0.7f, 0.7f);
+            f2.ZIndex = -50;
+            BackgroundImporter.ImageOfItem(f2).Position += new Vector2(33, -12);
+        }, PiecesMoreRoot, null);
         await Case("旧版升级：补层级、物件包装、Tool 复位、换图", () =>
         {
             var front = new Parallax2D { Name = "front" };

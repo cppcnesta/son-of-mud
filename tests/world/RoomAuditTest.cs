@@ -16,7 +16,28 @@ public partial class RoomAuditTest : WorldTestBase
     protected override async Task RunChecks()
     {
         AuditChecks();
+        ExportButtonChecks();
         await RescueChecks();
+    }
+
+    /// <summary>「导出文字图」按钮：S1_01 场景和文字图本来就同步，按一下写出来的和仓库里一字不差，开头的说明保留。</summary>
+    private void ExportButtonChecks()
+    {
+#if TOOLS
+        string path = RoomGrid.PathFor("S1_01");
+        string original = FileAccess.GetFileAsString(path);
+        var room = GD.Load<PackedScene>("res://assets/scenes/world/s1/S1_01.tscn").Instantiate<RoomRoot>();
+        room.ExportTextInEditor();
+        room.Free();
+        string written = FileAccess.GetFileAsString(path);
+        using (FileAccess restore = FileAccess.Open(path, FileAccess.ModeFlags.Write)) restore.StoreString(original);
+        string Norm(string s) => s.Replace("\r\n", "\n").TrimEnd('\n');
+        string firstLine = Norm(original).Split('\n')[0];
+        Check(Norm(written) == Norm(original) && firstLine.Length > "# S1_01 苏醒".Length,
+            $"导出文字图按钮：S1_01 导出结果和仓库里的文字图一样，开头的说明“{firstLine}”保留" + (Norm(written) == Norm(original) ? "" : $"\n实际开头：{Norm(written).Split('\n')[0]}"));
+#else
+        Check(true, "导出文字图按钮：只在编辑器版本里有，这里跳过");
+#endif
     }
 
     /// <summary>③ 掉出房间：从没有出口的地方离开房间 → 黑屏后送回最近站稳的地方，不扣血；从出口走仍然正常换房，不触发。</summary>
