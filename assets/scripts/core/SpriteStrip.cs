@@ -41,6 +41,66 @@ public static class SpriteStrip
         return ResourceLoader.Exists(path) ? GD.Load<Texture2D>(path) : null;
     }
 
+    /// <summary>网格切图的结果缓存（同一张图被多个敌人用时只算一次）：图路径 + 格子边长 → 有内容的格子。</summary>
+    private static readonly System.Collections.Generic.Dictionary<string, Rect2[]> GridCache = new();
+
+    /// <summary>
+    /// 严格按 cell × cell 的格子切图：从左到右、从上到下，整格透明的跳过。
+    /// - 图的宽或高比一格小：整张图算 1 帧（照样显示，给警告）；
+    /// - 宽或高不是 cell 的整数倍：多出来的右边 / 下边不用，给警告；
+    /// - 只有一行就是原来的横排图。
+    /// 返回帧在图里的区域（按播放顺序）；没有任何有内容的格子时返回空数组。
+    /// </summary>
+    public static Rect2[] GridRegions(Texture2D sheet, int cell, string what)
+    {
+        if (sheet == null || cell <= 0) return System.Array.Empty<Rect2>();
+        int w = sheet.GetWidth(), h = sheet.GetHeight();
+        string key = $"{sheet.ResourcePath}|{sheet.GetRid()}|{cell}";
+        if (GridCache.TryGetValue(key, out Rect2[] cached)) return cached;
+
+        Rect2[] result;
+        if (w < cell || h < cell)
+        {
+            GD.PushWarning($"{what} {sheet.ResourcePath}：{w}×{h} 比一格 {cell}×{cell} 小，整张图当 1 帧（照样显示）。");
+            result = new[] { new Rect2(0, 0, w, h) };
+        }
+        else
+        {
+            int cols = w / cell, rows = h / cell;
+            if (w % cell != 0 || h % cell != 0)
+                GD.PushWarning($"{what} {sheet.ResourcePath}：{w}×{h} 不是 {cell} 的整数倍，按 {cols} 列 × {rows} 行切，右边 / 下边多出来的部分不用。");
+            Image image = sheet.GetImage();
+            if (image != null && image.IsCompressed()) image.Decompress();
+            var list = new System.Collections.Generic.List<Rect2>();
+            for (int r = 0; r < rows; r++)
+            for (int c = 0; c < cols; c++)
+            {
+                var region = new Rect2I(c * cell, r * cell, cell, cell);
+                if (image != null && image.GetRegion(region).IsInvisible()) continue;   // 整格透明：最后一行没排满
+                list.Add(new Rect2(region.Position, region.Size));
+            }
+            result = list.ToArray();
+        }
+        GridCache[key] = result;
+        return result;
+    }
+
+    /// <summary>按 <see cref="GridRegions"/> 切好加成动画 name；没有任何帧时返回 false。</summary>
+    public static bool AddGrid(SpriteFrames frames, string name, Texture2D sheet, int cell, bool loop, float fps, string what)
+    {
+        Rect2[] regions = GridRegions(sheet, cell, what);
+        if (regions.Length == 0) return false;
+        frames.AddAnimation(name);
+        frames.SetAnimationLoop(name, loop);
+        frames.SetAnimationSpeed(name, fps);
+        foreach (Rect2 region in regions)
+        {
+            bool whole = region.Position == Vector2.Zero && region.Size == sheet.GetSize();
+            frames.AddFrame(name, whole ? sheet : new AtlasTexture { Atlas = sheet, Region = region });
+        }
+        return true;
+    }
+
     /// <summary>
     /// 把一张横排图切成正方形帧加成动画 name。图宽不是图高的整数倍时，多出来的部分不用，并给出警告（what 是警告里对这张图的称呼，例如「主角美术图」）。
     /// </summary>

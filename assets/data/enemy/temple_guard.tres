@@ -7,6 +7,7 @@
 script = ExtResource("1")
 AttackSpec = ExtResource("2")
 Kind = &"temple_guard"
+ArtNames = Dictionary[String, String]({"patrol": "walk", "chase": "walk", "attack_windup": "charge_windup", "attack_active": "charge", "attack_recover": "charge_recover", "dead": "death"})
 DisplayName = "塔庙泥卫"
 MaxHealth = 60
 Behaviour = 2

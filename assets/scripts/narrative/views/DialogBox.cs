@@ -22,6 +22,12 @@ public partial class DialogBox : Control, ILineSurface
 
     [Export] public NarrativeSettings Settings { get; set; }
 
+    /// <summary>
+    /// 有立绘时，名牌和正文整体往右挪多少像素（正文右边不动，所以变窄，换行和翻页按变窄后的宽度算）。
+    /// 场景里 Name / Body 的位置是“没有立绘时”的位置；这里填 0 就是有没有立绘都一样。
+    /// </summary>
+    [Export] public float PortraitTextShift { get; set; }
+
     public bool IsTyping { get; private set; }
     public bool Rushing { get; private set; }
     /// <summary>对话框现在显示着。</summary>
@@ -57,6 +63,7 @@ public partial class DialogBox : Control, ILineSurface
     private string _blockSpeaker;   // 这一段是谁在说；null 表示没有可以接着往下加的内容
     private bool _paragraphPending;
     private double _shown;
+    private float _nameLeft, _nameRight, _bodyLeft;   // 场景里（没有立绘时）的位置
 
     public override void _Ready()
     {
@@ -70,6 +77,8 @@ public partial class DialogBox : Control, ILineSurface
         _portraitImage = Need<TextureRect>("Portrait/Image");
         _portraitLabel = Need<Label>("Portrait/Caption");
         BaseFontSize = _body?.GetThemeFontSize(FontSizeName) ?? 22;
+        if (_name != null) (_nameLeft, _nameRight) = (_name.OffsetLeft, _name.OffsetRight);
+        if (_body != null) _bodyLeft = _body.OffsetLeft;
         Hide();
     }
 
@@ -92,6 +101,7 @@ public partial class DialogBox : Control, ILineSurface
         _name.Text = hasName ? name : "";
         _name.Modulate = character?.NameColor ?? new Color(0.95f, 0.85f, 0.6f);
         ShowPortrait(character, expression);
+        ApplyTextShift(_portrait != null && _portrait.Visible);
 
         _blockSpeaker = name ?? "";
         _paragraphPending = false;
@@ -193,6 +203,18 @@ public partial class DialogBox : Control, ILineSurface
         _shown += Settings.CharsPerSecond * delta;
         if (_shown >= total) CompleteTyping();
         else _body.VisibleCharacters = (int)_shown;
+    }
+
+    /// <summary>有立绘时名牌和正文右移 PortraitTextShift；没有时回到场景里的位置。</summary>
+    private void ApplyTextShift(bool portrait)
+    {
+        float shift = portrait ? PortraitTextShift : 0f;
+        if (_name != null)
+        {
+            _name.OffsetLeft = _nameLeft + shift;
+            _name.OffsetRight = _nameRight + shift;
+        }
+        if (_body != null) _body.OffsetLeft = _bodyLeft + shift;
     }
 
     /// <summary>立绘：角色勾了 HasPortrait 才显示；有图显示图（按表情找，找不到用默认），没图显示色块加名字。</summary>

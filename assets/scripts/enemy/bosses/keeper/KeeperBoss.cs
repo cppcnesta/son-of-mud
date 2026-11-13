@@ -157,7 +157,10 @@ public partial class KeeperBoss : BossBody
     }
 
     /// <summary>变身闪白：每 0.2 秒里有 0.1 秒是白的。</summary>
-    public override float FlashAmount => FlashRemaining > 0f && Mathf.PosMod(FlashRemaining, 0.2f) > 0.1f ? 1f : 0f;
+    protected override float StateFlashAmount => FlashRemaining > 0f && Mathf.PosMod(FlashRemaining, 0.2f) > 0.1f ? 1f : 0f;
+
+    /// <summary>Boss 不被击退（没有受击硬直，设定不变）。</summary>
+    protected override bool KnockbackImmune => true;
 
     // ---------- 技术占位外观（当前动作没有美术图时） ----------
 

@@ -1,6 +1,6 @@
 ﻿param(
     [string]$GodotPath = $env:GODOT_DOTNET,
-    [ValidateSet('all','core','world','player','combat','player-feel','wall-surface','flow','ui','narrative','enemy','levelcheck','new')][string]$Suite = 'all',
+    [ValidateSet('all','core','world','player','combat','player-feel','wall-surface','hit-feel','flow','ui','narrative','enemy','levelcheck','new')][string]$Suite = 'all',
     [switch]$Headless
 )
 $ErrorActionPreference = 'Stop'
@@ -58,7 +58,7 @@ try {
             if ($LASTEXITCODE -ne 0 -and $worldCode -eq 0) { $worldCode = $LASTEXITCODE }
         }
     }
-    # 新玩家 / 战斗验收测试：结果写到 tests/output/player_results.json、combat_results.json、player_feel_results.json、player_art_results.json
+    # 新玩家 / 战斗验收测试：结果写到 tests/output/player_results.json、combat_results.json、player_feel_results.json、player_art_results.json、hit_feel_results.json
     $newCode = 0
     $newScenes = [ordered]@{
         'player' = 'res://tests/player/player_suite.tscn'
@@ -66,6 +66,7 @@ try {
         'player-feel' = 'res://tests/player/feel_checks.tscn'
         'wall-surface' = 'res://tests/player/wall_surface_test.tscn'
         'player-art' = 'res://tests/player/player_art.tscn'
+        'hit-feel' = 'res://tests/combat/hit_feel.tscn'
     }
     foreach ($name in $newScenes.Keys) {
         if ($Suite -ne 'all' -and $Suite -ne 'new' -and $Suite -ne $name) { continue }
@@ -79,7 +80,7 @@ try {
     # 开局流程测试（一律从正式入口 main_game.tscn 启动）：每个场景单独运行，结果写到 tests/output/flow_<名字>_results.json
     $flowCode = 0
     if ($Suite -eq 'all' -or $Suite -eq 'flow' -or $Suite -eq 'new') {
-        $flowScenes = @('tests/flow/input_bindings.tscn', 'tests/flow/boot_new_game.tscn', 'tests/flow/boot_continue.tscn', 'tests/flow/boot_corrupt_save.tscn', 'tests/flow/boot_unsupported_version.tscn', 'tests/flow/restart_run.tscn', 'tests/player/interact_test.tscn', 'tests/flow/region_map_test.tscn', 'tests/player/bread_health.tscn')
+        $flowScenes = @('tests/flow/input_bindings.tscn', 'tests/flow/boot_new_game.tscn', 'tests/flow/boot_continue.tscn', 'tests/flow/boot_corrupt_save.tscn', 'tests/flow/boot_unsupported_version.tscn', 'tests/flow/restart_run.tscn', 'tests/player/interact_test.tscn', 'tests/flow/region_map_test.tscn', 'tests/player/bread_health.tscn', 'tests/flow/hit_feel_flow.tscn')
         foreach ($flowScene in $flowScenes) {
             $flowName = [System.IO.Path]::GetFileNameWithoutExtension($flowScene)
             $flowArguments = @('--path', $projectPath, '--scene', "res://$flowScene", '--audio-driver', 'Dummy', '--fixed-fps', '60', '--log-file', (Join-Path $outputPath "flow_$flowName.log"))

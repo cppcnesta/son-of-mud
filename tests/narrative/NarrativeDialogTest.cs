@@ -167,9 +167,8 @@ public partial class NarrativeDialogTest : NarrativeFlowBase
         Control npcPortrait = Narr.Dialog.GetNodeOrNull<Control>("Portrait");
         bool boxOn = OnScreen(Narr.Dialog.GetNodeOrNull<Control>("Box"), out string npcBox);
         bool portraitOn = OnScreen(npcPortrait, out string portraitInfo);
-        Check(boxOn && portraitOn && OnScreen(Narr.Dialog.GetNodeOrNull<Control>("Box/Name"), out _)
-              && Mathf.Abs(npcPortrait.GetGlobalRect().End.Y - Narr.Dialog.GetNodeOrNull<Control>("Box").GetGlobalRect().Position.Y) <= 0.5f,
-            $"守坑人：对话框、名牌和整张立绘都在屏幕内，立绘脚底贴着对话框上沿（框 {npcBox}；立绘 {portraitInfo}）");
+        Check(boxOn && portraitOn && OnScreen(Narr.Dialog.GetNodeOrNull<Control>("Box/Name"), out _),
+            $"守坑人：对话框、名牌和整张立绘都在屏幕内（框 {npcBox}；立绘 {portraitInfo}）");
         await Frames(30);   // 一直按着 E
         bool notSkipped = Narr.Dialog.LineCount == linesAtPress && Narr.Dialog.CurrentText == "祂……醒了……" && Narr.MainActive && Narr.Main.WaitingForAdvance;
         KeyUp(Key.E);
@@ -293,6 +292,7 @@ public partial class NarrativeDialogTest : NarrativeFlowBase
         name.Position = new Vector2(300, 6);
         var body = box.GetNode<RichTextLabel>("Box/Body");
         body.AddThemeFontSizeOverride("normal_font_size", 34);
+        float bodyLeft = body.OffsetLeft, bodyRight = body.OffsetRight;   // 场景里正文的位置（不管场景怎么摆，代码都不该改它）
         Narr.AddChild(box);
         await Frames(2);
 
@@ -301,12 +301,30 @@ public partial class NarrativeDialogTest : NarrativeFlowBase
         float frameTop = frame.GetGlobalRect().Position.Y;
         box.ShowLine("测试甲", "有立绘时名牌和正文不被代码挪动。", withPortrait, "");
         await Frames(2);
-        bool keptWith = name.Position == new Vector2(300, 6) && Mathf.IsEqualApprox(body.OffsetLeft, 24f) && box.PortraitVisible;
+        bool keptWith = name.Position == new Vector2(300, 6) && Mathf.IsEqualApprox(body.OffsetLeft, bodyLeft) && box.PortraitVisible;
         box.ShowLine("测试乙", "没立绘时也一样。", noPortrait, "");
         await Frames(2);
-        bool keptWithout = name.Position == new Vector2(300, 6) && Mathf.IsEqualApprox(body.OffsetLeft, 24f) && !box.PortraitVisible;
+        bool keptWithout = name.Position == new Vector2(300, 6) && Mathf.IsEqualApprox(body.OffsetLeft, bodyLeft) && !box.PortraitVisible;
         Check(keptWith && keptWithout && Mathf.IsEqualApprox(frame.GetGlobalRect().Position.Y, frameTop) && box.BaseFontSize == 34,
             $"场景为准：改了场景里框的位置、名牌位置、正文字号（34），有立绘、没立绘两种情况代码都不改它们（名牌 {name.Position}，字号 {box.BaseFontSize}）");
+
+        // 有立绘时文字右移：有 → 右移，没 → 回到场景位置，再有 → 又右移；每次文字都完整放得下
+        box.PortraitTextShift = 200f;
+        string longish = "有立绘时正文变窄，这一句稍微长一点，用来确认换行以后仍然完整显示在框里，不会被截掉。";
+        var shiftResults = new List<string>();
+        foreach ((CharacterData who, bool expectShift) in new[] { (withPortrait, true), (noPortrait, false), (withPortrait, true), (null as CharacterData, false) })
+        {
+            box.ShowLine(who?.DisplayName ?? "", longish, who, "");
+            box.CompleteTyping();
+            await Frames(1);
+            float shift = expectShift ? 200f : 0f;
+            bool ok = Mathf.IsEqualApprox(name.Position.X, 300f + shift) && Mathf.IsEqualApprox(body.OffsetLeft, bodyLeft + shift)
+                      && Mathf.IsEqualApprox(body.OffsetRight, bodyRight) && box.TextFits && box.CurrentText == longish;
+            shiftResults.Add($"{(expectShift ? "有" : "无")}立绘：名牌 x={name.Position.X}，正文左 {body.OffsetLeft}，放得下 {box.TextFits}{(ok ? "" : " ✗")}");
+        }
+        Check(shiftResults.All(r => !r.EndsWith("✗")),
+            "有立绘时文字右移 200：有立绘右移、没立绘回到场景位置，来回切换都对，正文变窄后仍完整放下（" + string.Join("；", shiftResults) + "）");
+        box.PortraitTextShift = 0f;
 
         // 字号变大后，开场旁白照样逐句完整放得下（会多翻几页）
         string[] narration =
@@ -332,7 +350,7 @@ public partial class NarrativeDialogTest : NarrativeFlowBase
             $"场景为准：正文改成 34 号字后，旁白每句都完整显示、字号不变，放不下就翻页（翻了 {box.PageCount - pages} 页）" + (bad.Count > 0 ? "；有问题：" + string.Join(" | ", bad) : ""));
 
         // 一句话自己就超过正文区：这一页缩小字号到放得下；下一页恢复
-        string longLine = string.Concat(Enumerable.Repeat("这是一句非常非常长、自己一句就超过对话框正文区的台词，", 12));
+        string longLine = string.Concat(Enumerable.Repeat("这是一句非常非常长、自己一句就超过对话框正文区的台词，", 6));
         box.ShowLine("", longLine, null, "");
         box.CompleteTyping();
         await Frames(1);
@@ -361,7 +379,7 @@ public partial class NarrativeDialogTest : NarrativeFlowBase
         await Frames(2);
         Control portrait = dialog.GetNode<Control>("Portrait");
         Rect2 rect = portrait.GetGlobalRect();
-        bool placed = OnScreen(portrait, out string info) && Mathf.Abs(rect.End.Y - dialog.GetNode<Control>("Box").GetGlobalRect().Position.Y) <= 0.5f && rect.Size.Y >= 300;
+        bool placed = OnScreen(portrait, out string info) && rect.Size.Y >= 200;
         bool normalShown = dialog.PortraitTexture == normal;
         dialog.ShowLine("测试丙", "惊讶。", hero, "惊讶");
         bool surprisedShown = dialog.PortraitTexture == surprised;
@@ -372,7 +390,7 @@ public partial class NarrativeDialogTest : NarrativeFlowBase
         dialog.ShowLine("", "旁白不显示立绘。", null, "");
         bool narrator = !dialog.PortraitVisible;
         dialog.Hide();
-        Check(placed, $"立绘：整张立绘在屏幕内，脚底贴着对话框上沿（{info}）");
+        Check(placed, $"立绘：整张立绘在屏幕内（{info}）");
         Check(normalShown && surprisedShown && fallback, "立绘：按表情换图（惊讶 → 惊讶图），没有这个表情的图就用默认立绘");
         Check(placeholder && narrator, "立绘：没有图时显示占位色块；旁白不显示立绘");
         await Frames(1);

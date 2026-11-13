@@ -7,9 +7,11 @@ namespace SonOfMud.Enemy;
 
 /// <summary>
 /// 敌人美术图按命名自动载入并按状态播放（规则同主角的 PlayerAnimator）。
-/// - 图放在 ArtDirectory（assets/art/enemy）下，文件名 spr_enemy_&lt;Kind&gt;_&lt;动作&gt;.png；动作名由当前状态的 AnimName 给出。
-/// - 横排图按正方形切帧（帧数 = 宽 ÷ 高，单张图就是 1 帧），每帧缩放到 Data.ArtCanvas 显示，帧底边中点对齐脚底（敌人原点）。
-///   源图标准尺寸 = ArtCanvas × 4（普通敌人 512，守坑人 1024），不是标准尺寸照样显示，但给警告。
+/// - 图放在 ArtDirectory（assets/art/enemy）下。动作名由当前状态的 AnimName 给出；文件名先按 Data.ArtNames 里的美术名找
+///   spr_enemy_&lt;Kind&gt;_&lt;美术名&gt;.png（如祈祷泥人待机 = pray，死亡 = death），没有再找 spr_enemy_&lt;Kind&gt;_&lt;动作名&gt;.png。
+/// - 严格按标准格子切帧：格子边长 = ArtCanvas × 4（普通敌人 512，守坑人 1024），从左到右、从上到下，整格透明的跳过；
+///   横排一行、网格多行都行。每帧缩放到 Data.ArtCanvas 显示，格子底边中点对齐脚底（敌人原点）。
+///   图比一格小就整张当 1 帧，宽高不是格子整数倍就丢掉多出来的部分，都给警告（照样显示）。
 /// - 敌人的图画**朝左**（主角相反，画朝右）：Facing &gt; 0（朝右）时水平翻转。
 /// - 不循环的动作拉伸到状态的 AnimDuration（读实际 FPS 和各帧相对时长，见 SpriteStrip.SpeedScaleFor）。
 /// - 当前动作没有图：Sprite 隐藏，敌人本体照旧画色块（以及攻击红框、蝎尾预警）；有图：本体什么都不画。
@@ -104,7 +106,7 @@ void fragment() {
 
     private void Rebuild()
     {
-        Generated = BuildFrames(_body?.Data?.Kind.ToString() ?? "", ArtDirectory, _body?.Data?.ArtCanvas ?? 128f, Actions.Keys);
+        Generated = BuildFrames(_body?.Data?.Kind.ToString() ?? "", ArtDirectory, _body?.Data?.ArtCanvas ?? 128f, Actions.Keys, _body?.Data?.ArtNames);
         Sprite.SpriteFrames = Generated;
     }
 
@@ -182,23 +184,36 @@ void fragment() {
         sprite.Position = Vector2.Zero;
     }
 
-    /// <summary>按命名为 kind 生成 SpriteFrames：actions 里有图的动作才加；没有任何图时返回 null。</summary>
-    public static SpriteFrames BuildFrames(string kind, string directory, float canvas, IEnumerable<string> actions)
+    /// <summary>这个动作要找的文件名（不含目录）：先美术名，再动作名本身。</summary>
+    public static IEnumerable<string> ArtFileNames(string kind, string action, IDictionary<string, string> artNames)
+    {
+        if (artNames != null && artNames.TryGetValue(action, out string art) && !string.IsNullOrWhiteSpace(art) && art != action)
+            yield return $"spr_enemy_{kind}_{art.Trim()}.png";
+        yield return $"spr_enemy_{kind}_{action}.png";
+    }
+
+    /// <summary>
+    /// 按命名为 kind 生成 SpriteFrames：actions 里有图的动作才加；没有任何图时返回 null。
+    /// artNames：动作名 → 美术名（文件名先按美术名找）；可以为 null。
+    /// </summary>
+    public static SpriteFrames BuildFrames(string kind, string directory, float canvas, IEnumerable<string> actions, IDictionary<string, string> artNames = null)
     {
         if (string.IsNullOrEmpty(kind)) return null;
         var frames = new SpriteFrames();
         if (frames.HasAnimation("default")) frames.RemoveAnimation("default");
-        int standard = Mathf.RoundToInt(canvas * SourceScale);
+        int cell = Mathf.RoundToInt(canvas * SourceScale);
         bool any = false;
         foreach (string action in actions)
         {
-            Texture2D art = SpriteStrip.Load(directory, $"spr_enemy_{kind}_{action}.png");
+            Texture2D art = null;
+            foreach (string file in ArtFileNames(kind, action, artNames))
+                if ((art = SpriteStrip.Load(directory, file)) != null) break;
             if (art == null) continue;
             bool loop = Actions.TryGetValue(action, out bool l) && l;
-            if (!SpriteStrip.AddStrip(frames, action, art, loop, BaseFps, "敌人美术图")) continue;
+            if (!SpriteStrip.AddGrid(frames, action, art, cell, loop, BaseFps, "敌人美术图")) continue;
             any = true;
-            if (art.GetHeight() != standard && SizeWarned.Add(art.ResourcePath))
-                GD.PushWarning($"敌人美术图 {art.ResourcePath}：每帧高 {art.GetHeight()}，标准是 {standard}×{standard}（照样缩放到 {canvas} 显示）。");
+            if ((art.GetWidth() % cell != 0 || art.GetHeight() % cell != 0 || art.GetWidth() < cell || art.GetHeight() < cell))
+                SizeWarned.Add(art.ResourcePath);
         }
         return any ? frames : null;
     }

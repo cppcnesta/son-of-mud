@@ -3,7 +3,7 @@
 [ext_resource type="Script" uid="uid://c02vcyjwcnanm" path="res://assets/scripts/enemy/EnemyData.cs" id="1"]
 [ext_resource type="Resource" path="res://assets/data/enemy/devout_liver.tres" id="2"]
 [ext_resource type="Script" uid="uid://cxpw7kj8g2on2" path="res://assets/scripts/enemy/DropTable.cs" id="3"]
-[ext_resource type="Resource" path="res://assets/data/combat/mud_liver_projectile.tres" id="4"]
+[ext_resource type="Resource" path="res://assets/data/combat/devout_liver_projectile.tres" id="4"]
 
 [sub_resource type="Resource" id="drops"]
 script = ExtResource("3")
@@ -13,6 +13,7 @@ Chance = 0.3
 [resource]
 script = ExtResource("1")
 Kind = &"devout"
+ArtNames = Dictionary[String, String]({"patrol": "walk", "chase": "walk", "attack_windup": "throw_windup", "attack_active": "throw", "attack_recover": "throw_recover", "dead": "death"})
 DisplayName = "虔诚泥人"
 MaxHealth = 40
 Behaviour = 3

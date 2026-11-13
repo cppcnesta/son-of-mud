@@ -75,7 +75,12 @@ public partial class EnemySprite : AnimatedSprite2D
         SpriteFrames generated = null;
         if (frames == null)
         {
-            generated = EnemyAnimator.BuildFrames(kind, ArtDirectory, canvas, PreviewAnimations);
+            // 编辑器里 EnemyData 只是普通 Resource（非 [Tool] 脚本），按属性名读对照表
+            var artNames = new System.Collections.Generic.Dictionary<string, string>();
+            if (data != null)
+                foreach (var (key, value) in data.Get("ArtNames").AsGodotDictionary())
+                    artNames[key.AsString()] = value.AsString();
+            generated = EnemyAnimator.BuildFrames(kind, ArtDirectory, canvas, PreviewAnimations, artNames);
             frames = generated;
         }
         string preview = null;

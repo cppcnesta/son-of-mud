@@ -109,6 +109,11 @@ public partial class AttackState : PlayerState
         // 倍率只取最大的一个（D2）：泥格挡增伤、下落中的下劈强化。
         float downMultiplier = _down && !P.IsOnFloor() && P.Velocity.Y >= 0f ? _profile.DownAttackMultiplier : 1f;
         float multiplier = DamageMath.MaxMultiplier(P.Timers.Bonus.Current, downMultiplier);
-        P.AttackHitBox.Activate(Hit.From(_profile.AttackSpec, AttackId, P.GlobalPosition, multiplier, P));
+        Hit hit = Hit.From(_profile.AttackSpec, AttackId, P.GlobalPosition, multiplier, P);
+        if (_down && _profile.DownAttackFeel != null) hit.Feel = _profile.DownAttackFeel;
+        // 挥刀音：出刀就播，打没打中都一样
+        if (hit.Feel != null && hit.Feel.SwingSounds.Count > 0)
+            Events.Instance?.EmitSignal(Events.SignalName.SoundRequested, (Godot.Collections.Array)hit.Feel.SwingSounds);
+        P.AttackHitBox.Activate(hit);
     }
 }

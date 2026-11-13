@@ -1,7 +1,9 @@
-[gd_resource type="Resource" script_class="HitSpec" load_steps=2 format=3]
+[gd_resource type="Resource" script_class="HitSpec" load_steps=3 format=3]
 
 [ext_resource type="Script" path="res://assets/scripts/combat/HitSpec.cs" id="1"]
+[ext_resource type="Resource" path="res://assets/data/player_v2/feel_water.tres" id="feel"]
 
 [resource]
 script = ExtResource("1")
 Damage = 10.0
+Feel = ExtResource("feel")

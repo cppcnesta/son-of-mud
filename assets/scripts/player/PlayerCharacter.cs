@@ -317,12 +317,48 @@ public partial class PlayerCharacter : CharacterBody2D
         if (State is BlockState block) block.OnBlocked(hit);
     }
 
+    /// <summary>
+    /// 自己的攻击结算了。真正打中（受伤 / 打死）时按这一刀的打击感（Hit.Feel）请求顿帧、震屏、命中点粒子和音效，
+    /// 每次结算只请求一次顿帧；没配打击感时顿帧用 Rules.HitStopSeconds。闪白和击退由受击方自己处理。
+    /// </summary>
     private void OnHitLanded(HurtBox target, Hit hit, int outcomeValue)
     {
         var outcome = (HitOutcome)outcomeValue;
         Timers.Bonus.OnOutcome(outcome);
-        if (outcome is HitOutcome.Damaged or HitOutcome.Killed)
-            Events.Instance?.EmitSignal(Events.SignalName.HitStopRequested, Rules.HitStopSeconds);
+        if (outcome is not (HitOutcome.Damaged or HitOutcome.Killed)) return;
+        bool killed = outcome == HitOutcome.Killed;
+        HitFeel feel = hit.Feel;
+        Events events = Events.Instance;
+        events?.EmitSignal(Events.SignalName.HitStopRequested, feel?.HitStopFor(killed) ?? Rules.HitStopSeconds);
+        if (feel == null || events == null) return;
+        float shake = feel.ShakeFor(killed);
+        if (shake > 0f && feel.ShakeDuration > 0f)
+            events.EmitSignal(Events.SignalName.CameraShakeRequested, shake, feel.ShakeDuration);
+        if (feel.SparkAmount > 0)
+        {
+            (Vector2 point, float side) = SparkPoint(target);
+            events.EmitSignal(Events.SignalName.HitSparkRequested, point, new Vector2(side, 0f), feel.SparkAmount, feel.SparkColor, feel.SparkSpeed);
+        }
+        Godot.Collections.Array<AudioStream> sounds = feel.SoundsFor(killed);
+        if (sounds.Count > 0) events.EmitSignal(Events.SignalName.SoundRequested, (Godot.Collections.Array)sounds);
+    }
+
+    /// <summary>粒子出现在受击框朝向主角那一侧的中点，朝远离主角的方向喷。</summary>
+    private (Vector2 point, float side) SparkPoint(HurtBox target)
+    {
+        Vector2 center = target.GlobalPosition;
+        float halfWidth = 0f;
+        foreach (Node child in target.GetChildren())
+        {
+            if (child is not CollisionShape2D shape) continue;
+            center = shape.GlobalPosition;
+            if (shape.Shape is RectangleShape2D rect) halfWidth = rect.Size.X * 0.5f;
+            else if (shape.Shape is CircleShape2D circle) halfWidth = circle.Radius;
+            break;
+        }
+        float side = Mathf.Sign(center.X - GlobalPosition.X);
+        if (side == 0f) side = Facing;
+        return (center - new Vector2(side * halfWidth, 0f), side);
     }
 
     private void OnHealthChanged(int oldHealth, int newHealth)
