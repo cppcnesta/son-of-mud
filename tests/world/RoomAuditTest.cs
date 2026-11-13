@@ -13,7 +13,41 @@ public partial class RoomAuditTest : WorldTestBase
 {
     protected override string SuiteName => "room_audit";
 
-    protected override Task RunChecks()
+    protected override async Task RunChecks()
+    {
+        AuditChecks();
+        await RescueChecks();
+    }
+
+    /// <summary>③ 掉出房间：从没有出口的地方离开房间 → 黑屏后送回最近站稳的地方，不扣血；从出口走仍然正常换房，不触发。</summary>
+    private async Task RescueChecks()
+    {
+        await SetUpGame();
+        World.LoadRoomImmediate("S1_01", SpawnPoint.DefaultId);
+        await Frames(10);
+        Vector2? safe = World.LastSafePosition;
+        Check(safe != null && World.Rescues == 0, $"站稳后记下位置（{safe}），开局没有触发保险");
+
+        Vector2 room = World.CurrentRoom.GlobalPosition;
+        Mover.GlobalPosition = room + new Vector2(-200, 300);
+        Mover.Velocity = Vector2.Zero;
+        bool rescued = await WaitUntil(() => World.Rescues == 1 && !World.IsTransitioning, 240);
+        await Frames(2);
+        Check(rescued && World.CurrentRoomDef.Id == "S1_01" && safe != null && Mover.GlobalPosition.DistanceTo(safe.Value) < 4f && World.LastRescue.Contains("左边"),
+            $"掉出房间：从左边离开房间 → 送回最近站稳的地方（{Mover.GlobalPosition}），说明“{World.LastRescue}”");
+
+        // 从出口正常走：S1_01 右出口 → S1_02，不算掉出房间
+        Mover.GlobalPosition = room + new Vector2(1080, 555);
+        Mover.Velocity = Vector2.Zero;
+        Mover.MoveDir = 1f;
+        bool walked = await WaitUntil(() => World.CurrentRoomDef?.Id == "S1_02", 240);
+        Mover.MoveDir = 0f;
+        await Frames(60);
+        Check(walked && World.Rescues == 1, $"从出口走：S1_01 → S1_02 正常换房，保险没有触发（共 {World.Rescues} 次）");
+        await TearDownGame();
+    }
+
+    private void AuditChecks()
     {
         var layout = GD.Load<WorldLayout>(WorldLayout.DefaultPath);
         var all = new List<string>();
@@ -28,7 +62,6 @@ public partial class RoomAuditTest : WorldTestBase
         Check(all.Count == 0, $"全部 {layout.Rooms.Count} 个房间没有关卡警告" + (all.Count > 0 ? "：\n  " + string.Join("\n  ", all) : ""));
 
         BrokenChecks(layout);
-        return Task.CompletedTask;
     }
 
     private void BrokenChecks(WorldLayout layout)
@@ -83,5 +116,7 @@ public partial class RoomAuditTest : WorldTestBase
         Check(outReported && !Has("铺到了房间外面"), "房间外：在房间右边外面铺一格砖 → 警告“铺到了房间外面”；删掉后消失");
         _ = tile; _ = shift;
         room.Free();
+        System.GC.Collect();
+        System.GC.WaitForPendingFinalizers();
     }
 }

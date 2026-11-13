@@ -12,7 +12,8 @@ namespace SonOfMud.Tools;
 /// 地图生成器（无界面运行）。用 -- 之后的参数选模式：
 /// 默认（不带参数）：读 world_layout.tres → 1) 缺的房间场景生成骨架（已存在的场景不覆盖，新骨架是 32 像素瓦片）；
 ///   2) 重写 MetSys 的 MapData.txt（每格四个方向：同一房间 -1、墙 0、通道 1，外加场景 UID）。
-/// --export-text [--force]：把房间场景原样转成文字图 assets/data/world/rooms/&lt;房间&gt;.txt（已有的文字图不覆盖，除非 --force）。
+/// --export-text [--force] [--rooms=S1_01,S1_02]：把房间场景原样转成文字图 assets/data/world/rooms/&lt;房间&gt;.txt
+///   （已有的文字图不覆盖，除非 --force；带 --rooms 只导出这几个房间；覆盖时保留原文字图开头的说明注释）。
 /// --geometry：按文字图重写各房间的地形、条件地形、可破坏物、出生点、锚点物件、条件门位置、出口箭头（见 GeometryBuilder）。
 /// --geometry --check：干跑，只报告哪些房间、哪些节点会变化，不写文件。
 /// 任何模式出错时退出码为 1，且不写文件。
@@ -36,16 +37,20 @@ public partial class BuildWorld : Node
     {
         var args = new HashSet<string>(OS.GetCmdlineUserArgs().Concat(OS.GetCmdlineArgs()));
         int code;
-        if (args.Contains("--export-text")) code = RunExport(args.Contains("--force"));
+        // --rooms=S1_01,S1_02：只导出这几个房间（其余房间的文字图不动）
+        string roomsArg = args.FirstOrDefault(a => a.StartsWith("--rooms="));
+        HashSet<string> only = roomsArg == null ? null
+            : new HashSet<string>(roomsArg["--rooms=".Length..].Split(',', System.StringSplitOptions.RemoveEmptyEntries | System.StringSplitOptions.TrimEntries));
+        if (args.Contains("--export-text")) code = RunExport(args.Contains("--force"), only);
         else if (args.Contains("--geometry")) code = RunGeometry(!args.Contains("--check"));
         else code = RunSkeleton();
         GetTree().Quit(code);
     }
 
-    private static int RunExport(bool force)
+    private static int RunExport(bool force, HashSet<string> only)
     {
         GeometryBuilder builder = GeometryBuilder.ForProject();
-        bool ok = builder.ExportAll(write: true, overwrite: force);
+        bool ok = builder.ExportAll(write: true, overwrite: force, only);
         foreach (string note in builder.Notes) GD.Print("BuildWorld --export-text：" + note);
         foreach (string error in builder.Errors) GD.PushError("BuildWorld --export-text：" + error);
         GD.Print(ok ? $"BuildWorld --export-text：已写 {builder.Written.Count} 个文字图。" : $"BuildWorld --export-text 失败：{builder.Errors.Count} 个错误，没有写任何文件。");

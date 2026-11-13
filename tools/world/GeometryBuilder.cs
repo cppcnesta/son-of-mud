@@ -62,17 +62,20 @@ public sealed class GeometryBuilder
     // =====================================================================
 
     /// <summary>导出全部房间的文字图。overwrite 为 false 时跳过已有文字图的房间。有任何错误就一个都不写。</summary>
-    public bool ExportAll(bool write, bool overwrite)
+    public bool ExportAll(bool write, bool overwrite, ISet<string> only = null)
     {
         var texts = new Dictionary<RoomDef, string>();
         foreach (RoomDef room in Layout.Rooms)
         {
-            if (!overwrite && FileAccess.FileExists(TextOutput(room))) continue;
+            if (only != null && !only.Contains(room.Id)) continue;
+            bool exists = FileAccess.FileExists(TextOutput(room));
+            if (!overwrite && exists) continue;
             Node root = LoadScene(room, false);
             if (root == null) continue;
             string text = ExportRoom(room, root);
             FreeRoom(root);
-            if (text != null) texts[room] = text;
+            if (text == null) continue;
+            texts[room] = exists ? KeepDescription(FileAccess.GetFileAsString(TextOutput(room)), text) : text;
         }
         if (Errors.Count > 0 || !write) return Errors.Count == 0;
         foreach (var (room, text) in texts)
@@ -85,6 +88,22 @@ public sealed class GeometryBuilder
             Written.Add(path);
         }
         return Errors.Count == 0;
+    }
+
+    /// <summary>覆盖已有文字图时，保留原来开头写的说明注释（导出器自己生成的注释不重复保留）。</summary>
+    public static string KeepDescription(string oldText, string newText)
+    {
+        var keep = new List<string>();
+        foreach (string line in oldText.Replace("\r\n", "\n").Split('\n'))
+        {
+            if (!line.StartsWith("#")) break;
+            if (line.Contains("BuildWorld --export-text") || line.StartsWith("# 封边") || line.Contains("写在 (")) continue;
+            keep.Add(line);
+        }
+        if (keep.Count == 0) return newText;
+        // 导出器的第一行注释是“# 房间 显示名”，已有更详细的说明时不重复
+        string body = newText.StartsWith("# ") ? newText[(newText.IndexOf('\n') + 1)..] : newText;
+        return string.Join("\n", keep) + "\n" + body;
     }
 
     /// <summary>把一个房间场景原样转成文字图；出错时返回 null，错误记进 Errors。</summary>

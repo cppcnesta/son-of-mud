@@ -1,17 +1,17 @@
 [gd_scene format=4 uid="uid://uy1xe2evf5ka"]
 
-[ext_resource type="Script" uid="uid://bp6qc4ftue0bq" path="res://assets/scripts/world/RoomRoot.cs" id="1_0vlwq"]
-[ext_resource type="Texture2D" uid="uid://ds2q5dr5m588e" path="res://assets/art/world/bg/s1/tex_bg_s1_03_far.png" id="2_5sw5w"]
-[ext_resource type="PackedScene" uid="uid://bsg0351mx3b4u" path="res://addons/MetroidvaniaSystem/Nodes/RoomInstance.tscn" id="2_ioub0"]
-[ext_resource type="Texture2D" uid="uid://dy647iyb7jv6o" path="res://assets/art/world/bg/s1/tex_bg_s1_03_mid.png" id="3_g3rwd"]
-[ext_resource type="TileSet" uid="uid://cjutdcfket0jk" path="res://assets/data/world/world_tileset.tres" id="4_eivtb"]
-[ext_resource type="Texture2D" uid="uid://628rteywwjve" path="res://assets/art/world/bg/s1/tex_bg_s1_03_front.png" id="4_yeldr"]
-[ext_resource type="Texture2D" uid="uid://bg0m2ua271sei" path="res://assets/art/world/bg/s1/tex_bg_s1_03_tool_tree.png" id="5_3sj33"]
-[ext_resource type="Script" uid="uid://170bxbdwtr2a" path="res://assets/scripts/world/SpawnPoint.cs" id="5_5sw5w"]
-[ext_resource type="Texture2D" uid="uid://t1vyc2ff5xiy" path="res://assets/art/world/bg/s1/tex_bg_s1_03_tool_cloud.png" id="6_o2x7x"]
+[ext_resource type="Script" path="res://assets/scripts/world/RoomRoot.cs" id="1_0vlwq"]
+[ext_resource type="Texture2D" path="res://assets/art/world/bg/s1/tex_bg_s1_03_far.png" id="2_5sw5w"]
+[ext_resource type="PackedScene" path="res://addons/MetroidvaniaSystem/Nodes/RoomInstance.tscn" id="2_ioub0"]
+[ext_resource type="Texture2D" path="res://assets/art/world/bg/s1/tex_bg_s1_03_mid.png" id="3_g3rwd"]
+[ext_resource type="TileSet" path="res://assets/data/world/world_tileset.tres" id="4_eivtb"]
+[ext_resource type="Texture2D" path="res://assets/art/world/bg/s1/tex_bg_s1_03_front.png" id="4_yeldr"]
+[ext_resource type="Texture2D" path="res://assets/art/world/bg/s1/tex_bg_s1_03_tool_tree.png" id="5_3sj33"]
+[ext_resource type="Script" path="res://assets/scripts/world/SpawnPoint.cs" id="5_5sw5w"]
+[ext_resource type="Texture2D" path="res://assets/art/world/bg/s1/tex_bg_s1_03_tool_cloud.png" id="6_o2x7x"]
 [ext_resource type="PackedScene" path="res://assets/scenes/enemy/devout.tscn" id="e_devout"]
 [ext_resource type="PackedScene" path="res://assets/scenes/enemy/prayer.tscn" id="e_prayer"]
-[ext_resource type="Script" uid="uid://gcj5me3gasqr" path="res://assets/scripts/narrative/world/StoryTrigger.cs" id="n_story"]
+[ext_resource type="Script" path="res://assets/scripts/narrative/world/StoryTrigger.cs" id="n_story"]
 
 [sub_resource type="RectangleShape2D" id="Shape_Story_Pilgrims"]
 size = Vector2(128, 256)
@@ -151,4 +151,4 @@ position = Vector2(2992, 944)
 position = Vector2(3056, 944)
 
 [node name="Devout2" parent="Objects" unique_id=2000088531 instance=ExtResource("e_devout")]
-position = Vector2(2751, 942)
+position = Vector2(2736, 944)
