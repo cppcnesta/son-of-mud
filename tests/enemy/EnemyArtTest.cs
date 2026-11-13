@@ -131,7 +131,7 @@ public partial class EnemyArtTest : LabSuiteBase
 
     private async Task RepoArtChecks()
     {
-        var expectArt = new Dictionary<string, bool> { ["prayer"] = true, ["devout"] = true, ["temple_guard"] = true, ["mason"] = false, ["keeper"] = false };
+        var expectArt = new Dictionary<string, bool> { ["prayer"] = true, ["devout"] = true, ["temple_guard"] = true, ["mason"] = true, ["keeper"] = false };
         foreach (string kind in Kinds)
         {
             EnemyBody enemy = await Spawn(kind);
@@ -150,16 +150,17 @@ public partial class EnemyArtTest : LabSuiteBase
             }
             else
             {
-                Check(!anim.CurrentIsArt && !anim.Sprite.Visible && enemy.DrawsPlaceholder && anim.Sprite.SpriteFrames == null,
-                    $"{kind}：仓库里没有它的图，Sprite 隐藏，本体照旧画色块");
+                // 守坑人：仓库里只有 spr_enemy_keeper_idle.png，而它开战前的状态是 dormant（没有图），所以当前仍是色块
+                Check(!anim.CurrentIsArt && !anim.Sprite.Visible && enemy.DrawsPlaceholder && anim.CurrentAnimation == "dormant",
+                    $"{kind}：当前动作（dormant）没有图，Sprite 隐藏，本体照旧画色块");
             }
             await Despawn(enemy);
         }
         string prayerPath = EnemyAnimator.DefaultArtDirectory + "/spr_enemy_prayer_idle.png";
         string devoutPath = EnemyAnimator.DefaultArtDirectory + "/spr_enemy_devout_idle.png";
         string guardPath = EnemyAnimator.DefaultArtDirectory + "/spr_enemy_temple_guard_idle.png";
-        Check(EnemyAnimator.WarnedSizes.Contains(prayerPath) && EnemyAnimator.WarnedSizes.Contains(devoutPath) && !EnemyAnimator.WarnedSizes.Contains(guardPath),
-            "尺寸警告：祈祷泥人 373×485 比一格小、虔诚泥人 2219×2564 不是 512 的整数倍，都给了警告（照样显示）；塔庙泥卫 512×512 没有警告");
+        Check(!EnemyAnimator.WarnedSizes.Contains(prayerPath) && EnemyAnimator.WarnedSizes.Contains(devoutPath) && !EnemyAnimator.WarnedSizes.Contains(guardPath),
+            "尺寸警告：虔诚泥人 2219×2564 不是 512 的整数倍，给了警告（照样显示）；祈祷泥人、塔庙泥卫的待机图 512×512 没有警告");
     }
 
     // ---------- ② 显示节点 ----------
@@ -517,8 +518,8 @@ public partial class EnemyArtTest : LabSuiteBase
             if (sprite.PreviewShown) repoShown.Add(kind);
             enemy.Free();
         }
-        Check(repoShown.SequenceEqual(new[] { "prayer", "devout", "temple_guard" }),
-            $"编辑器显示（仓库的图）：祈祷泥人、虔诚泥人、塔庙泥卫显示 idle，泥匠和守坑人没有图不显示（{string.Join(", ", repoShown)}）");
+        Check(repoShown.SequenceEqual(new[] { "prayer", "devout", "mason", "temple_guard", "keeper" }),
+            $"编辑器显示（仓库的图）：五种敌人都显示 idle 图（守坑人的 idle 图游戏里用不到，只在编辑器里预览）（{string.Join(", ", repoShown)}）");
 
         {
             // 朝向：默认朝左（InitialFacing = -1）不翻；初始朝右的翻过来
