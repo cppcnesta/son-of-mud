@@ -133,13 +133,17 @@ public partial class MapCheck : WorldTestBase
         List<string> abilityGates = _layout.Rooms.SelectMany(r => r.Exits.Where(e => e.Requirement != null && e.Requirement.Abilities.Count > 0).Select(e => $"{r.Id}→{e.Target}")).ToList();
         Check(abilityGates.Count == 0, "②清单里没有任何能力门（所有出口条件都只用剧情标记）" + (abilityGates.Count > 0 ? "：" + string.Join(",", abilityGates) : ""));
         Check(Gate("S1_05", "S1_06", "boss_keeper") && Gate("S2_03", "S2_04", "flood_done") && Gate("S2_04", "S2_06", "boss_dragon")
-              && Gate("S3_06", "S3_07", "districts_done") && Gate("S4_02", "S4_03", "seven_gates"), "②事件门：boss_keeper / flood_done / boss_dragon / districts_done / seven_gates 位置正确");
+              && Gate("S3_06", "S3_07", "districts_done"), "②事件门：boss_keeper / flood_done / boss_dragon / districts_done 位置正确");
+        ExitDef sevenGates = _layout.Find("S4_02").Exits.FirstOrDefault(e => e.Target == "S4_03");
+        Check(sevenGates != null && sevenGates.HasBarrier && sevenGates.Requirement.Flags.Select(f => f.ToString()).OrderBy(f => f).SequenceEqual(SevenTablets),
+            "②七道门：S4_02→S4_03 的出口要七块泥板 tablet.gate_1–7 全部读完");
 
         var objectProblems = new List<string>();
         foreach (RoomDef room in _layout.Rooms)
         {
             if (!_scenes.TryGetValue(room.Id, out RoomRoot scene)) continue;
-            List<GateBarrier> barriers = Search<GateBarrier>(scene);
+            // 出口上的实体门（GateTo 目标）；房间里面的门块（Gate_字母）由文字图管，见 room_audit / levelcheck_map4
+            List<GateBarrier> barriers = Search<GateBarrier>(scene).Where(b => b.Name.ToString().StartsWith("GateTo")).ToList();
             List<ExitDef> barrierExits = room.Exits.Where(e => e.HasBarrier).ToList();
             if (barriers.Count != barrierExits.Count) objectProblems.Add($"{room.Id} 实体门 {barriers.Count} 个，清单要求 {barrierExits.Count} 个");
             foreach (ExitDef exit in barrierExits)
@@ -245,8 +249,12 @@ public partial class MapCheck : WorldTestBase
     /// <summary>剧情标记的获取点。攀墙开局就有、下砸不发放，所以这里没有能力（关卡几何计划 v3 第 2 节）。</summary>
     private static readonly (string Room, string Token)[] Acquisitions =
     {
-        ("S1_05", "boss_keeper"), ("S2_03", "flood_done"), ("S2_04", "boss_dragon"), ("S4_02", "seven_gates"),
+        ("S1_05", "boss_keeper"), ("S2_03", "flood_done"), ("S2_04", "boss_dragon"),
+        ("S4_02", "tablet.gate_1"), ("S4_02", "tablet.gate_2"), ("S4_02", "tablet.gate_3"), ("S4_02", "tablet.gate_4"),
+        ("S4_02", "tablet.gate_5"), ("S4_02", "tablet.gate_6"), ("S4_02", "tablet.gate_7"),
     };
+    /// <summary>七道门：S4_02 里的七块泥板。</summary>
+    private static readonly string[] SevenTablets = Enumerable.Range(1, 7).Select(k => $"tablet.gate_{k}").ToArray();
     private static readonly string[] Districts = { "S3_04", "S3_05", "S3_06" };
     private const string DistrictsDone = "districts_done";
 

@@ -47,6 +47,10 @@ public sealed class LevelState
     public bool ConditionMet(LevelRoom room) =>
         ConditionOverride ?? (room.Grid.Condition.Length > 0 && Flags.Contains(room.Grid.Condition));
 
+    /// <summary>这个房间里已经打开的门块：变量成立的；ConditionOverride 为 true（单房间检查“条件全成立”）时全部打开。</summary>
+    public HashSet<char> OpenGates(LevelRoom room) =>
+        room.Grid.Gates.Where(g => ConditionOverride == true || Flags.Contains(g.Value.Flag)).Select(g => g.Key).ToHashSet();
+
     public bool FlagsMet(GateRequirement req) =>
         req == null || req.Flags.All(f => Flags.Contains(f.ToString()));
 
@@ -133,7 +137,7 @@ public sealed class LevelWorld
         Rooms.Values.FirstOrDefault(r => r.Def.Layer == layer && r.Def.ContainsCell(cell));
 
     public GridWorld Geometry(LevelRoom room, LevelState state) =>
-        new(room.Grid, state.ConditionMet(room), state.BrokenIn(room.Id), room.Origin);
+        new(room.Grid, state.ConditionMet(room), state.BrokenIn(room.Id), room.Origin, state.OpenGates(room));
 
     /// <summary>从 room 出去、进入 cell 这一格时对应的出口（Edge 类型）；没有就是 null。</summary>
     public static ExitDef EdgeExitToward(LevelRoom room, Vector2I cell)

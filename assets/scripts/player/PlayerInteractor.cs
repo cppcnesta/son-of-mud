@@ -66,7 +66,7 @@ public partial class PlayerInteractor : Area2D
 
     private void SetCurrent(IInteractable target)
     {
-        string prompt = target?.Prompt ?? "";
+        string prompt = target == null ? "" : target.ShowsKey ? target.Prompt ?? "" : IInteractable.NoKeyMark + target.Prompt;
         bool changed = !ReferenceEquals(target, Current) || prompt != CurrentPrompt;
         Current = target;
         CurrentPrompt = prompt;

@@ -39,19 +39,24 @@ public sealed class GridWorld : ISimWorld
     public bool ConditionMet { get; }
     public IReadOnlySet<Vector2I> Broken { get; }
     public Vector2 Offset { get; }
+    /// <summary>已经打开的门块字母（门块的变量成立）；其余门块按关着算。</summary>
+    public IReadOnlySet<char> OpenGates { get; }
 
-    public GridWorld(RoomGrid grid, bool conditionMet, IReadOnlySet<Vector2I> broken = null, Vector2 offset = default)
+    public GridWorld(RoomGrid grid, bool conditionMet, IReadOnlySet<Vector2I> broken = null, Vector2 offset = default, IReadOnlySet<char> openGates = null)
     {
         Grid = grid;
         ConditionMet = conditionMet;
         Broken = broken ?? new HashSet<Vector2I>();
         Offset = offset;
+        OpenGates = openGates ?? new HashSet<char>();
     }
 
+    /// <summary>门块（关着）和 GateBarrier 一样不可攀（门在 Surfaces.NoClimbGroup 分组里）。</summary>
     public static TileKind KindOf(char ch, bool conditionMet) => ch switch
     {
         RoomGrid.NoClimb => TileKind.NoClimb,
         RoomGrid.OneWay => TileKind.OneWay,
+        _ when RoomGrid.IsGateChar(ch) => TileKind.NoClimb,
         _ => RoomGrid.IsSolidChar(ch, conditionMet) ? TileKind.Solid : TileKind.Empty,
     };
 
@@ -59,7 +64,9 @@ public sealed class GridWorld : ISimWorld
     {
         if (!Grid.InBounds(c, r)) return TileKind.Empty;
         if (Broken.Count > 0 && Broken.Contains(new Vector2I(c, r))) return TileKind.Empty;
-        return KindOf(Grid.At(c, r), ConditionMet);
+        char ch = Grid.At(c, r);
+        if (OpenGates.Count > 0 && RoomGrid.IsGateChar(ch) && OpenGates.Contains(ch)) return TileKind.Empty;
+        return KindOf(ch, ConditionMet);
     }
 
     public bool IsBlocking(int c, int r) => KindAt(c, r) is TileKind.Solid or TileKind.NoClimb;

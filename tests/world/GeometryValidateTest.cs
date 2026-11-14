@@ -55,7 +55,7 @@ public partial class GeometryValidateTest : WorldTestBase
         }, "S1_01↔S1_02", "开口处的地面不在同一个全局 Y");
 
         // ⑤ 文字图解析失败
-        CaseText("文字图解析失败（S1_01 有非法字符）", "S1_01", text => text.Replace("---\n#", "---\nZ"), "S1_01 的文字图有", "非法字符");
+        CaseText("文字图解析失败（S1_01 有非法字符）", "S1_01", text => text.Replace("---\n#", "---\n?"), "S1_01 的文字图有", "非法字符");
 
         // ⑥ 锚点找不到节点
         CaseText("锚点找不到节点（S1_05 的 a 指向不存在的节点）", "S1_05", text => text.Replace("@anchor a Npc_Keeper", "@anchor a Npc_Nobody"), "S1_05：锚点 a 找不到节点", "Npc_Nobody");

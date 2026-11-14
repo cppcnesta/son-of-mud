@@ -31,8 +31,10 @@ public partial class InteractPrompt : Label
 
     public void Apply(string prompt)
     {
-        Prompt = prompt ?? "";
+        prompt ??= "";
+        bool noKey = prompt.StartsWith(IInteractable.NoKeyMark, System.StringComparison.Ordinal);
+        Prompt = noKey ? prompt[IInteractable.NoKeyMark.Length..] : prompt;
         Visible = Prompt.Length > 0;
-        Text = Visible ? string.Format(Settings.PromptFormat, Settings.InteractKeyLabel, Prompt) : "";
+        Text = !Visible ? "" : noKey ? Prompt : string.Format(Settings.PromptFormat, Settings.InteractKeyLabel, Prompt);
     }
 }

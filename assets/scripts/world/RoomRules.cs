@@ -226,6 +226,12 @@ public static class RoomRules
                 foreach (CollisionShape2D shape in item.GetChildren().OfType<CollisionShape2D>())
                     if (Mathf.Abs(shape.Position.X) > MaxShapeDrift)
                         problems.Add($"{item.Name} 的判定框 {shape.Name} 被拖离了节点 {Mathf.Abs(shape.Position.X):0} 像素：要挪位置请选中 {item.Name} 节点本身来挪，判定框放回节点上。");
+        // 出口门的条件要和房间表一样（场景里另存了一份；不一样时房间表放行了、门还挡着，或反过来）
+        if (root.GetNodeOrNull("Objects") is Node gates)
+            foreach (ExitDef exit in room.Exits.Where(e => e != null && e.HasBarrier))
+                if (gates.GetNodeOrNull<GateBarrier>("GateTo" + exit.Target) is { } gate
+                    && GateBarrier.Signature(gate.Requirement) != GateBarrier.Signature(exit.Requirement))
+                    problems.Add($"出口门 GateTo{exit.Target} 的条件和房间表不一样：场景里是 {GateBarrier.Signature(gate.Requirement)}，房间表是 {GateBarrier.Signature(exit.Requirement)}。运行一次生成工具（--geometry）会同步成房间表的。");
         if (root.GetNodeOrNull("Spawns") is Node spawns)
             foreach (SpawnPoint spawn in spawns.GetChildren().OfType<SpawnPoint>())
             {

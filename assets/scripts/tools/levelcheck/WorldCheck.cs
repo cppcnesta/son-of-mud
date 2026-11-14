@@ -6,17 +6,24 @@ using SonOfMud.World;
 
 namespace SonOfMud.Tools.LevelCheck;
 
-/// <summary>剧情推进的一步：到达 Room 之后 Flag 成立（R 出现、条件门打开）。</summary>
+/// <summary>
+/// 剧情推进的一步：到达 Room 之后 Flag 成立（R 出现、条件门和门块打开）。
+/// 写了 Anchor 时要站到 Room 里这个锚点（Objects 下的节点名，例如泥板）所在的地面上才算到达。
+/// </summary>
 public sealed class StoryStep
 {
     public string Flag = "";
     public string Room = "";
+    public string Anchor;
 
-    public StoryStep(string flag, string room)
+    public StoryStep(string flag, string room, string anchor = null)
     {
         Flag = flag;
         Room = room;
+        Anchor = anchor;
     }
+
+    public override string ToString() => Anchor == null ? Room : $"{Room} 的 {Anchor}";
 }
 
 public sealed class WorldCheckConfig
@@ -29,6 +36,8 @@ public sealed class WorldCheckConfig
     public string FinalGoal;
     /// <summary>两种形态各自都要能走完主线（计划 3.3“主线两种形态都要能过”）。</summary>
     public bool RequireEachForm = true;
+    /// <summary>有没有攀墙能力（false：只用跳、落下、单向平台这些基础移动）。</summary>
+    public bool HasWallClimb = true;
     /// <summary>门的位置（全局脚底坐标）。默认用文字图里名为 DoorTo&lt;目标&gt; 的锚点。</summary>
     public Func<LevelRoom, string, Vector2?> DoorFeet;
     public IReadOnlyList<MoveAction> Actions;
@@ -39,6 +48,8 @@ public sealed class StageInfo
     public int Index;
     public List<string> Flags = new();
     public HashSet<string> RoomsReached = new();
+    /// <summary>能站到的锚点（“房间/节点名”，例如 S4_02/Tablet_gate_1）。</summary>
+    public HashSet<string> AnchorsReached = new();
     public int NodesReached;
     public List<string> DeadEnds = new();
 }
@@ -91,7 +102,7 @@ public static class WorldCheck
     private static void RunForms(SimConfig cfg, LevelWorld world, WorldCheckConfig config, LevelRoom start, Vector2I pCell,
         List<string> mainLine, int[] forms, string tag, WorldReport report, bool primary)
     {
-        var state = new LevelState();
+        var state = new LevelState { HasWallClimb = config.HasWallClimb };
         var carry = new List<(LevelRoom room, Vector2 feet)> { (start, start.FeetGlobal(pCell.X, pCell.Y)) };
         MoveGraph graph = null;
         MoveGraph.Search search = null;
@@ -116,6 +127,9 @@ public static class WorldCheck
 
             var stage = new StageInfo { Index = k, Flags = state.Flags.ToList(), NodesReached = search.Reached.Count };
             stage.RoomsReached.UnionWith(search.Reached.Select(s => s.Room.Id));
+            foreach (LevelRoom room in search.Reached.Select(s => s.Room).Distinct())
+                foreach (string node in room.Grid.Anchors.Values)
+                    if (search.Reached.Any(s => OnAnchor(s, room.Id, node))) stage.AnchorsReached.Add($"{room.Id}/{node}");
             if (primary)
             {
                 report.Stages.Add(stage);
@@ -123,8 +137,10 @@ public static class WorldCheck
             }
 
             // 死局：每个能到的位置都要能到存档点或下一个剧情房间（最后一个阶段：存档点或主线最后一个房间）
-            string next = k < config.Story.Count ? config.Story[k].Room : config.FinalGoal ?? mainLine.LastOrDefault();
-            HashSet<Segment> good = graph.CanReach(search.Reached, s => s.Room.Id == next || IsSave(cfg, s));
+            StoryStep step = k < config.Story.Count ? config.Story[k] : null;
+            string next = step?.ToString() ?? config.FinalGoal ?? mainLine.LastOrDefault();
+            bool AtNext(Segment s) => step != null ? AtStep(s, step) : s.Room.Id == next;
+            HashSet<Segment> good = graph.CanReach(search.Reached, s => AtNext(s) || IsSave(cfg, s));
             foreach (Segment s in search.Reached.Where(s => !good.Contains(s)).OrderBy(s => s.Room.Id).ThenBy(s => s.Row))
             {
                 string msg = $"{tag}阶段 {k}（标记：{string.Join(",", state.Flags)}）死局：{s.Describe()} 能到，但到不了存档点" + (string.IsNullOrEmpty(next) ? "" : $"，也到不了 {next}");
@@ -132,8 +148,8 @@ public static class WorldCheck
                 report.Errors.Add(msg);
             }
 
-            if (k < config.Story.Count && !stage.RoomsReached.Contains(config.Story[k].Room))
-                report.Errors.Add($"{tag}阶段 {k}：剧情标记 {config.Story[k].Flag} 所在的 {config.Story[k].Room} 到不了");
+            if (step != null && !search.Reached.Any(s => AtStep(s, step)))
+                report.Errors.Add($"{tag}阶段 {k}：剧情标记 {step.Flag} 所在的 {step} 到不了");
 
             carry = search.Reached.Select(s => (s.Room, new Vector2((float)s.MidX, (float)s.FloorY))).ToList();
         }
@@ -156,6 +172,17 @@ public static class WorldCheck
                 if (!noClimb.Reached.Contains(group.Key.To)) report.ClimbShortcuts.Add(group.OrderBy(x => x.Frames).First().Describe());
             }
         }
+    }
+
+    private static bool AtStep(Segment s, StoryStep step) =>
+        s.Room.Id == step.Room && (step.Anchor == null || OnAnchor(s, step.Room, step.Anchor));
+
+    /// <summary>这段地面上能站到 roomId 里名为 node 的锚点（锚点的脚底在这段地面上）。</summary>
+    private static bool OnAnchor(Segment s, string roomId, string node)
+    {
+        if (s.Room.Id != roomId) return false;
+        Vector2? feet = AnchorFeet(s.Room, node);
+        return feet is { } f && s.Contains(f.X, f.Y);
     }
 
     private static bool IsSave(SimConfig cfg, Segment s)
