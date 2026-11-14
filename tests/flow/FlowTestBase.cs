@@ -174,7 +174,8 @@ public abstract partial class FlowTestBase : Node
     protected void BindMainGame()
     {
         Node scene = GetTree().CurrentScene;
-        bool isMain = scene != null && scene.SceneFilePath == MainGameScene;
+        // 试玩场景 trial_game.tscn 继承正式入口，节点路径一样
+        bool isMain = scene != null && (scene.SceneFilePath == MainGameScene || scene.SceneFilePath == DebugStart.TrialScene);
         MainGame = isMain ? scene : null;
         World = MainGame?.GetNodeOrNull<WorldGame>("Game/WorldGame");
         Saves = MainGame?.GetNodeOrNull<SaveService>("Game/SaveService");

@@ -18,6 +18,9 @@ public static class GameSession
     /// <summary>最近一次开局失败的原因（存档损坏、版本不支持……）；空表示没有失败。主菜单负责显示。</summary>
     public static string LastStartError { get; set; } = "";
 
+    /// <summary>这一局是试玩时的请求（见 TrialRequest）；正常游戏为 null。跨场景保留（试玩里重开还是同一个试玩），Reset 不动它。</summary>
+    public static TrialRequest Trial { get; set; }
+
     public static void Reset(AbilityTable initialAbilities = null)
     {
         Progress = new ProgressStore();
