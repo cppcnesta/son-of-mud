@@ -4,6 +4,13 @@
 [ext_resource type="PackedScene" path="res://addons/MetroidvaniaSystem/Nodes/RoomInstance.tscn" id="2_ssaq4"]
 [ext_resource type="TileSet" path="res://assets/data/world/world_tileset.tres" id="4_0r3of"]
 [ext_resource type="Script" path="res://assets/scripts/world/SpawnPoint.cs" id="5_iwke4"]
+[ext_resource type="Script" path="res://assets/scripts/narrative/world/TabletPickup.cs" id="n_tablet"]
+
+[sub_resource type="RectangleShape2D" id="Shape_Tablet_name"]
+size = Vector2(80, 96)
+
+[sub_resource type="RectangleShape2D" id="Shape_Tablet_star"]
+size = Vector2(80, 96)
 
 [node name="S4_05" type="Node2D" unique_id=938984325]
 script = ExtResource("1_52gde")
@@ -36,3 +43,35 @@ script = ExtResource("5_iwke4")
 SpawnId = &"From_S4_04"
 
 [node name="Objects" type="Node2D" parent="." unique_id=1869167204]
+
+[node name="Tablet_name" type="Area2D" parent="Objects" unique_id=1344802495]
+position = Vector2(1936, 1204)
+script = ExtResource("n_tablet")
+TabletId = "name"
+
+[node name="Shape" type="CollisionShape2D" parent="Objects/Tablet_name" unique_id=297095713]
+position = Vector2(0, -48)
+shape = SubResource("Shape_Tablet_name")
+
+[node name="Placeholder" type="ColorRect" parent="Objects/Tablet_name" unique_id=1659568928]
+offset_left = -24.0
+offset_top = -77.0
+offset_right = 24.0
+mouse_filter = 2
+color = Color(0.75, 0.6, 0.4, 1)
+
+[node name="Tablet_star" type="Area2D" parent="Objects" unique_id=1705234055]
+position = Vector2(2416, 1204)
+script = ExtResource("n_tablet")
+TabletId = "star"
+
+[node name="Shape" type="CollisionShape2D" parent="Objects/Tablet_star" unique_id=1242033193]
+position = Vector2(0, -48)
+shape = SubResource("Shape_Tablet_star")
+
+[node name="Placeholder" type="ColorRect" parent="Objects/Tablet_star" unique_id=780271358]
+offset_left = -24.0
+offset_top = -77.0
+offset_right = 24.0
+mouse_filter = 2
+color = Color(0.75, 0.6, 0.4, 1)

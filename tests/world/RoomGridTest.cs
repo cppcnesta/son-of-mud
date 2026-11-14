@@ -82,7 +82,7 @@ public partial class RoomGridTest : WorldTestBase
         int firstRow = Array.IndexOf(lines, "---") + 1;
         string shortened = string.Join("\n", lines.Select((l, i) => i == firstRow ? l[..^1] : l)) + "\n";
         Expect("一行长度不对", shortened, room, "长度应为 36");
-        Expect("非法字符", ok.Replace("@size 36x21\n---\n....", "@size 36x21\n---\n...Z"), room, "非法字符");
+        Expect("非法字符", ok.Replace("@size 36x21\n---\n....", "@size 36x21\n---\n...?"), room, "非法字符");
         Expect("没有 P", BaseText(room, g => g.Set(5, 10, RoomGrid.Empty)), room, "P（默认出生点）应恰好 1 个（实际 0）");
         Expect("两个 P", BaseText(room, g => g.Set(6, 10, RoomGrid.DefaultSpawn)), room, "P（默认出生点）应恰好 1 个（实际 2）");
         Expect("房间表没有存档点却有 S", BaseText(room, g => g.Set(7, 10, RoomGrid.SavePoint)), room, "不能有 S");
@@ -97,6 +97,18 @@ public partial class RoomGridTest : WorldTestBase
         Expect("数字出生点重复声明", ReplaceLine(BaseText(room, g => { g.SetSpawn('1', "From_X"); g.Set(8, 10, '1'); }), "@spawn 1 From_X\n", "@spawn 1 From_X\n@spawn 1 From_Y\n"), room, "出生点 1 重复声明");
         Expect("有 R 没有 @cond", BaseText(room, g => g.Set(8, 12, RoomGrid.Conditional)), room, "图里有 R（条件地形），文件头必须写 @cond");
         Expect("有 @cond 没有 R", BaseText(room, g => g.SetCondition("boss_keeper")), room, "文件头写了 @cond，但图里没有 R");
+
+        // 门块
+        void Hatch(RoomGrid g, char letter) { for (int c = 10; c <= 13; c++) g.Set(c, 12, letter); }
+        Expect("门块声明了但图里没有", BaseText(room, g => g.SetGate('C', "tablet.gate_1", "")), room, "门块 C（tablet.gate_1）在图里没有出现");
+        Expect("图里有门块但没声明", BaseText(room, g => Hatch(g, 'D')), room, "图里有门块 D，但文件头没有 @gate D");
+        Expect("门块不是矩形", BaseText(room, g => { g.SetGate('C', "f", ""); Hatch(g, 'C'); g.Set(11, 13, 'C'); }), room, "门块 C 必须画成一个填满的矩形");
+        Expect("门块用了保留字母", ReplaceLine(ok, "---\n", "@gate R f 提示\n---\n"), room, "门块字母 R 不能用");
+        Expect("门块重复声明", ReplaceLine(BaseText(room, g => { g.SetGate('C', "f", ""); Hatch(g, 'C'); }), "@gate C f\n", "@gate C f\n@gate C g\n"), room, "门块 C 重复声明");
+        RoomGrid gated = RoomGrid.Parse(BaseText(room, g => { g.SetGate('C', "tablet.gate_1", "门上 刻着字……先读泥板。"); Hatch(g, 'C'); }), room, _cell, out string gateError);
+        Check(gated != null && gated.Gates['C'] == ("tablet.gate_1", "门上 刻着字……先读泥板。") && gated.GateRect('C') == new Rect2I(10, 12, 4, 1)
+              && RoomGrid.IsSolidChar('C', false) && !RoomGrid.IsGateChar('B') && !RoomGrid.IsGateChar('X') && RoomGrid.IsGateChar('Z'),
+            $"门块：@gate C 变量 提示（提示里可以有空格）解析正确，矩形 (10,12) 4x1，关着按实心算；B / X 这些已有含义的字母不是门块（{gateError}）");
     }
 
     // ---------- 往返 ----------
@@ -120,6 +132,8 @@ public partial class RoomGridTest : WorldTestBase
         grid.SetSpawn('1', "From_A");
         grid.SetSpawn('9', "From_B");
         grid.SetCondition("boss_keeper");
+        for (int c = 12; c <= 14; c++) { grid.Set(c, 10, 'C'); grid.Set(c, 11, 'C'); }
+        grid.SetGate('C', "tablet.gate_1", "门紧闭 先读泥板");
         grid.AddComment("往返测试 一");
         grid.AddComment("第二行注释");
         string text = grid.Serialize();
@@ -132,8 +146,9 @@ public partial class RoomGridTest : WorldTestBase
                 cells &= back.At(c, r) == grid.At(c, r);
         Check(cells && back.Cols == grid.Cols && back.Rows == grid.Rows && back.Shift == grid.Shift, "往返：每一格、尺寸、Shift 都一致");
         Check(back.Condition == "boss_keeper" && back.Anchors.OrderBy(a => a.Key).SequenceEqual(grid.Anchors.OrderBy(a => a.Key))
-              && back.Spawns.OrderBy(a => a.Key).SequenceEqual(grid.Spawns.OrderBy(a => a.Key)) && back.Comments.SequenceEqual(grid.Comments),
-            "往返：@cond、@anchor、@spawn、注释都一致");
+              && back.Spawns.OrderBy(a => a.Key).SequenceEqual(grid.Spawns.OrderBy(a => a.Key)) && back.Comments.SequenceEqual(grid.Comments)
+              && back.Gates.OrderBy(a => a.Key).SequenceEqual(grid.Gates.OrderBy(a => a.Key)),
+            "往返：@cond、@anchor、@spawn、@gate、注释都一致");
         Check(back.Serialize() == text, "往返：再 Serialize 一次，文字完全相同");
     }
 

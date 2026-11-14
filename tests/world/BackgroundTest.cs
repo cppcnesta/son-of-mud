@@ -1072,12 +1072,16 @@ public partial class BackgroundTest : FlowTestBase
         await Teleport("S4_02", SpawnPoint.DefaultId);
         bool oldFreed = await WaitUntil(() => !GodotObject.IsInstanceIdValid(bgId), 30);
         ImportSized(1f, 1f);
-        Player.GlobalPosition = Room.GlobalPosition + new Vector2(1152, 120);
+        // 七道门塔：打开第一层的活板门（左边第 3–6 列），从塔顶附近穿过它落到第二层（约 760 像素）
+        GameSession.Progress.SetVar("tablet.gate_1", true);
+        await Frames(2);
+        Player.GlobalPosition = Room.GlobalPosition + new Vector2(160, 120);
         Player.Velocity = Vector2.Zero;
         Cam.SnapToTarget();
         float y0 = Player.GlobalPosition.Y;
         await Watch(300);
         float fell = Player.GlobalPosition.Y - y0;
+        GameSession.Progress.SetVar("tablet.gate_1", false);
 
         Check(problems.Count == 0, $"动态逐帧（{frames} 帧，S1_03 跑了 {run:0} 像素，竖井掉了 {fell:0} 像素，边界处震屏 {maxShake}）：每一帧三层都盖满画面"
                                    + (problems.Count == 0 ? "" : "：" + string.Join(" | ", problems)));

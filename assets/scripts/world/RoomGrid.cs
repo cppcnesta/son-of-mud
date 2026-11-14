@@ -18,6 +18,7 @@ namespace SonOfMud.World;
 /// @cond boss_keeper        R 的出现条件（剧情标记）；图里有 R 时必须写，没有 R 时不能写
 /// @anchor a Npc_Keeper     锚点字母 → Objects 下的节点名
 /// @spawn 1 From_S1_04      数字 → 出生点 ID（可选；左右出口的到达点不写时由生成工具按开口推算）
+/// @gate C tablet.gate_1 门上刻着字……   门块：大写字母画出的矩形是一道门（GateBarrier），变量成立前挡路，之后消失；后面是锁着时的提示
 /// ---
 /// （Rows 行，每行 Cols 个字符）
 /// </code>
@@ -63,8 +64,11 @@ public sealed class RoomGrid
     public IReadOnlyDictionary<char, string> Anchors => _anchors;
     public IReadOnlyDictionary<char, string> Spawns => _spawns;
     public IReadOnlyList<string> Comments => _comments;
+    /// <summary>门块：字母 → (开门的变量, 锁着时的提示)。</summary>
+    public IReadOnlyDictionary<char, (string Flag, string Text)> Gates => _gates;
 
     private char[,] _cells = new char[0, 0];
+    private readonly Dictionary<char, (string Flag, string Text)> _gates = new();
     private readonly Dictionary<char, string> _anchors = new();
     private readonly Dictionary<char, string> _spawns = new();
     private readonly List<string> _comments = new();
@@ -96,8 +100,25 @@ public sealed class RoomGrid
     }
 
     /// <summary>这个字符在给定条件下是不是实心（挡路、能站）。</summary>
+    /// <summary>门块按关着算（挡路、能站、不可攀）；静态模拟器按进度另算开没开。</summary>
     public static bool IsSolidChar(char ch, bool conditionMet) =>
-        ch is Solid or NoClimb or Breakable or HiddenBreakable || (ch == Conditional && conditionMet);
+        ch is Solid or NoClimb or Breakable or HiddenBreakable || (ch == Conditional && conditionMet) || IsGateChar(ch);
+
+    /// <summary>门块字母：大写字母里除去已有含义的 B H P R S X。</summary>
+    public static bool IsGateChar(char ch) => ch is >= 'A' and <= 'Z' && !ReservedUpper.Contains(ch);
+
+    public const string ReservedUpper = "BHPRSX";
+
+    /// <summary>门块占的格子矩形（左上格、大小）；图里没有这个字母时为 null。</summary>
+    public Rect2I? GateRect(char letter)
+    {
+        var cells = FindAll(letter).ToList();
+        if (cells.Count == 0) return null;
+        int c0 = cells.Min(c => c.X), r0 = cells.Min(c => c.Y), c1 = cells.Max(c => c.X), r1 = cells.Max(c => c.Y);
+        return new Rect2I(c0, r0, c1 - c0 + 1, r1 - r0 + 1);
+    }
+
+    public void SetGate(char letter, string flag, string text) => _gates[letter] = (flag ?? "", text ?? "");
 
     public static bool IsClimbableChar(char ch, bool conditionMet) =>
         ch is Solid or Breakable or HiddenBreakable || (ch == Conditional && conditionMet);
@@ -109,7 +130,7 @@ public sealed class RoomGrid
         ch is DefaultSpawn or SavePoint || (ch >= 'a' && ch <= 'z') || (ch >= '1' && ch <= '9');
 
     public static bool IsLegalChar(char ch) =>
-        ch is Solid or NoClimb or Empty or OneWay or Breakable or HiddenBreakable or Conditional || IsMarkerChar(ch);
+        ch is Solid or NoClimb or Empty or OneWay or Breakable or HiddenBreakable or Conditional || IsMarkerChar(ch) || IsGateChar(ch);
 
     public bool IsSolid(int c, int r, bool conditionMet = false) => IsSolidChar(At(c, r), conditionMet);
 
@@ -193,6 +214,13 @@ public sealed class RoomGrid
                 case "@spawn" when parts.Length == 3 && parts[1].Length == 1 && parts[1][0] is >= '1' and <= '9':
                     if (!grid._spawns.TryAdd(parts[1][0], parts[2])) problems.Add($"第 {i + 1} 行：出生点 {parts[1]} 重复声明");
                     break;
+                case "@gate" when parts.Length >= 3 && parts[1].Length == 1:
+                    if (!IsGateChar(parts[1][0])) { problems.Add($"第 {i + 1} 行：门块字母 {parts[1]} 不能用（只能用大写字母，除去 {ReservedUpper}）"); break; }
+                    // 提示文字是变量后面的整段（可以有空格）
+                    string[] four = line.Split((char[])null, 4, StringSplitOptions.RemoveEmptyEntries);
+                    string rest = four.Length == 4 ? four[3].Trim() : "";
+                    if (!grid._gates.TryAdd(parts[1][0], (parts[2], rest))) problems.Add($"第 {i + 1} 行：门块 {parts[1]} 重复声明");
+                    break;
                 default: problems.Add($"第 {i + 1} 行：看不懂的文件头“{line}”"); break;
             }
         }
@@ -242,6 +270,16 @@ public sealed class RoomGrid
             if (declared && n != 1) problems.Add($"出生点 {ch}（{grid._spawns[ch]}）应在图里恰好出现 1 次（实际 {n}）");
             if (!declared && n > 0) problems.Add($"图里有出生点 {ch}，但文件头没有 @spawn {ch}");
         }
+        for (char ch = 'A'; ch <= 'Z'; ch++)
+        {
+            if (!IsGateChar(ch)) continue;
+            int n = Count(ch);
+            bool declared = grid._gates.ContainsKey(ch);
+            if (declared && n == 0) problems.Add($"门块 {ch}（{grid._gates[ch].Flag}）在图里没有出现");
+            if (!declared && n > 0) problems.Add($"图里有门块 {ch}，但文件头没有 @gate {ch}");
+            if (n > 0 && grid.GateRect(ch) is { } rect && rect.Size.X * rect.Size.Y != n)
+                problems.Add($"门块 {ch} 必须画成一个填满的矩形（现在 {n} 格，外框 {rect.Size.X}x{rect.Size.Y}）");
+        }
         bool hasR = Count(Conditional) > 0;
         if (hasR && grid.Condition.Length == 0) problems.Add("图里有 R（条件地形），文件头必须写 @cond");
         if (!hasR && grid.Condition.Length > 0) problems.Add("文件头写了 @cond，但图里没有 R");
@@ -264,6 +302,7 @@ public sealed class RoomGrid
         if (Condition.Length > 0) sb.Append($"@cond {Condition}\n");
         foreach (var (letter, node) in _anchors.OrderBy(a => a.Key)) sb.Append($"@anchor {letter} {node}\n");
         foreach (var (digit, spawn) in _spawns.OrderBy(a => a.Key)) sb.Append($"@spawn {digit} {spawn}\n");
+        foreach (var (letter, gate) in _gates.OrderBy(a => a.Key)) sb.Append($"@gate {letter} {gate.Flag}{(gate.Text.Length > 0 ? " " + gate.Text : "")}\n");
         sb.Append(Separator).Append('\n');
         for (int r = 0; r < Rows; r++)
         {

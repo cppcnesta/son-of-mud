@@ -181,6 +181,50 @@ public sealed class GeometryBuilder
             sealedCells.Add($"{SideName(side)}边 ({cell.X},{cell.Y})");
         }
 
+        // 门块：Objects 下不是出口门的 GateBarrier → 大写字母矩形 + @gate（名字是 Gate_字母 就用那个字母）
+        if (root.GetNodeOrNull("Objects") is Node gateParent)
+        {
+            HashSet<string> exitGates = ExitGateNames(room);
+            var inner = gateParent.GetChildren().OfType<GateBarrier>().Where(g => !exitGates.Contains(g.Name)).ToList();
+            var used = new HashSet<char>();
+            var wanted = new Dictionary<GateBarrier, char>();
+            foreach (GateBarrier gate in inner)
+            {
+                string n = gate.Name;
+                if (n.Length == 6 && n.StartsWith("Gate_") && RoomGrid.IsGateChar(n[5]) && used.Add(n[5])) wanted[gate] = n[5];
+            }
+            foreach (GateBarrier gate in inner.Where(g => !wanted.ContainsKey(g)))
+            {
+                char free = Enumerable.Range('A', 26).Select(i => (char)i).FirstOrDefault(c => RoomGrid.IsGateChar(c) && !used.Contains(c));
+                if (free == default) { Fail($"门块超过 20 个（{gate.Name} 没有字母可用）"); break; }
+                used.Add(free);
+                wanted[gate] = free;
+            }
+            foreach (var (gate, gateLetter) in wanted)
+            {
+                GateRequirement req = gate.Requirement;
+                if (req == null || req.Flags.Count != 1 || req.Abilities.Count != 0) { Fail($"门 {gate.Name} 的条件必须恰好是一个变量（门块只认一个变量）"); continue; }
+                if (gate.LocalRect() is not { } px) { Fail($"门 {gate.Name} 没有矩形碰撞形状 Shape"); continue; }
+                float top = px.Position.Y + grid.Shift;
+                if (Mathf.PosMod(px.Position.X, Tile) != 0 || Mathf.PosMod(top, Tile) != 0 || Mathf.PosMod(px.Size.X, Tile) != 0 || Mathf.PosMod(px.Size.Y, Tile) != 0)
+                {
+                    Fail($"门 {gate.Name} 的矩形 {px} 没有对齐 32 像素网格");
+                    continue;
+                }
+                int c0 = Mathf.RoundToInt(px.Position.X / Tile), r0 = Mathf.RoundToInt(top / Tile);
+                int w = Mathf.RoundToInt(px.Size.X / Tile), h = Mathf.RoundToInt(px.Size.Y / Tile);
+                bool ok = true;
+                for (int r = r0; r < r0 + h && ok; r++)
+                    for (int c = c0; c < c0 + w && ok; c++)
+                        if (!grid.InBounds(c, r) || grid.At(c, r) != RoomGrid.Empty) { Fail($"门 {gate.Name} 的格子 ({c},{r}) 在房间外或和地形重叠"); ok = false; }
+                if (!ok) continue;
+                for (int r = r0; r < r0 + h; r++)
+                    for (int c = c0; c < c0 + w; c++)
+                        grid.Set(c, r, gateLetter);
+                grid.SetGate(gateLetter, req.Flags[0], req.LockedText);
+            }
+        }
+
         // 标记：P、S、数字出生点、锚点
         var nudges = new List<string>();
         bool Place(char ch, Vector2 pos, string label)
@@ -575,6 +619,13 @@ public sealed class GeometryBuilder
         {
             var gate = objects.GetNodeOrNull<GateBarrier>("GateTo" + exit.Target);
             if (gate == null) { Fail($"找不到通往 {exit.Target} 的条件门 Objects/GateTo{exit.Target}"); continue; }
+            // 条件以房间表为准（场景里另存了一份，不同步的话房间表开了、实体门还挡着）
+            string wantReq = GateBarrier.Signature(exit.Requirement);
+            if (GateBarrier.Signature(gate.Requirement) != wantReq)
+            {
+                changes.Add($"条件门 {gate.Name} 的条件：{GateBarrier.Signature(gate.Requirement)} → {wantReq}");
+                gate.Requirement = GateBarrier.CopyRequirement(exit.Requirement);
+            }
             if (exit.Kind != ExitKind.Edge || exit.Side is ExitSide.Up or ExitSide.Down)
             {
                 Notes.Add($"{room.Id}：通往 {exit.Target} 的条件门在上下出口或门上，位置不由生成工具管");
@@ -594,8 +645,52 @@ public sealed class GeometryBuilder
                 gate.Position = at;
             }
         }
+
+        // ⑧ 门块：房间里面的门（GateBarrier，名字 Gate_字母），形状、位置、条件按文字图
+        HashSet<string> exitGates = ExitGateNames(room);
+        var innerGates = objects.GetChildren().OfType<GateBarrier>().Where(g => !exitGates.Contains(g.Name)).ToList();
+        foreach (var (letter, spec) in grid.Gates.OrderBy(g => g.Key))
+        {
+            Rect2I rect = grid.GateRect(letter).Value;
+            string name = GateBarrier.InnerName(letter);
+            var size = new Vector2(rect.Size.X * Tile, rect.Size.Y * Tile);
+            var at = new Vector2((rect.Position.X + rect.Size.X / 2f) * Tile, rect.End.Y * Tile - shift);
+            GateRequirement wantGate = GateBarrier.FlagRequirement(spec.Flag, spec.Text);
+            GateBarrier gate = innerGates.FirstOrDefault(g => g.Name == name);
+            if (gate == null)
+            {
+                gate = GateBarrier.Create(name, size, wantGate);
+                gate.Position = at;
+                objects.AddChild(gate);
+                foreach (Node n in new Node[] { gate }.Concat(gate.GetChildren())) n.Owner = root;
+                changes.Add($"新建门 {name}（{rect.Size.X}x{rect.Size.Y} 格，条件 {spec.Flag}）@ {at}");
+                continue;
+            }
+            innerGates.Remove(gate);
+            if (gate.Position != at)
+            {
+                changes.Add($"门 {name}：{gate.Position} → {at}");
+                gate.Position = at;
+            }
+            if (!gate.HasSize(size))
+            {
+                changes.Add($"门 {name} 的大小改成 {size}");
+                gate.Resize(size);
+            }
+            if (GateBarrier.Signature(gate.Requirement) != GateBarrier.Signature(wantGate))
+            {
+                changes.Add($"门 {name} 的条件：{GateBarrier.Signature(gate.Requirement)} → {GateBarrier.Signature(wantGate)}");
+                gate.Requirement = wantGate;
+            }
+        }
+        foreach (GateBarrier extra in innerGates)
+            Fail($"场景里有门 Objects/{extra.Name}，文字图里没有对应的门块（先导出文字图，或在文字图里加 @gate）");
         return changes;
     }
+
+    /// <summary>出口用的条件门的节点名（GateTo + 目标）；其余 GateBarrier 都是门块。</summary>
+    public static HashSet<string> ExitGateNames(RoomDef room) =>
+        room.Exits.Where(e => e != null && e.HasBarrier).Select(e => "GateTo" + e.Target).ToHashSet();
 
     /// <summary>
     /// TileMapLayer.tile_map_data 的格式：2 字节格式版本（0），然后每格 12 字节：x、y（int16），图集源、图集 x、图集 y、替代图块（uint16），小端。

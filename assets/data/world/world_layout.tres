@@ -653,7 +653,7 @@ Requirement = null
 [sub_resource type="Resource" id="Gate_S4_02_1"]
 script = ExtResource("4_gate")
 Abilities = Array[StringName]([])
-Flags = Array[StringName]([&"seven_gates"])
+Flags = Array[StringName]([&"tablet.gate_1", &"tablet.gate_2", &"tablet.gate_3", &"tablet.gate_4", &"tablet.gate_5", &"tablet.gate_6", &"tablet.gate_7"])
 LockedText = "七道门还没有走完。"
 
 [sub_resource type="Resource" id="Exit_S4_02_1"]
