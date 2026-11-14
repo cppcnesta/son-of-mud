@@ -21,6 +21,14 @@ public partial class GameBoot : Node
     [Export] public WorldGame World { get; set; }
     /// <summary>存档服务节点（只检查它已进树、已就绪）。</summary>
     [Export] public Node SaveService { get; set; }
+    /// <summary>
+    /// 试玩场景（trial_game.tscn 里打开）：开局时读「从这里试玩」的一次性请求（DebugStart），放进 GameSession.Trial，按新游戏开局。
+    /// 正式场景里为 false：不看请求文件，并清掉 GameSession.Trial（正常游戏永远不是试玩）。
+    /// </summary>
+    [Export] public bool TrialMode { get; set; }
+
+    /// <summary>试玩时屏幕角上的字样（没有试玩时为 null）。</summary>
+    public Label TrialBadge { get; private set; }
 
     /// <summary>本实例已经发出开局请求、正在等 GameStartFinished。</summary>
     public bool AwaitingStart { get; private set; }
@@ -59,6 +67,7 @@ public partial class GameBoot : Node
         if (Leaving || StartedWith != StartMode.None) return;
         StartMode mode = GameSession.PendingStart == StartMode.Continue ? StartMode.Continue : StartMode.NewGame;
         GameSession.PendingStart = StartMode.None;
+        PrepareTrial(ref mode);
         StartedWith = mode;
         AwaitingStart = true;
 
@@ -71,6 +80,30 @@ public partial class GameBoot : Node
             return;
         }
         Events.Instance.EmitSignal(mode == StartMode.Continue ? Events.SignalName.ContinueRequested : Events.SignalName.NewGameRequested);
+    }
+
+    /// <summary>
+    /// 试玩场景：已有试玩（试玩里重开）就沿用；否则读一次性请求文件（读完即删）。有试玩就一律按新游戏开局，角上显示试玩字样。
+    /// 正式场景：清掉试玩，不看请求文件。只在调试版本里生效。
+    /// </summary>
+    private void PrepareTrial(ref StartMode mode)
+    {
+        if (!TrialMode || !OS.IsDebugBuild())
+        {
+            GameSession.Trial = null;
+            return;
+        }
+        if (GameSession.Trial == null)
+        {
+            GameSession.Trial = DebugStart.Consume(World?.Layout ?? GD.Load<WorldLayout>(WorldLayout.DefaultPath), out string error);
+            if (GameSession.Trial == null) GD.PushWarning($"GameBoot：试玩场景里{error}，按普通新游戏开局。");
+        }
+        if (GameSession.Trial == null) return;
+        mode = StartMode.NewGame;
+        var layer = new CanvasLayer { Name = "TrialBadge", Layer = 100 };
+        TrialBadge = new Label { Text = GameSession.Trial.Describe(), Position = new Vector2(12, 8), Modulate = new Color(1f, 0.85f, 0.4f, 0.9f), MouseFilter = Control.MouseFilterEnum.Ignore };
+        layer.AddChild(TrialBadge);
+        AddChild(layer);
     }
 
     /// <summary>开局前提：Events 在、WorldGame 已经拿到玩家、SaveService 已经就绪。返回 null 表示满足，否则是原因。</summary>
@@ -94,17 +127,24 @@ public partial class GameBoot : Node
         }
         GameSession.LastStartError = string.IsNullOrEmpty(error) ? "开局失败（没有给出原因）。" : error;
         GameSession.PendingStart = StartMode.None;
+        GameSession.Trial = null;
         GD.PushWarning("GameBoot：" + GameSession.LastStartError + " 回到主菜单。");
         GoTo(Settings.MenuScene);
     }
 
-    private void OnQuitToMenuRequested() => GoTo(Settings.MenuScene);
+    /// <summary>回主菜单：试玩到此结束（之后菜单里的新游戏 / 继续都是正常的）。</summary>
+    private void OnQuitToMenuRequested()
+    {
+        GameSession.Trial = null;
+        GoTo(Settings.MenuScene);
+    }
 
+    /// <summary>重开一局：试玩中就按同一个试玩重开（重新载入试玩场景、重新补进度）；否则照旧。</summary>
     private void OnRestartRunRequested()
     {
         if (Leaving) return;
         GameSession.PendingStart = StartMode.NewGame;
-        GoTo(Settings.GameScene);
+        GoTo(TrialMode && GameSession.Trial != null ? DebugStart.TrialScene : Settings.GameScene);
     }
 
     /// <summary>清掉暂停和输入锁的所有来源，再切场景（当前整个游戏实例随之释放）。</summary>

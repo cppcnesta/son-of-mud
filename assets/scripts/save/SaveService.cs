@@ -38,13 +38,22 @@ public partial class SaveService : Node
     /// <summary>正在进行的新游戏换房请求编号；-1 表示没有。</summary>
     public int PendingNewGameId { get; private set; } = -1;
 
-    public StringName CheckpointSpawn => string.IsNullOrEmpty(CheckpointSavePoint) ? NewGameSpawn : SavePointSpawn;
+    /// <summary>这一局的起点（新游戏是 NewGameRoom / NewGameSpawn，试玩是试玩的房间和出生点），也是第一个存档点之前的复活点。</summary>
+    public string StartRoom { get; private set; }
+    public StringName StartSpawn { get; private set; }
+
+    public StringName CheckpointSpawn => string.IsNullOrEmpty(CheckpointSavePoint) ? StartSpawn ?? NewGameSpawn : SavePointSpawn;
+
+    /// <summary>这一局是试玩（GameSession.Trial）：存档点照常更新检查点、回血、提示，但不写存档文件。</summary>
+    public static bool IsTrial => GameSession.Trial != null;
 
     public string SlotPath(int slot) => SavePaths.SlotPath(SaveDirectory, slot);
 
     public override void _EnterTree()
     {
         CheckpointRoom ??= NewGameRoom;
+        StartRoom ??= NewGameRoom;
+        StartSpawn ??= NewGameSpawn;
         if (Events.Instance == null) return;
         Events.Instance.SaveRequested += OnSaveRequested;
         Events.Instance.PlayerDied += RespawnAtCheckpoint;
@@ -69,23 +78,31 @@ public partial class SaveService : Node
     private void OnSaveRequested(StringName savePointId) => SaveToDisk(savePointId);
     private void OnContinueRequested() => LoadFromDisk(0);
 
-    /// <summary>新游戏：清空进度和 MetSys 状态，检查点回到起点，进入起点房间。</summary>
+    /// <summary>
+    /// 新游戏：清空进度和 MetSys 状态，检查点回到起点，进入起点房间。
+    /// 试玩（GameSession.Trial）也走这里，顺序：重置 → 起点和检查点改成试玩的房间 / 出生点 → 补变量 → ProgressRestored → 换房 → 核对到达的是起点。
+    /// </summary>
     public void StartNewGame()
     {
+        TrialRequest trial = GameSession.Trial;
         GameSession.Reset(InitialAbilities);
         if (MetSysApi.Available)
         {
             MetSysApi.ResetState();
             MetSysApi.SetSaveData();
         }
-        CheckpointRoom = NewGameRoom;
+        StartRoom = trial?.Room ?? NewGameRoom;
+        StartSpawn = trial != null ? (StringName)trial.Spawn : NewGameSpawn;
+        CheckpointRoom = StartRoom;
         CheckpointSavePoint = "";
         PendingRespawnId = -1;
         PendingLoadId = -1;
+        if (trial != null)
+            foreach (string flag in trial.Flags) GameSession.Progress.SetVar(flag, true);
         Events.Instance?.EmitSignal(Events.SignalName.ProgressRestored);
         // GameStartFinished 等 World 回执“已到达”之后才发（见 OnTravelFinished）。
         PendingNewGameId = Events.NewRequestId();
-        Events.Instance?.EmitSignal(Events.SignalName.TravelRequested, PendingNewGameId, NewGameRoom, NewGameSpawn);
+        Events.Instance?.EmitSignal(Events.SignalName.TravelRequested, PendingNewGameId, StartRoom, StartSpawn);
     }
 
     public bool SaveToDisk(StringName savePointId, int slot = 0)
@@ -93,6 +110,13 @@ public partial class SaveService : Node
         if (string.IsNullOrEmpty(CurrentRoom)) return Fail("还没有进入任何房间，不能存档。");
         CheckpointRoom = CurrentRoom;
         CheckpointSavePoint = savePointId.ToString();
+        if (IsTrial)
+        {
+            // 试玩：检查点照常更新（之后死亡回这里），提示照常，但不碰存档文件
+            LastError = "";
+            Events.Instance?.EmitSignal(Events.SignalName.GameSaved);
+            return true;
+        }
         var data = new SaveData
         {
             MetSys = MetSysApi.Available && MetSysApi.HasSaveData ? MetSysApi.GetSaveData() : new GDictionary(),
@@ -175,8 +199,8 @@ public partial class SaveService : Node
         else if (requestId == PendingNewGameId)
         {
             PendingNewGameId = -1;
-            if (success && roomId == NewGameRoom) FinishStart();
-            else FailStart($"新游戏没能进入起点房间 {NewGameRoom}（房间不存在或换房失败；回执房间 {roomId}，success={success}）。");
+            if (success && roomId == StartRoom) FinishStart();
+            else FailStart($"新游戏没能进入起点房间 {StartRoom}（房间不存在或换房失败；回执房间 {roomId}，success={success}）。");
         }
     }
 

@@ -13,6 +13,7 @@ namespace SonOfMud.World;
 /// 只改编辑器里的显示，保存场景前自动还原，预览开关和位置本身也不存进场景。
 /// 关卡检查（见 <see cref="RoomRules.AuditScene"/>）：房间边缘有缺口但没有出口、出口被堵、出生点悬空或卡在砖里、砖铺到房间外，
 /// 都会在这个节点旁给警告。「导出文字图」按钮把这个房间场景写回 assets/data/world/rooms/&lt;房间&gt;.txt（关卡检查和测试读它）。
+/// 「从这里试玩」按钮：按检查器“试玩”一组里选的出生点、是否补齐前面的进度，直接从这个房间开始玩（见 <see cref="DebugStart"/>）。
 /// </summary>
 [Tool]
 [GlobalClass]
@@ -28,6 +29,15 @@ public partial class RoomRoot : Node2D
     /// <summary>把这个房间场景（地形、出生点、敌人和剧情触发器的位置）写回文字图。房间还有关卡警告时不导出。</summary>
     [ExportToolButton("导出文字图")]
     public Callable ExportTextButton => Callable.From(ExportTextInEditor);
+
+    /// <summary>用正式游戏的全部系统，从这个房间、检查器里选的出生点开始玩（见 <see cref="DebugStart"/>）。试玩不写存档。</summary>
+    [ExportToolButton("从这里试玩")]
+    public Callable TrialButton => Callable.From(TrialInEditor);
+
+    private const string TrialSpawnProperty = "trial_spawn";
+    private const string TrialFillProperty = "trial_fill";
+    private string _trialSpawn = "Default";
+    private bool _trialFill = true;
 
     private string[] _warnings = Array.Empty<string>();
     private double _checkLeft;
@@ -75,6 +85,9 @@ public partial class RoomRoot : Node2D
         new() { ["name"] = PreviewOnProperty, ["type"] = (int)Variant.Type.Bool, ["usage"] = (int)PropertyUsageFlags.Editor },
         new() { ["name"] = PreviewXProperty, ["type"] = (int)Variant.Type.Float, ["usage"] = (int)PropertyUsageFlags.Editor, ["hint"] = (int)PropertyHint.Range, ["hint_string"] = "0,1,0.01" },
         new() { ["name"] = PreviewYProperty, ["type"] = (int)Variant.Type.Float, ["usage"] = (int)PropertyUsageFlags.Editor, ["hint"] = (int)PropertyHint.Range, ["hint_string"] = "0,1,0.01" },
+        new() { ["name"] = "试玩（不存进场景）", ["type"] = (int)Variant.Type.Nil, ["usage"] = (int)PropertyUsageFlags.Group, ["hint_string"] = "trial_" },
+        new() { ["name"] = TrialSpawnProperty, ["type"] = (int)Variant.Type.String, ["usage"] = (int)PropertyUsageFlags.Editor, ["hint"] = (int)PropertyHint.Enum, ["hint_string"] = string.Join(",", TrialSpawns()) },
+        new() { ["name"] = TrialFillProperty, ["type"] = (int)Variant.Type.Bool, ["usage"] = (int)PropertyUsageFlags.Editor },
     };
 
     public override Variant _Get(StringName property) => property.ToString() switch
@@ -82,8 +95,37 @@ public partial class RoomRoot : Node2D
         PreviewOnProperty => _previewOn,
         PreviewXProperty => _previewX,
         PreviewYProperty => _previewY,
+        TrialSpawnProperty => _trialSpawn,
+        TrialFillProperty => _trialFill,
         _ => default,
     };
+
+    /// <summary>这个房间 Spawns 下的出生点编号（试玩的下拉框）；Default 排第一个。</summary>
+    public List<string> TrialSpawns()
+    {
+        var ids = new List<string>();
+        if (GetNodeOrNull("Spawns") is Node spawns)
+            foreach (Node child in spawns.GetChildren())
+            {
+                string id = child.Get("SpawnId").AsString();
+                if (string.IsNullOrEmpty(id)) id = child.Name;
+                if (!ids.Contains(id)) ids.Add(id);
+            }
+        ids.Remove(SpawnPoint.DefaultId.ToString());
+        ids.Insert(0, SpawnPoint.DefaultId.ToString());
+        return ids;
+    }
+
+    /// <summary>「从这里试玩」：写一次性请求，再让编辑器启动试玩场景。</summary>
+    public void TrialInEditor()
+    {
+#if TOOLS
+        string spawn = TrialSpawns().Contains(_trialSpawn) ? _trialSpawn : SpawnPoint.DefaultId.ToString();
+        DebugStart.WriteRequest(RoomId, spawn, _trialFill);
+        GD.Print($"[试玩] {RoomId} / {spawn}（{(_trialFill ? "补齐进度" : "白纸")}）");
+        EditorInterface.Singleton.PlayCustomScene(DebugStart.TrialScene);
+#endif
+    }
 
     public override bool _Set(StringName property, Variant value)
     {
@@ -92,6 +134,8 @@ public partial class RoomRoot : Node2D
             case PreviewOnProperty: SetPreview(value.AsBool(), _previewX, _previewY); return true;
             case PreviewXProperty: SetPreview(_previewOn, (float)value.AsDouble(), _previewY); return true;
             case PreviewYProperty: SetPreview(_previewOn, _previewX, (float)value.AsDouble()); return true;
+            case TrialSpawnProperty: _trialSpawn = value.AsString(); return true;
+            case TrialFillProperty: _trialFill = value.AsBool(); return true;
             default: return false;
         }
     }
