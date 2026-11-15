@@ -6,10 +6,14 @@
 [ext_resource type="Script" path="res://assets/scripts/world/SpawnPoint.cs" id="5_vwsye"]
 [ext_resource type="Script" path="res://assets/scripts/enemy/DropTable.cs" id="e_drops"]
 [ext_resource type="PackedScene" path="res://assets/scenes/enemy/prayer.tscn" id="e_prayer"]
+[ext_resource type="Script" path="res://assets/scripts/narrative/world/StoryTrigger.cs" id="n_story"]
 
 [sub_resource type="Resource" id="CityDrops"]
 script = ExtResource("e_drops")
 ItemId = &"泥瓶"
+
+[sub_resource type="RectangleShape2D" id="Shape_Story_Relief"]
+size = Vector2(96, 160)
 
 [node name="S3_02" type="Node2D" unique_id=445563852]
 script = ExtResource("1_1f74j")
@@ -70,3 +74,21 @@ DropsOverride = SubResource("CityDrops")
 position = Vector2(1800, 572)
 InitialFacing = 1.0
 DropsOverride = SubResource("CityDrops")
+
+[node name="Story_Relief" type="Area2D" parent="Objects" unique_id=819084094]
+position = Vector2(1456, 572)
+script = ExtResource("n_story")
+ScriptId = "c_city"
+Label = "浮雕"
+PromptText = "查看浮雕"
+
+[node name="Shape" type="CollisionShape2D" parent="Objects/Story_Relief" unique_id=1199052159]
+position = Vector2(0, -80)
+shape = SubResource("Shape_Story_Relief")
+
+[node name="Placeholder" type="ColorRect" parent="Objects/Story_Relief" unique_id=1022329276]
+offset_left = -29.0
+offset_top = -128.0
+offset_right = 29.0
+mouse_filter = 2
+color = Color(0.45, 0.38, 0.3, 1)

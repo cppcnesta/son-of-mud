@@ -38,6 +38,9 @@ public partial class NarrativeMap4Test : NarrativeFlowBase
             Check(started && Narr != null && Interactor != null, "正式入口开新游戏");
             if (Narr == null || Interactor == null) return;
             await WaitSettled();
+            // 这里测七道门的地形和门；落进塔里自动播的“七道门”旁白当作已经看过（剧情本身由 narrative_story 测）
+            GameSession.Progress.SetVar("seen.h_tower.七道门", true);
+            GameSession.Progress.SetVar("seen.h_tower.塔顶", true);
 
             await LockedExit();
             await Teleport("S4_02", SpawnPoint.DefaultId);

@@ -225,7 +225,8 @@ public partial class NarrativeUnitTest : Node
     {
         string dir = _settings.StoryDirectory;
         string[] files = DirAccess.GetFilesAt(dir).Where(f => f.EndsWith(".orph")).OrderBy(f => f).ToArray();
-        Check(files.SequenceEqual(new[] { "m_pit.orph", "pickups.orph", "tablets.orph" }), $"剧本：assets/story 下有 m_pit.orph、pickups.orph（道具拾取台词，目前没有段落）和 tablets.orph（实际 {string.Join(",", files)}）");
+        Check(files.SequenceEqual(new[] { "c_city.orph", "h_tower.orph", "m_pit.orph", "pickups.orph", "t_site.orph", "tablets.orph" }),
+            $"剧本：assets/story 下有四张地图的剧本 m_pit / t_site / c_city / h_tower、pickups（道具拾取台词）和 tablets（实际 {string.Join(",", files)}）");
         var problems = new List<string>();
         foreach (string file in files)
         {
@@ -287,11 +288,11 @@ public partial class NarrativeUnitTest : Node
 
         TabletData mural = GD.Load<TabletData>(_settings.InscriptionPath("mural"));
         TabletData relief = GD.Load<TabletData>(_settings.InscriptionPath("relief"));
-        Check(mural != null && mural.Room == "S2_02" && mural.PartialText == "祂把风灌进她的嘴里，海就停了。祂举起弯刃，海就分成了两半。" && !mural.HasFull,
+        Check(mural != null && mural.Room == "S2_02" && mural.PartialText == "祂把风灌进她的嘴里，海就停了；祂举起弯刃，她的海就分成了两半。" && !mural.HasFull,
             "铭文：S2_02 壁画铭文，只有一个版本");
         Check(relief != null && relief.Room == "S3_02" && relief.PartialText == "祂睡在泥里。祂是破碎的。祂没有醒。" && !relief.HasFull, "铭文：S3_02 浮雕铭文，只有一个版本");
 
-        string[] cgs = { "black", "seven_nights", "reshape", "sea_war", "meteor", "door", "patricide", "third_world", "slumber" };
+        string[] cgs = { "black", "seven_nights", "reshape", "sea_war", "meteor", "clay", "patricide", "third_world", "slumber" };
         Check(cgs.All(id => ResourceLoader.Exists(_settings.CgPath(id)) && GD.Load<CgData>(_settings.CgPath(id)).Id == id), "CG：黑屏 + CG1–8 共 9 份数据");
 
         CharacterDatabase db = _settings.Characters;

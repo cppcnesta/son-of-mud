@@ -39,6 +39,9 @@ public partial class BackgroundTest : FlowTestBase
         PureChecks();
         bool started = await EnterMainGame(StartMode.NewGame);
         await WaitSettled();
+        // 背景测试会传送进有“走进来自动播”剧情的房间（S4_02 七道门等）：都当作已经看过，免得剧情暂停游戏
+        foreach (string seen in new[] { "t_site.工地入口", "c_city.城门", "c_city.登塔", "h_tower.七道门", "h_tower.塔顶" })
+            GameSession.Progress.SetVar("seen." + seen, true);
         Check(started && World != null && Cam != null && Player != null, "正式入口开新游戏成功，有 WorldGame、RoomCamera、玩家");
         if (World == null || Cam == null || Player == null) return;
 

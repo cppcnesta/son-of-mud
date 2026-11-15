@@ -6,6 +6,7 @@
 [ext_resource type="Script" path="res://assets/scripts/world/SpawnPoint.cs" id="5_fe33t"]
 [ext_resource type="Script" path="res://assets/scripts/world/GateBarrier.cs" id="6_1sivc"]
 [ext_resource type="Script" path="res://assets/scripts/core/GateRequirement.cs" id="7_s2g0n"]
+[ext_resource type="Script" path="res://assets/scripts/narrative/world/StoryTrigger.cs" id="n_story"]
 [ext_resource type="Script" path="res://assets/scripts/narrative/world/TabletPickup.cs" id="n_tablet"]
 
 [sub_resource type="Resource" id="Resource_wa84m"]
@@ -84,6 +85,9 @@ LockedText = "活板门紧闭，门上刻着字……先读完这一层的泥板
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_tspww"]
 size = Vector2(128, 32)
+
+[sub_resource type="RectangleShape2D" id="Shape_Story_SevenGates"]
+size = Vector2(4608, 6480)
 
 [node name="S4_02" type="Node2D" unique_id=607016676]
 script = ExtResource("1_wa84m")
@@ -350,3 +354,14 @@ offset_top = -32.0
 offset_right = 64.0
 mouse_filter = 2
 color = Color(0.75, 0.2, 0.2, 0.85)
+
+[node name="Story_SevenGates" type="Area2D" parent="Objects" unique_id=1427024220]
+position = Vector2(1520, 432)
+script = ExtResource("n_story")
+ScriptId = "h_tower"
+Label = "七道门"
+Mode = 1
+Once = true
+
+[node name="Shape" type="CollisionShape2D" parent="Objects/Story_SevenGates" unique_id=628970488]
+shape = SubResource("Shape_Story_SevenGates")

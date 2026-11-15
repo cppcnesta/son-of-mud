@@ -5,15 +5,34 @@
 [ext_resource type="TileSet" path="res://assets/data/world/world_tileset.tres" id="4_7ytcb"]
 [ext_resource type="Script" path="res://assets/scripts/world/SpawnPoint.cs" id="5_ywgdd"]
 [ext_resource type="Script" path="res://assets/scripts/world/GateBarrier.cs" id="6_a0s1y"]
-[ext_resource type="Script" path="res://assets/scripts/core/GateRequirement.cs" id="7_gpgyf"]
+[ext_resource type="Script" path="res://assets/scripts/core/GateRequirement.cs" id="n_req"]
+[ext_resource type="Script" path="res://assets/scripts/narrative/world/StoryTrigger.cs" id="n_story"]
+[ext_resource type="Script" path="res://assets/scripts/narrative/world/TabletPickup.cs" id="n_tablet"]
 
 [sub_resource type="Resource" id="Gate_S2_04_1"]
-script = ExtResource("7_gpgyf")
+script = ExtResource("n_req")
 Flags = Array[StringName]([&"boss_dragon"])
 LockedText = "龙蛇泥人还挡着路。"
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_carjh"]
 size = Vector2(64, 312)
+
+[sub_resource type="RectangleShape2D" id="Shape_Story_DragonFall"]
+size = Vector2(96, 160)
+
+[sub_resource type="Resource" id="Req_Story_Tamtu"]
+script = ExtResource("n_req")
+Flags = Array[StringName]([&"boss_dragon"])
+
+[sub_resource type="RectangleShape2D" id="Shape_Story_Tamtu"]
+size = Vector2(96, 160)
+
+[sub_resource type="Resource" id="Req_Tablet_destiny"]
+script = ExtResource("n_req")
+Flags = Array[StringName]([&"seen.t_site.塔姆图"])
+
+[sub_resource type="RectangleShape2D" id="Shape_Tablet_destiny"]
+size = Vector2(80, 96)
 
 [node name="S2_04" type="Node2D" unique_id=1200259855]
 script = ExtResource("1_tck23")
@@ -82,3 +101,58 @@ offset_top = -312.0
 offset_right = 32.0
 mouse_filter = 2
 color = Color(0.75, 0.2, 0.2, 0.85)
+
+[node name="Story_DragonFall" type="Area2D" parent="Objects" unique_id=188893176]
+position = Vector2(1648, 1220)
+script = ExtResource("n_story")
+ScriptId = "t_site"
+Label = "龙蛇·倒下"
+PromptText = "（占位）打倒龙蛇"
+Once = true
+
+[node name="Shape" type="CollisionShape2D" parent="Objects/Story_DragonFall" unique_id=618618731]
+position = Vector2(0, -80)
+shape = SubResource("Shape_Story_DragonFall")
+
+[node name="Placeholder" type="ColorRect" parent="Objects/Story_DragonFall" unique_id=1948698983]
+offset_left = -29.0
+offset_top = -128.0
+offset_right = 29.0
+mouse_filter = 2
+color = Color(0.45, 0.38, 0.3, 1)
+
+[node name="Story_Tamtu" type="Area2D" parent="Objects" unique_id=258930143]
+position = Vector2(1776, 1220)
+script = ExtResource("n_story")
+ScriptId = "t_site"
+Label = "塔姆图"
+PromptText = "触碰雕像"
+Requirement = SubResource("Req_Story_Tamtu")
+
+[node name="Shape" type="CollisionShape2D" parent="Objects/Story_Tamtu" unique_id=849485906]
+position = Vector2(0, -80)
+shape = SubResource("Shape_Story_Tamtu")
+
+[node name="Placeholder" type="ColorRect" parent="Objects/Story_Tamtu" unique_id=529402593]
+offset_left = -29.0
+offset_top = -128.0
+offset_right = 29.0
+mouse_filter = 2
+color = Color(0.45, 0.38, 0.3, 1)
+
+[node name="Tablet_destiny" type="Area2D" parent="Objects" unique_id=510976936]
+position = Vector2(1872, 1220)
+script = ExtResource("n_tablet")
+TabletId = "destiny"
+VisibleWhen = SubResource("Req_Tablet_destiny")
+
+[node name="Shape" type="CollisionShape2D" parent="Objects/Tablet_destiny" unique_id=1739752134]
+position = Vector2(0, -48)
+shape = SubResource("Shape_Tablet_destiny")
+
+[node name="Placeholder" type="ColorRect" parent="Objects/Tablet_destiny" unique_id=1041942769]
+offset_left = -29.0
+offset_top = -77.0
+offset_right = 29.0
+mouse_filter = 2
+color = Color(0.75, 0.6, 0.4, 1)

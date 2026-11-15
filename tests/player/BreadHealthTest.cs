@@ -20,6 +20,8 @@ using SonOfMud.World;
 public partial class BreadHealthTest : NarrativeFlowBase
 {
     protected override string SuiteName => "bread_health";
+    /// <summary>会真实过 S3_08 的门（登塔入口有走进去自动播的剧情），关掉免得剧情暂停游戏。</summary>
+    protected override bool AutoStories => false;
 
     private const string BreadFlag = "item.生命之面包";
 

@@ -4,6 +4,6 @@
 
 [resource]
 script = ExtResource("1_cg")
-Id = "door"
-Title = "CG5「门」"
+Id = "clay"
+Title = "CG5「泥」"
 PlaceholderColor = Color(0.2, 0.18, 0.12, 1)

@@ -4,13 +4,13 @@
 [ext_resource type="PackedScene" path="res://addons/MetroidvaniaSystem/Nodes/RoomInstance.tscn" id="2_ssaq4"]
 [ext_resource type="TileSet" path="res://assets/data/world/world_tileset.tres" id="4_0r3of"]
 [ext_resource type="Script" path="res://assets/scripts/world/SpawnPoint.cs" id="5_iwke4"]
-[ext_resource type="Script" path="res://assets/scripts/narrative/world/TabletPickup.cs" id="n_tablet"]
+[ext_resource type="Script" path="res://assets/scripts/narrative/world/StoryTrigger.cs" id="n_story"]
 
-[sub_resource type="RectangleShape2D" id="Shape_Tablet_name"]
-size = Vector2(80, 96)
+[sub_resource type="RectangleShape2D" id="Shape_Story_Summit"]
+size = Vector2(5760, 2592)
 
-[sub_resource type="RectangleShape2D" id="Shape_Tablet_star"]
-size = Vector2(80, 96)
+[sub_resource type="RectangleShape2D" id="Shape_Story_FinalBoss"]
+size = Vector2(96, 160)
 
 [node name="S4_05" type="Node2D" unique_id=938984325]
 script = ExtResource("1_52gde")
@@ -44,34 +44,32 @@ SpawnId = &"From_S4_04"
 
 [node name="Objects" type="Node2D" parent="." unique_id=1869167204]
 
-[node name="Tablet_name" type="Area2D" parent="Objects" unique_id=1344802495]
-position = Vector2(1936, 1204)
-script = ExtResource("n_tablet")
-TabletId = "name"
+[node name="Story_Summit" type="Area2D" parent="Objects" unique_id=650799630]
+position = Vector2(1520, 1204)
+script = ExtResource("n_story")
+ScriptId = "h_tower"
+Label = "塔顶"
+Mode = 1
+Once = true
 
-[node name="Shape" type="CollisionShape2D" parent="Objects/Tablet_name" unique_id=297095713]
-position = Vector2(0, -48)
-shape = SubResource("Shape_Tablet_name")
+[node name="Shape" type="CollisionShape2D" parent="Objects/Story_Summit" unique_id=2084604015]
+shape = SubResource("Shape_Story_Summit")
 
-[node name="Placeholder" type="ColorRect" parent="Objects/Tablet_name" unique_id=1659568928]
-offset_left = -24.0
-offset_top = -77.0
-offset_right = 24.0
+[node name="Story_FinalBoss" type="Area2D" parent="Objects" unique_id=1491387902]
+position = Vector2(1712, 1204)
+script = ExtResource("n_story")
+ScriptId = "h_tower"
+Label = "最终Boss"
+PromptText = "（占位）打倒最终 Boss"
+Once = true
+
+[node name="Shape" type="CollisionShape2D" parent="Objects/Story_FinalBoss" unique_id=1909593147]
+position = Vector2(0, -80)
+shape = SubResource("Shape_Story_FinalBoss")
+
+[node name="Placeholder" type="ColorRect" parent="Objects/Story_FinalBoss" unique_id=91315513]
+offset_left = -29.0
+offset_top = -128.0
+offset_right = 29.0
 mouse_filter = 2
-color = Color(0.75, 0.6, 0.4, 1)
-
-[node name="Tablet_star" type="Area2D" parent="Objects" unique_id=1705234055]
-position = Vector2(2416, 1204)
-script = ExtResource("n_tablet")
-TabletId = "star"
-
-[node name="Shape" type="CollisionShape2D" parent="Objects/Tablet_star" unique_id=1242033193]
-position = Vector2(0, -48)
-shape = SubResource("Shape_Tablet_star")
-
-[node name="Placeholder" type="ColorRect" parent="Objects/Tablet_star" unique_id=780271358]
-offset_left = -24.0
-offset_top = -77.0
-offset_right = 24.0
-mouse_filter = 2
-color = Color(0.75, 0.6, 0.4, 1)
+color = Color(0.45, 0.38, 0.3, 1)

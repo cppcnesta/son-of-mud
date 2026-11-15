@@ -83,7 +83,10 @@ public partial class NarrativeMap1Test : NarrativeFlowBase
         // 走进坑里：“倒影”自动触发（不用按 E）
         bool reflected = await HoldUntil(PlayerActions.Right, () => Narr.MainActive, 600);
         await WaitUntil(() => Narr.Dialog.IsOpen, 60);
-        Check(reflected && Narr.MainLabel == "倒影" && Narr.Dialog.CurrentText == "……水太浑了。", $"S1_02：走进坑里自动播“倒影” → “……水太浑了。”（{Narr.MainLabel}：{Narr.Dialog.CurrentText}）");
+        Check(reflected && Narr.MainLabel == "倒影" && Narr.Dialog.CurrentText == "站在水边时，倒影里能看见他头上嵌满宝石的角冠。" && !Narr.Dialog.NameVisible,
+            $"S1_02：走进坑里自动播“倒影” → 旁白“站在水边时，倒影里能看见他头上嵌满宝石的角冠。”（{Narr.MainLabel}：{Narr.Dialog.CurrentText}）");
+        await AdvanceUntil(() => Narr.Dialog.CurrentText == "……水太浑了。" || !Narr.MainActive, 5);
+        Check(Narr.Dialog.CurrentText == "……水太浑了。" && Narr.Dialog.CurrentName == "穆尔图库尔", "S1_02：接着穆尔图库尔“……水太浑了。”");
         Check(await FinishDialog(), "S1_02：倒影播完");
         bool atTablet = await WalkToPrompt("拾取泥板", PlayerActions.Right);
         Check(atTablet, "S1_02：走到坑底的泥板「当天还没有名字」旁");
@@ -119,7 +122,9 @@ public partial class NarrativeMap1Test : NarrativeFlowBase
         bool atKeeper = await WalkToPrompt("交谈", PlayerActions.Right);
         await KeyTap(Key.E);
         await WaitUntil(() => Narr.MainActive, 10);
-        Check(atKeeper && Narr.MainLabel == "守坑人" && Narr.Dialog.CurrentText == "祂……醒了……", "S1_05：boss_keeper 之后和守坑人老人对话");
+        await WaitUntil(() => !Narr.Dialog.IsTyping, 300);
+        Check(atKeeper && Narr.MainLabel == "守坑人" && Narr.Dialog.CurrentText.StartsWith("两百年来……"),
+            $"S1_05：boss_keeper 之后和守坑人老人对话：“两百年来……祂……醒了……”（{Narr.Dialog.CurrentText}）");
         Check(await FinishDialog(), "S1_05：对话播完");
 
         // S1_05 → S1_06：七夜雕像
@@ -148,8 +153,10 @@ public partial class NarrativeMap1Test : NarrativeFlowBase
         await KeyTap(Key.E);
         await WaitUntil(() => Narr.MainActive, 10);
         await Frames(2);
-        Check(atReshape && Narr.MainLabel == "重塑" && Narr.Cg.CurrentId == "reshape" && Narr.Dialog.CurrentText == "他又捏了我一次。我希望我一直碎着。就像永远一样久。" && !Narr.Dialog.NameVisible,
+        Check(atReshape && Narr.MainLabel == "重塑" && Narr.Cg.CurrentId == "reshape" && Narr.Dialog.CurrentText == "在献给父亲的那场伟大胜利之后，他沉醉在祂慈爱的目光中，即使自己已经破碎。" && !Narr.Dialog.NameVisible,
             "S1_08：触碰重塑雕像，播 CG2 和旁白");
+        await AdvanceUntil(() => Narr.Dialog.CurrentName == "穆尔图库尔" || !Narr.MainActive, 5);
+        Check(Narr.Dialog.CurrentText == "他又捏了我一次。我希望我一直碎着。就像永远一样久。" && Narr.Dialog.NameVisible, "S1_08：接着穆尔图库尔“他又捏了我一次……”");
         Check(await FinishDialog(), "S1_08：CG2 播完");
         bool atHand = await WalkToPrompt("拾取泥板", PlayerActions.Right);
         await KeyTap(Key.E);

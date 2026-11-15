@@ -6,6 +6,10 @@
 [ext_resource type="Script" path="res://assets/scripts/world/SpawnPoint.cs" id="5_4gj1q"]
 [ext_resource type="PackedScene" path="res://assets/scenes/enemy/devout.tscn" id="e_devout"]
 [ext_resource type="PackedScene" path="res://assets/scenes/enemy/mason.tscn" id="e_mason"]
+[ext_resource type="Script" path="res://assets/scripts/narrative/world/StoryTrigger.cs" id="n_story"]
+
+[sub_resource type="RectangleShape2D" id="Shape_Story_Worksite"]
+size = Vector2(3456, 1944)
 
 [node name="S2_01" type="Node2D" unique_id=554404438]
 script = ExtResource("1_lrnnp")
@@ -53,3 +57,14 @@ position = Vector2(1000, 896)
 
 [node name="Devout1" parent="Objects" unique_id=1402333695 instance=ExtResource("e_devout")]
 position = Vector2(1400, 896)
+
+[node name="Story_Worksite" type="Area2D" parent="Objects" unique_id=2142661016]
+position = Vector2(944, 896)
+script = ExtResource("n_story")
+ScriptId = "t_site"
+Label = "工地入口"
+Mode = 1
+Once = true
+
+[node name="Shape" type="CollisionShape2D" parent="Objects/Story_Worksite" unique_id=1489690283]
+shape = SubResource("Shape_Story_Worksite")

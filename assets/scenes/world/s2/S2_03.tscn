@@ -5,18 +5,33 @@
 [ext_resource type="TileSet" path="res://assets/data/world/world_tileset.tres" id="4_daa41"]
 [ext_resource type="Script" path="res://assets/scripts/world/SpawnPoint.cs" id="5_5lsj6"]
 [ext_resource type="Script" path="res://assets/scripts/world/GateBarrier.cs" id="6_7b1fm"]
-[ext_resource type="Script" path="res://assets/scripts/core/GateRequirement.cs" id="7_q3r6a"]
 [ext_resource type="PackedScene" path="res://assets/scenes/enemy/devout.tscn" id="e_devout"]
 [ext_resource type="PackedScene" path="res://assets/scenes/enemy/temple_guard.tscn" id="e_guard"]
 [ext_resource type="PackedScene" path="res://assets/scenes/enemy/mason.tscn" id="e_mason"]
+[ext_resource type="Script" path="res://assets/scripts/core/GateRequirement.cs" id="n_req"]
+[ext_resource type="Script" path="res://assets/scripts/narrative/world/StoryTrigger.cs" id="n_story"]
+[ext_resource type="Script" path="res://assets/scripts/narrative/world/TabletPickup.cs" id="n_tablet"]
 
 [sub_resource type="Resource" id="Gate_S2_03_1"]
-script = ExtResource("7_q3r6a")
+script = ExtResource("n_req")
 Flags = Array[StringName]([&"flood_done"])
 LockedText = "水闸还没打开。"
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_l1wpq"]
 size = Vector2(64, 312)
+
+[sub_resource type="RectangleShape2D" id="Shape_Story_Sluice"]
+size = Vector2(3456, 1944)
+
+[sub_resource type="RectangleShape2D" id="Shape_Story_SluiceOpen"]
+size = Vector2(96, 160)
+
+[sub_resource type="Resource" id="Req_Tablet_after_flood"]
+script = ExtResource("n_req")
+Flags = Array[StringName]([&"flood_done"])
+
+[sub_resource type="RectangleShape2D" id="Shape_Tablet_after_flood"]
+size = Vector2(80, 96)
 
 [node name="S2_03" type="Node2D" unique_id=1254036274]
 script = ExtResource("1_b2e0d")
@@ -85,3 +100,50 @@ position = Vector2(1300, 888)
 
 [node name="Devout1" parent="Objects" unique_id=1690737091 instance=ExtResource("e_devout")]
 position = Vector2(1450, 888)
+
+[node name="Story_Sluice" type="Area2D" parent="Objects" unique_id=736166475]
+position = Vector2(944, 888)
+script = ExtResource("n_story")
+ScriptId = "t_site"
+Label = "水闸"
+Mode = 1
+Once = true
+
+[node name="Shape" type="CollisionShape2D" parent="Objects/Story_Sluice" unique_id=875813355]
+shape = SubResource("Shape_Story_Sluice")
+
+[node name="Story_SluiceOpen" type="Area2D" parent="Objects" unique_id=682248234]
+position = Vector2(1136, 888)
+script = ExtResource("n_story")
+ScriptId = "t_site"
+Label = "水闸之后"
+PromptText = "（占位）打开水闸"
+Once = true
+
+[node name="Shape" type="CollisionShape2D" parent="Objects/Story_SluiceOpen" unique_id=1604581874]
+position = Vector2(0, -80)
+shape = SubResource("Shape_Story_SluiceOpen")
+
+[node name="Placeholder" type="ColorRect" parent="Objects/Story_SluiceOpen" unique_id=807132865]
+offset_left = -29.0
+offset_top = -128.0
+offset_right = 29.0
+mouse_filter = 2
+color = Color(0.45, 0.38, 0.3, 1)
+
+[node name="Tablet_after_flood" type="Area2D" parent="Objects" unique_id=1078003820]
+position = Vector2(1232, 888)
+script = ExtResource("n_tablet")
+TabletId = "after_flood"
+VisibleWhen = SubResource("Req_Tablet_after_flood")
+
+[node name="Shape" type="CollisionShape2D" parent="Objects/Tablet_after_flood" unique_id=1078909489]
+position = Vector2(0, -48)
+shape = SubResource("Shape_Tablet_after_flood")
+
+[node name="Placeholder" type="ColorRect" parent="Objects/Tablet_after_flood" unique_id=1663914224]
+offset_left = -29.0
+offset_top = -77.0
+offset_right = 29.0
+mouse_filter = 2
+color = Color(0.75, 0.6, 0.4, 1)
