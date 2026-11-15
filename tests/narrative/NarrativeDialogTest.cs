@@ -160,22 +160,28 @@ public partial class NarrativeDialogTest : NarrativeFlowBase
         KeyDown(Key.E);
         await WaitUntil(() => Narr.MainActive, 5);
         bool paused = NarrativePaused;
-        bool firstLine = Narr.MainActive && Narr.MainLabel == "守坑人" && Narr.Dialog.CurrentName == "守坑人" && Narr.Dialog.CurrentText == "祂……醒了……";
-        int linesAtPress = Narr.Dialog.LineCount;
-        Check(paused && firstLine && Started.Count == started + 1, $"守坑人：按 E → 游戏暂停、对话框开始打第一句“祂……醒了……”（{Narr.Dialog.CurrentName}：{Narr.Dialog.CurrentText}）");
+        bool firstLine = Narr.MainActive && Narr.MainLabel == "守坑人" && Narr.Dialog.CurrentName == "守坑人" && Narr.Dialog.CurrentText.StartsWith("两百年来……");
+        Check(paused && firstLine && Started.Count == started + 1, $"守坑人：按 E → 游戏暂停、对话框开始打第一句“两百年来……”（{Narr.Dialog.CurrentName}：{Narr.Dialog.CurrentText}）");
         Check(Narr.Dialog.PortraitVisible, "守坑人：显示守坑人立绘（占位）");
         Control npcPortrait = Narr.Dialog.GetNodeOrNull<Control>("Portrait");
         bool boxOn = OnScreen(Narr.Dialog.GetNodeOrNull<Control>("Box"), out string npcBox);
         bool portraitOn = OnScreen(npcPortrait, out string portraitInfo);
         Check(boxOn && portraitOn && OnScreen(Narr.Dialog.GetNodeOrNull<Control>("Box/Name"), out _),
             $"守坑人：对话框、名牌和整张立绘都在屏幕内（框 {npcBox}；立绘 {portraitInfo}）");
+        int linesAtPress = Narr.Dialog.LineCount;
         await Frames(30);   // 一直按着 E
-        bool notSkipped = Narr.Dialog.LineCount == linesAtPress && Narr.Dialog.CurrentText == "祂……醒了……" && Narr.MainActive && Narr.Main.WaitingForAdvance;
+        bool notSkipped = Narr.Dialog.LineCount == linesAtPress && Narr.Dialog.CurrentText.StartsWith("两百年来……") && !Narr.Dialog.CurrentText.Contains("祂……醒了……") && Narr.MainActive;
         KeyUp(Key.E);
         await Frames(5);
-        Check(Narr.Dialog.LineCount == linesAtPress && Narr.Dialog.CurrentText == "祂……醒了……" && Narr.MainActive && notSkipped,
+        Check(Narr.Dialog.LineCount == linesAtPress && !Narr.Dialog.CurrentText.Contains("祂……醒了……") && Narr.MainActive && notSkipped,
             "守坑人：打开对话的那一下 E 被吞掉（按住 30 帧再松开，仍停在第一句等推进）");
 
+        // 守坑人的第二句“祂……醒了……”是同一个人接着说：按 E 接在下面；再按 E 才换到穆尔图库尔
+        await WaitUntil(ReadyForKey, 300);
+        await KeyTap(Key.E);
+        await Frames(3);
+        await WaitUntil(ReadyForKey, 300);
+        Check(Narr.Dialog.CurrentName == "守坑人" && Narr.Dialog.CurrentText.EndsWith("祂……醒了……"), "守坑人：按 E 接着出第二句“祂……醒了……”");
         await KeyTap(Key.E);
         await Frames(3);
         Check(Narr.Dialog.CurrentName == "穆尔图库尔" && Narr.Dialog.CurrentText == "……父亲在哪儿？", $"守坑人：松开再按 E 才推进到下一句（{Narr.Dialog.CurrentName}：{Narr.Dialog.CurrentText}）");
@@ -237,7 +243,7 @@ public partial class NarrativeDialogTest : NarrativeFlowBase
         bool barkGone = !Narr.Subtitle.IsShowing && !Narr.Bark.IsPlaying && Narr.MainActive;
         Check(barkOn && barkGone, "字幕：字幕播放中对话框剧情开始 → 字幕当帧收起");
         await Frames(2);
-        Check(Narr.Dialog.IsOpen && Narr.Dialog.CurrentText == "……水太浑了。" && NarrativePaused, "字幕：对话框剧情照常开始（倒影：“……水太浑了。”）");
+        Check(Narr.Dialog.IsOpen && Narr.Dialog.CurrentText == "站在水边时，倒影里能看见他头上嵌满宝石的角冠。" && NarrativePaused, "字幕：对话框剧情照常开始（倒影的第一句旁白）");
         Request("m_pit", "两河源头");
         await Frames(2);
         Check(!Narr.Subtitle.IsShowing && !Narr.Bark.IsPlaying, "字幕：对话框剧情进行中，新的插话请求被丢掉");

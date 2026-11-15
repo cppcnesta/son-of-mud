@@ -65,6 +65,9 @@ public partial class TrialTest : NarrativeFlowBase
         bool finished = await WaitUntil(() => Starts.Count > before, 600);
         BindMainGame();
         BindNarrative();
+        // 试玩起点有“走进来自动播”的剧情（S4_02 七道门旁白）时先看完；S1_01 的开场留给开场检查自己处理
+        await Frames(10);
+        if (Narr != null && Narr.MainActive && Narr.MainLabel != "开场") await AdvanceUntil(() => !Narr.MainActive, 40);
         await WaitSettled();
         return finished && Starts[^1].success;
     }

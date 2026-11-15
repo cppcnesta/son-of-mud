@@ -7,4 +7,4 @@ script = ExtResource("1_tablet")
 Id = "gate_7"
 Title = "七"
 Room = "S4_02"
-PartialText = "刀进去的时候，他的血浸透了我的长袍。他叫我：我的儿子。"
+PartialText = "刀进去的时候，祂的血浸透了我的长袍。祂叫我：我的儿子。"

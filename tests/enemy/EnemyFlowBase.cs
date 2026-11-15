@@ -15,6 +15,8 @@ using SonOfMud.Player.States;
 public abstract partial class EnemyFlowBase : NarrativeFlowBase
 {
     protected override string ResultPrefix => "enemy";
+    /// <summary>敌人测试会路过有“走进去自动播”剧情的房间，关掉免得剧情暂停游戏。</summary>
+    protected override bool AutoStories => false;
 
     protected readonly List<string> Encounters = new();
     protected readonly List<string> Defeats = new();

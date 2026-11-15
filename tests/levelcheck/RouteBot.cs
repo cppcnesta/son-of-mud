@@ -35,7 +35,12 @@ public sealed class RouteBot
 
     private PlayerCharacter P => _player();
 
-    public async Task Frame() => await _host.ToSignal(_host.GetTree(), SceneTree.SignalName.PhysicsFrame);
+    /// <summary>等一个物理帧；游戏暂停时（路上走进自动播的剧情）一直等到恢复，暂停的帧不算进脚本的帧数。</summary>
+    public async Task Frame()
+    {
+        do await _host.ToSignal(_host.GetTree(), SceneTree.SignalName.PhysicsFrame);
+        while (_host.GetTree().Paused);
+    }
 
     public async Task Frames(int n)
     {

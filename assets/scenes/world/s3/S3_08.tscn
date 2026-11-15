@@ -5,9 +5,13 @@
 [ext_resource type="TileSet" path="res://assets/data/world/world_tileset.tres" id="4_2l4lm"]
 [ext_resource type="Script" path="res://assets/scripts/world/SpawnPoint.cs" id="5_51bnd"]
 [ext_resource type="Script" path="res://assets/scripts/world/RoomDoor.cs" id="6_kwyix"]
+[ext_resource type="Script" path="res://assets/scripts/narrative/world/StoryTrigger.cs" id="n_story"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_p43pj"]
 size = Vector2(112, 176)
+
+[sub_resource type="RectangleShape2D" id="Shape_Story_Ascend"]
+size = Vector2(2304, 1296)
 
 [node name="S3_08" type="Node2D" unique_id=1157331005]
 script = ExtResource("1_4wph7")
@@ -62,3 +66,14 @@ offset_top = -160.0
 offset_right = 48.0
 mouse_filter = 2
 color = Color(0.25, 0.4, 0.8, 0.8)
+
+[node name="Story_Ascend" type="Area2D" parent="Objects" unique_id=1403306025]
+position = Vector2(656, 528)
+script = ExtResource("n_story")
+ScriptId = "c_city"
+Label = "登塔"
+Mode = 1
+Once = true
+
+[node name="Shape" type="CollisionShape2D" parent="Objects/Story_Ascend" unique_id=1190128569]
+shape = SubResource("Shape_Story_Ascend")

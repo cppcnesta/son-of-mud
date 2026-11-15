@@ -4,6 +4,10 @@
 [ext_resource type="PackedScene" path="res://addons/MetroidvaniaSystem/Nodes/RoomInstance.tscn" id="2_3hwl8"]
 [ext_resource type="TileSet" path="res://assets/data/world/world_tileset.tres" id="4_fkdn4"]
 [ext_resource type="Script" path="res://assets/scripts/world/SpawnPoint.cs" id="5_bmvsx"]
+[ext_resource type="Script" path="res://assets/scripts/narrative/world/StoryTrigger.cs" id="n_story"]
+
+[sub_resource type="RectangleShape2D" id="Shape_Story_Meteor"]
+size = Vector2(96, 160)
 
 [node name="S2_05" type="Node2D" unique_id=1425467284]
 script = ExtResource("1_s6xjf")
@@ -36,3 +40,21 @@ script = ExtResource("5_bmvsx")
 SpawnId = &"From_S2_04"
 
 [node name="Objects" type="Node2D" parent="." unique_id=1198100068]
+
+[node name="Story_Meteor" type="Area2D" parent="Objects" unique_id=214063488]
+position = Vector2(560, 524)
+script = ExtResource("n_story")
+ScriptId = "t_site"
+Label = "流星"
+PromptText = "触碰雕像"
+
+[node name="Shape" type="CollisionShape2D" parent="Objects/Story_Meteor" unique_id=1259668983]
+position = Vector2(0, -80)
+shape = SubResource("Shape_Story_Meteor")
+
+[node name="Placeholder" type="ColorRect" parent="Objects/Story_Meteor" unique_id=404505890]
+offset_left = -29.0
+offset_top = -128.0
+offset_right = 29.0
+mouse_filter = 2
+color = Color(0.45, 0.38, 0.3, 1)

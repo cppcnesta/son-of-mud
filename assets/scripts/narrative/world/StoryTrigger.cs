@@ -82,9 +82,15 @@ public partial class StoryTrigger : Area2D, IInteractable
 
     private ulong _readyFrame;
 
+    /// <summary>
+    /// 走进去自动触发（Enter）的总开关，默认开。和 NarrativeDirector.AutoOpeningEnabled 一样只给测试用：
+    /// 不测剧情的流程测试（过门、敌人、HUD……）会路过有自动剧情的房间，关掉免得剧情暂停游戏。
+    /// </summary>
+    public static bool AutoEnterEnabled { get; set; } = true;
+
     private void OnBodyEntered(Node2D body)
     {
-        if (Mode != TriggerMode.Enter || !Active) return;
+        if (Mode != TriggerMode.Enter || !Active || !AutoEnterEnabled) return;
         // 房间刚放进场景的头几个物理帧：物理系统里玩家可能还在传送前的旧位置（比如在坑底复活 / 读档后挪到了出口），
         // 会误报“走进来了”。等两帧再确认玩家是不是真的在区域里。
         if (Engine.GetPhysicsFrames() - _readyFrame <= 2)

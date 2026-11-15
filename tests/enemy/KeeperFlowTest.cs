@@ -142,10 +142,10 @@ public partial class KeeperFlowTest : EnemyFlowBase
         bool atNpc = Interactor.CurrentPrompt == "交谈" || await WalkToPrompt("交谈", PlayerActions.Right);
         await KeyTap(RealKeys.Interact);
         await WaitUntil(() => Narr.MainActive, 10);
-        bool dialog = Narr.MainActive && Narr.MainLabel == "守坑人" && Narr.Dialog.CurrentText == "祂……醒了……";
+        bool dialog = Narr.MainActive && Narr.MainLabel == "守坑人" && Narr.Dialog.CurrentText.StartsWith("两百年来……");
         bool done = await AdvanceUntil(() => !Narr.MainActive, 30);
         await WaitUntil(() => !PauseService.IsPaused, 60);
-        Check(atNpc && dialog && done && GameSession.Progress.Flag("talked.keeper"), "闪白结束：按 E 和老人对话（“祂……醒了……”），对话播完");
+        Check(atNpc && dialog && done && GameSession.Progress.Flag("talked.keeper"), "闪白结束：按 E 和老人对话（“两百年来……祂……醒了……”），对话播完");
         await Frames(120);
         Check(Defeats.Count == 1, "BossDefeated 恰好一次");
 

@@ -7,4 +7,4 @@ script = ExtResource("1_tablet")
 Id = "too_soft"
 Title = "他们太软了"
 Room = "S3_05"
-PartialText = "泥人那么软，一碰就碎。他为什么要碰它们？"
+PartialText = "泥人那么软，一碰就碎。祂为什么要碰它们？"

@@ -17,6 +17,9 @@ public abstract partial class NarrativeFlowBase : FlowTestBase
 {
     public const string TestScriptPath = "res://tests/narrative/fixtures/test_story.orph";
 
+    /// <summary>剧情测试要房间里走进去自动触发的剧情。</summary>
+    protected override bool AutoStories => true;
+
     protected NarrativeDirector Narr;
     protected PlayerInteractor Interactor;
     protected readonly List<string> Started = new();

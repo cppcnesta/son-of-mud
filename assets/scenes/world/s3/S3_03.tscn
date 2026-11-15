@@ -5,9 +5,13 @@
 [ext_resource type="TileSet" path="res://assets/data/world/world_tileset.tres" id="4_v60f4"]
 [ext_resource type="Script" path="res://assets/scripts/world/SpawnPoint.cs" id="5_q508u"]
 [ext_resource type="Script" path="res://assets/scripts/save/SavePoint.cs" id="6_bdiqw"]
+[ext_resource type="Script" path="res://assets/scripts/narrative/world/NpcTalk.cs" id="n_npc"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_dq6j5"]
 size = Vector2(96, 128)
+
+[sub_resource type="RectangleShape2D" id="Shape_Npc_Igi"]
+size = Vector2(80, 144)
 
 [node name="S3_03" type="Node2D" unique_id=155772347]
 script = ExtResource("1_qebgk")
@@ -71,3 +75,22 @@ offset_top = -96.0
 offset_right = 24.0
 mouse_filter = 2
 color = Color(0.85, 0.7, 0.25, 1)
+
+[node name="Npc_Igi" type="Area2D" parent="Objects" unique_id=2038249577]
+position = Vector2(1424, 904)
+script = ExtResource("n_npc")
+NpcId = "igi"
+ScriptId = "c_city"
+FirstLabel = "伊吉"
+RepeatLabel = "肝占卜"
+
+[node name="Shape" type="CollisionShape2D" parent="Objects/Npc_Igi" unique_id=1391791335]
+position = Vector2(0, -72)
+shape = SubResource("Shape_Npc_Igi")
+
+[node name="Placeholder" type="ColorRect" parent="Objects/Npc_Igi" unique_id=1252103046]
+offset_left = -29.0
+offset_top = -115.0
+offset_right = 29.0
+mouse_filter = 2
+color = Color(0.5, 0.45, 0.35, 1)

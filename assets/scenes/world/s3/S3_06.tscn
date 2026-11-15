@@ -6,6 +6,8 @@
 [ext_resource type="Script" path="res://assets/scripts/world/SpawnPoint.cs" id="5_6i0ms"]
 [ext_resource type="Script" path="res://assets/scripts/world/GateBarrier.cs" id="6_rwoas"]
 [ext_resource type="Script" path="res://assets/scripts/core/GateRequirement.cs" id="7_ecvil"]
+[ext_resource type="Script" path="res://assets/scripts/narrative/world/StoryTrigger.cs" id="n_story"]
+[ext_resource type="Script" path="res://assets/scripts/narrative/world/TabletPickup.cs" id="n_tablet"]
 
 [sub_resource type="Resource" id="Gate_S3_06_1"]
 script = ExtResource("7_ecvil")
@@ -14,6 +16,12 @@ LockedText = "三个街区还没有解开。"
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_papn0"]
 size = Vector2(64, 268)
+
+[sub_resource type="RectangleShape2D" id="Shape_Story_Crack"]
+size = Vector2(96, 160)
+
+[sub_resource type="RectangleShape2D" id="Shape_Tablet_curse"]
+size = Vector2(80, 96)
 
 [node name="S3_06" type="Node2D" unique_id=2124898385]
 script = ExtResource("1_mkov6")
@@ -72,3 +80,38 @@ offset_top = -268.0
 offset_right = 32.0
 mouse_filter = 2
 color = Color(0.75, 0.2, 0.2, 0.85)
+
+[node name="Story_Crack" type="Area2D" parent="Objects" unique_id=1768122156]
+position = Vector2(1072, 908)
+script = ExtResource("n_story")
+ScriptId = "c_city"
+Label = "裂痕"
+PromptText = "（占位）读出泥肝"
+Once = true
+
+[node name="Shape" type="CollisionShape2D" parent="Objects/Story_Crack" unique_id=867575718]
+position = Vector2(0, -80)
+shape = SubResource("Shape_Story_Crack")
+
+[node name="Placeholder" type="ColorRect" parent="Objects/Story_Crack" unique_id=942896806]
+offset_left = -29.0
+offset_top = -128.0
+offset_right = 29.0
+mouse_filter = 2
+color = Color(0.45, 0.38, 0.3, 1)
+
+[node name="Tablet_curse" type="Area2D" parent="Objects" unique_id=1928725964]
+position = Vector2(1200, 908)
+script = ExtResource("n_tablet")
+TabletId = "curse"
+
+[node name="Shape" type="CollisionShape2D" parent="Objects/Tablet_curse" unique_id=1172379850]
+position = Vector2(0, -48)
+shape = SubResource("Shape_Tablet_curse")
+
+[node name="Placeholder" type="ColorRect" parent="Objects/Tablet_curse" unique_id=1221647115]
+offset_left = -29.0
+offset_top = -77.0
+offset_right = 29.0
+mouse_filter = 2
+color = Color(0.75, 0.6, 0.4, 1)

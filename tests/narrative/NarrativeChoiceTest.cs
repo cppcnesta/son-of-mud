@@ -138,7 +138,7 @@ public partial class NarrativeChoiceTest : NarrativeFlowBase
         int before = Collected.Count;
         Request("test_story", "铭文");
         await WaitUntil(() => Narr.Tablet.IsOpen, 30);
-        Check(Narr.Tablet.CurrentTitle == "壁画铭文" && Narr.Tablet.CurrentText == "祂把风灌进她的嘴里，海就停了。祂举起弯刃，海就分成了两半。" && Collected.Count == before,
+        Check(Narr.Tablet.CurrentTitle == "壁画铭文" && Narr.Tablet.CurrentText == "祂把风灌进她的嘴里，海就停了；祂举起弯刃，她的海就分成了两半。" && Collected.Count == before,
             "铭文：[铭文 mural] 用同一个界面显示壁画铭文，不收集、不发 TabletCollected");
         await AdvanceUntil(() => !Narr.MainActive, 5);
     }
@@ -153,6 +153,10 @@ public partial class NarrativeChoiceTest : NarrativeFlowBase
         await WaitUntil(() => Narr.MainActive, 10);
         await Frames(2);
         Check(Narr.Cg.IsShowing && Narr.Cg.CurrentId == "seven_nights" && Narr.Cg.CurrentCaption == "CG1「七夜」", $"七夜：触碰雕像播 CG1「七夜」（占位标题 {Narr.Cg.CurrentCaption}）");
+        Check(!Narr.Dialog.NameVisible && Narr.Dialog.CurrentText.StartsWith("伊姆杜跪在海底"), $"七夜：CG 上先是旁白“伊姆杜跪在海底……”（{Narr.Dialog.CurrentText}）");
+        await WaitUntil(ReadyForKey, 120);
+        await KeyTap(Key.E);
+        await Frames(2);
         Check(Narr.Dialog.CurrentName == "伊姆杜" && Narr.Dialog.CurrentText == "穆尔图库尔" && !Narr.Dialog.PortraitVisible, "七夜：CG 上叠对话“伊姆杜：穆尔图库尔”（伊姆杜没有立绘）");
         await WaitUntil(ReadyForKey, 120);
         await KeyTap(Key.E);

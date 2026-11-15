@@ -5,6 +5,10 @@
 [ext_resource type="TileSet" path="res://assets/data/world/world_tileset.tres" id="4_8abwr"]
 [ext_resource type="Script" path="res://assets/scripts/world/SpawnPoint.cs" id="5_2v8i7"]
 [ext_resource type="PackedScene" path="res://assets/scenes/enemy/temple_guard.tscn" id="e_guard"]
+[ext_resource type="Script" path="res://assets/scripts/narrative/world/StoryTrigger.cs" id="n_story"]
+
+[sub_resource type="RectangleShape2D" id="Shape_Story_CityGate"]
+size = Vector2(2304, 1296)
 
 [node name="S3_01" type="Node2D" unique_id=42731117]
 script = ExtResource("1_a278k")
@@ -50,3 +54,14 @@ SpawnId = &"From_S3_02"
 
 [node name="TempleGuard1" parent="Objects" unique_id=273141187 instance=ExtResource("e_guard")]
 position = Vector2(800, 572)
+
+[node name="Story_CityGate" type="Area2D" parent="Objects" unique_id=1619704748]
+position = Vector2(656, 572)
+script = ExtResource("n_story")
+ScriptId = "c_city"
+Label = "城门"
+Mode = 1
+Once = true
+
+[node name="Shape" type="CollisionShape2D" parent="Objects/Story_CityGate" unique_id=105239031]
+shape = SubResource("Shape_Story_CityGate")
