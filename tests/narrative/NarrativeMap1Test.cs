@@ -9,7 +9,7 @@ using SonOfMud.Player;
 /// 计划第 4 节第 8 步：地图一剧本的集成测试。从正式入口 main_game.tscn 开新游戏，真实玩家用真实按键从 S1_01 走到 S1_07：
 /// 开场 → 走进 S1_02 坑里自动播“倒影”、坑底拾取泥板「当天还没有名字」 → S1_03 朝圣者插话（字幕）→ S1_04 供桌（选吃下）
 /// → S1_05 守坑人（打 Boss 用设变量 boss_keeper 代替）→ S1_06 七夜雕像（CG1）→ S1_07 两河源头（字幕）；
-/// 然后回溯 S1_08：重塑雕像（CG2）和泥板「手与刃」。所有剧情按顺序触发，零报错。
+/// 然后回溯 S1_08：重塑雕像（CG2）和泥板「神子」。所有剧情按顺序触发，零报错。
 /// 房间骨架里还没有平台：出口在高处的房间（S1_02、S1_03、S1_05、S1_06）先把人放到出口平台的出生点，再按住方向键走过房间边缘。
 /// </summary>
 public partial class NarrativeMap1Test : NarrativeFlowBase
@@ -147,7 +147,7 @@ public partial class NarrativeMap1Test : NarrativeFlowBase
         Check(inS107 && song && first == "有人在唱歌。" && second, "S1_07：走进两河源头 → 字幕“有人在唱歌。”“别听。”");
         await WaitUntil(() => !Narr.Bark.IsPlaying && !Narr.Subtitle.IsShowing, 400);
 
-        // 回溯 S1_08（要攀墙才上得去，这里直接放到 S1_08）：重塑雕像 CG2 + 泥板「手与刃」
+        // 回溯 S1_08（要攀墙才上得去，这里直接放到 S1_08）：重塑雕像 CG2 + 泥板「神子」
         await Teleport("S1_08", "Default");
         bool atReshape = await WalkToPrompt("触碰雕像", PlayerActions.Right);
         await KeyTap(Key.E);
@@ -161,7 +161,7 @@ public partial class NarrativeMap1Test : NarrativeFlowBase
         bool atHand = await WalkToPrompt("拾取泥板", PlayerActions.Right);
         await KeyTap(Key.E);
         await WaitUntil(() => Narr.Tablet.IsOpen, 30);
-        Check(atHand && Narr.Tablet.CurrentTitle == "手与刃" && !Narr.Tablet.ShowingFull, "S1_08：拾取泥板「手与刃」（残缺版）");
+        Check(atHand && Narr.Tablet.CurrentTitle == "神子" && !Narr.Tablet.ShowingFull, "S1_08：拾取泥板「神子」（残缺版）");
         Check(await FinishDialog(5), "S1_08：收起泥板");
     }
 }
