@@ -23,8 +23,8 @@ public partial class EnemyData : KeptResource
     [Export] public Vector2 BodySize { get; set; } = new(48f, 64f);
     [Export] public Color Tint { get; set; } = new("8a6a4a");
     /// <summary>
-    /// 美术图一帧在游戏里显示的边长（像素）。标准：普通敌人 128（源图每帧 512×512），守坑人 256（源图每帧 1024×1024），
-    /// 和主角同一个比例（源图 4 像素 = 游戏里 1 像素）。源图不是标准尺寸也照样缩放到这个大小，但会给警告。
+    /// 文件名没写行列数的美术图按标准格子切：格子边长 = 它 × 4（普通敌人 128 → 512，守坑人 256 → 1024）。
+    /// 显示一律固定比例（源图 4 像素 = 游戏里 1 像素），标准格子显示出来就是这个边长；写了行列数的图不看它。
     /// </summary>
     [Export] public float ArtCanvas { get; set; } = 128f;
     /// <summary>

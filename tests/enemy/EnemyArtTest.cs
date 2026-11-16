@@ -38,6 +38,7 @@ public partial class EnemyArtTest : LabSuiteBase
         await FixtureChecks();
         await GridChecks();
         await DevoutArtChecks();
+        await EvenGridFixtureChecks();
         await ProjectileArtChecks();
         await KeeperChecks();
         await PlaybackChecks();
@@ -144,23 +145,24 @@ public partial class EnemyArtTest : LabSuiteBase
             {
                 int h = EnemyAnimator.FrameHeight(anim.Sprite.SpriteFrames, "idle");
                 float shown = h * anim.Sprite.Scale.Y;
+                // 固定比例：源图 4 像素 = 游戏 1 像素（标准 512 的格子显示 128；虔诚泥人按 6x5 切，格子约 513 高）
                 Check(anim.CurrentAnimation == "idle" && anim.CurrentIsArt && anim.Sprite.Visible && !enemy.DrawsPlaceholder
-                      && Mathf.IsEqualApprox(shown, 128f) && Mathf.Abs(BottomOf(anim.Sprite, h)) < 0.01f,
-                    $"{kind}：仓库里的 spr_enemy_{kind}_idle.png 被载入，待机显示美术图（源图帧高 {h}，游戏里 {shown:F1}），帧底边在脚底，本体不画色块");
+                      && Mathf.IsEqualApprox(shown, h / 4f) && Mathf.IsEqualApprox(anim.Sprite.Scale.Y, 0.25f) && Mathf.Abs(BottomOf(anim.Sprite, h)) < 0.01f,
+                    $"{kind}：仓库里的待机图被载入，固定比例 1/4 显示（源图帧高 {h}，游戏里 {shown:F1}），帧底边在脚底，本体不画色块");
             }
             else
             {
-                // 守坑人：仓库里只有 spr_enemy_keeper_idle.png，而它开战前的状态是 dormant（没有图），所以当前仍是色块
+                // 守坑人：仓库里只有 spr_enemy_keeper_idle_1x1.png，而它开战前的状态是 dormant（没有图），所以当前仍是色块
                 Check(!anim.CurrentIsArt && !anim.Sprite.Visible && enemy.DrawsPlaceholder && anim.CurrentAnimation == "dormant",
                     $"{kind}：当前动作（dormant）没有图，Sprite 隐藏，本体照旧画色块");
             }
             await Despawn(enemy);
         }
         string prayerPath = EnemyAnimator.DefaultArtDirectory + "/spr_enemy_prayer_idle.png";
-        string devoutPath = EnemyAnimator.DefaultArtDirectory + "/spr_enemy_devout_idle.png";
+        string devoutPath = EnemyAnimator.DefaultArtDirectory + "/spr_enemy_devout_idle_6x5.png";
         string guardPath = EnemyAnimator.DefaultArtDirectory + "/spr_enemy_temple_guard_idle.png";
-        Check(!EnemyAnimator.WarnedSizes.Contains(prayerPath) && EnemyAnimator.WarnedSizes.Contains(devoutPath) && !EnemyAnimator.WarnedSizes.Contains(guardPath),
-            "尺寸警告：虔诚泥人 2219×2564 不是 512 的整数倍，给了警告（照样显示）；祈祷泥人、塔庙泥卫的待机图 512×512 没有警告");
+        Check(!EnemyAnimator.WarnedSizes.Contains(prayerPath) && !EnemyAnimator.WarnedSizes.Contains(devoutPath) && !EnemyAnimator.WarnedSizes.Contains(guardPath),
+            "尺寸警告：虔诚泥人的图写了行列数（idle_6x5），按行列平均切、不再报「不是 512 的整数倍」；祈祷泥人、塔庙泥卫的 512×512 也没有警告");
     }
 
     // ---------- ② 显示节点 ----------
@@ -241,13 +243,13 @@ public partial class EnemyArtTest : LabSuiteBase
         Check(enemy.AttackHitBox.Active && anim.CurrentIsArt && !enemy.DrawsPlaceholder, "当前动作有图时判定开着也不画攻击红框（本体什么都不画）");
         enemy.CloseAttacks();
 
-        // 受击：竖长单张图 300×400，非标准尺寸 → 缩放到 128，脚底对齐，按 HurtStun 拉伸
+        // 受击：竖长单张图 300×400（没写行列数，按旧规则整张 1 帧）→ 固定比例显示 100 高，脚底对齐，按 HurtStun 拉伸
         enemy.Machine.TransitionTo<HurtState>();
         await ProcessFrames(1);
         float hurtScale = 1f / (12f * data.HurtStun);
-        Check(anim.CurrentAnimation == "hurt" && anim.CurrentIsArt && Mathf.IsEqualApprox(400f * sprite.Scale.Y, 128f) && Mathf.Abs(BottomOf(sprite, 400)) < 0.01f
+        Check(anim.CurrentAnimation == "hurt" && anim.CurrentIsArt && Mathf.IsEqualApprox(400f * sprite.Scale.Y, 100f) && Mathf.Abs(BottomOf(sprite, 400)) < 0.01f
               && Mathf.Abs(anim.CurrentSpeedScale - hurtScale) < 0.0001f && EnemyAnimator.WarnedSizes.Contains(Fixture + "/spr_enemy_prayer_hurt.png"),
-            $"受击：竖长单张图也缩放到 128 高、脚底对齐，按 {data.HurtStun} 秒拉伸；不是标准尺寸，给了警告");
+            $"受击：竖长单张图按固定比例显示 100 高（400 ÷ 4）、脚底对齐，按 {data.HurtStun} 秒拉伸；不是标准尺寸，给了警告");
 
         // 死亡：不拉伸，播完停在最后一帧；有图时不画红泥
         enemy.Machine.TransitionTo<DeadState>();
@@ -324,25 +326,80 @@ public partial class EnemyArtTest : LabSuiteBase
             + (wrong.Count > 0 ? "：缺 " + string.Join(", ", wrong) : ""));
     }
 
-    /// <summary>仓库里虔诚泥人的正式序列帧（美术交来的这一套，文件名已改对）：严格按 512 切出来的帧数。</summary>
+    /// <summary>仓库里虔诚泥人的正式序列帧：文件名写了行列数，按实际格子平均切出来的帧数；播放时逐帧脚底对齐。</summary>
     private async Task DevoutArtChecks()
     {
         EnemyBody devout = await Spawn("devout");
         SpriteFrames frames = devout.Animator.Sprite.SpriteFrames;
         var expected = new Dictionary<string, int>
         {
-            ["idle"] = 17, ["patrol"] = 20, ["chase"] = 20, ["attack_windup"] = 30, ["attack_active"] = 2, ["attack_recover"] = 18, ["hurt"] = 11,
+            ["idle"] = 25, ["patrol"] = 25, ["chase"] = 25, ["attack_windup"] = 30, ["attack_active"] = 4, ["attack_recover"] = 17, ["hurt"] = 11,
         };
         var got = expected.Keys.ToDictionary(a => a, a => frames != null && frames.HasAnimation(a) ? frames.GetFrameCount(a) : 0);
         Check(expected.All(e => got[e.Key] == e.Value) && frames != null && !frames.HasAnimation("dead"),
-            "虔诚泥人正式图：严格按 512 切，空格子跳过 → " + string.Join("、", got.Select(g => $"{g.Key} {g.Value}"))
+            "虔诚泥人正式图：按文件名的行列数平均切（idle / walk 6x5、throw 2x2、throw_windup 5x6、throw_recover 4x5、hurt 3x4），空格子跳过 → " + string.Join("、", got.Select(g => $"{g.Key} {g.Value}"))
             + "（walk 用于巡逻和追击；还没有 death 图，死亡仍是色块）");
+        // 补边：同一动画每帧一样大（格子取整后差 1 像素的补齐）
+        var uneven = new List<string>();
+        foreach (string a in expected.Keys)
+        {
+            if (frames == null || !frames.HasAnimation(a)) continue;
+            int w0 = frames.GetFrameTexture(a, 0).GetWidth(), h0 = frames.GetFrameTexture(a, 0).GetHeight();
+            for (int i = 1; i < frames.GetFrameCount(a); i++)
+                if (frames.GetFrameTexture(a, i).GetWidth() != w0 || frames.GetFrameTexture(a, i).GetHeight() != h0) uneven.Add($"{a}#{i}");
+        }
+        Check(uneven.Count == 0, "虔诚泥人：每个动画的帧补边后一样大" + (uneven.Count > 0 ? "：" + string.Join(", ", uneven) : ""));
+        // 实际播放：待机 25 帧逐帧检查脚底
+        var (seen, worst) = await PlayAndCheckFeet(devout.Animator.Sprite, 150);
+        Check(seen == 25 && worst < 0.01f, $"虔诚泥人待机：实际播放 {seen} 个不同的帧，每帧底边中点都在脚底（最大偏差 {worst:F4}）");
         devout.Machine.TransitionTo<HurtState>();
         await ProcessFrames(1);
         float scale = 11f / (12f * devout.Data.HurtStun);
         Check(devout.Animator.CurrentIsArt && Mathf.Abs(devout.Animator.CurrentSpeedScale - scale) < 0.0001f,
             $"虔诚泥人受伤：11 帧整段压进 {devout.Data.HurtStun} 秒（速度倍率 {devout.Animator.CurrentSpeedScale:F2}）");
         await Despawn(devout);
+    }
+
+    /// <summary>
+    /// 播放中逐帧检查脚底：每个处理帧读当前帧贴图的高度（含补边），算出帧底边中点在敌人本地坐标里的 y，应当是 0。
+    /// 返回见到的不同帧数和最大偏差。
+    /// </summary>
+    private async Task<(int seen, float worst)> PlayAndCheckFeet(AnimatedSprite2D sprite, int processFrames)
+    {
+        var seen = new HashSet<int>();
+        float worst = 0f;
+        for (int i = 0; i < processFrames; i++)
+        {
+            await ProcessFrames(1);
+            if (!sprite.Visible || sprite.SpriteFrames == null) continue;
+            Texture2D tex = sprite.SpriteFrames.GetFrameTexture(sprite.Animation, sprite.Frame);
+            float bottom = sprite.Position.Y + (sprite.Offset.Y + tex.GetHeight() * 0.5f) * sprite.Scale.Y;
+            worst = Mathf.Max(worst, Mathf.Abs(bottom));
+            seen.Add(sprite.Frame);
+        }
+        return (seen.Count, worst);
+    }
+
+    /// <summary>测试图：格子宽高不是整数（1109×1024 按 3x3 切，格子 369/370 × 341/342，第一行比第二行矮 1 像素），最后两格透明；每帧补边，播放时脚底不抖。</summary>
+    private async Task EvenGridFixtureChecks()
+    {
+        EnemyBody mason = await Spawn("mason", e => e.Data.FleeChance = 0f);
+        mason.Animator.UseArtDirectory(Fixture);
+        SpriteFrames frames = mason.Animator.Sprite.SpriteFrames;
+        bool counted = frames.HasAnimation("flee") && frames.GetFrameCount("flee") == 7;
+        int w0 = frames.GetFrameTexture("flee", 0).GetWidth(), h0 = frames.GetFrameTexture("flee", 0).GetHeight();
+        bool same = Enumerable.Range(0, frames.GetFrameCount("flee")).All(i => frames.GetFrameTexture("flee", i).GetWidth() == w0 && frames.GetFrameTexture("flee", i).GetHeight() == h0);
+        Check(counted && same && w0 == 370 && h0 == 342,
+            $"敌人测试图 spr_enemy_mason_flee_3x3.png：9 格里 7 格有内容 → 7 帧；格子 369/370 × 341/342 补边成一样的 {w0}×{h0}（第 1 帧比最大的格子矮，补在上面）");
+        mason.Machine.TransitionTo<FleeState>();
+        var (seen, worst) = await PlayAndCheckFeet(mason.Animator.Sprite, 50);
+        Check(seen >= 6 && worst < 0.01f, $"敌人测试图：实际播放 {seen} 个不同的帧，每帧脚底都在原点（最大偏差 {worst:F4}）");
+        await Despawn(mason);
+
+        // 守坑人的待机图是一整张（1x1）：按行列数切成 1 帧，不再按 1024 的格子切碎
+        SpriteFrames keeper = EnemyAnimator.BuildFrames("keeper", EnemyAnimator.DefaultArtDirectory, 256f, new[] { "idle" });
+        Check(keeper != null && keeper.GetFrameCount("idle") == 1 && keeper.GetFrameTexture("idle", 0).GetWidth() == 4096 && keeper.GetFrameTexture("idle", 0).GetHeight() == 2708,
+            "守坑人 spr_enemy_keeper_idle_1x1.png：整张 4096×2708 当 1 帧（按旧规则会被 1024 的格子切成碎片）");
     }
 
     /// <summary>虔诚泥人扔出去的泥肝用美术的图；主角扔的泥肝不受影响。</summary>
