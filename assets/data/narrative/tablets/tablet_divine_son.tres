@@ -4,7 +4,7 @@
 
 [resource]
 script = ExtResource("1_tablet")
-Id = "hand_blade"
+Id = "divine_son"
 Title = "神子"
 Room = "S1_08"
 PartialText = "父亲说：你是我的手。\n父亲说：你是我的刃。我身上流过的每一滴血都曾在父亲的心口跳过。我是祂用自己的血和泥捏出的第一个造物，一把（…？），一位万人之上的神子。"

@@ -35,17 +35,17 @@ public partial class NarrativeMap1Test : NarrativeFlowBase
             await Walk();
 
             string[] mains = Started.ToArray();
-            string[] expectedMains = { "m_pit:开场", "m_pit:倒影", "tablets:nameless_day", "m_pit:供桌", "m_pit:守坑人", "m_pit:七夜", "m_pit:重塑", "tablets:hand_blade" };
+            string[] expectedMains = { "m_pit:开场", "m_pit:倒影", "tablets:nameless_day", "m_pit:供桌", "m_pit:守坑人", "m_pit:七夜", "m_pit:重塑", "tablets:divine_son" };
             Check(mains.SequenceEqual(expectedMains), $"顺序：对话框剧情依次是 {string.Join(" → ", expectedMains)}（实际 {string.Join(" → ", mains)}）");
             Check(Ended.SequenceEqual(expectedMains), $"顺序：每段都正常播完，Finished 与 Started 一一对应（{string.Join(",", Ended)}）");
             string[] requests = Requests.ToArray();
-            string[] expectedRequests = { "m_pit:倒影", "tablets:nameless_day", "m_pit:朝圣者之路", "m_pit:供桌", "m_pit:守坑人", "m_pit:七夜", "m_pit:两河源头", "m_pit:重塑", "tablets:hand_blade" };
+            string[] expectedRequests = { "m_pit:倒影", "tablets:nameless_day", "m_pit:朝圣者之路", "m_pit:供桌", "m_pit:守坑人", "m_pit:七夜", "m_pit:两河源头", "m_pit:重塑", "tablets:divine_son" };
             Check(requests.SequenceEqual(expectedRequests), $"顺序：房间里的触发器依次发出请求（含两段字幕）：{string.Join(" → ", requests)}");
             string[] seen = { "seen.opening", "seen.m_pit.开场", "seen.tablets.nameless_day", "seen.m_pit.倒影", "seen.m_pit.朝圣者之路", "seen.m_pit.供桌", "seen.m_pit.守坑人",
-                              "seen.m_pit.七夜", "seen.m_pit.两河源头", "seen.m_pit.重塑", "tablet.nameless_day", "tablet.hand_blade", "item.生命之面包", "talked.keeper" };
+                              "seen.m_pit.七夜", "seen.m_pit.两河源头", "seen.m_pit.重塑", "tablet.nameless_day", "tablet.divine_son", "item.生命之面包", "talked.keeper" };
             string[] missing = seen.Where(k => !GameSession.Progress.Flag(k)).ToArray();
             Check(missing.Length == 0, $"进度：地图一的剧情变量都写好了（缺 {string.Join(",", missing)}）");
-            Check(Collected.SequenceEqual(new[] { "nameless_day", "hand_blade" }), $"进度：拾取了两块泥板（{string.Join(",", Collected)}）");
+            Check(Collected.SequenceEqual(new[] { "nameless_day", "divine_son" }), $"进度：拾取了两块泥板（{string.Join(",", Collected)}）");
             Check(Errors.Count == errorBase && NarrativeLog.ErrorCount == narrativeErrors,
                 "全程零报错" + (Errors.Count > errorBase ? "：" + string.Join(" | ", Errors.Snapshot().Skip(errorBase).Take(5)) : ""));
             Check(NoPauseOrLock() && !Narr.MainActive && !Narr.Bark.IsPlaying, "最后没有剧情在播，没有暂停和输入锁残留");

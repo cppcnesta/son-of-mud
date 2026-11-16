@@ -264,7 +264,7 @@ public partial class NarrativeUnitTest : Node
 
     private static readonly string[] TabletIds =
     {
-        "nameless_day", "hand_blade", "smile", "after_flood", "destiny", "hoped_world", "too_soft", "curse", "annals",
+        "nameless_day", "divine_son", "smile", "after_flood", "destiny", "hoped_world", "too_soft", "curse", "annals",
         "gate_1", "gate_2", "gate_3", "gate_4", "gate_5", "gate_6", "gate_7", "name", "star",
     };
 
@@ -275,7 +275,7 @@ public partial class NarrativeUnitTest : Node
         var tablets = TabletIds.Select(id => (id, data: ResourceLoader.Exists(_settings.TabletPath(id)) ? GD.Load<TabletData>(_settings.TabletPath(id)) : null)).ToList();
         Check(tablets.All(t => t.data != null && t.data.Id == t.id && t.data.Title != "" && t.data.PartialText != ""), "泥板：18 块都能加载，编号、标题、残缺版文字齐全");
         string[] full = tablets.Where(t => t.data?.HasFull == true).Select(t => t.id).ToArray();
-        Check(full.SequenceEqual(new[] { "nameless_day", "hand_blade", "destiny", "curse", "star" }), $"泥板：只有策划案写了完整版的 5 块有完整版（实际 {string.Join(",", full)}）");
+        Check(full.SequenceEqual(new[] { "nameless_day", "divine_son", "destiny", "curse", "star" }), $"泥板：只有策划案写了完整版的 5 块有完整版（实际 {string.Join(",", full)}）");
         Check(tablets.All(t => t.data == null || t.data.FullAfterVar == "truth"), "泥板：完整版都在 truth 之后显示");
         TabletData first = tablets[0].data;
         Check(first.Room == "S1_02" && first.Title == "当天还没有名字" && first.FullText.EndsWith("祂说：我的儿子。") && first.PartialText.EndsWith("第七夜，……落下。"),
@@ -328,7 +328,7 @@ public partial class NarrativeUnitTest : Node
             }
             scene.Free();
         }
-        string expected = "S1_02:泥板:nameless_day,S1_02:进入:倒影,S1_03:进入:朝圣者之路,S1_04:按E:供桌,S1_05:NPC:守坑人,S1_06:按E:七夜,S1_07:进入:两河源头,S1_08:按E:重塑,S1_08:泥板:hand_blade";
+        string expected = "S1_02:泥板:nameless_day,S1_02:进入:倒影,S1_03:进入:朝圣者之路,S1_04:按E:供桌,S1_05:NPC:守坑人,S1_06:按E:七夜,S1_07:进入:两河源头,S1_08:按E:重塑,S1_08:泥板:divine_son";
         Check(string.Join(",", found) == expected, $"房间：地图一 S1_02–S1_08 摆好了 9 个剧情节点（{string.Join(",", found)}）");
         Check(problems.Count == 0, "房间：每个剧情节点都在 Objects 下，指向存在的剧本标签" + (problems.Count > 0 ? "：" + string.Join("; ", problems) : ""));
     }
