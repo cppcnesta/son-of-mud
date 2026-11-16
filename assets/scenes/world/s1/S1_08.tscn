@@ -10,7 +10,7 @@
 [sub_resource type="RectangleShape2D" id="Shape_Story_Reshape"]
 size = Vector2(96, 160)
 
-[sub_resource type="RectangleShape2D" id="Shape_Tablet_hand_blade"]
+[sub_resource type="RectangleShape2D" id="Shape_Tablet_divine_son"]
 size = Vector2(80, 96)
 
 [node name="S1_08" type="Node2D" unique_id=938166667]
@@ -63,16 +63,16 @@ offset_right = 29.0
 mouse_filter = 2
 color = Color(0.45, 0.38, 0.3, 1)
 
-[node name="Tablet_hand_blade" type="Area2D" parent="Objects" unique_id=608138903]
+[node name="Tablet_divine_son" type="Area2D" parent="Objects" unique_id=608138903]
 position = Vector2(944, 636)
 script = ExtResource("n_tablet")
-TabletId = "hand_blade"
+TabletId = "divine_son"
 
-[node name="Shape" type="CollisionShape2D" parent="Objects/Tablet_hand_blade" unique_id=2027514735]
+[node name="Shape" type="CollisionShape2D" parent="Objects/Tablet_divine_son" unique_id=2027514735]
 position = Vector2(0, -48)
-shape = SubResource("Shape_Tablet_hand_blade")
+shape = SubResource("Shape_Tablet_divine_son")
 
-[node name="Placeholder" type="ColorRect" parent="Objects/Tablet_hand_blade" unique_id=476686759]
+[node name="Placeholder" type="ColorRect" parent="Objects/Tablet_divine_son" unique_id=476686759]
 offset_left = -24.0
 offset_top = -77.0
 offset_right = 24.0

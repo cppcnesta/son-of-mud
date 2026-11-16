@@ -2,7 +2,7 @@
 @room S1_08
 @size 36x21
 @anchor a Story_Reshape
-@anchor b Tablet_hand_blade
+@anchor b Tablet_divine_son
 @spawn 1 From_S1_04
 ---
 ####################################
