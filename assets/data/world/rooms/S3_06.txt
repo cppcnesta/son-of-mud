@@ -4,7 +4,7 @@
 @room S3_06
 @size 54x31
 @anchor a Story_Crack
-@anchor b Tablet_curse
+@anchor b Story_Omen3
 @spawn 1 From_S3_05
 @spawn 2 From_S3_07
 ---
