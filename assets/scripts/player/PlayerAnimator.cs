@@ -10,9 +10,11 @@ namespace SonOfMud.Player;
 /// 动作时长以 .tres 为准，动画只负责表现：SpeedScale = 帧数 ÷ (基础 FPS × 目标时长)（规格第 6 节）。
 ///
 /// 美术图按命名自动载入（不用在编辑器里手动做 SpriteFrames）：
-/// - 每个动作一张横排图，放在 ArtDirectory 下。先找分形态的 spr_player_water_&lt;动作&gt;.png / spr_player_mud_&lt;动作&gt;.png，
-///   没有就找两形态共用的 spr_player_&lt;动作&gt;.png，都没有就用色块占位。
-/// - 帧是正方形：帧数 = 图宽 ÷ 图高（只有一张图就是 1 帧）。图的分辨率随意，游戏里每帧都缩放成 ArtCanvas（128）大小。
+/// - 每个动作一张图，放在 ArtDirectory 下。先找分形态的 spr_player_water_&lt;动作&gt; / spr_player_mud_&lt;动作&gt;，
+///   没有就找两形态共用的 spr_player_&lt;动作&gt;，都没有就用色块占位。
+/// - 文件名可以写行列数（例如 spr_player_idle_4x1.png、spr_player_jump_windup_3x2.png）：按行列平均切，格子不要求正方形
+///   （见 SpriteStrip）；不写行列数的按旧规则切（正方形横排：帧数 = 图宽 ÷ 图高，只有一张图就是 1 帧）。
+/// - 固定比例显示：源图 4 像素 = 游戏 1 像素（SpriteStrip.SourceScale），画布大的动作角色大小不变。
 /// - 每帧的底边中点就是脚底，对齐到身体碰撞框的底边。
 /// - 真图不染形态色（占位色块仍按形态着色）；角色朝左时水平翻转。
 /// </summary>
@@ -25,8 +27,6 @@ public partial class PlayerAnimator : Node
     [Export] public float BaseFps { get; set; } = 12f;
     /// <summary>美术图所在文件夹。</summary>
     [Export] public string ArtDirectory { get; set; } = DefaultArtDirectory;
-    /// <summary>游戏里一帧画布的边长（像素）。源图不管多大，都缩放到这个大小。</summary>
-    [Export] public float ArtCanvas { get; set; } = 128f;
 
     /// <summary>占位动画：名字 → (水帧数, 泥帧数, 循环)。也是会去找美术图的全部动作。</summary>
     private static readonly Dictionary<string, (int water, int mud, bool loop)> Placeholder = new()
@@ -117,8 +117,9 @@ public partial class PlayerAnimator : Node
         Sprite.Centered = true;
         if (_artHeight.TryGetValue(chosen, out int height))
         {
-            // 美术图：缩放到 ArtCanvas，帧底边中点放在脚底；不染色
-            float scale = ArtCanvas / height;
+            // 美术图：固定比例（源图 4 像素 = 游戏 1 像素），帧底边中点放在脚底；不染色。
+            // height 是补边后的帧高，同一动画每帧一样大，所以脚底每帧都在同一点
+            float scale = 1f / SpriteStrip.SourceScale;
             Sprite.Scale = new Vector2(scale, scale);
             Sprite.Offset = new Vector2(0f, -height * 0.5f);
             Sprite.Position = new Vector2(0f, FootY);
@@ -152,10 +153,15 @@ public partial class PlayerAnimator : Node
             foreach (var (anim, info) in Placeholder)
             {
                 string name = $"{form}_{anim}";
-                Texture2D art = SpriteStrip.Load(ArtDirectory, $"spr_player_{form}_{anim}.png") ?? SpriteStrip.Load(ArtDirectory, $"spr_player_{anim}.png");
-                if (art != null && SpriteStrip.AddStrip(frames, name, art, info.loop, ArtFps.TryGetValue(anim, out float f) ? f : BaseFps, "主角美术图"))
+                float fps = ArtFps.TryGetValue(anim, out float f) ? f : BaseFps;
+                Texture2D art = SpriteStrip.Find(ArtDirectory, $"spr_player_{form}_{anim}", "主角美术图", out int cols, out int rows)
+                                ?? SpriteStrip.Find(ArtDirectory, $"spr_player_{anim}", "主角美术图", out cols, out rows);
+                bool added = art != null && (cols > 0
+                    ? SpriteStrip.AddEvenGrid(frames, name, art, cols, rows, info.loop, fps)
+                    : SpriteStrip.AddStrip(frames, name, art, info.loop, fps, "主角美术图"));
+                if (added)
                 {
-                    _artHeight[name] = art.GetHeight();
+                    _artHeight[name] = SpriteStrip.FrameHeight(frames, name);
                     continue;
                 }
                 int count = isMud ? info.mud : info.water;

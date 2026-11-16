@@ -9,9 +9,10 @@ namespace SonOfMud.Enemy;
 /// 敌人美术图按命名自动载入并按状态播放（规则同主角的 PlayerAnimator）。
 /// - 图放在 ArtDirectory（assets/art/enemy）下。动作名由当前状态的 AnimName 给出；文件名先按 Data.ArtNames 里的美术名找
 ///   spr_enemy_&lt;Kind&gt;_&lt;美术名&gt;.png（如祈祷泥人待机 = pray，死亡 = death），没有再找 spr_enemy_&lt;Kind&gt;_&lt;动作名&gt;.png。
-/// - 严格按标准格子切帧：格子边长 = ArtCanvas × 4（普通敌人 512，守坑人 1024），从左到右、从上到下，整格透明的跳过；
-///   横排一行、网格多行都行。每帧缩放到 Data.ArtCanvas 显示，格子底边中点对齐脚底（敌人原点）。
-///   图比一格小就整张当 1 帧，宽高不是格子整数倍就丢掉多出来的部分，都给警告（照样显示）。
+/// - 文件名可以写行列数（例如 spr_enemy_devout_idle_6x5.png）：按行列平均切，格子不要求正方形、不要求整数宽，
+///   每帧补边到同样大小（见 SpriteStrip）。不写行列数的按标准格子切：格子边长 = ArtCanvas × 4（普通敌人 512，守坑人 1024），
+///   图比一格小就整张当 1 帧，宽高不是格子整数倍就丢掉多出来的部分，都给警告（照样显示）。两种都从左到右、从上到下，整格透明的跳过。
+/// - 固定比例显示：源图 4 像素 = 游戏 1 像素；每帧底边中点对齐脚底（敌人原点）。
 /// - 敌人的图画**朝左**（主角相反，画朝右）：Facing &gt; 0（朝右）时水平翻转。
 /// - 不循环的动作拉伸到状态的 AnimDuration（读实际 FPS 和各帧相对时长，见 SpriteStrip.SpeedScaleFor）。
 /// - 当前动作没有图：Sprite 隐藏，敌人本体照旧画色块（以及攻击红框、蝎尾预警）；有图：本体什么都不画。
@@ -26,7 +27,7 @@ public partial class EnemyAnimator : Node
     public const string SpriteName = "Sprite";
     public const float BaseFps = 12f;
     /// <summary>源图像素 ÷ 游戏像素（和主角一样）：源图标准帧边长 = ArtCanvas × 它。</summary>
-    public const float SourceScale = 4f;
+    public const float SourceScale = SpriteStrip.SourceScale;
 
     /// <summary>会去找美术图的全部动作 → 是否循环（普通敌人 9 个 + 守坑人 10 个；守坑人「已击败」时节点隐藏，不需要图）。</summary>
     public static readonly IReadOnlyDictionary<string, bool> Actions = new Dictionary<string, bool>
@@ -129,7 +130,7 @@ void fragment() {
             Sprite.SetFrameAndProgress(0, 0f);
             float seconds = (_body.Machine.Current as EnemyState)?.AnimDuration ?? 0f;
             Sprite.SpeedScale = seconds > 0f ? SpriteStrip.SpeedScaleFor(frames, name, seconds) : 1f;
-            Layout(Sprite, FrameHeight(frames, name), _body.Data?.ArtCanvas ?? 128f);
+            Layout(Sprite, FrameHeight(frames, name));
         }
         else
         {
@@ -164,20 +165,17 @@ void fragment() {
     /// <summary>敌人的图画朝左，所以朝右（facing &gt; 0）时要水平翻转。</summary>
     public static bool FlipFor(float facing) => facing > 0f;
 
-    /// <summary>源图一帧的高度（像素），用来算缩放；取这个动作第 1 帧的贴图高度。</summary>
-    public static int FrameHeight(SpriteFrames frames, string animation)
-    {
-        if (frames == null || !frames.HasAnimation(animation) || frames.GetFrameCount(animation) == 0) return 0;
-        Texture2D texture = frames.GetFrameTexture(animation, 0);
-        if (texture is AtlasTexture atlas) return (int)atlas.Region.Size.Y;
-        return texture?.GetHeight() ?? 0;
-    }
+    /// <summary>
+    /// 源图一帧的高度（像素），用来放脚底：取这个动作第 1 帧的贴图高度，含补边（AtlasTexture.Margin）。
+    /// 按行列切的帧补边后每帧一样大，所以第 1 帧就代表整段动画。
+    /// </summary>
+    public static int FrameHeight(SpriteFrames frames, string animation) => SpriteStrip.FrameHeight(frames, animation);
 
-    /// <summary>缩放到 canvas、帧底边中点放在原点（脚底）。</summary>
-    public static void Layout(AnimatedSprite2D sprite, int frameHeight, float canvas)
+    /// <summary>固定比例（源图 4 像素 = 游戏 1 像素）、帧底边中点放在原点（脚底）。</summary>
+    public static void Layout(AnimatedSprite2D sprite, int frameHeight)
     {
         if (frameHeight <= 0) return;
-        float scale = canvas / frameHeight;
+        float scale = 1f / SourceScale;
         sprite.Centered = true;
         sprite.Scale = new Vector2(scale, scale);
         sprite.Offset = new Vector2(0f, -frameHeight * 0.5f);
@@ -206,10 +204,17 @@ void fragment() {
         foreach (string action in actions)
         {
             Texture2D art = null;
+            int cols = 0, rows = 0;
             foreach (string file in ArtFileNames(kind, action, artNames))
-                if ((art = SpriteStrip.Load(directory, file)) != null) break;
+                if ((art = SpriteStrip.Find(directory, file[..^4], "敌人美术图", out cols, out rows)) != null) break;
             if (art == null) continue;
             bool loop = Actions.TryGetValue(action, out bool l) && l;
+            if (cols > 0)
+            {
+                // 文件名写了行列数：按行列平均切（不看标准格子，也不给尺寸警告）
+                if (SpriteStrip.AddEvenGrid(frames, action, art, cols, rows, loop, BaseFps)) any = true;
+                continue;
+            }
             if (!SpriteStrip.AddGrid(frames, action, art, cell, loop, BaseFps, "敌人美术图")) continue;
             any = true;
             if ((art.GetWidth() % cell != 0 || art.GetHeight() % cell != 0 || art.GetWidth() < cell || art.GetHeight() < cell))

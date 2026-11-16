@@ -1,5 +1,8 @@
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Godot;
+using SonOfMud.Core;
 using SonOfMud.Player;
 
 /// <summary>
@@ -126,6 +129,91 @@ public partial class PlayerArtTest : LabSuiteBase
         float manualExpected = 4f / (6f * seconds);
         Check(anim.CurrentAnimation == "water_attack" && Mathf.Abs(anim.CurrentSpeedScale - manualExpected) < 0.001f,
             $"手动帧（6 FPS、1/2/1）：速度倍率 = 4 ÷ (6 × {seconds:F2}) = {manualExpected:F3}（实际 {anim.CurrentSpeedScale:F3}），不是按帧数 3 算的 {3f / (6f * seconds):F3}");
+        await LayoutChecks(anim, sprite);
         anim.UseArtDirectory(PlayerAnimator.DefaultArtDirectory);
+    }
+
+    private const string ConflictArt = "res://tests/player/fixtures/conflict";
+
+    /// <summary>新的切图规则：文件名写行列数、平均切、补边、固定比例、选图规则、导出版的文件名。</summary>
+    private async Task LayoutChecks(PlayerAnimator anim, AnimatedSprite2D sprite)
+    {
+        // 文件名解析
+        var a = SpriteStrip.ParseLayout("spr_enemy_devout_idle_6x5.png");
+        var b = SpriteStrip.ParseLayout("spr_player_idle.png");
+        var c = SpriteStrip.ParseLayout("spr_player_idle_0x1.png");
+        Check(a?.baseName == "spr_enemy_devout_idle" && a?.cols == 6 && a?.rows == 5 && b?.baseName == "spr_player_idle" && b?.cols == 0
+              && c?.baseName == "spr_player_idle_0x1" && c?.cols == 0 && SpriteStrip.ParseLayout("x.png.import") == null,
+            "文件名：_6x5 解析成 6 列 5 行；不写行列数（或写成 0 列）按旧规则；不是 .png 的不算");
+
+        // 选图：带行列数优先；多张带行列数的报冲突、按文件名排序取第一张，和目录列表顺序无关；导出版的 .import / .remap 名字也认
+        var listing = new[] { "spr_player_idle_4x1.png", "spr_player_idle_2x2.png", "spr_player_idle.png", "spr_player_run.png" };
+        var pick1 = SpriteStrip.Choose(listing, "spr_player_idle");
+        var pick2 = SpriteStrip.Choose(listing.Reverse(), "spr_player_idle");
+        Check(pick1?.file == "spr_player_idle_2x2.png" && pick2?.file == pick1?.file && pick1?.error == true && pick1?.message.Contains("spr_player_idle_4x1.png") == true,
+            $"冲突：同时有 idle_4x1 和 idle_2x2 → 报错，按文件名排序用 {pick1?.file}；列表顺序反过来结果一样");
+        var mixed = SpriteStrip.Choose(new[] { "spr_player_run.png", "spr_player_run_2x1.png" }, "spr_player_run");
+        var plain = SpriteStrip.Choose(new[] { "spr_player_run.png" }, "spr_player_run");
+        Check(mixed?.file == "spr_player_run_2x1.png" && mixed?.error == false && mixed?.message != null && plain?.file == "spr_player_run.png" && plain?.cols == 0 && plain?.message == null
+              && SpriteStrip.Choose(new[] { "spr_player_runner.png" }, "spr_player_run") == null,
+            "并存：带行列数的和不带的都有 → 用带的并给警告；只有不带的 → 按旧规则；名字只是开头相同的不算");
+        var exported = SpriteStrip.Choose(new[] { "spr_player_idle_4x1.png.import", "spr_player_mud_run.png.remap", "readme.txt" }, "spr_player_idle");
+        var exportedRun = SpriteStrip.Choose(new[] { "spr_player_mud_run.png.remap" }, "spr_player_mud_run");
+        Check(exported?.file == "spr_player_idle_4x1.png" && exported?.cols == 4 && exportedRun?.file == "spr_player_mud_run.png",
+            "导出版：目录里列出来的 xxx.png.import / xxx.png.remap 还原成原文件名再选图");
+
+        // 格子边界：round(i × 宽 ÷ 列)，相邻格子连续、不重叠、不漏像素
+        bool continuous = true;
+        foreach (var (size, count) in new[] { (739, 2), (1025, 2), (2219, 6), (2564, 5), (3077, 6), (1801, 3) })
+        {
+            if (SpriteStrip.Edge(0, size, count) != 0 || SpriteStrip.Edge(count, size, count) != size) continuous = false;
+            for (int i = 0; i < count; i++)
+            {
+                int width = SpriteStrip.Edge(i + 1, size, count) - SpriteStrip.Edge(i, size, count);
+                if (width < size / count || width > size / count + 1) continuous = false;
+            }
+        }
+        var sheet = GD.Load<Texture2D>(FixtureArt + "/spr_player_attack_down_2x2.png");
+        Rect2I[] regions = SpriteStrip.EvenGridRegions(sheet, 2, 2);
+        bool regionsOk = regions.Length == 3 && regions[0] == new Rect2I(0, 0, 370, 513) && regions[1] == new Rect2I(370, 0, 369, 513) && regions[2] == new Rect2I(0, 513, 370, 512);
+        Check(continuous && regionsOk, $"平均切：边界取整后相邻格子连续不重叠；739×1025 按 2x2 → 3 格有内容（最后一格透明跳过）：{string.Join(" ", regions)}");
+
+        // 测试图：大画布的蓄力跳 3x1（格子 600/601 × 641）、非整数格子的下劈 2x2
+        anim.UseArtDirectory(FixtureArt);
+        await Frames(2);
+        SpriteFrames frames = sprite.SpriteFrames;
+        bool windup = anim.IsArt("water_jump_windup") && anim.IsArt("mud_jump_windup") && frames.GetFrameCount("water_jump_windup") == 3
+                      && Enumerable.Range(0, 3).All(i => frames.GetFrameTexture("water_jump_windup", i).GetWidth() == 601 && frames.GetFrameTexture("water_jump_windup", i).GetHeight() == 641);
+        bool down = frames.GetFrameCount("water_attack_down") == 3
+                    && Enumerable.Range(0, 3).All(i => frames.GetFrameTexture("water_attack_down", i).GetWidth() == 370 && frames.GetFrameTexture("water_attack_down", i).GetHeight() == 513);
+        Check(windup && down, "测试图：蓄力跳 3x1 切 3 帧、补边成 601×641；下劈 2x2 切 3 帧、补边成 370×513（每帧一样大）");
+
+        // 实际播放蓄力跳（泥形态 0.24 秒），逐帧检查：固定比例 1/4、每帧脚底都在身体碰撞框底边
+        await Reset(new Vector2(900, FloorY), 1);
+        await Tap(PlayerActions.Jump);
+        var seen = new HashSet<int>();
+        float worst = 0f;
+        bool scaleOk = true;
+        for (int i = 0; i < 30 && Player.State is SonOfMud.Player.States.JumpWindupState or SonOfMud.Player.States.IdleState; i++)
+        {
+            await ToSignal(GetTree(), SceneTree.SignalName.ProcessFrame);
+            if (anim.CurrentAnimation != "mud_jump_windup") continue;
+            Texture2D tex = sprite.SpriteFrames.GetFrameTexture(sprite.Animation, sprite.Frame);
+            float bottom = sprite.Position.Y + (sprite.Offset.Y + tex.GetHeight() * 0.5f) * sprite.Scale.Y;
+            worst = Mathf.Max(worst, Mathf.Abs(bottom - anim.FootY));
+            scaleOk &= Mathf.IsEqualApprox(sprite.Scale.Y, 0.25f);
+            seen.Add(sprite.Frame);
+        }
+        Check(seen.Count >= 2 && worst < 0.01f && scaleOk,
+            $"蓄力跳实际播放：见到 {seen.Count} 个不同的帧，固定比例 1/4（641 高的画布显示 160 高，角色大小不变），每帧脚底都在碰撞框底边（最大偏差 {worst:F4}）");
+
+        // 冲突目录：idle 有 4x1、2x2、不带的三张 → 报错并用 2x2（4 帧）；run 有 2x1 和不带的 → 用 2x1 并警告
+        anim.UseArtDirectory(ConflictArt);
+        await Frames(2);
+        frames = sprite.SpriteFrames;
+        bool reportedConflict = SpriteStrip.ReportedMessages.Any(m => m.Contains("spr_player_idle_2x2.png") && m.Contains("spr_player_idle_4x1.png"));
+        bool reportedMixed = SpriteStrip.ReportedMessages.Any(m => m.Contains("spr_player_run_2x1.png"));
+        Check(frames.GetFrameCount("water_idle") == 4 && frames.GetFrameTexture("water_idle", 0).GetWidth() == 512 && frames.GetFrameCount("water_run") == 2 && reportedConflict && reportedMixed,
+            "冲突目录：idle 用文件名排序第一的 idle_2x2（4 帧、每帧 512）并报错；run 用带行列数的 run_2x1（2 帧）并给警告");
     }
 }

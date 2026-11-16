@@ -114,7 +114,7 @@ public partial class EnemySprite : AnimatedSprite2D
         SpriteFrames = frames;
         if (Animation != shown) Animation = shown;
         Frame = 0;
-        EnemyAnimator.Layout(this, height, canvas);
+        EnemyAnimator.Layout(this, height);
         FlipH = PreviewFlip();
         PreviewAction = preview;
         PreviewShown = true;

@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bncycy0qyjj1c"
-path="res://.godot/imported/spr_enemy_devout_hurt.png-ef03cba043ac7c66260cce6c7ff91812.ctex"
+uid="uid://cx0fbhrnxxks6"
+path="res://.godot/imported/spr_player_run_2x1.png-b4a1e57debddc80ea7dde0772c2950b7.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/art/enemy/spr_enemy_devout_hurt.png"
-dest_files=["res://.godot/imported/spr_enemy_devout_hurt.png-ef03cba043ac7c66260cce6c7ff91812.ctex"]
+source_file="res://tests/player/fixtures/conflict/spr_player_run_2x1.png"
+dest_files=["res://.godot/imported/spr_player_run_2x1.png-b4a1e57debddc80ea7dde0772c2950b7.ctex"]
 
 [params]
 
