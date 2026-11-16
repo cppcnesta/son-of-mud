@@ -22,7 +22,8 @@ using SonOfMud.Player.States;
 public partial class KeeperLabTest : LabSuiteBase
 {
     private const string LabScene = "res://assets/scenes/tests/keeper_lab.tscn";
-    private const float FloorY = 864f;
+    /// <summary>站在 y=888 的地面上时身体中心（原点）的 y。</summary>
+    private static readonly float FloorY = 888f - PlayerBody.HalfH;
     private const float Dt = 1f / 60f;
 
     protected override string ReportName => "keeper_lab_results";
@@ -166,12 +167,13 @@ public partial class KeeperLabTest : LabSuiteBase
     {
         await Fresh(new Vector2(1600, FloorY));
         bool windup = await WaitFor(() => _keeper.State is SweepWindupState, 200);
-        Check(windup && Distance <= 128f && _keeper.Sweep.IsCasting && _encounters.Count == 1,
-            $"横扫：玩家进入 2 地块（{Distance:F0} ≤ 128）且横扫就绪 → 前摇，横扫冷却 BeginCast（施法中）");
+        Check(windup && Distance <= _keeper.Keeper.SweepRange && _keeper.Sweep.IsCasting && _encounters.Count == 1,
+            $"横扫：玩家进入横扫距离（{Distance:F0} ≤ {_keeper.Keeper.SweepRange}）且横扫就绪 → 前摇，横扫冷却 BeginCast（施法中）");
         float x = _keeper.GlobalPosition.X;
         float prevTail = _keeper.Tail.Remaining;
         int hp = Player.Stats.Health;
-        int windupFrames = 0;
+        // 守坑人放大后发动距离变远，放好玩家的那几帧里它可能已经开始前摇了：把已经过去的帧数也算上
+        int windupFrames = Mathf.RoundToInt((_keeper.Keeper.SweepWindup - _keeper.Machine.Get<SweepWindupState>().Remaining) * 60f);
         bool castingAll = true;
         while (_keeper.State is SweepWindupState && windupFrames < 120)
         {
@@ -261,10 +263,10 @@ public partial class KeeperLabTest : LabSuiteBase
         Check(ready && _keeper.Sweep.IsReady && _keeper.State is ApproachState && _encounters.Count == 1,
             "蝎尾：开战约 20 秒后充满（期间玩家一直在 500px 外，横扫没发动、仍是就绪）");
         PlacePlayer(_keeper.GlobalPosition.X - 100f);
-        bool bothReadyInRange = _keeper.Sweep.IsReady && _keeper.Tail.IsReady && Distance <= 128f;
+        bool bothReadyInRange = _keeper.Sweep.IsReady && _keeper.Tail.IsReady && Distance <= _keeper.Keeper.SweepRange;
         await Frames(1);
         ulong aimStart = Engine.GetPhysicsFrames();
-        Check(bothReadyInRange && _keeper.State is TailAimState, $"蝎尾优先（Q3）：两个技能都就绪、玩家在 128px 内，守坑人选择蝎尾瞄准（{_keeper.State?.DisplayName}）");
+        Check(bothReadyInRange && _keeper.State is TailAimState, $"蝎尾优先（Q3）：两个技能都就绪、玩家在横扫距离内，守坑人选择蝎尾瞄准（{_keeper.State?.DisplayName}）");
 
         // 瞄准：无敌、不动、冷却施法中
         float x = _keeper.GlobalPosition.X;

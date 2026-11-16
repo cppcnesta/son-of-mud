@@ -17,6 +17,11 @@ namespace SonOfMud.Player;
 /// - 固定比例显示：源图 4 像素 = 游戏 1 像素（SpriteStrip.SourceScale），画布大的动作角色大小不变。
 /// - 每帧的底边中点就是脚底，对齐到身体碰撞框的底边。
 /// - 真图不染形态色（占位色块仍按形态着色）；角色朝左时水平翻转。
+/// - 水形态缺图时先用泥形态的同名图（水形态还没画）。
+/// - 替补表（<see cref="AnimFallbacks"/>）：美术表里没画的动作用现成动画拼，只在这个动作没有专门的图、而拿来拼的那段有图时生效：
+///   攀墙 = 循环播上升（贴墙不动时停在第一帧）；下砸下落 = 停在下劈最后一帧；下砸落地 = 起跳蓄力播一遍。
+/// - 泥收势（攻击后能走动的 1.5 秒）没有专门的图时：前 <see cref="RecoverHoldSeconds"/> 秒停在刚结束的那一下攻击的最后一帧
+///   （第 1 下后是 attack、连招第 2 下后是 attack_down），之后按有没有在走播待机 / 跑。
 /// </summary>
 [GlobalClass]
 public partial class PlayerAnimator : Node
@@ -27,6 +32,20 @@ public partial class PlayerAnimator : Node
     [Export] public float BaseFps { get; set; } = 12f;
     /// <summary>美术图所在文件夹。</summary>
     [Export] public string ArtDirectory { get; set; } = DefaultArtDirectory;
+
+    /// <summary>
+    /// 替补表：动作 → 拿来拼的动作[:方式]。方式：不写 = 原样播；last = 停在最后一帧；once = 播一遍不循环。
+    /// 只在「这个动作没有专门的图」且「拿来拼的动作有图」时生效。
+    /// </summary>
+    [Export] public Godot.Collections.Dictionary<string, string> AnimFallbacks { get; set; } = new()
+    {
+        ["wall_climb"] = "rise",
+        ["slam_fall"] = "attack_down:last",
+        ["slam_land"] = "jump_windup:once",
+    };
+
+    /// <summary>泥收势没有专门的图时，先停在刚结束那一下攻击最后一帧的时长（秒）。</summary>
+    [Export] public float RecoverHoldSeconds { get; set; } = 0.25f;
 
     /// <summary>占位动画：名字 → (水帧数, 泥帧数, 循环)。也是会去找美术图的全部动作。</summary>
     private static readonly Dictionary<string, (int water, int mud, bool loop)> Placeholder = new()
@@ -49,12 +68,23 @@ public partial class PlayerAnimator : Node
     private PlayerCharacter _player;
     /// <summary>用了美术图的动画 → 源图一帧的高度（像素），用来算缩放和脚底。</summary>
     private readonly Dictionary<string, int> _artHeight = new();
+    /// <summary>按替补表拼出来的动画 → 拿来拼的动画。</summary>
+    private readonly Dictionary<string, string> _fallbackOf = new();
+    /// <summary>泥收势替补中：已过的时间（秒），停在哪一下攻击的最后一帧。</summary>
+    private bool _recoverMode;
+    private float _recoverElapsed;
+    private string _recoverHold = "";
+    private Vector2 _bodySize = new(48f, 48f);
 
     public string CurrentAnimation => Sprite?.Animation.ToString() ?? "";
     public float CurrentSpeedScale => Sprite?.SpeedScale ?? 1f;
     /// <summary>当前播放的动画是不是美术图（不是色块占位）。</summary>
     public bool CurrentIsArt => _artHeight.ContainsKey(CurrentAnimation);
     public bool IsArt(string animation) => _artHeight.ContainsKey(animation);
+    /// <summary>这个动画是不是按替补表拼出来的（返回拿来拼的动画）。</summary>
+    public string FallbackOf(string animation) => _fallbackOf.TryGetValue(animation, out string src) ? src : "";
+    /// <summary>正在用「泥收势替补」（先停帧、再按移动播待机 / 跑）。</summary>
+    public bool RecoverFallbackActive => _recoverMode;
     /// <summary>身体碰撞框底边在玩家本地坐标里的 y（脚底）。</summary>
     public float FootY { get; private set; }
 
@@ -68,6 +98,7 @@ public partial class PlayerAnimator : Node
         _player = player;
         Sprite ??= player.GetNodeOrNull<AnimatedSprite2D>("AnimatedSprite2D");
         FootY = FindFootY(player);
+        if (player.GetNodeOrNull<CollisionShape2D>("CollisionShape2D")?.Shape is RectangleShape2D body) _bodySize = body.Size;
         if (Sprite != null && Sprite.SpriteFrames == null) Sprite.SpriteFrames = BuildFrames();
         player.Machine.StateChanged += OnStateChanged;
         player.Forms.FormChanged += OnFormChanged;
@@ -88,8 +119,29 @@ public partial class PlayerAnimator : Node
 
     public override void _Process(double delta)
     {
-        if (_player != null && IsInstanceValid(_player) && Sprite != null && IsInstanceValid(Sprite))
-            Sprite.FlipH = _player.Facing < 0f;
+        if (_player == null || !IsInstanceValid(_player) || Sprite == null || !IsInstanceValid(Sprite)) return;
+        Sprite.FlipH = _player.Facing < 0f;
+        string current = Sprite.Animation.ToString();
+        // 攀墙用上升拼的：贴墙不动时停在第一帧，动了再播
+        if (_player.Machine.Current is WallClimbState && FallbackOf(current) != "")
+        {
+            bool moving = Mathf.Abs(_player.Velocity.Y) > 1f;
+            if (!moving && Sprite.IsPlaying()) { Sprite.Pause(); Sprite.Frame = 0; }
+            else if (moving && !Sprite.IsPlaying()) Sprite.Play(current);
+        }
+        if (_recoverMode)
+        {
+            _recoverElapsed += (float)delta;
+            if (_recoverElapsed < RecoverHoldSeconds) return;
+            string prefix = _player.Forms.Current.AnimPrefix;
+            string target = Mathf.Abs(_player.Velocity.X) > 1f ? $"{prefix}_run" : $"{prefix}_idle";
+            if (current != target && Sprite.SpriteFrames.HasAnimation(target))
+            {
+                Sprite.Play(target);
+                Sprite.SpeedScale = 1f;
+                ApplyLayout(target);
+            }
+        }
     }
 
     public override void _ExitTree()
@@ -105,15 +157,36 @@ public partial class PlayerAnimator : Node
         if (!IsInsideTree() || _player == null || !IsInstanceValid(_player) || _player.Forms?.Current == null
             || Sprite == null || !IsInstanceValid(Sprite) || Sprite.SpriteFrames == null) return;
         if (_player.Machine.Current is not PlayerState state) return;
+        string previous = Sprite.Animation.ToString();
+        _recoverMode = false;
         string name = state.AnimName;
         if (string.IsNullOrEmpty(name)) return;
         string prefixed = $"{_player.Forms.Current.AnimPrefix}_{name}";
         string chosen = Sprite.SpriteFrames.HasAnimation(prefixed) ? prefixed : Sprite.SpriteFrames.HasAnimation(name) ? name : null;
         if (chosen == null) return;
+        Sprite.FlipH = _player.Facing < 0f;
+        // 泥收势没有专门的图，但刚才那一下攻击有图：先停在那一下的最后一帧，之后在 _Process 里按移动换待机 / 跑
+        if (state is AttackRecoveryState && !_artHeight.ContainsKey(chosen) && _artHeight.ContainsKey(previous)
+            && (previous.EndsWith("_attack") || previous.EndsWith("_attack_down")))
+        {
+            _recoverMode = true;
+            _recoverElapsed = 0f;
+            _recoverHold = previous;
+            Sprite.Play(previous);
+            Sprite.Pause();
+            Sprite.Frame = Sprite.SpriteFrames.GetFrameCount(previous) - 1;
+            ApplyLayout(previous);
+            return;
+        }
         Sprite.Play(chosen);
         // 实际 FPS 和各帧相对时长都算进去：手动做的 SpriteFrames 也能刚好播满动作时长
         Sprite.SpeedScale = SpriteStrip.SpeedScaleFor(Sprite.SpriteFrames, chosen, state.AnimDuration);
-        Sprite.FlipH = _player.Facing < 0f;
+        ApplyLayout(chosen);
+    }
+
+    /// <summary>按动画是美术图还是色块，设好缩放、脚底对齐和着色。</summary>
+    private void ApplyLayout(string chosen)
+    {
         Sprite.Centered = true;
         if (_artHeight.TryGetValue(chosen, out int height))
         {
@@ -141,10 +214,11 @@ public partial class PlayerAnimator : Node
         return body?.Shape is RectangleShape2D rect ? body.Position.Y + rect.Size.Y * 0.5f : 24f;
     }
 
-    /// <summary>每个形态、每个动作：分形态的图 → 共用的图 → 色块占位。</summary>
+    /// <summary>每个形态、每个动作：分形态的图 → 共用的图 →（水形态）泥形态的图 → 替补表 → 色块占位。</summary>
     private SpriteFrames BuildFrames()
     {
         _artHeight.Clear();
+        _fallbackOf.Clear();
         var frames = new SpriteFrames();
         if (frames.HasAnimation("default")) frames.RemoveAnimation("default");
         foreach (string form in Forms)
@@ -156,6 +230,8 @@ public partial class PlayerAnimator : Node
                 float fps = ArtFps.TryGetValue(anim, out float f) ? f : BaseFps;
                 Texture2D art = SpriteStrip.Find(ArtDirectory, $"spr_player_{form}_{anim}", "主角美术图", out int cols, out int rows)
                                 ?? SpriteStrip.Find(ArtDirectory, $"spr_player_{anim}", "主角美术图", out cols, out rows);
+                // 水形态还没画：缺图时先用泥形态的同名图
+                if (art == null && !isMud) art = SpriteStrip.Find(ArtDirectory, $"spr_player_mud_{anim}", "主角美术图", out cols, out rows);
                 bool added = art != null && (cols > 0
                     ? SpriteStrip.AddEvenGrid(frames, name, art, cols, rows, info.loop, fps)
                     : SpriteStrip.AddStrip(frames, name, art, info.loop, fps, "主角美术图"));
@@ -169,16 +245,43 @@ public partial class PlayerAnimator : Node
                 frames.AddAnimation(name);
                 frames.SetAnimationLoop(name, info.loop);
                 frames.SetAnimationSpeed(name, BaseFps);
-                for (int i = 0; i < count; i++) frames.AddFrame(name, MakeBlock(i, count));
+                for (int i = 0; i < count; i++) frames.AddFrame(name, MakeBlock(i, count, _bodySize));
             }
+            ApplyFallbacks(frames, form);
         }
         return frames;
     }
 
-    /// <summary>48×48 的灰度色块，每帧亮度略有不同，方便肉眼看出动画在播。实际颜色由 Modulate 着色。</summary>
-    private static ImageTexture MakeBlock(int index, int count)
+    /// <summary>按替补表拼动画：这个动作没有专门的图、拿来拼的动作有图时，用那段图的帧替换掉色块。</summary>
+    private void ApplyFallbacks(SpriteFrames frames, string form)
     {
-        var image = Image.CreateEmpty(48, 48, false, Image.Format.Rgba8);
+        if (AnimFallbacks == null) return;
+        foreach (var (anim, rule) in AnimFallbacks)
+        {
+            string name = $"{form}_{anim}";
+            if (_artHeight.ContainsKey(name) || string.IsNullOrEmpty(rule)) continue;
+            string[] parts = rule.Split(':');
+            string src = $"{form}_{parts[0]}";
+            string mode = parts.Length > 1 ? parts[1] : "";
+            if (!_artHeight.ContainsKey(src) || !frames.HasAnimation(src)) continue;
+            if (frames.HasAnimation(name)) frames.RemoveAnimation(name);
+            frames.AddAnimation(name);
+            int count = frames.GetFrameCount(src);
+            bool loop = mode switch { "last" => true, "once" => false, _ => Placeholder.TryGetValue(anim, out var info) ? info.loop : frames.GetAnimationLoop(src) };
+            frames.SetAnimationLoop(name, loop);
+            frames.SetAnimationSpeed(name, frames.GetAnimationSpeed(src));
+            if (mode == "last") frames.AddFrame(name, frames.GetFrameTexture(src, count - 1));
+            else
+                for (int i = 0; i < count; i++) frames.AddFrame(name, frames.GetFrameTexture(src, i), frames.GetFrameDuration(src, i));
+            _artHeight[name] = _artHeight[src];
+            _fallbackOf[name] = src;
+        }
+    }
+
+    /// <summary>和身体碰撞框一样大的灰度色块，每帧亮度略有不同，方便肉眼看出动画在播。实际颜色由 Modulate 着色。</summary>
+    private static ImageTexture MakeBlock(int index, int count, Vector2 size)
+    {
+        var image = Image.CreateEmpty(Mathf.Max(1, (int)size.X), Mathf.Max(1, (int)size.Y), false, Image.Format.Rgba8);
         float shade = 0.7f + 0.3f * (count <= 1 ? 1f : index / (float)(count - 1));
         image.Fill(new Color(shade, shade, shade));
         return ImageTexture.CreateFromImage(image);

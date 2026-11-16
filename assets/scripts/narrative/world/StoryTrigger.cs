@@ -41,8 +41,14 @@ public partial class StoryTrigger : Area2D, IInteractable
         if (Events.Instance != null) Events.Instance.VariableChanged -= OnVariableChanged;
     }
 
+    /// <summary>这个触发点显示的图（例如祈祷者雕像）；为空时照旧显示占位色块。</summary>
+    [Export] public Texture2D Art { get; set; }
+    /// <summary>图显示的高度（像素），底边中点在节点原点。雕像和主角一样高。</summary>
+    [Export] public float ArtHeight { get; set; } = 120f;
+
     public override void _Ready()
     {
+        ArtSprite.Attach(this, Art, ArtHeight);
         if (Mode == TriggerMode.Interact)
         {
             CollisionLayer = Layers.Interact;

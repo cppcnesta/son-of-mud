@@ -14,7 +14,8 @@ using SonOfMud.Tools;
 /// </summary>
 public partial class PlayerSuite : LabSuiteBase
 {
-    private const float FloorY = 576f;
+    /// <summary>站在 y=600 的地面上时身体中心（原点）的 y。</summary>
+    private static readonly float FloorY = 600f - PlayerBody.HalfH;
     private const string LabPath = "res://assets/scenes/tests/player_lab.tscn";
 
     protected override string ReportName => "player_results";
@@ -71,7 +72,7 @@ public partial class PlayerSuite : LabSuiteBase
 
     private async Task<bool> WalkOffPlatform()
     {
-        await Reset(new Vector2(560, 376));
+        await Reset(new Vector2(560, 400f - PlayerBody.HalfH));
         Press(PlayerActions.Right);
         for (int i = 0; i < 60 && Player.State is not FallState; i++) await Frames(1);
         Release(PlayerActions.Right);

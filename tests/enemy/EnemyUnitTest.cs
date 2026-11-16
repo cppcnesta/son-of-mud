@@ -157,10 +157,12 @@ public partial class EnemyUnitTest : LabSuiteBase
             "数值：守坑人血 150，中速 120px/s（D1、Q7）");
         Check(keeper.SweepSpec?.Damage == 40f && keeper.TailSpec?.Damage == 60f && keeper.TailSpec.StunSeconds == 3f && keeper.TailSpec.CounterOnBlock && keeper.TailSpec.Blockable,
             "数值：横扫 40、蝎尾 60 + 眩晕 3 秒 + CounterOnBlock（Q1，用户已批准，待试玩）");
-        Check(keeper.SweepCooldown == 5f && keeper.SweepWindup == 1f && keeper.SweepRecover == 0.5f && keeper.SweepRange == 128f && keeper.SweepRecoverMultiplier == 2f && keeper.SweepReducesTail == 5f,
-            "数值：横扫 CD 5、前摇 1、收招 0.5（2 倍易伤）、距离 128、命中让蝎尾减 5");
-        Check(keeper.TailCooldown == 20f && keeper.TailAim == 3f && keeper.TailDelay == 0.1f && keeper.TailWidth == 96f && keeper.TailTriggerRange == 384f && keeper.TailRecover == 0.5f,
-            "数值：蝎尾 CD 20、瞄准 3、过渡 0.1、竖带宽 96、触发 384（Q2）、收招 0.5（Q6）");
+        Check(keeper.SweepCooldown == 5f && keeper.SweepWindup == 1f && keeper.SweepRecover == 0.5f && keeper.SweepRange == 440f && keeper.SweepRecoverMultiplier == 2f && keeper.SweepReducesTail == 5f,
+            "数值：横扫 CD 5、前摇 1、收招 0.5（2 倍易伤）、距离 440（守坑人按图放大后）、命中让蝎尾减 5");
+        Check(keeper.StopDistance == 360f && keeper.StopDistance <= keeper.SweepRange && keeper.StopDistance < keeper.TailTriggerRange,
+            $"数值：停步距离 {keeper.StopDistance} 不超过横扫距离 {keeper.SweepRange}（停下就能横扫），也小于蝎尾触发距离 {keeper.TailTriggerRange}（玩家站着不动也能放蝎尾）");
+        Check(keeper.TailCooldown == 20f && keeper.TailAim == 3f && keeper.TailDelay == 0.1f && keeper.TailWidth == 96f && keeper.TailTriggerRange == 900f && keeper.TailRecover == 0.5f,
+            "数值：蝎尾 CD 20、瞄准 3、过渡 0.1、竖带宽 96、触发 900（守坑人按图放大后）、收招 0.5（Q6）");
         Check(keeper.Stagger != null && keeper.Stagger.Duration == 5f && keeper.Stagger.DamageMultiplier == 2f && keeper.Stagger.ReducePerHit == 1f && keeper.TransformFlash == 1f,
             "数值：反制僵直 5 秒 / 2 倍 / 每次受伤减 1 秒；变身闪白 1 秒");
 

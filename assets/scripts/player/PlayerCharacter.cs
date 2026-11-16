@@ -473,6 +473,7 @@ public partial class PlayerCharacter : CharacterBody2D
         Timers.Bonus.Clear();
         Forms.SetForm(form);
         Facing = 1f;
+        // 测试用：position 是身体中心（原点）。正式出生点放人用 BodyFeet.PlaceFeetAt（出生点给的是脚）
         GlobalPosition = position;
         Velocity = Vector2.Zero;
         Stats.Refill();

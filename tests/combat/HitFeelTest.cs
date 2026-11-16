@@ -88,7 +88,7 @@ public partial class HitFeelTest : LabSuiteBase
             if (child is EnemyBody || child.Name.ToString().StartsWith("TestSolid")) child.Free();
         Service.CancelAll();
         PauseService.Reset();
-        await Reset(new Vector2(x, FloorY - 24f), form);
+        await Reset(new Vector2(x, FloorY - PlayerBody.HalfH), form);
         await ProcessFrames(2);
     }
 

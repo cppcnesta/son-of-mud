@@ -98,7 +98,8 @@ public partial class AttackState : PlayerState
             if (_down)
             {
                 rect.Size = new Vector2(_profile.DownAttackWidth, reach);
-                shapeNode.Position = new Vector2(0f, reach * 0.5f);
+                // 下劈框从脚底往下伸（原点是身体中心，所以先下移半个身高）
+                shapeNode.Position = new Vector2(0f, BodyFeet.FeetOffset(P) + reach * 0.5f);
             }
             else
             {

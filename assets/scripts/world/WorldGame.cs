@@ -149,10 +149,11 @@ public partial class WorldGame : Node
         {
             await Fade(true);
             if (!IsInstanceValid(this) || !IsInstanceValid(Player) || CurrentRoom == null) return;
-            Vector2 target = LastSafePosition is Vector2 safe && _safeRoom == CurrentRoomDef?.Id
-                ? safe
-                : CurrentRoom.FindSpawn(SpawnPoint.DefaultId)?.GlobalPosition ?? CurrentRoom.GlobalPosition;
-            Player.GlobalPosition = target;
+            // 最近站稳的位置记的是原点；出生点给的是脚的位置，要换算
+            if (LastSafePosition is Vector2 safe && _safeRoom == CurrentRoomDef?.Id)
+                Player.GlobalPosition = safe;
+            else
+                BodyFeet.PlaceFeetAt(Player, CurrentRoom.FindSpawn(SpawnPoint.DefaultId)?.GlobalPosition ?? CurrentRoom.GlobalPosition);
             if (Player is CharacterBody2D body) body.Velocity = Vector2.Zero;
             Rescues++;
             Events.Instance?.EmitSignal(Events.SignalName.PlayerTeleported, (StringName)"Rescue");
@@ -349,7 +350,7 @@ public partial class WorldGame : Node
             else if (teleported)
             {
                 SpawnPoint spawn = next.FindSpawn(spawnId);
-                if (spawn != null) Player.GlobalPosition = spawn.GlobalPosition;
+                if (spawn != null) BodyFeet.PlaceFeetAt(Player, spawn.GlobalPosition);
                 else GD.PushError($"WorldGame：房间 {def.Id} 没有出生点 {spawnId}，也没有 Default。");
             }
         }

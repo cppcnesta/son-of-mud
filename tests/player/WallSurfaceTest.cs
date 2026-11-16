@@ -19,8 +19,8 @@ public partial class WallSurfaceTest : LabSuiteBase
     private const int Tile = 32;
     private const int FloorRow = 20;
     private const float FloorTop = FloorRow * Tile;          // 640
-    private const float StandY = FloorTop - 24f;             // 身体 48×48，中心离地 24
-    private const float HalfBody = 24f;
+    private static readonly float HalfBody = PlayerBody.HalfH;   // 主角原点在身体中心，脚底 = 原点 + 半个身高
+    private static readonly float StandY = FloorTop - HalfBody;  // 站着时原点（身体中心）的 y
 
     // 各段场地（瓦片列号；墙都是两列宽）
     private const int XWallCol = 30;      // 全是 X，从顶到地

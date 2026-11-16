@@ -136,7 +136,7 @@ public partial class LegacySaveClimbTest : UiTestBase
         for (int i = 0; i < 900 && !arrived; i++)
         {
             await Frames(1);
-            if (!roseAbove && RoomId == "S1_04" && LocalY - 24f < wallBottom - 16f)
+            if (!roseAbove && RoomId == "S1_04" && LocalY - PlayerBody.HalfH < wallBottom - 16f)
             {
                 roseAbove = true;
                 RealKeys.Down(RealKeys.Right);

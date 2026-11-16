@@ -107,8 +107,8 @@ public partial class ArenaLockClimbTest : EnemyFlowBase
         Check(stayedClosed && Deaths == 0 && RoomId == "S1_05", "攀爬尝试期间：一直在战斗中（入口门关着），玩家没死，还在 S1_05");
         Check(contact > 30, $"确实贴着 ArenaLock 门体（接触 {contact} 帧）");
         Check(!sawClimb && airWindups == 0, $"战斗中贴着门体按住 A+W 并连按跳 {JumpPresses} 次：从未进入攀墙，没有蹬墙跳（{airWindups} 次）");
-        Check(rise <= single + 1f && minY - 24f > doorTop,
-            $"最高点 {rise:F1}px 不超过单跳 {single:F1}px，身体顶部（{minY - 24f:F0}）始终低于门顶（{doorTop:F0}）");
+        Check(rise <= single + 1f && minY - PlayerBody.HalfH > doorTop,
+            $"最高点 {rise:F1}px 不超过单跳 {single:F1}px，身体顶部（{minY - PlayerBody.HalfH:F0}）始终低于门顶（{doorTop:F0}）");
 
         await RightWallAttempts(arenaLock, single);
     }
@@ -156,8 +156,8 @@ public partial class ArenaLockClimbTest : EnemyFlowBase
             float rise = startY - minY;
             Check(stayedClosed && RoomId == "S1_05" && contact > 30, $"右墙（{how}）：一直在战斗中，确实贴着右墙（{contact} 帧）");
             Check(!sawClimb && airWindups == 0, $"右墙（{how}）：从未进入攀墙，没有蹬墙跳（{airWindups} 次）");
-            Check(rise <= single + 1f && minY - 24f > LedgeBottom,
-                $"右墙（{how}）：最高点 {rise:F1}px 不超过单跳 {single:F1}px，身体顶部（{minY - 24f:F0}）始终低于出口平台底面（{LedgeBottom:F0}）");
+            Check(rise <= single + 1f && minY - PlayerBody.HalfH > LedgeBottom,
+                $"右墙（{how}）：最高点 {rise:F1}px 不超过单跳 {single:F1}px，身体顶部（{minY - PlayerBody.HalfH:F0}）始终低于出口平台底面（{LedgeBottom:F0}）");
         }
     }
 }

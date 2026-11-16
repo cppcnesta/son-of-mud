@@ -144,7 +144,7 @@ void fragment() {
     private void UpdateLook()
     {
         if (_body == null || !IsInstanceValid(_body) || Sprite == null || !IsInstanceValid(Sprite)) return;
-        Sprite.FlipH = FlipFor(_body.Facing);
+        Sprite.FlipH = FlipFor(_body.Facing, _body.Data?.ArtFacesRight ?? false);
         Sprite.Modulate = _body.StateTint(Colors.White);
         FlashMaterial?.SetShaderParameter("flash", _body.FlashAmount);
     }
@@ -164,6 +164,9 @@ void fragment() {
 
     /// <summary>敌人的图画朝左，所以朝右（facing &gt; 0）时要水平翻转。</summary>
     public static bool FlipFor(float facing) => facing > 0f;
+
+    /// <summary>图画朝右的敌人（守坑人）反过来：朝左时才翻转。</summary>
+    public static bool FlipFor(float facing, bool artFacesRight) => artFacesRight ? facing < 0f : facing > 0f;
 
     /// <summary>
     /// 源图一帧的高度（像素），用来放脚底：取这个动作第 1 帧的贴图高度，含补边（AtlasTexture.Margin）。

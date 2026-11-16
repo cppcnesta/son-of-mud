@@ -21,11 +21,14 @@
 [ext_resource type="Script" path="res://assets/scripts/enemy/EnemySprite.cs" id="enemy_sprite"]
 
 [sub_resource type="RectangleShape2D" id="body"]
-size = Vector2(112, 160)
+size = Vector2(600, 80)
+
+[sub_resource type="RectangleShape2D" id="hurt"]
+size = Vector2(600, 400)
 
 [sub_resource type="RectangleShape2D" id="hit"]
 resource_local_to_scene = true
-size = Vector2(176, 120)
+size = Vector2(320, 200)
 
 [sub_resource type="RectangleShape2D" id="tail"]
 resource_local_to_scene = true
@@ -39,7 +42,7 @@ Data = ExtResource("2")
 BossId = &"keeper"
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
-position = Vector2(0, -80)
+position = Vector2(0, -40)
 shape = SubResource("body")
 
 [node name="Sprite" type="AnimatedSprite2D" parent="."]
@@ -55,8 +58,8 @@ monitoring = false
 script = ExtResource("4")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="HurtBox"]
-position = Vector2(0, -80)
-shape = SubResource("body")
+position = Vector2(0, -200)
+shape = SubResource("hurt")
 
 [node name="HitBox" type="Area2D" parent="."]
 collision_layer = 64
@@ -66,7 +69,7 @@ monitorable = false
 script = ExtResource("5")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="HitBox"]
-position = Vector2(88, -60)
+position = Vector2(310, -100)
 shape = SubResource("hit")
 
 [node name="TailHitBox" type="Area2D" parent="."]

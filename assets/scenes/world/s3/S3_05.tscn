@@ -6,6 +6,7 @@
 [ext_resource type="Script" path="res://assets/scripts/world/SpawnPoint.cs" id="5_s0nap"]
 [ext_resource type="Script" path="res://assets/scripts/narrative/world/StoryTrigger.cs" id="n_story"]
 [ext_resource type="Script" path="res://assets/scripts/narrative/world/TabletPickup.cs" id="n_tablet"]
+[ext_resource type="Texture2D" path="res://assets/art/collectible/spr_collectible_prayer_statue_1x1.png" id="statue_art"]
 
 [sub_resource type="RectangleShape2D" id="Shape_Story_Clay"]
 size = Vector2(96, 160)
@@ -60,6 +61,7 @@ position = Vector2(1072, 904)
 script = ExtResource("n_story")
 ScriptId = "c_city"
 Label = "泥"
+Art = ExtResource("statue_art")
 PromptText = "触碰雕像"
 
 [node name="Shape" type="CollisionShape2D" parent="Objects/Story_Clay" unique_id=2136890288]

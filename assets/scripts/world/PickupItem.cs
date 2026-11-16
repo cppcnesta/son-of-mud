@@ -19,4 +19,6 @@ public partial class PickupItem : KeptResource
     [Export] public int MaxCount { get; set; }
     [Export] public bool PlaysLine { get; set; }
     [Export] public Color Tint { get; set; } = new(0.72f, 0.55f, 0.36f);
+    /// <summary>地上显示的图（高 Pickup.Size.Y，宽度按比例）；为空时画色块。</summary>
+    [Export] public Texture2D Art { get; set; }
 }

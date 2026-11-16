@@ -5,6 +5,7 @@
 [ext_resource type="TileSet" path="res://assets/data/world/world_tileset.tres" id="4_7vlff"]
 [ext_resource type="Script" path="res://assets/scripts/world/SpawnPoint.cs" id="5_5u5so"]
 [ext_resource type="Script" path="res://assets/scripts/narrative/world/StoryTrigger.cs" id="n_story"]
+[ext_resource type="Texture2D" path="res://assets/art/collectible/spr_collectible_prayer_statue_1x1.png" id="statue_art"]
 
 [sub_resource type="RectangleShape2D" id="Shape_Story_SevenNights"]
 size = Vector2(96, 160)
@@ -56,6 +57,7 @@ position = Vector2(464, 636)
 script = ExtResource("n_story")
 ScriptId = "m_pit"
 Label = "七夜"
+Art = ExtResource("statue_art")
 PromptText = "触碰雕像"
 
 [node name="Shape" type="CollisionShape2D" parent="Objects/Story_SevenNights" unique_id=787600493]

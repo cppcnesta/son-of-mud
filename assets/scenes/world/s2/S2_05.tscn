@@ -5,6 +5,7 @@
 [ext_resource type="TileSet" path="res://assets/data/world/world_tileset.tres" id="4_fkdn4"]
 [ext_resource type="Script" path="res://assets/scripts/world/SpawnPoint.cs" id="5_bmvsx"]
 [ext_resource type="Script" path="res://assets/scripts/narrative/world/StoryTrigger.cs" id="n_story"]
+[ext_resource type="Texture2D" path="res://assets/art/collectible/spr_collectible_prayer_statue_1x1.png" id="statue_art"]
 
 [sub_resource type="RectangleShape2D" id="Shape_Story_Meteor"]
 size = Vector2(96, 160)
@@ -46,6 +47,7 @@ position = Vector2(560, 524)
 script = ExtResource("n_story")
 ScriptId = "t_site"
 Label = "流星"
+Art = ExtResource("statue_art")
 PromptText = "触碰雕像"
 
 [node name="Shape" type="CollisionShape2D" parent="Objects/Story_Meteor" unique_id=1259668983]

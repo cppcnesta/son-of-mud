@@ -97,7 +97,7 @@ public partial class EnemyFlowTest : EnemyFlowBase
     private async Task<Pickup> DropNear(StringName item, float offset)
     {
         var before = InRoom<Pickup>().Select(p => p.GetInstanceId()).ToHashSet();
-        float floorY = Player.GlobalPosition.Y + 24f;
+        float floorY = Player.GlobalPosition.Y + PlayerBody.HalfH;
         Events.Instance.EmitSignal(Events.SignalName.ItemDropped, item, new Vector2(Player.GlobalPosition.X + offset, floorY));
         await Frames(2);
         return InRoom<Pickup>().FirstOrDefault(p => !before.Contains(p.GetInstanceId()));

@@ -27,6 +27,8 @@ public partial class EnemyData : KeptResource
     /// 显示一律固定比例（源图 4 像素 = 游戏里 1 像素），标准格子显示出来就是这个边长；写了行列数的图不看它。
     /// </summary>
     [Export] public float ArtCanvas { get; set; } = 128f;
+    /// <summary>美术图画朝右（默认敌人的图画朝左）。守坑人的图画朝右。</summary>
+    [Export] public bool ArtFacesRight { get; set; }
     /// <summary>
     /// 动作名 → 美术名：文件名先按美术名找 spr_enemy_&lt;Kind&gt;_&lt;美术名&gt;.png，没有再按动作名找。
     /// 动作名：idle / patrol / chase / attack_windup / attack_active / attack_recover / hurt / flee / dead（守坑人另有自己的）。

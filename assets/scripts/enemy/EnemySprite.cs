@@ -52,7 +52,10 @@ public partial class EnemySprite : AnimatedSprite2D
     {
         Variant facing = GetParent()?.Get("InitialFacing") ?? default;
         float value = facing.VariantType == Variant.Type.Nil ? -1f : (float)facing.AsDouble();
-        return EnemyAnimator.FlipFor(value >= 0f ? 1f : -1f);
+        // 守坑人的图画朝右（数据里 ArtFacesRight），其他敌人画朝左
+        Resource data = GetParent()?.Get("Data").AsGodotObject() as Resource;
+        bool facesRight = data != null && data.Get("ArtFacesRight").VariantType == Variant.Type.Bool && data.Get("ArtFacesRight").AsBool();
+        return EnemyAnimator.FlipFor(value >= 0f ? 1f : -1f, facesRight);
     }
 
     public override void _Notification(int what)

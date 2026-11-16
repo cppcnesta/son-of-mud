@@ -12,7 +12,7 @@ public static class RoomRules
 {
     public const int Tile = RoomGrid.Tile;
     /// <summary>出生点检查用的玩家碰撞体（脚在出生点）和它与实心瓦片之间至少要留的间隙。</summary>
-    public static readonly Vector2 BodySize = new(48, 48);
+    public static readonly Vector2 BodySize = new(48, 120);
     public const float BodyGap = 2f;
     /// <summary>跨房间对齐：两边开口至少要重叠 2 格。</summary>
     public const int MinOverlap = 2 * Tile;
@@ -143,7 +143,7 @@ public static class RoomRules
         return errors;
     }
 
-    /// <summary>出生点：放得下 48×48 的身体（脚在 feet，左右上和实心瓦片至少留 2 像素），并且脚下是实心或单向平台。返回问题描述，没问题返回 null。</summary>
+    /// <summary>出生点：放得下 48×120 的身体（脚在 feet，左右上和实心瓦片至少留 2 像素），并且脚下是实心或单向平台。返回问题描述，没问题返回 null。</summary>
     public static string SpawnProblem(RoomGrid grid, Vector2 feet)
     {
         var body = new Rect2(feet.X - BodySize.X / 2f - BodyGap, feet.Y - BodySize.Y - BodyGap, BodySize.X + BodyGap * 2f, BodySize.Y + BodyGap);
