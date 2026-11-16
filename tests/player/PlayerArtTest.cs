@@ -34,9 +34,11 @@ public partial class PlayerArtTest : LabSuiteBase
         // ① 默认文件夹：仓库里有哪些主角美术图就用哪些（现在只有待机图 spr_player_idle.png），没有图的动作是占位
         await Reset(new Vector2(900, FloorY), 0);
         bool repoIdle = ResourceLoader.Exists(PlayerAnimator.DefaultArtDirectory + "/spr_player_idle.png");
+        // 仓库里有没有泥形态攻击图（spr_player_mud_attack[_列x行].png）；水形态攻击还没有图
+        bool repoMudAttack = SpriteStrip.Find(PlayerAnimator.DefaultArtDirectory, "spr_player_mud_attack", "主角美术图", out _, out _) != null;
         Check(anim.ArtDirectory == PlayerAnimator.DefaultArtDirectory && anim.IsArt("water_idle") == repoIdle && anim.IsArt("mud_idle") == repoIdle
-              && !anim.IsArt("mud_attack") && anim.CurrentIsArt == repoIdle,
-            $"默认：美术文件夹是 {PlayerAnimator.DefaultArtDirectory}，仓库里{(repoIdle ? "有" : "没有")}待机图，待机{(repoIdle ? "用美术图" : "是占位")}；攻击没有图，是占位");
+              && anim.IsArt("mud_attack") == repoMudAttack && !anim.IsArt("water_attack") && anim.CurrentIsArt == repoIdle,
+            $"默认：美术文件夹是 {PlayerAnimator.DefaultArtDirectory}，仓库里{(repoIdle ? "有" : "没有")}待机图，待机{(repoIdle ? "用美术图" : "是占位")}；泥攻击{(repoMudAttack ? "用美术图" : "是占位")}；水攻击没有图，是占位");
 
         // 一张图也没有的文件夹：全部是占位
         anim.UseArtDirectory(NoArt);
@@ -106,8 +108,9 @@ public partial class PlayerArtTest : LabSuiteBase
         await Reset(new Vector2(900, FloorY), 0);
         anim.UseArtDirectory(PlayerAnimator.DefaultArtDirectory);
         await Frames(2);
-        Check(anim.CurrentIsArt == repoIdle && sprite.Modulate == (repoIdle ? Colors.White : Player.Forms.Current.Tint) && !anim.IsArt("mud_attack"),
-            $"换回默认文件夹：又按仓库里的图显示（待机{(repoIdle ? "用美术图" : "是占位")}，攻击是占位）");
+        Check(anim.CurrentIsArt == repoIdle && sprite.Modulate == (repoIdle ? Colors.White : Player.Forms.Current.Tint)
+              && anim.IsArt("mud_attack") == repoMudAttack && !anim.IsArt("water_attack"),
+            $"换回默认文件夹：又按仓库里的图显示（待机{(repoIdle ? "用美术图" : "是占位")}，泥攻击{(repoMudAttack ? "用美术图" : "是占位")}，水攻击是占位）");
 
         // 手动做的 SpriteFrames（6 FPS、帧时长 1/2/1）：速度倍率按实际 FPS 和各帧相对时长算，整段刚好播满攻击时长
         var manual = new SpriteFrames();
