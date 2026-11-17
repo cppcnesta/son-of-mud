@@ -92,9 +92,11 @@ public partial class AnimFallbackTest : LabSuiteBase
               && f.GetFrameCount("mud_slam_land") == f.GetFrameCount("mud_jump_windup"),
             "下砸落地：起跳蓄力播一遍（不循环）");
         Check(anim.FallbackOf("mud_idle") == "" && anim.FallbackOf("mud_run") == "", "有专门图的动作（待机、跑）不替补");
-        Check(anim.IsArt("water_attack") && SameImage(f.GetFrameTexture("water_attack", 0), f.GetFrameTexture("mud_attack", 0))
-              && anim.IsArt("water_block") && SameImage(f.GetFrameTexture("water_block", 0), f.GetFrameTexture("mud_block", 0)),
-            "水形态没有自己的攻击、格挡图：先用泥形态的图");
+        Check(anim.IsArt("water_attack") && !SameImage(f.GetFrameTexture("water_attack", 0), f.GetFrameTexture("mud_attack", 0))
+              && anim.IsArt("water_block") && !SameImage(f.GetFrameTexture("water_block", 0), f.GetFrameTexture("mud_block", 0)),
+            "水形态有自己的攻击、格挡图：用水形态的图");
+        Check(anim.IsArt("water_hurt") && SameImage(f.GetFrameTexture("water_hurt", 0), f.GetFrameTexture("mud_hurt", 0)),
+            "水形态没有自己的受击图：先用泥形态的图");
     }
 
     /// <summary>两帧来自同一张图的同一格（每个形态各切一份，帧对象不同）。</summary>
@@ -128,14 +130,15 @@ public partial class AnimFallbackTest : LabSuiteBase
 
     private async Task ObjectArtChecks()
     {
-        Node room = GD.Load<PackedScene>("res://assets/scenes/world/s1/S1_06.tscn").Instantiate();
+        // S1_06「七夜」的雕像画进了背景，不再单独挂雕像图；用 S1_08「重塑」检查
+        Node room = GD.Load<PackedScene>("res://assets/scenes/world/s1/S1_08.tscn").Instantiate();
         AddChild(room);
         await Frames(1);
-        var statue = room.GetNode<Node2D>("Objects/Story_SevenNights");
+        var statue = room.GetNode<Node2D>("Objects/Story_Reshape");
         var art = statue.GetNodeOrNull<Sprite2D>(ArtSprite.NodeName);
         Check(art != null && Mathf.IsEqualApprox(ShownHeight(art), 120f) && !statue.GetNode<CanvasItem>("Placeholder").Visible
               && art.Texture.ResourcePath.Contains("spr_collectible_prayer_statue"),
-            $"祈祷者雕像「七夜」：显示雕像图，高 {(art == null ? 0 : ShownHeight(art)):F0}（和主角一样高），占位色块藏起来");
+            $"祈祷者雕像「重塑」：显示雕像图，高 {(art == null ? 0 : ShownHeight(art)):F0}（和主角一样高），占位色块藏起来");
         room.QueueFree();
 
         Node room2 = GD.Load<PackedScene>("res://assets/scenes/world/s1/S1_02.tscn").Instantiate();

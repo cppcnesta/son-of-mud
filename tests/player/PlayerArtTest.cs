@@ -80,11 +80,12 @@ public partial class PlayerArtTest : LabSuiteBase
             $"512 的图在游戏里显示为 128 高，帧底边正好在身体碰撞框底边（底边 {bottom:F1}，脚底 {anim.FootY:F1}）");
 
         // ④ 朝向翻转
+        // 翻转在 PlayerAnimator._Process 里刷新，等 2 帧保证它跑过一次（只等 1 帧取决于这一帧里节点的处理顺序）
         Player.Facing = -1f;
-        await Frames(1);
+        await Frames(2);
         bool flippedLeft = sprite.FlipH;
         Player.Facing = 1f;
-        await Frames(1);
+        await Frames(2);
         Check(flippedLeft && !sprite.FlipH, "朝左时水平翻转，朝右时不翻");
 
         // 水攻击：美术图 3 帧，按 0.34 秒缩放速度
