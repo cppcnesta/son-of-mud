@@ -19,6 +19,8 @@ public partial class Hit : RefCounted
     public float KnockbackForce { get; set; }
     public bool CounterOnBlock { get; set; }
     public string[] Tags { get; set; } = System.Array.Empty<string>();
+    /// <summary>能不能打断敌人出招（见 HitSpec.InterruptsActions）。</summary>
+    public bool InterruptsActions { get; set; } = true;
     /// <summary>发起攻击的实体（可能为 null）。</summary>
     public Node Source { get; set; }
     /// <summary>结算后实际扣掉的血量（Damaged / Killed 时有效）。</summary>
@@ -36,6 +38,7 @@ public partial class Hit : RefCounted
         KnockbackForce = spec?.KnockbackForce ?? 0f,
         CounterOnBlock = spec?.CounterOnBlock ?? false,
         Tags = spec?.Tags ?? System.Array.Empty<string>(),
+        InterruptsActions = spec?.InterruptsActions ?? true,
         Multiplier = multiplier,
         SourcePosition = sourcePosition,
         Source = source,

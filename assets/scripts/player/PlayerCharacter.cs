@@ -149,6 +149,10 @@ public partial class PlayerCharacter : CharacterBody2D
 
     public void StopHorizontal() => Velocity = new Vector2(0f, Velocity.Y);
 
+    /// <summary>攻击中走动：按当前形态移速 × multiplier（再乘减速恢复倍率），不改朝向；multiplier 为 0 时就是站定。</summary>
+    public void DriftWhileAttacking(float axis, float multiplier) =>
+        Velocity = new Vector2(axis * multiplier * Forms.Current.MoveSpeed * Timers.Recovery.Multiplier(), Velocity.Y);
+
     /// <summary>地面上给一点向下的速度，保证 IsOnFloor 稳定。</summary>
     public void StickToFloor(float delta) => Velocity = new Vector2(Velocity.X, Forms.Current.Gravity * delta);
 
@@ -271,7 +275,7 @@ public partial class PlayerCharacter : CharacterBody2D
     /// <summary>消费缓冲的攻击输入：空中按住下且有下砸能力 → Slam；否则普通攻击（空中按住下 → 下劈）。</summary>
     public bool TryStartAttack()
     {
-        if (!Timers.AttackReady || !Buffer.Consume(PlayerActions.Attack, Rules.ActionBuffer)) return false;
+        if (!Timers.AttackReady || !Buffer.Consume(PlayerActions.Attack, Rules.AttackBuffer)) return false;
         bool down = !IsOnFloor() && Held(PlayerActions.Down);
         if (down && HasAbility(PlayerAbilities.HeavySlam)) Machine.TransitionTo<SlamState>();
         else Machine.TransitionTo<AttackState>(new StateMsg().Set(AttackState.DownKey, down));
@@ -368,8 +372,15 @@ public partial class PlayerCharacter : CharacterBody2D
 
     // ---------- 血量上限（生命之面包） ----------
 
-    /// <summary>新游戏 / 读档：进度整体换掉了，按最终进度定上限并回满血（读档等于回到存档点），然后报一次血量。</summary>
-    private void OnProgressRestored() => ApplyMaxHealth(refill: true, alwaysAnnounce: true);
+    /// <summary>
+    /// 新游戏 / 读档：进度整体换掉了，按最终进度定上限并回满血（读档等于回到存档点），然后报一次血量。
+    /// 形态不进存档：新游戏、读档都从开局形态（泥）开始。
+    /// </summary>
+    private void OnProgressRestored()
+    {
+        Forms.SetForm(Rules.InitialForm);
+        ApplyMaxHealth(refill: true, alwaysAnnounce: true);
+    }
 
     /// <summary>剧情等改了生命之面包的变量：上限变大时当前血量加上新增的部分（吃下面包 +70）。</summary>
     private void OnVariableChanged(StringName key, Variant value)

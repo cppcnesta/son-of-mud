@@ -74,7 +74,14 @@ public partial class PlayerAnimator : Node
     private bool _recoverMode;
     private float _recoverElapsed;
     private string _recoverHold = "";
+    /// <summary>下砸落地后正在播落地动画：已过的时间、要播多久（之后换成收势）。</summary>
+    private bool _slamLandMode;
+    private float _slamLandElapsed;
+    private float _slamLandSeconds;
     private Vector2 _bodySize = new(48f, 48f);
+
+    /// <summary>正在播下砸落地动画（收势的前一段）。</summary>
+    public bool SlamLandActive => _slamLandMode;
 
     public string CurrentAnimation => Sprite?.Animation.ToString() ?? "";
     public float CurrentSpeedScale => Sprite?.SpeedScale ?? 1f;
@@ -129,6 +136,14 @@ public partial class PlayerAnimator : Node
             if (!moving && Sprite.IsPlaying()) { Sprite.Pause(); Sprite.Frame = 0; }
             else if (moving && !Sprite.IsPlaying()) Sprite.Play(current);
         }
+        if (_slamLandMode)
+        {
+            _slamLandElapsed += (float)delta;
+            if (_slamLandElapsed < _slamLandSeconds) return;
+            _slamLandMode = false;
+            if (_player.Machine.Current is AttackRecoveryState recovery) PlayRecoveryAfterSlam(recovery);
+            return;
+        }
         if (_recoverMode)
         {
             _recoverElapsed += (float)delta;
@@ -159,6 +174,19 @@ public partial class PlayerAnimator : Node
         if (_player.Machine.Current is not PlayerState state) return;
         string previous = Sprite.Animation.ToString();
         _recoverMode = false;
+        _slamLandMode = false;
+        // 下砸落地：收势的前一段先播落地动画（占用收势时间），之后在 _Process 里换成收势
+        if (state is AttackRecoveryState { FromSlam: true } slamRecovery && Choose("slam_land") is string land)
+        {
+            _slamLandMode = true;
+            _slamLandElapsed = 0f;
+            _slamLandSeconds = slamRecovery.SlamLandSeconds;
+            Sprite.FlipH = _player.Facing < 0f;
+            Sprite.Play(land);
+            Sprite.SpeedScale = SpriteStrip.SpeedScaleFor(Sprite.SpriteFrames, land, _slamLandSeconds);
+            ApplyLayout(land);
+            return;
+        }
         string name = state.AnimName;
         if (string.IsNullOrEmpty(name)) return;
         string prefixed = $"{_player.Forms.Current.AnimPrefix}_{name}";
@@ -182,6 +210,32 @@ public partial class PlayerAnimator : Node
         // 实际 FPS 和各帧相对时长都算进去：手动做的 SpriteFrames 也能刚好播满动作时长
         Sprite.SpeedScale = SpriteStrip.SpeedScaleFor(Sprite.SpriteFrames, chosen, state.AnimDuration);
         ApplyLayout(chosen);
+    }
+
+    /// <summary>当前形态下 name 对应的动画（先找带形态前缀的）；都没有返回 null。</summary>
+    private string Choose(string name)
+    {
+        string prefixed = $"{_player.Forms.Current.AnimPrefix}_{name}";
+        return Sprite.SpriteFrames.HasAnimation(prefixed) ? prefixed : Sprite.SpriteFrames.HasAnimation(name) ? name : null;
+    }
+
+    /// <summary>
+    /// 下砸落地动画播完、还在收势里：收势有专门的图就播剩下的时间；没有图（泥收势替补）就直接按有没有在走播待机 / 跑，
+    /// 不再停在哪一下攻击的最后一帧（落地前不是攻击）。
+    /// </summary>
+    private void PlayRecoveryAfterSlam(AttackRecoveryState recovery)
+    {
+        string chosen = Choose(recovery.AnimName);
+        if (chosen != null && _artHeight.ContainsKey(chosen))
+        {
+            Sprite.Play(chosen);
+            Sprite.SpeedScale = SpriteStrip.SpeedScaleFor(Sprite.SpriteFrames, chosen, recovery.Remaining);
+            ApplyLayout(chosen);
+            return;
+        }
+        _recoverMode = true;
+        _recoverElapsed = RecoverHoldSeconds;
+        _recoverHold = "";
     }
 
     /// <summary>按动画是美术图还是色块，设好缩放、脚底对齐和着色。</summary>

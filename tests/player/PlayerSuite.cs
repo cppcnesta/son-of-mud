@@ -51,10 +51,10 @@ public partial class PlayerSuite : LabSuiteBase
     {
         Check(_spawned.Count >= 1 && _spawned[^1] == Player, "出生：发出 Events.PlayerSpawned(玩家)");
         Check(Player.Stats.Health == 70 && Player.Stats.MaxHealth == 70, $"出生：HP 70/70（起始上限）（实际 {Player.Stats.Health}/{Player.Stats.MaxHealth}）");
-        Check(Player.State is IdleState && Player.Forms.Form == FormController.Water, "出生：水形态、Idle 状态");
-        Check(Player.HasAbility(PlayerAbilities.Block) && Player.HasAbility(PlayerAbilities.SwitchForm) &&
-              Player.HasAbility(PlayerAbilities.WallClimb) && !Player.HasAbility(PlayerAbilities.HeavySlam) && GameSession.Progress.Abilities.Count() == 3,
-              "能力：开局正好是 block、switch_form、wall_climb（攀墙开局就有），没有 heavy_slam");
+        Check(Player.State is IdleState && Player.Forms.Form == FormController.Mud, "出生：泥形态（开局形态）、Idle 状态");
+        Check(Player.HasAbility(PlayerAbilities.Block) && !Player.HasAbility(PlayerAbilities.SwitchForm) &&
+              Player.HasAbility(PlayerAbilities.WallClimb) && !Player.HasAbility(PlayerAbilities.HeavySlam) && GameSession.Progress.Abilities.Count() == 2,
+              "能力：开局正好是 block、wall_climb（攀墙开局就有）；切换形态要打赢守坑人才学会，没有 heavy_slam");
 
         var timers = new PlayerTimers { DodgeCooldown = 1.25f, BlockCooldown = 2f, AttackInterval = 0.5f, SwitchCooldown = 0.1f };
         timers.Recovery.Start(MovementRecovery.Source.Dodge, 1f, 0.2f, Player.Forms.MudConfig.RecoveryCurve);
@@ -171,6 +171,11 @@ public partial class PlayerSuite : LabSuiteBase
     private async Task SwitchChecks()
     {
         await Reset(new Vector2(900, FloorY));
+        await Tap(PlayerActions.SwitchForm);
+        Check(Player.Forms.Form == FormController.Water, "还没学会切换形态（没打赢守坑人）：按 Q 切不了");
+        // 下面测切换本身：直接给能力（正式流程里 boss_keeper 变成 true 时才解锁，见 combo_feel）
+        GameSession.Progress.Unlock(PlayerAbilities.SwitchForm);
+        await Frames(10);
         FormConfig mud = Player.Forms.MudConfig;
         Player.Timers.DodgeCooldown = 2f;
         Player.Timers.BlockCooldown = 1.5f;

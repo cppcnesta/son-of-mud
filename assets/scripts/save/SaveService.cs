@@ -49,12 +49,16 @@ public partial class SaveService : Node
 
     public string SlotPath(int slot) => SavePaths.SlotPath(SaveDirectory, slot);
 
+    /// <summary>正在新游戏 / 读档 / 试玩里换进度：这期间变量变化不算「游戏中学会」，不弹提示（之后统一核对）。</summary>
+    private bool _restoring;
+
     public override void _EnterTree()
     {
         CheckpointRoom ??= NewGameRoom;
         StartRoom ??= NewGameRoom;
         StartSpawn ??= NewGameSpawn;
         if (Events.Instance == null) return;
+        Events.Instance.VariableChanged += OnVariableChanged;
         Events.Instance.SaveRequested += OnSaveRequested;
         Events.Instance.PlayerDied += RespawnAtCheckpoint;
         Events.Instance.RoomEntered += OnRoomEntered;
@@ -66,6 +70,7 @@ public partial class SaveService : Node
     public override void _ExitTree()
     {
         if (Events.Instance == null) return;
+        Events.Instance.VariableChanged -= OnVariableChanged;
         Events.Instance.SaveRequested -= OnSaveRequested;
         Events.Instance.PlayerDied -= RespawnAtCheckpoint;
         Events.Instance.RoomEntered -= OnRoomEntered;
@@ -78,6 +83,14 @@ public partial class SaveService : Node
     private void OnSaveRequested(StringName savePointId) => SaveToDisk(savePointId);
     private void OnContinueRequested() => LoadFromDisk(0);
 
+    /// <summary>游戏中打赢守坑人（boss_keeper 变成 true）：学会切换形态，提示条说一句。</summary>
+    private void OnVariableChanged(StringName key, Variant value)
+    {
+        if (_restoring) return;
+        if (FormUnlockRule.TryUnlock(GameSession.Progress, key, value))
+            Events.Instance?.EmitSignal(Events.SignalName.MessageRequested, FormUnlockRule.UnlockText);
+    }
+
     /// <summary>
     /// 新游戏：清空进度和 MetSys 状态，检查点回到起点，进入起点房间。
     /// 试玩（GameSession.Trial）也走这里，顺序：重置 → 起点和检查点改成试玩的房间 / 出生点 → 补变量 → ProgressRestored → 换房 → 核对到达的是起点。
@@ -85,6 +98,7 @@ public partial class SaveService : Node
     public void StartNewGame()
     {
         TrialRequest trial = GameSession.Trial;
+        _restoring = true;
         GameSession.Reset(InitialAbilities);
         if (MetSysApi.Available)
         {
@@ -99,6 +113,9 @@ public partial class SaveService : Node
         PendingLoadId = -1;
         if (trial != null)
             foreach (string flag in trial.Flags) GameSession.Progress.SetVar(flag, true);
+        // 开局只有泥；试玩补的变量里有 boss_keeper 时补上切换形态（不弹提示）
+        FormUnlockRule.Reconcile(GameSession.Progress);
+        _restoring = false;
         Events.Instance?.EmitSignal(Events.SignalName.ProgressRestored);
         // GameStartFinished 等 World 回执“已到达”之后才发（见 OnTravelFinished）。
         PendingNewGameId = Events.NewRequestId();
@@ -141,6 +158,7 @@ public partial class SaveService : Node
         SaveData data = SaveData.ReadFrom(SlotPath(slot), out string error);
         if (data == null) return FailStart("读档失败：" + error);
 
+        _restoring = true;
         GameSession.Reset(InitialAbilities);
         if (MetSysApi.Available)
         {
@@ -150,6 +168,9 @@ public partial class SaveService : Node
         GameSession.Progress.FromSave(data.Progress);
         // FromSave 完全按存档恢复能力；旧存档里没有这个版本新加的初始能力（例如攀墙），在这里补齐。存档格式和版本号不变。
         if (InitialAbilities != null) GameSession.Progress.EnsureAbilities(InitialAbilities.Initial);
+        // 旧存档迁移：没打赢守坑人的拿掉切换形态，打赢了但没有的补上（不弹提示）。形态不进存档，玩家按开局形态（泥）出现。
+        FormUnlockRule.Reconcile(GameSession.Progress);
+        _restoring = false;
         // 只在进度完全恢复之后发一次（不在上面的 Reset 之后发），玩家的血量上限一步到位，不会先按空进度算一遍。
         Events.Instance?.EmitSignal(Events.SignalName.ProgressRestored);
         CheckpointRoom = data.Room;

@@ -6,4 +6,5 @@
 [resource]
 script = ExtResource("1")
 Damage = 10.0
+InterruptsActions = false
 Feel = ExtResource("feel")

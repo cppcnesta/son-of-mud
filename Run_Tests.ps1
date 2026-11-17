@@ -1,6 +1,6 @@
 ﻿param(
     [string]$GodotPath = $env:GODOT_DOTNET,
-    [ValidateSet('all','core','world','player','combat','player-feel','wall-surface','anim-fallback','hit-feel','flow','ui','narrative','enemy','levelcheck','new')][string]$Suite = 'all',
+    [ValidateSet('all','core','world','player','combat','player-feel','wall-surface','anim-fallback','combo-feel','hit-feel','flow','ui','narrative','enemy','levelcheck','new')][string]$Suite = 'all',
     [switch]$Headless
 )
 $ErrorActionPreference = 'Stop'
@@ -58,7 +58,7 @@ try {
             if ($LASTEXITCODE -ne 0 -and $worldCode -eq 0) { $worldCode = $LASTEXITCODE }
         }
     }
-    # 新玩家 / 战斗验收测试：结果写到 tests/output/player_results.json、combat_results.json、player_feel_results.json、player_art_results.json、hit_feel_results.json、anim_fallback_results.json（碰撞框、替补表、物件图）
+    # 新玩家 / 战斗验收测试：结果写到 tests/output/player_results.json、combat_results.json、player_feel_results.json、player_art_results.json、hit_feel_results.json、anim_fallback_results.json（碰撞框、替补表、物件图）、combo_feel_results.json（连招、攻击手感、G5、下砸落地、学会水形态）
     $newCode = 0
     $newScenes = [ordered]@{
         'player' = 'res://tests/player/player_suite.tscn'
@@ -68,6 +68,7 @@ try {
         'player-art' = 'res://tests/player/player_art.tscn'
         'hit-feel' = 'res://tests/combat/hit_feel.tscn'
         'anim-fallback' = 'res://tests/player/anim_fallback.tscn'
+        'combo-feel' = 'res://tests/player/combo_feel.tscn'
     }
     foreach ($name in $newScenes.Keys) {
         if ($Suite -ne 'all' -and $Suite -ne 'new' -and $Suite -ne $name) { continue }

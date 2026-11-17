@@ -16,8 +16,12 @@ public partial class PlayerRules : KeptResource
     [ExportGroup("输入宽容")]
     [Export] public float CoyoteTime { get; set; } = 0.10f;
     [Export] public float JumpBuffer { get; set; } = 0.12f;
-    /// <summary>攻击 / 格挡 / 闪避的输入缓冲。</summary>
+    /// <summary>格挡 / 闪避的输入缓冲。</summary>
     [Export] public float ActionBuffer { get; set; } = 0.15f;
+    /// <summary>
+    /// 攻击的输入缓冲：能出刀（或接第 2 下）的那一刻，往前这么多秒内按过攻击才出；更早按的作废，不做预约。
+    /// </summary>
+    [Export] public float AttackBuffer { get; set; } = 0.25f;
 
     [ExportGroup("生命与受击")]
     /// <summary>起始血量上限（还没吃生命之面包时）。实际上限见 MaxHealthFor。</summary>
@@ -37,6 +41,8 @@ public partial class PlayerRules : KeptResource
     [Export] public float SlamRadius { get; set; } = 150f;
     /// <summary>水形态下砸落地后的站定后摇（泥形态用 1.5 秒可移动后摇）。</summary>
     [Export] public float HardSlamRecovery { get; set; } = 0.25f;
+    /// <summary>下砸落地后，收势的前这么多秒播落地动画（slam_land），不超过收势时长；占用收势时间，不额外延长。</summary>
+    [Export] public float SlamLandAnimSeconds { get; set; } = 0.25f;
 
     [ExportGroup("反馈")]
     [Export] public float HitStopSeconds { get; set; } = 0.05f;

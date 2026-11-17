@@ -322,14 +322,17 @@ public partial class DevoutLabTest : LabSuiteBase
         await Fresh(new Vector2(1650, 576));
         _devout.SetSeeds(1, FindSeed(r => r.Randf() < 0.3f));
         var reactions = new List<string>();
+        int reactionsBefore = _devout.Reactions, uninterruptedBefore = _devout.UninterruptedHits, damaged = 0;
         for (int i = 0; i < 8 && !_devout.IsDead; i++)
         {
             HitOutcome? outcome = await Strike(_devout);
-            if (outcome == HitOutcome.Damaged) reactions.Add(_devout.LastReaction);
+            if (outcome == HitOutcome.Damaged) { reactions.Add(_devout.LastReaction); damaged++; }
         }
         await Frames(5);
-        Check(_devout.IsDead && _killed.SequenceEqual(new[] { "devout" }) && reactions.All(r => r == "hurt"),
-            $"虔诚泥人：真实攻击打死它（水形态 4 刀），被打时只是受击硬直、不逃跑（{string.Join(",", reactions)}），EnemyKilled 一次");
+        // G5：出招（扔泥肝）中被水打不打断，不进反应；不在出招时进受击硬直。从不逃跑
+        int reacted = _devout.Reactions - reactionsBefore, uninterrupted = _devout.UninterruptedHits - uninterruptedBefore;
+        Check(_devout.IsDead && _killed.SequenceEqual(new[] { "devout" }) && reactions.All(r => r is "hurt" or "") && reacted + uninterrupted == damaged,
+            $"虔诚泥人：真实攻击打死它（水形态），不逃跑；被打时受击硬直 {reacted} 次、出招中不打断 {uninterrupted} 次，EnemyKilled 一次");
         Check(_dropped.SequenceEqual(new[] { "泥肝" }), $"虔诚泥人：固定掉落种子 → 掉一个泥肝（{string.Join(",", _dropped)}）");
     }
 }
