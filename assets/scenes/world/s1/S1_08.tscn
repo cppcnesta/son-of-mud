@@ -6,6 +6,7 @@
 [ext_resource type="Script" path="res://assets/scripts/world/SpawnPoint.cs" id="5_o6d4f"]
 [ext_resource type="Script" path="res://assets/scripts/narrative/world/StoryTrigger.cs" id="n_story"]
 [ext_resource type="Script" path="res://assets/scripts/narrative/world/TabletPickup.cs" id="n_tablet"]
+[ext_resource type="Texture2D" path="res://assets/art/collectible/spr_collectible_prayer_statue_1x1.png" id="statue_art"]
 
 [sub_resource type="RectangleShape2D" id="Shape_Story_Reshape"]
 size = Vector2(96, 160)
@@ -50,6 +51,7 @@ position = Vector2(752, 636)
 script = ExtResource("n_story")
 ScriptId = "m_pit"
 Label = "重塑"
+Art = ExtResource("statue_art")
 PromptText = "触碰雕像"
 
 [node name="Shape" type="CollisionShape2D" parent="Objects/Story_Reshape" unique_id=394549222]

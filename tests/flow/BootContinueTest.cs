@@ -65,7 +65,7 @@ public partial class BootContinueTest : FlowTestBase
 
         SpawnPoint save = World.CurrentRoom?.FindSpawn(SpawnPoint.SaveId);
         Check(World.CurrentRoomDef?.Id == "S1_04", $"读档：人在 S1_04（实际 {World.CurrentRoomDef?.Id}）");
-        Check(save != null && save.SpawnId == SpawnPoint.SaveId && Mathf.Abs(Player.GlobalPosition.X - save.GlobalPosition.X) < 1f && Mathf.Abs(Player.GlobalPosition.Y - save.GlobalPosition.Y) < 32f && Player.IsOnFloor(),
+        Check(save != null && save.SpawnId == SpawnPoint.SaveId && Mathf.Abs(Player.GlobalPosition.X - save.GlobalPosition.X) < 1f && Mathf.Abs(Player.GlobalPosition.Y + PlayerBody.HalfH - save.GlobalPosition.Y) < 32f && Player.IsOnFloor(),
             $"读档：人在存档点的 Save 出生点（玩家 {Player.GlobalPosition}，出生点 {save?.GlobalPosition}）");
         Check(GameSession.Progress.GetVar(TestVar).AsInt32() == 7, $"读档：进度变量回到存档时的值 7（实际 {GameSession.Progress.GetVar(TestVar)}）");
         Check(AbilityList() == savedAbilities && AbilityList() == "block,switch_form,wall_climb", $"读档：能力恢复（{AbilityList()}）");

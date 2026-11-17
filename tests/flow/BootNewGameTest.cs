@@ -19,7 +19,15 @@ public partial class BootNewGameTest : FlowTestBase
     {
         await GameContainerDoesNotAutoStart();
 
+        // 放到出生点的那一刻（物理把身体从地里推出来之前）脚就应该在出生点上：出生点给的是脚的位置，玩家原点在身体中心
+        float? placedFeetY = null;
+        void OnTeleported(StringName id)
+        {
+            if (placedFeetY == null && PlayerRegistry.Current is Node2D p) placedFeetY = BodyFeet.FeetOffset(p) + p.GlobalPosition.Y;
+        }
+        Events.Instance.PlayerTeleported += OnTeleported;
         bool finished = await EnterMainGame(StartMode.NewGame);
+        Events.Instance.PlayerTeleported -= OnTeleported;
         Check(finished && MainGame != null, "切到正式入口 main_game.tscn 后收到开局结果");
         if (MainGame == null || World == null || Player == null) return;
         await WaitSettled();
@@ -37,8 +45,10 @@ public partial class BootNewGameTest : FlowTestBase
 
         SpawnPoint spawn = World.CurrentRoom?.FindSpawn("Default");
         Check(World.CurrentRoomDef?.Id == "S1_01", $"人在 S1_01（实际 {World.CurrentRoomDef?.Id}）");
-        Check(spawn != null && Mathf.Abs(Player.GlobalPosition.X - spawn.GlobalPosition.X) < 1f && Mathf.Abs(Player.GlobalPosition.Y - spawn.GlobalPosition.Y) < 32f,
+        Check(spawn != null && Mathf.Abs(Player.GlobalPosition.X - spawn.GlobalPosition.X) < 1f && Mathf.Abs(Player.GlobalPosition.Y + PlayerBody.HalfH - spawn.GlobalPosition.Y) < 32f,
             $"人在 S1_01 的 Default 出生点（玩家 {Player.GlobalPosition}，出生点 {spawn?.GlobalPosition}）");
+        Check(spawn != null && placedFeetY is float feetY && Mathf.Abs(feetY - spawn.GlobalPosition.Y) < 0.5f,
+            $"放到出生点的那一刻，脚就在出生点上（脚 {placedFeetY}，出生点 {spawn?.GlobalPosition.Y}），身体不会先埋进地里");
         Check(Player.IsOnFloor(), "站在地面上");
         Check(Player.Stats.Health == 70 && Player.Stats.MaxHealth == 70, $"血量 70/70（实际 {Player.Stats.Health}/{Player.Stats.MaxHealth}）");
         Check(Player.Forms.Form == FormController.Water, "水形态");

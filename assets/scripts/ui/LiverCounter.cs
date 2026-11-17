@@ -40,7 +40,26 @@ public partial class LiverCounter : HBoxContainer
     public override void _Ready()
     {
         MouseFilter = MouseFilterEnum.Ignore;
+        ShowIconArt();
         Refresh();
+    }
+
+    /// <summary>图标换成泥肝图：在占位色块里铺一张图（保持比例），色块变透明；没有图时照旧是色块。</summary>
+    private void ShowIconArt()
+    {
+        Texture2D art = ArtSprite.Load(ArtSprite.ItemDirectory, "spr_item_mud_liver");
+        if (art == null || Icon == null || Icon.GetNodeOrNull("Art") != null) return;
+        if (Icon is ColorRect rect) rect.Color = new Color(rect.Color, 0f);
+        var texture = new TextureRect
+        {
+            Name = "Art",
+            Texture = art,
+            ExpandMode = TextureRect.ExpandModeEnum.IgnoreSize,
+            StretchMode = TextureRect.StretchModeEnum.KeepAspectCentered,
+            MouseFilter = MouseFilterEnum.Ignore,
+        };
+        texture.SetAnchorsPreset(LayoutPreset.FullRect);
+        Icon.AddChild(texture);
     }
 
     private void OnVariableChanged(StringName key, Variant value)

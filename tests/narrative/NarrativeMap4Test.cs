@@ -60,8 +60,8 @@ public partial class NarrativeMap4Test : NarrativeFlowBase
         }
     }
 
-    /// <summary>脚底的局部 y（玩家节点在身体中心，身体高 48）。</summary>
-    private float LocalY => Player.GlobalPosition.Y - World.CurrentRoom.GlobalPosition.Y + 24f;
+    /// <summary>脚底的局部 y（玩家节点在身体中心）。</summary>
+    private float LocalY => Player.GlobalPosition.Y - World.CurrentRoom.GlobalPosition.Y + PlayerBody.HalfH;
     private static float FloorTop(int row) => row * 32 - Shift;
     private static string HintOf(GateBarrier gate) => IInteractable.NoKeyMark + gate.LockedText;
     private GateBarrier Gate(string name) => World.CurrentRoom.GetNodeOrNull<GateBarrier>("Objects/" + name);

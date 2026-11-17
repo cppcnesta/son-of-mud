@@ -14,7 +14,8 @@ using SonOfMud.Tools;
 /// </summary>
 public partial class CombatSuite : LabSuiteBase
 {
-    private const float FloorY = 576f;
+    /// <summary>站在 y=600 的地面上时身体中心（原点）的 y。</summary>
+    private static readonly float FloorY = 600f - PlayerBody.HalfH;
     private static readonly Vector2 Near = new(470, 552);
     private static readonly Vector2 Far = new(2400, 552);
 

@@ -398,8 +398,8 @@ public partial class EnemyArtTest : LabSuiteBase
 
         // 守坑人的待机图是一整张（1x1）：按行列数切成 1 帧，不再按 1024 的格子切碎
         SpriteFrames keeper = EnemyAnimator.BuildFrames("keeper", EnemyAnimator.DefaultArtDirectory, 256f, new[] { "idle" });
-        Check(keeper != null && keeper.GetFrameCount("idle") == 1 && keeper.GetFrameTexture("idle", 0).GetWidth() == 4096 && keeper.GetFrameTexture("idle", 0).GetHeight() == 2708,
-            "守坑人 spr_enemy_keeper_idle_1x1.png：整张 4096×2708 当 1 帧（按旧规则会被 1024 的格子切成碎片）");
+        Check(keeper != null && keeper.GetFrameCount("idle") == 1 && keeper.GetFrameTexture("idle", 0).GetWidth() == 4096 && keeper.GetFrameTexture("idle", 0).GetHeight() == 2509,
+            "守坑人 spr_enemy_keeper_idle_1x1.png：整张 4096×2509（底下的透明边已裁掉）当 1 帧（按旧规则会被 1024 的格子切成碎片）");
     }
 
     /// <summary>虔诚泥人扔出去的泥肝用美术的图；主角扔的泥肝不受影响。</summary>

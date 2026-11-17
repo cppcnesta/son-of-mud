@@ -111,7 +111,7 @@ public partial class TrialTest : NarrativeFlowBase
     {
         bool started = await EnterTrial("S4_02", "From_S4_03", true);
         Vector2 at = Room == "S4_02" ? SpawnAt("S4_02", "From_S4_03") : Vector2.Zero;
-        Check(started && Room == "S4_02" && Player.GlobalPosition.DistanceTo(at) < 40f,
+        Check(started && Room == "S4_02" && (Player.GlobalPosition + new Vector2(0f, PlayerBody.HalfH)).DistanceTo(at) < 40f,
             $"试玩 S4_02 / From_S4_03：开局成功，人在 S4_02 的 From_S4_03（{Room} {Player?.GlobalPosition}，出生点 {at}）");
         Check(Main3.All(Flag) && !Tablets.Any(Flag) && Flag("seen.opening") && !DebugStart.HasRequestFile,
             "补齐：boss_keeper、flood_done、boss_dragon、districts_done、seen.opening 为真，七块泥板为假；请求文件已删");
@@ -136,7 +136,7 @@ public partial class TrialTest : NarrativeFlowBase
     {
         await Teleport("S4_02", "Default");
         bool back = await Die();
-        Check(back && Room == "S4_02" && Player.GlobalPosition.DistanceTo(SpawnAt("S4_02", "From_S4_03")) < 40f,
+        Check(back && Room == "S4_02" && (Player.GlobalPosition + new Vector2(0f, PlayerBody.HalfH)).DistanceTo(SpawnAt("S4_02", "From_S4_03")) < 40f,
             $"试玩里还没用过存档点就死亡：回到试玩起点 S4_02 / From_S4_03（{Room} {Player.GlobalPosition}）");
 
         await Teleport("S4_04", "Save");
@@ -150,7 +150,7 @@ public partial class TrialTest : NarrativeFlowBase
             "试玩里用 S4_04 的存档点：照常提示已存档、检查点更新成 S4_04，但没有写存档文件");
         await Teleport("S4_02", "Default");
         bool atSave = await Die();
-        Check(atSave && Room == "S4_04" && Player.GlobalPosition.DistanceTo(SpawnAt("S4_04", "Save")) < 40f && ReadSaveBytes() == null,
+        Check(atSave && Room == "S4_04" && (Player.GlobalPosition + new Vector2(0f, PlayerBody.HalfH)).DistanceTo(SpawnAt("S4_04", "Save")) < 40f && ReadSaveBytes() == null,
             $"用过存档点后再死亡：回到 S4_04 的存档点（{Room}），存档文件仍然没有");
     }
 
@@ -165,7 +165,7 @@ public partial class TrialTest : NarrativeFlowBase
         BindNarrative();
         await WaitSettled();
         Check(restarted && GetTree().CurrentScene?.SceneFilePath == DebugStart.TrialScene && Room == "S4_02"
-              && Player.GlobalPosition.DistanceTo(SpawnAt("S4_02", "From_S4_03")) < 40f && !Flag("tablet.gate_1") && Main3.All(Flag) && Boot?.TrialBadge != null,
+              && (Player.GlobalPosition + new Vector2(0f, PlayerBody.HalfH)).DistanceTo(SpawnAt("S4_02", "From_S4_03")) < 40f && !Flag("tablet.gate_1") && Main3.All(Flag) && Boot?.TrialBadge != null,
             $"试玩里重开（回去睡）：重新载入试玩场景，回到同一个试玩起点，进度重新补齐（{Room}）");
     }
 

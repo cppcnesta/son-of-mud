@@ -26,6 +26,9 @@ public partial class LevelCheckSuite : LabSuiteBase
     protected override Task RunChecks()
     {
         _cfg = SimConfig.Load();
+        // 这些 fixture 房间是专门为检查器的规则搭的小房间（台阶、沟、低顶、对不齐的开口……），按 48×48 的身体设计，
+        // 检的是检查器本身的逻辑，和正式主角的身高无关；所以固定用 48×48 模拟。正式地图用正式身体检查（Map1 / Map23 / Map4）。
+        _cfg.BodySize = new Vector2(48, 48);
         ulong t0 = Time.GetTicksMsec();
         WalkOk();
         DeadEnd();

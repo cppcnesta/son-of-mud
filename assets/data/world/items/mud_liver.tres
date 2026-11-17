@@ -1,6 +1,7 @@
 [gd_resource type="Resource" script_class="PickupItem" format=3]
 
 [ext_resource type="Script" path="res://assets/scripts/world/PickupItem.cs" id="1"]
+[ext_resource type="Texture2D" path="res://assets/art/item/spr_item_mud_liver_1x1.png" id="art"]
 
 [resource]
 script = ExtResource("1")
@@ -10,3 +11,4 @@ Counted = true
 MaxCount = 5
 PlaysLine = false
 Tint = Color(0.55, 0.2, 0.16, 1)
+Art = ExtResource("art")

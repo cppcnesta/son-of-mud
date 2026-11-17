@@ -17,7 +17,7 @@
 [ext_resource type="Script" path="res://assets/scripts/enemy/EnemySprite.cs" id="enemy_sprite"]
 
 [sub_resource type="RectangleShape2D" id="body"]
-size = Vector2(46, 62)
+size = Vector2(32, 80)
 
 [node name="Devout" type="CharacterBody2D"]
 collision_layer = 4
@@ -26,7 +26,7 @@ script = ExtResource("1")
 Data = ExtResource("2")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
-position = Vector2(0, -31)
+position = Vector2(0, -40)
 shape = SubResource("body")
 
 [node name="Sprite" type="AnimatedSprite2D" parent="."]
@@ -42,7 +42,7 @@ monitoring = false
 script = ExtResource("4")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="HurtBox"]
-position = Vector2(0, -31)
+position = Vector2(0, -40)
 shape = SubResource("body")
 
 [node name="StateMachine" type="Node" parent="." node_paths=PackedStringArray("Initial")]

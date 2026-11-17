@@ -17,7 +17,8 @@ namespace SonOfMud.World;
 public partial class Pickup : Area2D
 {
     public const string StoryScript = "pickups";
-    public static readonly Vector2 Size = new(28f, 28f);
+    /// <summary>拾取范围（主角身体放大到 120 高之后，道具也放大）。</summary>
+    public static readonly Vector2 Size = new(40f, 40f);
 
     [Export] public StringName ItemId { get; set; } = "";
     [Export] public PickupItem Item { get; set; }
@@ -91,6 +92,16 @@ public partial class Pickup : Area2D
 
     public override void _Process(double delta) => QueueRedraw();
 
-    public override void _Draw() =>
+    /// <summary>有图时画图（高 Size.Y，宽度按图的比例，底边中点在原点）；没有图时画色块。</summary>
+    public override void _Draw()
+    {
+        Texture2D art = Item?.Art;
+        if (art != null && art.GetHeight() > 0)
+        {
+            float width = Size.Y * art.GetWidth() / art.GetHeight();
+            DrawTextureRect(art, new Rect2(-width * 0.5f, -Size.Y, width, Size.Y), false);
+            return;
+        }
         DrawRect(new Rect2(-Size.X * 0.5f, -Size.Y, Size.X, Size.Y), Item?.Tint ?? new Color(0.72f, 0.55f, 0.36f));
+    }
 }

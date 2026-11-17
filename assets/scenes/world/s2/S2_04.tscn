@@ -8,6 +8,7 @@
 [ext_resource type="Script" path="res://assets/scripts/core/GateRequirement.cs" id="n_req"]
 [ext_resource type="Script" path="res://assets/scripts/narrative/world/StoryTrigger.cs" id="n_story"]
 [ext_resource type="Script" path="res://assets/scripts/narrative/world/TabletPickup.cs" id="n_tablet"]
+[ext_resource type="Texture2D" path="res://assets/art/collectible/spr_collectible_prayer_statue_1x1.png" id="statue_art"]
 
 [sub_resource type="Resource" id="Gate_S2_04_1"]
 script = ExtResource("n_req")
@@ -126,6 +127,7 @@ position = Vector2(1776, 1220)
 script = ExtResource("n_story")
 ScriptId = "t_site"
 Label = "塔姆图"
+Art = ExtResource("statue_art")
 PromptText = "触碰雕像"
 Requirement = SubResource("Req_Story_Tamtu")
 

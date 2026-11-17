@@ -247,7 +247,7 @@ public sealed class RouteBot
                 var (roomId, origin) = _room();
                 Vector2 local = p.GlobalPosition - origin;
                 result.End = local;
-                float bottom = local.Y + 24f;
+                float bottom = local.Y + PlayerBody.HalfH;
                 if (step.Kind == EdgeKind.Exit)
                 {
                     result.Ok = roomId != before && roomId == step.TargetRoom;

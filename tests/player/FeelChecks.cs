@@ -15,7 +15,8 @@ using Source = SonOfMud.Player.MovementRecovery.Source;
 /// </summary>
 public partial class FeelChecks : LabSuiteBase
 {
-    private const float FloorY = 576f;
+    /// <summary>站在 y=600 的地面上时身体中心（原点）的 y。</summary>
+    private static readonly float FloorY = 600f - PlayerBody.HalfH;
 
     protected override string ReportName => "player_feel_results";
 

@@ -14,7 +14,8 @@ using SonOfMud.Tools;
 /// </summary>
 public partial class PlayerSuite : LabSuiteBase
 {
-    private const float FloorY = 576f;
+    /// <summary>站在 y=600 的地面上时身体中心（原点）的 y。</summary>
+    private static readonly float FloorY = 600f - PlayerBody.HalfH;
     private const string LabPath = "res://assets/scenes/tests/player_lab.tscn";
 
     protected override string ReportName => "player_results";
@@ -71,7 +72,7 @@ public partial class PlayerSuite : LabSuiteBase
 
     private async Task<bool> WalkOffPlatform()
     {
-        await Reset(new Vector2(560, 376));
+        await Reset(new Vector2(560, 400f - PlayerBody.HalfH));
         Press(PlayerActions.Right);
         for (int i = 0; i < 60 && Player.State is not FallState; i++) await Frames(1);
         Release(PlayerActions.Right);
@@ -418,9 +419,11 @@ public partial class PlayerSuite : LabSuiteBase
         Check(hud.PlayingAnimation == "mud_idle" && hud.Form == 1, $"HUD：切到泥形态后动画为 mud_idle（实际 {hud.PlayingAnimation}）");
         await Tap(PlayerActions.Jump);
         hud.Refresh();
-        float expected = 4f / (12f * 0.24f);
-        Check(hud.PlayingAnimation == "mud_jump_windup" && Mathf.Abs(Player.Animator.CurrentSpeedScale - expected) < 0.001f,
-            $"动画：泥起跳前摇 4 帧、12FPS、0.24 秒 → SpeedScale={expected:F3}（实际 {hud.PlayingAnimation} {Player.Animator.CurrentSpeedScale:F3}）");
+        // 帧数按实际载入的：有美术图用美术图的帧数（美术表 2 帧），没有就是占位色块的 4 帧
+        int windupFrames = Player.Animator.Sprite.SpriteFrames.GetFrameCount("mud_jump_windup");
+        float expected = windupFrames / (12f * 0.24f);
+        Check(hud.PlayingAnimation == "mud_jump_windup" && windupFrames > 0 && Mathf.Abs(Player.Animator.CurrentSpeedScale - expected) < 0.001f,
+            $"动画：泥起跳前摇 {windupFrames} 帧、12FPS、0.24 秒 → SpeedScale={expected:F3}（实际 {hud.PlayingAnimation} {Player.Animator.CurrentSpeedScale:F3}）");
         Check(Mathf.Abs(PlayerAnimator.SpeedScaleFor(6, 12f, 0.5f) - 1f) < 0.0001f, "动画：SpeedScale = 帧数 ÷ (基础 FPS × 目标时长)，6 帧 12FPS 0.5 秒 = 1");
         await Reset(new Vector2(900, FloorY), 0);
         await Tap(PlayerActions.Attack);

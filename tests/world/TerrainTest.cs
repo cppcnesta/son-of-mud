@@ -24,7 +24,10 @@ public partial class TerrainTest : WorldTestBase
     private const string SaveDir = "user://terrain_tests";
     private const string Flag = "test_terrain_r";
     private const string Flag2 = "test_terrain_r2";
+    /// <summary>身体半宽（左右边缘用）。</summary>
     private const float HalfBody = 24f;
+    /// <summary>身体半高：站在地上时原点（身体中心）离地面这么高。</summary>
+    private static readonly float HalfHeight = PlayerBody.HalfH;
 
     private PlayerCharacter _player;
     private Vector2I _cell;
@@ -82,7 +85,7 @@ public partial class TerrainTest : WorldTestBase
         RealKeys.ReleaseAll();
         await WaitUntil(() => !World.IsTransitioning, 240);
         World.LoadRoomImmediate(room, spawn);
-        Vector2 at = x.HasValue ? new Vector2(x.Value, _floorY - HalfBody - 1f) : _player.GlobalPosition;
+        Vector2 at = x.HasValue ? new Vector2(x.Value, _floorY - HalfHeight - 1f) : _player.GlobalPosition;
         _player.ResetForLab(at, 0);
         await Frames(15);
     }
@@ -122,7 +125,7 @@ public partial class TerrainTest : WorldTestBase
         Check(passed, $"条件地形：条件不成立时玩家直接走过柱子所在的位置（x={_player.GlobalPosition.X:0}）");
 
         // 玩家站在会出现的位置 → 条件成立 → 先不出现
-        _player.ResetForLab(new Vector2(Left(col) + RoomGrid.Tile, _floorY - HalfBody - 1f), 0);
+        _player.ResetForLab(new Vector2(Left(col) + RoomGrid.Tile, _floorY - HalfHeight - 1f), 0);
         await Frames(10);
         Check(terrain.PlayerOverlaps(), $"条件地形：玩家站在柱子的位置上（{_player.GlobalPosition}）");
         GameSession.Progress.SetVar(Flag, true);
