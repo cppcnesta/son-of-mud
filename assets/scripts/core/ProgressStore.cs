@@ -28,6 +28,9 @@ public sealed class ProgressStore
             Events.Instance?.EmitSignal(Events.SignalName.AbilityUnlocked, id);
     }
 
+    /// <summary>拿掉一个能力（读档迁移用，例如没打赢守坑人的旧存档拿掉切换形态）。返回原来有没有。</summary>
+    public bool Revoke(StringName id) => _abilities.Remove(id);
+
     public bool HasVar(StringName key) => _vars.ContainsKey(key);
 
     public Variant GetVar(StringName key, Variant fallback = default) =>

@@ -53,6 +53,25 @@ public partial class FormConfig : KeptResource
     /// <summary>下劈的打击感（伤害规则仍用 AttackSpec）；不填就用 AttackSpec.Feel。</summary>
     [Export] public SonOfMud.Combat.HitFeel DownAttackFeel { get; set; }
 
+    [ExportGroup("连招第 2 下（地面）")]
+    /// <summary>第 2 下的伤害和打击感（水 14、泥 30）；不填就没有连招。</summary>
+    [Export] public HitSpec Attack2Spec { get; set; }
+    [Export] public float Attack2Windup { get; set; } = 0.06f;
+    [Export] public float Attack2Active { get; set; } = 0.12f;
+    /// <summary>第 2 下的站定后摇（水 0.24）。泥（SoftAttackRecovery）第 2 下之后照旧进 1.5 秒收势，不看这个值。</summary>
+    [Export] public float Attack2Recovery { get; set; } = 0.24f;
+    /// <summary>
+    /// 第 1 下之后多久内按攻击能接第 2 下（秒）：水是第 1 下站定后摇里的前 ComboWindow 秒（0.16 = 整段后摇），
+    /// 泥是收势开始后的前 ComboWindow 秒（0.35）。按键走攻击缓冲（PlayerRules.AttackBuffer）。
+    /// </summary>
+    [Export] public float ComboWindow { get; set; } = 0.16f;
+
+    [ExportGroup("攻击手感")]
+    /// <summary>攻击中（前摇、判定、站定后摇）按方向键的移速倍率：水 0.6，泥 0（站定）。只在前摇里能转身。</summary>
+    [Export] public float AttackMoveMultiplier { get; set; }
+    /// <summary>泥收势开始多少秒后可以重新出第 1 下（收势被取消）；0 表示等收势结束（泥 1.2）。</summary>
+    [Export] public float ReattackAfter { get; set; }
+
     [ExportGroup("攻击后摇衔接")]
     /// <summary>true：后摇可以移动、曲线恢复速度（泥 1.5 秒）。</summary>
     [Export] public bool SoftAttackRecovery { get; set; }

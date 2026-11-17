@@ -195,8 +195,10 @@ public partial class CombatSuite : LabSuiteBase
         Release(PlayerActions.Right);
         float moved = Player.GlobalPosition.X - x;
         Check(Player.State is AttackRecoveryState && moved > 8f && moved < 70f, $"泥后摇 1.5 秒内可以移动，但被减速（15 帧移动 {moved:F1}px）");
+        // 连招窗口（前 0.35 秒）之后、能重新出刀（1.2 秒）之前按的攻击：到点时已过缓冲，作废（连招见 combo_feel）
+        await WaitWhile(() => Player.State is AttackRecoveryState { Elapsed: < 0.5f }, 60);
         await Tap(PlayerActions.Attack);
-        Check(Player.State is AttackRecoveryState, "泥后摇中再按攻击无效");
+        Check(Player.State is AttackRecoveryState, "泥后摇第 0.5 秒（连招窗口之后、能重新出刀之前）再按攻击无效");
         await WaitWhile(() => Player.State is AttackRecoveryState, 120);
         float recovery = (Engine.GetPhysicsFrames() - recoveryStart) * Dt;
         Check(Player.State is IdleState && Mathf.Abs(recovery - 1.5f) <= 2 * Dt, $"泥后摇按时结束回到 Idle（实测 {recovery:F3} 秒）");

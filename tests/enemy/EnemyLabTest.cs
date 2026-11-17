@@ -67,6 +67,8 @@ public partial class EnemyLabTest : LabSuiteBase
     {
         RealKeys.ReleaseAll();
         await LoadLab(LabScene);
+        // 这些检查要真实按 Q 切形态：直接给切换形态（开局没有，打赢守坑人才学会，见 combo_feel）
+        GameSession.Progress.Unlock("switch_form");
         _mason = Lab.GetNode<EnemyBody>("Mason");
         _prayer = Lab.GetNode<EnemyBody>("Prayer");
         _prayerCity = Lab.GetNode<EnemyBody>("PrayerCity");
@@ -234,6 +236,7 @@ public partial class EnemyLabTest : LabSuiteBase
         var hps = new List<int>();
         var outcomes = new List<HitOutcome?>();
         var reactions = new List<string>();
+        int reactionsBefore = _mason.Reactions, uninterruptedBefore = _mason.UninterruptedHits;
         for (int i = 0; i < 4 && !_mason.IsDead; i++)
         {
             outcomes.Add(await StrikeHit(_mason));
@@ -242,7 +245,10 @@ public partial class EnemyLabTest : LabSuiteBase
         }
         Check(hps.SequenceEqual(new[] { 30, 20, 10, 0 }) && outcomes.Last() == HitOutcome.Killed,
             $"塔庙泥匠：水形态每刀只扣 10（同一刀只结算一次），4 刀打死（血量 {string.Join("→", hps)}，最后一刀 {outcomes.LastOrDefault()}）");
-        Check(reactions.Count == 3 && reactions.All(r => r == "hurt"), $"塔庙泥匠：不逃跑，每次受伤都是受击硬直（{string.Join(",", reactions)}）");
+        // G5：不在出招时被打进受击硬直；出招中被水打不打断（不进反应）。两种加起来正好是没打死的 3 刀，从不逃跑
+        int reacted = _mason.Reactions - reactionsBefore, uninterrupted = _mason.UninterruptedHits - uninterruptedBefore;
+        Check(reactions.Count == 3 && reacted + uninterrupted == 3 && reactions.All(r => r is "hurt" or "") && _mason.LastReaction != "flee",
+            $"塔庙泥匠：不逃跑；每次受伤要么受击硬直（{reacted} 次），要么出招中被水打不打断（{uninterrupted} 次）");
         HitOutcome? after = await StrikeHit(_mason);
         await Frames(30);
         Check(_mason.IsDead && _mason.State is EnemyDead && _killed.Count(k => k == "mason") == 1 && _mason.KilledEmits == 1 && after == HitOutcome.Ignored,

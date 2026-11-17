@@ -288,9 +288,9 @@ public partial class CoreSuite : Node
     private void EnsureAbilitiesChecks()
     {
         var table = GD.Load<AbilityTable>(AbilityTable.DefaultPath);
-        Check(table != null && table.Initial.Contains("wall_climb") && table.Initial.Contains("block") && table.Initial.Contains("switch_form")
-              && !table.Initial.Contains("heavy_slam") && table.Initial.Count == 3,
-            "正式能力表：初始能力是 block、switch_form、wall_climb，不含 heavy_slam");
+        Check(table != null && table.Initial.Contains("wall_climb") && table.Initial.Contains("block") && !table.Initial.Contains("switch_form")
+              && !table.Initial.Contains("heavy_slam") && table.Initial.Count == 2,
+            "正式能力表：初始能力是 block、wall_climb；不含 switch_form（打赢守坑人才学会）和 heavy_slam");
         if (table == null) return;
 
         // 旧存档的进度：只有 block、switch_form，外加几个变量

@@ -45,11 +45,13 @@ public partial class RestartRunTest : FlowTestBase
         Check(MetSysApi.IsCellDiscovered(explored2, false) && MetSysApi.GetExploredRatio() > freshRatio,
             $"搭建：S1_05 的格子 {explored2} 也已探索，探索比例 {freshRatio:F4} → {MetSysApi.GetExploredRatio():F4}");
 
-        // 把玩家状态弄乱：泥形态（真按键）→ 闪避（真按键，泥闪避冷却 4 秒）→ 挨一刀残血 → 增伤就绪
+        // 把玩家状态弄乱：学会切换形态、切到水（真按键）→ 闪避（真按键）→ 挨一刀残血 → 增伤就绪
+        GameSession.Progress.Unlock(PlayerAbilities.SwitchForm);
         await Tap(PlayerActions.SwitchForm);
         await Frames(3);
         await Tap(PlayerActions.Dodge);
         await Frames(40);
+        oldPlayer.Timers.DodgeCooldown = 2f; // 水闪避冷却只有 0.65 秒，等下来早就归零了；直接设一个长冷却，看重开会不会清掉
         oldPlayer.HurtBox.Receive(new Hit { AttackId = "flow_restart_hit", Damage = 60f, SourcePosition = oldPlayer.GlobalPosition, Blockable = false });
         await Frames(30);
         oldPlayer.Timers.Bonus.Grant(1.6f);
@@ -59,7 +61,7 @@ public partial class RestartRunTest : FlowTestBase
         InputLock.Request(InputLock.Narrative, true);
         await Frames(2);
 
-        Check(oldPlayer.Forms.Form == FormController.Mud && oldPlayer.Stats.Health < oldPlayer.Stats.MaxHealth && oldPlayer.Stats.Health > 0 && oldPlayer.Timers.DodgeCooldown > 1f
+        Check(oldPlayer.Forms.Form == FormController.Water && oldPlayer.Stats.Health < oldPlayer.Stats.MaxHealth && oldPlayer.Stats.Health > 0 && oldPlayer.Timers.DodgeCooldown > 1f
               && oldPlayer.Timers.Bonus.Ready && GameSession.Progress.Flag(TestVar) && PauseService.IsPaused && InputLock.IsLocked,
             $"搭建：已弄乱（形态 {oldPlayer.Forms.Form}、血 {oldPlayer.Stats.Health}、闪避冷却 {oldPlayer.Timers.DodgeCooldown:F2}、" +
             $"增伤 {oldPlayer.Timers.Bonus.Ready}、暂停 {PauseService.IsPaused}、锁 {InputLock.IsLocked}）");
@@ -78,13 +80,13 @@ public partial class RestartRunTest : FlowTestBase
             "重开：玩家是新实例（实例 ID 不同），旧玩家和旧场景都已释放");
         Check(AllPlayers().Count == 1 && World.Player == Player && Cam.Target == Player, "重开：场景里只有一个玩家，WorldGame 和镜头都拿到它");
         Check(Player.Stats.Health == 70 && Player.Stats.MaxHealth == 70, $"重开：血量 70/70（实际 {Player.Stats.Health}/{Player.Stats.MaxHealth}）");
-        Check(Player.Forms.Form == FormController.Water, "重开：水形态");
+        Check(Player.Forms.Form == FormController.Mud, "重开：泥形态（开局形态）");
         PlayerTimers t = Player.Timers;
         Check(t.DodgeCooldown == 0f && t.BlockCooldown == 0f && t.AttackInterval == 0f && t.SwitchCooldown == 0f && t.Recovery.Multiplier() == 1f,
             $"重开：各种冷却为 0、没有减速（闪避 {t.DodgeCooldown}、格挡 {t.BlockCooldown}、攻击 {t.AttackInterval}、切换 {t.SwitchCooldown}）");
         Check(!t.Bonus.Ready, "重开：增伤未就绪");
         Check(!GameSession.Progress.VariableKeys.Any(), "重开：进度变量清空");
-        Check(AbilityList() == "block,switch_form,wall_climb", $"重开：能力恢复初始（{AbilityList()}）");
+        Check(AbilityList() == "block,wall_climb", $"重开：能力恢复初始（{AbilityList()}）");
         Check(!MetSysApi.IsCellDiscovered(explored, false) && !MetSysApi.IsCellDiscovered(explored2, false),
             $"重开：上一局探索的格子 {explored}、{explored2} 已清空");
         Check(Mathf.IsEqualApprox(MetSysApi.GetExploredRatio(), freshRatio), $"重开：探索比例回到新游戏时的 {freshRatio:F4}（实际 {MetSysApi.GetExploredRatio():F4}）");

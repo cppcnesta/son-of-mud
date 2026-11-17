@@ -54,6 +54,9 @@ public partial class EnemyFlowTest : EnemyFlowBase
             "新游戏：从正式入口开局，收到 GameStartFinished(true)，玩家在 S1_01 出生");
         Check(PlayerRegistry.Current != null && PlayerRegistry.Current == Player,
             "生命周期（新游戏）：开局完成后 PlayerRegistry.Current 仍然指向场景里那个真实玩家");
+        // 下面按水形态打（固定种子的反应按水的伤害算）：开局是泥，这里直接学会切换、切到水
+        GameSession.Progress.Unlock(PlayerAbilities.SwitchForm);
+        Player.Forms.SetForm(FormController.Water);
         PlayerSpawnedCount = 0;
 
         bool inS102 = await HoldKeyUntil(RealKeys.Right, () => RoomId == "S1_02", 400);

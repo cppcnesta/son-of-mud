@@ -8,7 +8,7 @@ using SonOfMud.World;
 /// <summary>
 /// 正式入口开新游戏：PendingStart = NewGame → 切到 main_game.tscn。
 /// 有且只有一个真实玩家、WorldGame 和镜头都拿到它；能力正好是能力表里的初始两项；人在 S1_01 的 Default 出生点，
-/// 70 血（起始上限）、水形态；GameStartFinished(true) 恰好一次；PendingStart 清零；新游戏不碰存档文件。
+/// 70 血（起始上限）、泥形态；GameStartFinished(true) 恰好一次；PendingStart 清零；新游戏不碰存档文件。
 /// 另外确认测试容器 game.tscn 不会自动开局；最后发 QuitToMenuRequested：清掉暂停和输入锁、回到主菜单场景。
 /// </summary>
 public partial class BootNewGameTest : FlowTestBase
@@ -40,7 +40,7 @@ public partial class BootNewGameTest : FlowTestBase
         Check(Player.GetNodeOrNull<PlayerInteractor>("Interactor") != null, "玩家身上有交互组件 Interactor");
         Check(MainGame.GetChildren().OfType<GameBoot>().Count() == 1, "main_game 里有一个 GameBoot");
 
-        Check(AbilityList() == "block,switch_form,wall_climb", $"能力正好是初始的 block、switch_form、wall_climb（实际 {AbilityList()}）");
+        Check(AbilityList() == "block,wall_climb", $"能力正好是初始的 block、wall_climb，还不会切换形态（实际 {AbilityList()}）");
         Check(!GameSession.Progress.VariableKeys.Any(), "新游戏没有任何进度变量");
 
         SpawnPoint spawn = World.CurrentRoom?.FindSpawn("Default");
@@ -51,7 +51,7 @@ public partial class BootNewGameTest : FlowTestBase
             $"放到出生点的那一刻，脚就在出生点上（脚 {placedFeetY}，出生点 {spawn?.GlobalPosition.Y}），身体不会先埋进地里");
         Check(Player.IsOnFloor(), "站在地面上");
         Check(Player.Stats.Health == 70 && Player.Stats.MaxHealth == 70, $"血量 70/70（实际 {Player.Stats.Health}/{Player.Stats.MaxHealth}）");
-        Check(Player.Forms.Form == FormController.Water, "水形态");
+        Check(Player.Forms.Form == FormController.Mud, "泥形态（开局形态）");
 
         Check(Starts.Count == 1 && Starts[0].success && Starts[0].error == "", $"收到 GameStartFinished(true) 恰好一次（实际 {Starts.Count} 次）");
         Check(GameSession.PendingStart == StartMode.None, "PendingStart 已经清零");

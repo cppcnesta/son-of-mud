@@ -329,8 +329,25 @@ public partial class EnemyBody : CharacterBody2D
         OnKilled(hit);
     }
 
-    /// <summary>受到没打死自己的攻击。普通敌人按行为组合反应；Boss 覆盖。</summary>
-    protected virtual void OnDamaged(Hit hit, int dealt) => React();
+    /// <summary>正在出招（前摇 / 判定 / 后摇）。</summary>
+    public bool IsActing => State is AttackWindupState or AttackActiveState or AttackRecoverState;
+
+    /// <summary>没被打断的受击次数（G5：出招中被不能打断的攻击打中，只扣血、闪白、击退）。</summary>
+    public int UninterruptedHits { get; private set; }
+
+    /// <summary>
+    /// 受到没打死自己的攻击。普通敌人按行为组合反应；Boss 覆盖。
+    /// G5：正在出招时被不能打断出招的攻击（水）打中，不进受击反应，招照常出完（闪白、击退在这之前已经做了）。
+    /// </summary>
+    protected virtual void OnDamaged(Hit hit, int dealt)
+    {
+        if (!hit.InterruptsActions && IsActing)
+        {
+            UninterruptedHits++;
+            return;
+        }
+        React();
+    }
 
     /// <summary>
     /// 受击反应（被打中没死时，每次都重新决定）：先按 FleeChance 逃跑（掷一次反应随机数；为 0 时不掷）。

@@ -30,4 +30,4 @@ Description = "本轮不发放（代码保留）。空中按住下再攻击，�
 [resource]
 script = ExtResource("1_table")
 All = Array[ExtResource("2_def")]([SubResource("ability_block"), SubResource("ability_switch_form"), SubResource("ability_wall_climb"), SubResource("ability_heavy_slam")])
-Initial = Array[StringName]([&"block", &"switch_form", &"wall_climb"])
+Initial = Array[StringName]([&"block", &"wall_climb"])

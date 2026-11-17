@@ -37,6 +37,7 @@ public partial class SlamState : PlayerState
         P.SlamHitBox.Activate(Hit.From(P.Rules.SlamSpec, AttackId, P.GlobalPosition, P.Timers.Bonus.Current, P));
         P.SlamHitBox.Deactivate();
         Events.Instance?.EmitSignal(Events.SignalName.CameraShakeRequested, P.Rules.SlamShakeStrength, P.Rules.SlamShakeDuration);
-        Machine.TransitionTo<AttackRecoveryState>(StateMsg.With(P.Forms.Current));
+        // 收势的前 SlamLandAnimSeconds 秒播落地动画（PlayerAnimator 看 FromSlam），总时长不变
+        Machine.TransitionTo<AttackRecoveryState>(StateMsg.With(P.Forms.Current).Set(AttackRecoveryState.FromSlamKey, true));
     }
 }

@@ -45,6 +45,10 @@ public partial class LiverThrowTest : EnemyFlowBase
             Check(finished && Starts.Count == 1 && Starts[0].success && Player != null && RoomId == "S1_01", "新游戏：从正式入口开局，玩家在 S1_01 出生");
             if (Player == null) return;
             Bind();
+            // 这条测投掷：按「已经学会切换形态、在水形态」开始（开局是泥、打赢守坑人才学会，见 combo_feel）
+            GameSession.Progress.Unlock(PlayerAbilities.SwitchForm);
+            Player.Forms.SetForm(FormController.Water);
+            await Frames(2);
             await NoLiverChecks();
             await ThrowChecks();
             await IntervalChecks();

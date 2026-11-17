@@ -1,8 +1,9 @@
-[gd_resource type="Resource" script_class="FormConfig" load_steps=5 format=3]
+[gd_resource type="Resource" script_class="FormConfig" load_steps=6 format=3]
 
 [ext_resource type="Script" path="res://assets/scripts/player/FormConfig.cs" id="1"]
 [ext_resource type="Resource" path="res://assets/data/player_v2/water_attack.tres" id="2"]
 [ext_resource type="Curve" path="res://assets/data/player_v2/curves/recovery_ease_out.tres" id="3"]
+[ext_resource type="Resource" path="res://assets/data/player_v2/water_attack_2.tres" id="attack2"]
 [ext_resource type="Resource" path="res://assets/data/player_v2/feel_water_down.tres" id="down_feel"]
 
 [resource]
@@ -32,6 +33,13 @@ AttackHeight = 110.0
 AttackForwardOffset = 16.0
 DownAttackWidth = 72.0
 DownAttackMultiplier = 1.0
+Attack2Spec = ExtResource("attack2")
+Attack2Windup = 0.06
+Attack2Active = 0.12
+Attack2Recovery = 0.24
+ComboWindow = 0.16
+AttackMoveMultiplier = 0.6
+ReattackAfter = 0.0
 SoftAttackRecovery = false
 JumpStyle = 0
 JumpWindup = 0.05
