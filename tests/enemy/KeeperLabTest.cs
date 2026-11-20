@@ -407,6 +407,19 @@ public partial class KeeperLabTest : LabSuiteBase
         Check(during == null || during == HitOutcome.Ignored, $"变身：闪白期间再打它不结算伤害（结果 {during?.ToString() ?? "没有"}）");
         Check(_keeper.State is GoneState && GameSession.Progress.Flag("boss_keeper") && _defeats.SequenceEqual(new[] { "keeper" }) && !_keeper.Visible,
             "变身 ②：闪白结束写 boss_keeper = true，发 BossDefeated(keeper) → 已击败（身体隐藏）");
+        await Frames(2);
+        Node2D remains = _keeper.Remains;
+        var body = remains?.GetNodeOrNull<Sprite2D>("Body");
+        bool lying = body != null && Mathf.IsEqualApprox(Mathf.Abs(body.Rotation), Mathf.Pi * 0.5f);
+        // 躺下后身体的底边贴地：转 90 度后的高 = 贴图宽 × 1/4，往上抬一半
+        float bottom = body == null ? 99f : body.Position.Y + body.Texture.GetWidth() * body.Scale.X * 0.5f;
+        Check(remains != null && remains.IsInsideTree() && remains.Visible && remains.GlobalPosition.IsEqualApprox(_keeper.GlobalPosition) && lying && Mathf.Abs(bottom) < 0.01f
+              && body.Texture is AtlasTexture crop && crop.Atlas.ResourcePath.Contains("spr_enemy_devout_idle"),
+            $"变身 ③：原地留下躺着的虔诚泥人（借虔诚泥人待机图第 1 帧，转 90 度，身体底边贴地 {bottom:F2}）");
+        _keeper.ShowRemains();
+        await Frames(1);
+        Check(_keeper.Remains == remains && remains.GetParent().GetChildren().Count(n => n.Name.ToString().StartsWith("KeeperRemains")) == 1,
+            "变身 ③：躺着的虔诚泥人只出现一次");
         await Frames(180);
         Check(_defeats.Count == 1 && Player.Stats.Health == playerHp && _healthEvents == healthEvents && _keeper.State is GoneState,
             "变身之后：BossDefeated 恰好一次，再也没有判定打到玩家，血量也不再变化");

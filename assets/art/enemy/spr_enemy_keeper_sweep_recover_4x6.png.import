@@ -3,19 +3,20 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bhyiuby1fro04"
-path="res://.godot/imported/spr_enemy_keeper_sweep_recover_4x6.png-ba5f3489d091916c1cafd785f07de357.ctex"
+path.s3tc="res://.godot/imported/spr_enemy_keeper_sweep_recover_4x6.png-ba5f3489d091916c1cafd785f07de357.s3tc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc"],
+"vram_texture": true
 }
 
 [deps]
 
 source_file="res://assets/art/enemy/spr_enemy_keeper_sweep_recover_4x6.png"
-dest_files=["res://.godot/imported/spr_enemy_keeper_sweep_recover_4x6.png-ba5f3489d091916c1cafd785f07de357.ctex"]
+dest_files=["res://.godot/imported/spr_enemy_keeper_sweep_recover_4x6.png-ba5f3489d091916c1cafd785f07de357.s3tc.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

@@ -1,5 +1,6 @@
 using Godot;
 using SonOfMud.Combat;
+using SonOfMud.Core;
 using SonOfMud.Enemy.Bosses.Keeper.States;
 
 namespace SonOfMud.Enemy.Bosses.Keeper;
@@ -144,6 +145,66 @@ public partial class KeeperBoss : BossBody
     }
 
     protected override void EnterDefeated() => Machine.TransitionTo<GoneState>();
+
+    // ---------- 被打败后：躺着的虔诚泥人 ----------
+
+    /// <summary>被打败后留下的样子借谁的图（虔诚泥人待机的第 1 帧）。</summary>
+    public const string RemainsKind = "devout";
+    public const string RemainsDataPath = "res://assets/data/enemy/devout.tres";
+
+    /// <summary>被打败后留在原地的「躺着的虔诚泥人」（放在房间里，守坑人自己隐藏）；还没出现时为 null。</summary>
+    public Node2D Remains { get; private set; }
+
+    /// <summary>
+    /// 闪白结束后守坑人变成躺着的虔诚泥人：借虔诚泥人待机图的第 1 帧（裁掉透明边），转 90 度躺平、贴在地上，
+    /// 头朝守坑人面朝的方向。没有虔诚泥人的图时画一块躺着的色块。只出现一次；以后再进房间（已击败）也会出现。
+    /// </summary>
+    public void ShowRemains()
+    {
+        if (Remains != null && IsInstanceValid(Remains)) return;
+        if (GetParent() is not Node parent) return;
+        var root = new Node2D { Name = "KeeperRemains", Position = Position, ZIndex = ZIndex, ZAsRelative = ZAsRelative };
+        var data = ResourceLoader.Exists(RemainsDataPath) ? GD.Load<EnemyData>(RemainsDataPath) : null;
+        SpriteFrames frames = EnemyAnimator.BuildFrames(RemainsKind, EnemyAnimator.DefaultArtDirectory, data?.ArtCanvas ?? 128f, new[] { "idle" }, data?.ArtNames);
+        Texture2D first = frames != null && frames.HasAnimation("idle") && frames.GetFrameCount("idle") > 0 ? frames.GetFrameTexture("idle", 0) : null;
+        if (first != null)
+        {
+            // 裁到有内容的部分，躺下后身体正好贴地
+            Texture2D atlas = first is AtlasTexture a ? a.Atlas : first;
+            Vector2 origin = first is AtlasTexture b ? b.Region.Position : Vector2.Zero;
+            Vector2 size = first is AtlasTexture c ? c.Region.Size : first.GetSize();
+            Image image = atlas.GetImage();
+            if (image != null && image.IsCompressed()) image.Decompress();
+            Rect2I used = image?.GetRegion(new Rect2I((Vector2I)origin, (Vector2I)size)).GetUsedRect() ?? new Rect2I(Vector2I.Zero, (Vector2I)size);
+            if (used.Size.X <= 0 || used.Size.Y <= 0) used = new Rect2I(Vector2I.Zero, (Vector2I)size);
+            var crop = new AtlasTexture { Atlas = atlas, Region = new Rect2(origin + used.Position, used.Size) };
+            float scale = 1f / SpriteStrip.SourceScale;
+            float headSide = Facing > 0f ? 1f : -1f;
+            root.AddChild(new Sprite2D
+            {
+                Name = "Body",
+                Texture = crop,
+                Centered = true,
+                Scale = new Vector2(scale, scale),
+                // 转 90 度：头朝面朝的方向；转完原来的宽变成高，往上抬一半贴地
+                Rotation = headSide * Mathf.Pi * 0.5f,
+                Position = new Vector2(0f, -used.Size.X * scale * 0.5f),
+            });
+        }
+        else
+        {
+            Color tint = data?.Tint ?? new Color(0.6f, 0.45f, 0.32f);
+            root.AddChild(new ColorRect { Name = "Body", Color = tint, Size = new Vector2(62f, 46f), Position = new Vector2(-31f, -46f) });
+        }
+        Remains = root;
+        parent.CallDeferred(Node.MethodName.AddChild, root);
+    }
+
+    public override void _ExitTree()
+    {
+        base._ExitTree();
+        if (Remains != null && IsInstanceValid(Remains) && !Remains.IsInsideTree()) Remains.QueueFree();
+    }
 
     // ---------- 外观 ----------
 
