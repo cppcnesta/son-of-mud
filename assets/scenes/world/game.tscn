@@ -12,6 +12,12 @@
 [ext_resource type="Resource" path="res://assets/data/world/items/mud_bottle.tres" id="10_bottle"]
 [ext_resource type="Resource" path="res://assets/data/world/items/mud_liver.tres" id="11_liver"]
 [ext_resource type="Script" path="res://assets/scripts/world/PickupItem.cs" id="12_item"]
+[ext_resource type="Script" path="res://assets/scripts/world/CollectibleDropper.cs" id="13_collect"]
+[ext_resource type="Script" path="res://assets/scripts/world/CollectibleDef.cs" id="14_def"]
+[ext_resource type="Resource" path="res://assets/data/world/collectibles/devout_shard.tres" id="c_devout_shard"]
+[ext_resource type="Resource" path="res://assets/data/world/collectibles/prayer_shard.tres" id="c_prayer_shard"]
+[ext_resource type="Resource" path="res://assets/data/world/collectibles/stone_mason.tres" id="c_stone_mason"]
+[ext_resource type="Resource" path="res://assets/data/world/collectibles/stone_guard.tres" id="c_stone_guard"]
 
 [node name="Game" type="Node"]
 
@@ -37,3 +43,8 @@ Settings = ExtResource("7_fadeset")
 script = ExtResource("9_drops")
 World = NodePath("../WorldGame")
 Items = Array[ExtResource("12_item")]([ExtResource("10_bottle"), ExtResource("11_liver")])
+
+[node name="CollectibleDropper" type="Node" parent="." node_paths=PackedStringArray("World")]
+script = ExtResource("13_collect")
+World = NodePath("../WorldGame")
+Collectibles = Array[ExtResource("14_def")]([ExtResource("c_devout_shard"), ExtResource("c_prayer_shard"), ExtResource("c_stone_mason"), ExtResource("c_stone_guard")])
