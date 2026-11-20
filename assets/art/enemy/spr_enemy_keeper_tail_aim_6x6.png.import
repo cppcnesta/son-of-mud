@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://daoeuxn7lr24y"
-path="res://.godot/imported/spr_enemy_mason_idle.png-84e5013ce1d2297970ccc22b9be60bed.ctex"
+uid="uid://rxd8j4trhiyw"
+path="res://.godot/imported/spr_enemy_keeper_tail_aim_6x6.png-d2238cbe4c57da08b9d0fdf532c221dc.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/art/enemy/spr_enemy_mason_idle.png"
-dest_files=["res://.godot/imported/spr_enemy_mason_idle.png-84e5013ce1d2297970ccc22b9be60bed.ctex"]
+source_file="res://assets/art/enemy/spr_enemy_keeper_tail_aim_6x6.png"
+dest_files=["res://.godot/imported/spr_enemy_keeper_tail_aim_6x6.png-d2238cbe4c57da08b9d0fdf532c221dc.ctex"]
 
 [params]
 

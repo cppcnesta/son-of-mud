@@ -132,7 +132,7 @@ public partial class EnemyArtTest : LabSuiteBase
 
     private async Task RepoArtChecks()
     {
-        var expectArt = new Dictionary<string, bool> { ["prayer"] = true, ["devout"] = true, ["temple_guard"] = true, ["mason"] = true, ["keeper"] = false };
+        var expectArt = new Dictionary<string, bool> { ["prayer"] = true, ["devout"] = true, ["temple_guard"] = true, ["mason"] = true, ["keeper"] = true };
         foreach (string kind in Kinds)
         {
             EnemyBody enemy = await Spawn(kind);
@@ -143,18 +143,19 @@ public partial class EnemyArtTest : LabSuiteBase
             bool art = expectArt[kind];
             if (art)
             {
-                int h = EnemyAnimator.FrameHeight(anim.Sprite.SpriteFrames, "idle");
+                // 守坑人开战前是 dormant（美术图是 spr_enemy_keeper_idle，对照表 dormant → idle），其他敌人是 idle
+                string first = kind == "keeper" ? "dormant" : "idle";
+                int h = EnemyAnimator.FrameHeight(anim.Sprite.SpriteFrames, first);
                 float shown = h * anim.Sprite.Scale.Y;
                 // 固定比例：源图 4 像素 = 游戏 1 像素（标准 512 的格子显示 128；虔诚泥人按 6x5 切，格子约 513 高）
-                Check(anim.CurrentAnimation == "idle" && anim.CurrentIsArt && anim.Sprite.Visible && !enemy.DrawsPlaceholder
+                Check(anim.CurrentAnimation == first && anim.CurrentIsArt && anim.Sprite.Visible && !enemy.DrawsPlaceholder
                       && Mathf.IsEqualApprox(shown, h / 4f) && Mathf.IsEqualApprox(anim.Sprite.Scale.Y, 0.25f) && Mathf.Abs(BottomOf(anim.Sprite, h)) < 0.01f,
                     $"{kind}：仓库里的待机图被载入，固定比例 1/4 显示（源图帧高 {h}，游戏里 {shown:F1}），帧底边在脚底，本体不画色块");
             }
             else
             {
-                // 守坑人：仓库里只有 spr_enemy_keeper_idle_1x1.png，而它开战前的状态是 dormant（没有图），所以当前仍是色块
-                Check(!anim.CurrentIsArt && !anim.Sprite.Visible && enemy.DrawsPlaceholder && anim.CurrentAnimation == "dormant",
-                    $"{kind}：当前动作（dormant）没有图，Sprite 隐藏，本体照旧画色块");
+                Check(!anim.CurrentIsArt && !anim.Sprite.Visible && enemy.DrawsPlaceholder,
+                    $"{kind}：当前动作没有图，Sprite 隐藏，本体照旧画色块");
             }
             await Despawn(enemy);
         }
@@ -396,10 +397,17 @@ public partial class EnemyArtTest : LabSuiteBase
         Check(seen >= 6 && worst < 0.01f, $"敌人测试图：实际播放 {seen} 个不同的帧，每帧脚底都在原点（最大偏差 {worst:F4}）");
         await Despawn(mason);
 
-        // 守坑人的待机图是一整张（1x1）：按行列数切成 1 帧，不再按 1024 的格子切碎
-        SpriteFrames keeper = EnemyAnimator.BuildFrames("keeper", EnemyAnimator.DefaultArtDirectory, 256f, new[] { "idle" });
-        Check(keeper != null && keeper.GetFrameCount("idle") == 1 && keeper.GetFrameTexture("idle", 0).GetWidth() == 4096 && keeper.GetFrameTexture("idle", 0).GetHeight() == 2509,
-            "守坑人 spr_enemy_keeper_idle_1x1.png：整张 4096×2509（底下的透明边已裁掉）当 1 帧（按旧规则会被 1024 的格子切成碎片）");
+        // 守坑人正式序列帧（美术交来的这一套）：按文件名的行列数切出来的帧数；对照表 dormant → idle、approach → walk、staggered / transform → stagger
+        var keeperData = GD.Load<EnemyData>("res://assets/data/enemy/keeper/KeeperData.tres");
+        SpriteFrames keeper = EnemyAnimator.BuildFrames("keeper", EnemyAnimator.DefaultArtDirectory, keeperData.ArtCanvas, EnemyAnimator.Actions.Keys, keeperData.ArtNames);
+        var keeperExpected = new Dictionary<string, int>
+        {
+            ["dormant"] = 20, ["approach"] = 36, ["sweep_windup"] = 30, ["sweep_strike"] = 21, ["sweep_recover"] = 21,
+            ["tail_aim"] = 35, ["tail_strike"] = 18, ["tail_recover"] = 11, ["staggered"] = 15, ["transform"] = 15,
+        };
+        var keeperGot = keeperExpected.Keys.ToDictionary(a => a, a => keeper != null && keeper.HasAnimation(a) ? keeper.GetFrameCount(a) : 0);
+        Check(keeperExpected.All(e => keeperGot[e.Key] == e.Value),
+            "守坑人正式图：" + string.Join("、", keeperGot.Select(g => $"{g.Key} {g.Value}")));
     }
 
     /// <summary>虔诚泥人扔出去的泥肝用美术的图；主角扔的泥肝不受影响。</summary>
@@ -462,8 +470,8 @@ public partial class EnemyArtTest : LabSuiteBase
         Check(anim.CurrentAnimation == "transform" && anim.CurrentIsArt && sprite.Material == anim.FlashMaterial && on == 1f && off == 0f,
             $"变身：图上闪白（白 {on}，不白 {off}）");
 
-        // 换回仓库的图（守坑人没有图）：瞄准时预警竖带照旧画
-        anim.UseArtDirectory(EnemyAnimator.DefaultArtDirectory);
+        // 换到没有图的文件夹：瞄准时预警竖带照旧画
+        anim.UseArtDirectory(NoArt);
         keeper.Machine.TransitionTo<TailAimState>();
         await ProcessFrames(1);
         Check(keeper.Aiming && !anim.CurrentIsArt && keeper.DrawsPlaceholder, "没有瞄准图时：色块和预警竖带照旧画");
