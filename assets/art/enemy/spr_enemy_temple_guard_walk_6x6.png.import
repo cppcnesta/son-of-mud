@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://c1nvkselstmeg"
-path="res://.godot/imported/spr_enemy_keeper_idle_1x1.png-85c6ff07db22fda3c0bca114ce3f8b2f.ctex"
+uid="uid://bcrvouae4giut"
+path="res://.godot/imported/spr_enemy_temple_guard_walk_6x6.png-f4d3f1c2deee053346d6f4bd3ad6936e.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/art/enemy/spr_enemy_keeper_idle_1x1.png"
-dest_files=["res://.godot/imported/spr_enemy_keeper_idle_1x1.png-85c6ff07db22fda3c0bca114ce3f8b2f.ctex"]
+source_file="res://assets/art/enemy/spr_enemy_temple_guard_walk_6x6.png"
+dest_files=["res://.godot/imported/spr_enemy_temple_guard_walk_6x6.png-f4d3f1c2deee053346d6f4bd3ad6936e.ctex"]
 
 [params]
 
