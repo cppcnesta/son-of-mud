@@ -303,9 +303,12 @@ public partial class PlayerCharacter : CharacterBody2D
     {
         if (Stats.IsDepleted)
         {
+            // 致死的一下只响死亡声（还没有文件时用受击声）
+            SoundBank.PlayFirst(SoundBank.PlayerDeath, SoundBank.PlayerHit);
             Machine.TransitionTo<DeadState>();
             return;
         }
+        SoundBank.Play(SoundBank.PlayerHit);
         if (State is StunnedState stunned)
         {
             // 眩晕中还能继续挨打（策划要的连环惩罚）：不打断眩晕，带眩晕的攻击取更长的剩余时间。
@@ -322,8 +325,8 @@ public partial class PlayerCharacter : CharacterBody2D
     }
 
     /// <summary>
-    /// 自己的攻击结算了。真正打中（受伤 / 打死）时按这一刀的打击感（Hit.Feel）请求顿帧、震屏、命中点粒子和音效，
-    /// 每次结算只请求一次顿帧；没配打击感时顿帧用 Rules.HitStopSeconds。闪白和击退由受击方自己处理。
+    /// 自己的攻击结算了。真正打中（受伤 / 打死）时按这一刀的打击感（Hit.Feel）请求顿帧、震屏和命中点粒子，
+    /// 每次结算只请求一次顿帧；没配打击感时顿帧用 Rules.HitStopSeconds。闪白、击退和受击声由受击方自己处理。
     /// </summary>
     private void OnHitLanded(HurtBox target, Hit hit, int outcomeValue)
     {
@@ -343,8 +346,6 @@ public partial class PlayerCharacter : CharacterBody2D
             (Vector2 point, float side) = SparkPoint(target);
             events.EmitSignal(Events.SignalName.HitSparkRequested, point, new Vector2(side, 0f), feel.SparkAmount, feel.SparkColor, feel.SparkSpeed);
         }
-        Godot.Collections.Array<AudioStream> sounds = feel.SoundsFor(killed);
-        if (sounds.Count > 0) events.EmitSignal(Events.SignalName.SoundRequested, (Godot.Collections.Array)sounds);
     }
 
     /// <summary>粒子出现在受击框朝向主角那一侧的中点，朝远离主角的方向喷。</summary>

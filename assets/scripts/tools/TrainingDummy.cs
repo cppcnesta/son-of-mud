@@ -46,7 +46,7 @@ public partial class TrainingDummy : Node2D
             }
         }
         foreach (HurtBox hb in HurtBoxes)
-            hb.Damaged += (hit, dealt) => { DamageEvents++; LastDealt = dealt; QueueRedraw(); };
+            hb.Damaged += (hit, dealt) => { DamageEvents++; LastDealt = dealt; QueueRedraw(); SoundBank.Play(SoundBank.MinionHit); };
         if (HitBox != null) HitBox.HitLanded += OnStrikeLanded;
         QueueRedraw();
     }

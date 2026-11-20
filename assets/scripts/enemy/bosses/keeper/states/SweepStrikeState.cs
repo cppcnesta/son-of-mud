@@ -23,6 +23,7 @@ public partial class SweepStrikeState : KeeperState
         K.Facing = K.LockedDirection;
         K.Stop();
         K.OpenAttack(K.SweepHitBox, D.SweepSpec, "sweep");
+        SoundBank.Play(SoundBank.BossSweep);
     }
 
     public override void Exit() => K.SweepHitBox?.Deactivate();

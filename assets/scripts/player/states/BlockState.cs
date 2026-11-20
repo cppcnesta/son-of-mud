@@ -45,6 +45,7 @@ public partial class BlockState : PlayerState
     public void OnBlocked(Hit hit)
     {
         BlockedCount++;
+        SoundBank.Play(SoundBank.PlayerBlock); // 挡住攻击的那一下才响，只按格挡不响
         if (_profile.GrantsBlockBonus) P.Timers.Bonus.Grant(_profile.BlockBonusMultiplier);
         if (_profile.ResetBlockCooldownOnSuccess) P.Timers.BlockCooldown = 0f;
         if (_profile.ResetAttackIntervalOnBlock) P.Timers.ResetAttackInterval();

@@ -80,6 +80,12 @@ public partial class EnemyData : KeptResource
     [Export] public float FleeSpeed { get; set; } = 220f;
     [Export] public float FleeDuration { get; set; } = 1.5f;
 
+    [ExportGroup("音效（SoundBank 的组名，见 assets/audio/sfx）")]
+    /// <summary>被打中没死时。</summary>
+    [Export] public string HitSound { get; set; } = SoundBank.MinionHit;
+    /// <summary>被打死时；这一组还没有文件就用 HitSound。</summary>
+    [Export] public string DeathSound { get; set; } = SoundBank.MinionDeath;
+
     [ExportGroup("掉落")]
     [Export] public DropTable Drops { get; set; }
 }

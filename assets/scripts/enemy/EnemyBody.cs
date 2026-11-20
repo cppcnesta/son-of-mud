@@ -317,6 +317,7 @@ public partial class EnemyBody : CharacterBody2D
     private void OnHurtDamaged(Hit hit, int dealt)
     {
         if (IsDead || Stats.IsDepleted) return; // 打死的情况由 Killed 处理
+        SoundBank.Play(Data?.HitSound); // G5 没被打断但掉了血也响
         StartHitFlash(hit);
         StartKnockback(hit); // 在反应之前；反应规则（React / Boss 覆盖）不变
         OnDamaged(hit, dealt);
@@ -324,6 +325,8 @@ public partial class EnemyBody : CharacterBody2D
 
     private void OnHurtKilled(Hit hit)
     {
+        // 致死的一下只响一个：死亡声，还没有文件时用受击声
+        SoundBank.PlayFirst(Data?.DeathSound, Data?.HitSound);
         StartHitFlash(hit);
         KnockbackVelocity = 0f; // 死了就不再滑
         OnKilled(hit);

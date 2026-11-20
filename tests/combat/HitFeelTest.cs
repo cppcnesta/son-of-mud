@@ -32,6 +32,8 @@ public partial class HitFeelTest : LabSuiteBase
     private RoomCamera _camera;
     private int _hitStopRequests;
     private readonly List<float> _hitStopSeconds = new();
+    /// <summary>SoundBank 播过的组名（按顺序）。</summary>
+    private readonly List<string> _played = new();
 
     protected override async Task RunChecks()
     {
@@ -43,6 +45,7 @@ public partial class HitFeelTest : LabSuiteBase
         Lab.AddChild(_camera);
         _camera.SetTarget(Player);
         Events.Instance.HitStopRequested += OnHitStopRequested;
+        SoundBank.Played += OnSoundPlayed;
         await ProcessFrames(2);
 
         Check(Service != null && GetNodeOrNull(FeedbackService.JuiceePath) != null && _camera.ShakeRig != null,
@@ -158,6 +161,13 @@ public partial class HitFeelTest : LabSuiteBase
 
     private AudioStreamPlayer NewSound(HashSet<ulong> before) => Sounds().FirstOrDefault(p => !before.Contains(p.GetInstanceId()));
 
+    private void OnSoundPlayed(string group, AudioStream stream) => _played.Add(group);
+
+    public override void _ExitTree() => SoundBank.Played -= OnSoundPlayed;
+
+    /// <summary>这个音频是不是这一组里的文件之一。</summary>
+    private static bool InGroup(AudioStream stream, string group) => stream != null && SoundBank.Variants(group).Contains(stream.ResourcePath);
+
     private static bool Near(float a, float b, float tolerance = 0.001f) => Mathf.Abs(a - b) <= tolerance;
 
     /// <summary>刚打中时的击退速度：初速度，最多已经按衰减走了一个物理帧（结算和敌人的物理帧在同一帧）。</summary>
@@ -179,7 +189,7 @@ public partial class HitFeelTest : LabSuiteBase
             "数据：下劈单独配打击感（不往旁边推）");
         Check(rules.SlamSpec?.Feel?.ResourcePath.EndsWith("feel_slam.tres") == true && Hit.From(rules.SlamSpec, "x", Vector2.Zero).Feel == rules.SlamSpec.Feel,
             "数据：下砸有自己的打击感，Hit.From 把 HitSpec.Feel 带进本次 Hit");
-        Check(w.HitStop < w.KillHitStop && m.HitStop < m.KillHitStop && w.HitStop < m.HitStop && w.Knockback < m.Knockback && w.HitSounds.Count > 0 && m.KillSounds.Count > 0,
+        Check(w.HitStop < w.KillHitStop && m.HitStop < m.KillHitStop && w.HitStop < m.HitStop && w.Knockback < m.Knockback,
             $"数据：打死比打中重、泥比水重（水顿帧 {w.HitStop}/{w.KillHitStop}，泥 {m.HitStop}/{m.KillHitStop}；击退 {w.Knockback}/{m.Knockback}）");
     }
 
@@ -195,6 +205,7 @@ public partial class HitFeelTest : LabSuiteBase
         int requests = _hitStopRequests;
         int sparksBefore = Service.ActiveSparks();
         HashSet<ulong> soundsBefore = SoundIds();
+        int playedBefore = _played.Count;
         int toHit = await AttackUntilHitStop();
         Check(toHit > 0 && Engine.TimeScale == 0.0 && _hitStopRequests == requests + 1 && Near(_hitStopSeconds[^1], feel.HitStop),
             $"水攻击打中：立刻顿帧（TimeScale {Engine.TimeScale}），只请求一次，时长取 feel_water 的 {feel.HitStop} 秒（请求 {_hitStopRequests - requests} 次）");
@@ -211,7 +222,9 @@ public partial class HitFeelTest : LabSuiteBase
         Check(flashing, "闪白：被打中的敌人在闪白");
         Check(FreshKnock(knock, feel), $"击退：敌人被沿远离主角的方向推开，初速度 {feel.Knockback}（{knock:0}）");
         Check(sparked, "粒子：命中点出现泥点");
-        Check(sound != null && feel.HitSounds.Contains(sound), "音效：播了 feel_water 里的打中音效之一");
+        List<string> played = _played.Skip(playedBefore).ToList();
+        Check(InGroup(sound, SoundBank.MinionHit) && played.SequenceEqual(new[] { SoundBank.MinionHit }),
+            $"音效：只播了一个小怪受击声（SFX_Minion_Hit 之一：{sound?.ResourcePath}；播过 {string.Join("、", played)}）");
         float before = enemy.GlobalPosition.X;
         await Frames(20);
         Check(enemy.GlobalPosition.X > before + 5f && enemy.KnockbackVelocity < knock, $"击退在顿帧结束后真的把敌人推远并减速（移动 {enemy.GlobalPosition.X - before:0} 像素）");
@@ -235,10 +248,14 @@ public partial class HitFeelTest : LabSuiteBase
         Player.Timers.AttackInterval = 0f;
         Player.GlobalPosition = new Vector2(enemy.GlobalPosition.X - 70f, Player.GlobalPosition.Y);
         HashSet<ulong> soundsBefore = SoundIds();
+        int playedBefore = _played.Count;
         int toHit = await AttackUntilHitStop();
         Check(toHit > 0 && enemy.IsDead && Near(_hitStopSeconds[^1], feel.KillHitStop), $"打死：顿帧取打死档 {feel.KillHitStop} 秒（toHit {toHit} dead {enemy.IsDead} hp {enemy.Stats.Health} last {(_hitStopSeconds.Count > 0 ? _hitStopSeconds[^1] : -1)} state {enemy.State?.Name} player {Player.State?.Name}）");
         AudioStream sound = NewSound(soundsBefore)?.Stream;
-        Check(sound != null && feel.KillSounds.Contains(sound), "打死：播打死音效");
+        List<string> killPlayed = _played.Skip(playedBefore).ToList();
+        string deathGroup = SoundBank.Has(SoundBank.MinionDeath) ? SoundBank.MinionDeath : SoundBank.MinionHit;
+        Check(InGroup(sound, deathGroup) && killPlayed.SequenceEqual(new[] { deathGroup }),
+            $"打死：只播一个死亡声（还没有 Minion_Death 时用受击声；这次 {deathGroup}：{sound?.ResourcePath}）");
         Check(enemy.KnockbackVelocity == 0f && enemy.FlashAmount == 1f, $"打死：不被推开，照样闪白（之前那一下击退 {(sliding ? "有" : "没有")}）");
         float x = enemy.GlobalPosition.X;
         await FramesUntilTimeResumes();
@@ -504,11 +521,12 @@ public partial class HitFeelTest : LabSuiteBase
     {
         await Clean(800f);
         HitFeel feel = Player.Forms.Current.AttackSpec.Feel;
-        EnemyBody mason = Spawn("mason", 870f, FloorY, e => e.Data.FleeChance = 0f); // 没有美术图：色块
+        EnemyBody mason = Spawn("mason", 870f, FloorY, e => e.Data.FleeChance = 0f); // 换到没有图的文件夹：色块（仓库里泥匠已经有图了）
         // 有图：用测试图（祈祷泥人有待机和反击前摇的图），被打中后进反击前摇，仍在播图
         EnemyBody devout = Spawn("prayer", 1000f, FloorY, e => e.Data.FleeChance = 0f);
         await Frames(4);
         devout.Animator.UseArtDirectory("res://tests/enemy/fixtures/art");
+        mason.Animator.UseArtDirectory("res://tests/combat/fixtures/sfx");
         mason.Stats.MaxHealth = devout.Stats.MaxHealth = 999; mason.Stats.Refill(); devout.Stats.Refill();
         foreach (EnemyBody e in new[] { mason, devout })
             e.HurtBox.Receive(new Hit { AttackId = "flash" + e.Name, Damage = 1f, SourcePosition = e.GlobalPosition - new Vector2(50f, 0f), Feel = feel, Source = Player });

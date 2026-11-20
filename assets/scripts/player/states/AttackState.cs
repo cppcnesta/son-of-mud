@@ -142,9 +142,8 @@ public partial class AttackState : PlayerState
         float multiplier = DamageMath.MaxMultiplier(P.Timers.Bonus.Current, downMultiplier);
         Hit hit = Hit.From(Spec, AttackId, P.GlobalPosition, multiplier, P);
         if (_down && _profile.DownAttackFeel != null) hit.Feel = _profile.DownAttackFeel;
-        // 挥刀音：出刀就播，打没打中都一样
-        if (hit.Feel != null && hit.Feel.SwingSounds.Count > 0)
-            Events.Instance?.EmitSignal(Events.SignalName.SoundRequested, (Godot.Collections.Array)hit.Feel.SwingSounds);
+        // 下劈声：播下劈动画的两种（空中下劈、连招第 2 下）出刀就响，打没打中都一样
+        if (AnimName == "attack_down") SoundBank.Play(SoundBank.PlayerDownSlash);
         P.AttackHitBox.Activate(hit);
     }
 }

@@ -40,6 +40,7 @@ public partial class JumpWindupState : PlayerState
         if (_remaining > 0.000001f) return;
         P.JumpProfile = _profile;
         P.Velocity = new Vector2(P.Velocity.X, -_profile.JumpSpeed);
+        SoundBank.Play(SoundBank.PlayerJump); // 离地那一刻（地面跳、蹬墙跳都是这里）
         Machine.TransitionTo<RiseState>();
     }
 }

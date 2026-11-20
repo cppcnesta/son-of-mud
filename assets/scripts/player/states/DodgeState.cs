@@ -25,6 +25,7 @@ public partial class DodgeState : PlayerState
         if (axis != 0f) P.Facing = Mathf.Sign(axis);
         P.Timers.DodgeCooldown = _profile.DodgeCooldown;
         Remaining = _profile.DodgeDuration;
+        SoundBank.Play(SoundBank.PlayerDodge);
     }
 
     public override void Exit()
