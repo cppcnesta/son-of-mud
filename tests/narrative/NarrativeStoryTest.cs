@@ -223,15 +223,15 @@ public partial class NarrativeStoryTest : NarrativeFlowBase
         await Teleport("S4_02", SpawnPoint.DefaultId);
         Check(!Narr.MainActive, "S4_02 再进来不重播（只播一次）");
 
-        await Enter("S4_05");
+        await Enter("S4_11");
         List<string> summit = await Play();
-        Check(summit.LastOrDefault() == "？？？：你来拯救我了，又一次，我的儿子。", $"S4_05 走进终末之室自动播（{Show(summit)}）");
-        Check(Obj("Tablet_name") == null && Obj("Tablet_star") == null, "S4_05 地上没有泥板「名字」「星」（改由结局剧情显示）");
+        Check(summit.LastOrDefault() == "？？？：你来拯救我了，又一次，我的儿子。", $"S4_11 走进终末之室自动播（{Show(summit)}）");
+        Check(Obj("Tablet_name") == null && Obj("Tablet_star") == null, "S4_11 地上没有泥板「名字」「星」（改由结局剧情显示）");
         bool boss = await Use("Story_FinalBoss", "（占位）打倒最终 Boss");
         List<string> truth = await Play(120);
         Check(boss && truth.Contains("伊姆杜：我的儿子，救救我。") && truth.Contains("穆尔图库尔：我的儿子……") && truth.Contains("[patricide]伊姆杜：我的儿子。")
               && truth.Any(l => l.StartsWith("[third_world]")) && truth.Any(l => l.StartsWith("[slumber]")) && truth.Contains("泥板「名字」") && Narr.Choice.IsOpen,
-            $"S4_05 占位“打倒最终 Boss”：？？？改名为穆尔图库尔，CG6–8，泥板「名字」，停在结局选项（{truth.Count} 句）");
+            $"S4_11 占位“打倒最终 Boss”：？？？改名为穆尔图库尔，CG6–8，泥板「名字」，停在结局选项（{truth.Count} 句）");
         await KeyTap(Key.E);
         List<string> wake = await Play();
         Check(wake.FirstOrDefault() == "穆尔图库尔：父亲？" && wake.Contains("泥板「星𒀭」") && !Narr.MainActive, $"结局选“醒来”：“父亲？”……，泥板「星」（{Show(wake)}）");

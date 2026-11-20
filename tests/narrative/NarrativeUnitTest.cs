@@ -283,7 +283,7 @@ public partial class NarrativeUnitTest : Node
         TabletData star = tablets.Last().data;
         Check(star.Title == "星\U0001202D" && star.FullText == "他爱我。可是只有一颗星落下那么久。", "泥板「星𒀭」：标题带楔形文字，完整版照抄策划案");
         string[] rooms = tablets.Select(t => t.data?.Room).ToArray();
-        Check(rooms.SequenceEqual(new[] { "S1_02", "S1_08", "S2_02", "S2_03", "S2_04", "S3_04", "S3_05", "S3_06", "S3_07", "S4_02", "S4_02", "S4_02", "S4_02", "S4_02", "S4_02", "S4_02", "S4_05", "S4_05" }),
+        Check(rooms.SequenceEqual(new[] { "S1_02", "S1_08", "S2_02", "S2_03", "S2_04", "S3_04", "S3_05", "S3_06", "S3_07", "S4_02", "S4_0304", "S4_0304", "S4_05", "S4_06", "S4_07", "S4_08", "S4_11", "S4_11" }),
             "泥板：所在房间和计划第 2 节一致（新地图编号）");
 
         TabletData mural = GD.Load<TabletData>(_settings.InscriptionPath("mural"));

@@ -48,7 +48,7 @@ try {
     $worldCode = 0
     if ($Suite -eq 'all' -or $Suite -eq 'world' -or $Suite -eq 'new') {
         # World / Save / Camera 测试：每个场景单独运行，结果写到 tests/output/world_<名字>_results.json
-        $worldScenes = @('tests/world/map_check.tscn', 'tests/world/slice_test.tscn', 'tests/world/door_test.tscn', 'tests/world/gate_test.tscn', 'tests/world/room_grid_test.tscn', 'tests/world/geometry_sync_test.tscn', 'tests/world/geometry_validate_test.tscn', 'tests/world/room_audit_test.tscn', 'tests/world/terrain_test.tscn', 'tests/save/save_roundtrip.tscn', 'tests/save/respawn_test.tscn', 'tests/integration/real_player_test.tscn', 'tests/world/background_test.tscn')
+        $worldScenes = @('tests/world/map_check.tscn', 'tests/world/slice_test.tscn', 'tests/world/door_test.tscn', 'tests/world/gate_test.tscn', 'tests/world/room_grid_test.tscn', 'tests/world/geometry_sync_test.tscn', 'tests/world/geometry_validate_test.tscn', 'tests/world/room_audit_test.tscn', 'tests/world/terrain_test.tscn', 'tests/world/terrain_art_test.tscn', 'tests/save/save_roundtrip.tscn', 'tests/save/respawn_test.tscn', 'tests/integration/real_player_test.tscn', 'tests/world/background_test.tscn')
         foreach ($worldScene in $worldScenes) {
             $worldName = [System.IO.Path]::GetFileNameWithoutExtension($worldScene)
             $worldArguments = @('--path', $projectPath, '--scene', "res://$worldScene", '--audio-driver', 'Dummy', '--fixed-fps', '60', '--log-file', (Join-Path $outputPath "world_$worldName.log"))
@@ -95,7 +95,7 @@ try {
     # UI 测试（HUD 假事件、暂停菜单 / 地图、新主菜单流程、读档失败、真实玩家集成）：结果写到 tests/output/ui_<名字>_results.json
     $uiCode = 0
     if ($Suite -eq 'all' -or $Suite -eq 'ui' -or $Suite -eq 'new') {
-        $uiScenes = @('tests/ui/ui_hud_test.tscn', 'tests/ui/ui_pause_map_test.tscn', 'tests/ui/collection_screen_test.tscn', 'tests/ui/title_menu_test.tscn', 'tests/ui/title_menu_failure_test.tscn', 'tests/ui/ui_integration_test.tscn', 'tests/ui/quit_from_pause_test.tscn', 'tests/ui/quit_from_title_test.tscn', 'tests/ui/legacy_save_climb_test.tscn')
+        $uiScenes = @('tests/ui/ui_hud_test.tscn', 'tests/ui/ui_pause_map_test.tscn', 'tests/ui/collection_screen_test.tscn', 'tests/ui/title_menu_test.tscn', 'tests/ui/title_menu_failure_test.tscn', 'tests/ui/ui_integration_test.tscn', 'tests/ui/quit_from_pause_test.tscn', 'tests/ui/quit_from_title_test.tscn', 'tests/ui/legacy_save_climb_test.tscn', 'tests/ui/map4_save_migration_test.tscn')
         foreach ($uiScene in $uiScenes) {
             $uiName = [System.IO.Path]::GetFileNameWithoutExtension($uiScene)
             $uiArguments = @('--path', $projectPath, '--scene', "res://$uiScene", '--audio-driver', 'Dummy', '--fixed-fps', '60', '--log-file', (Join-Path $outputPath "ui_$uiName.log"))

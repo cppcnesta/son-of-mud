@@ -36,11 +36,11 @@ public partial class MapCheck : WorldTestBase
     private void RoomsAndScenes()
     {
         List<RoomDef> rooms = _layout.Rooms.ToList();
-        Check(rooms.Count == 27, $"①清单共 27 个房间（实际 {rooms.Count}）");
+        Check(rooms.Count == 32, $"①清单共 32 个房间（实际 {rooms.Count}）");
         Check(rooms.Select(r => r.Id).Distinct().Count() == rooms.Count, "①房间编号唯一");
-        Check(rooms.All(r => Regex.IsMatch(r.Id, @"^S[1-4]_0[1-9]$")), "①编号格式都是 S<场景>_<两位序号>");
+        Check(rooms.All(r => Regex.IsMatch(r.Id, @"^S[1-4]_\d{2}(\d{2})?$")), "①编号格式都是 S<场景>_<两位序号>（两层合成一间的写两个序号，如 S4_0304）");
         int[] perScene = Enumerable.Range(1, 4).Select(s => rooms.Count(r => r.Id.StartsWith($"S{s}_"))).ToArray();
-        Check(perScene.SequenceEqual(new[] { 8, 6, 8, 5 }), $"①四个场景的房间数 8/6/8/5（实际 {string.Join("/", perScene)}）");
+        Check(perScene.SequenceEqual(new[] { 8, 6, 8, 10 }), $"①四个场景的房间数 8/6/8/10（实际 {string.Join("/", perScene)}）");
         Check(rooms.All(r => r.Layer == 0), "①全部房间在同一个图层 0");
         Check(rooms.All(r => r.Size.X >= 2 && r.Size.Y >= 2), "①每个房间至少 2×2 格（一屏），镜头不会比房间大");
 
@@ -70,8 +70,14 @@ public partial class MapCheck : WorldTestBase
             if (root.GetNodeOrNull<TileMapLayer>("Geometry") == null || root.GetNodeOrNull("Spawns") == null || root.GetNodeOrNull("Objects") == null)
                 problems.Add(room.Id + " 骨架缺 Geometry / Spawns / Objects");
             if (Search<SpawnPoint>(root).All(s => s.SpawnId != SpawnPoint.DefaultId)) problems.Add(room.Id + " 没有 Default 出生点");
+            // UID 要写在场景文件头里：只记在本机缓存里的话，别的电脑打开会换成新的 UID，地图数据（按 UID 认房间）就对不上了
+            using FileAccess file = FileAccess.Open(room.ScenePath, FileAccess.ModeFlags.Read);
+            string header = file?.GetLine() ?? "";
+            long uid = ResourceLoader.GetResourceUid(room.ScenePath);
+            if (uid == ResourceUid.InvalidId || !header.Contains($"uid=\"{ResourceUid.IdToText(uid)}\""))
+                problems.Add($"{room.Id} 的场景文件头里没有写 UID");
         }
-        Check(problems.Count == 0, "①27 个场景都存在，根是 RoomRoot、编号一致，RoomInstance 在 (0,0)，骨架齐全" + (problems.Count > 0 ? "：" + string.Join("; ", problems.Take(6)) : ""));
+        Check(problems.Count == 0, "①32 个场景都存在，根是 RoomRoot、编号一致，RoomInstance 在 (0,0)，骨架齐全，文件头里写了 UID" + (problems.Count > 0 ? "：" + string.Join("; ", problems.Take(6)) : ""));
 
         // 放进场景树，让 MetSys 按 MapData.txt 认出房间：尺寸必须等于清单。
         var sizeProblems = new List<string>();
@@ -89,7 +95,7 @@ public partial class MapCheck : WorldTestBase
             RemoveChild(live);
             live.Free();
         }
-        Check(sizeProblems.Count == 0, "①MetSys 运行时认出全部 27 个房间，尺寸与清单一致，房间 ID 能反查清单" + (sizeProblems.Count > 0 ? "：" + string.Join("; ", sizeProblems.Take(6)) : ""));
+        Check(sizeProblems.Count == 0, "①MetSys 运行时认出全部 32 个房间，尺寸与清单一致，房间 ID 能反查清单" + (sizeProblems.Count > 0 ? "：" + string.Join("; ", sizeProblems.Take(6)) : ""));
     }
 
     // ---------- ② ----------
@@ -121,12 +127,12 @@ public partial class MapCheck : WorldTestBase
                 problems.Add($"{target.Id} 缺出生点 From_{room.Id}");
         }
         Check(problems.Count == 0, $"②每条通道两边都对得上，没有单向通道，到达出生点齐全（边出口 {edgeCount} 个，门 {doorCount} 个）" + (problems.Count > 0 ? "：" + string.Join("; ", problems.Take(6)) : ""));
-        Check(edgeCount == 2 * 25 && doorCount == 2, $"②通道数：25 条边通道 + 1 扇门（双向计数 {edgeCount}/{doorCount}）");
+        Check(edgeCount == 2 * 30 && doorCount == 2, $"②通道数：30 条边通道 + 1 扇门（双向计数 {edgeCount}/{doorCount}）");
 
         Check(HasEdge("S1_07", "S2_01") && HasEdge("S2_06", "S3_01"), "②跨场景出口 S1_07→S2_01、S2_06→S3_01 在格子上直接相邻");
         Check(HasDoor("S3_08", "S4_01") && !Adjacent(_layout.Find("S3_08"), _layout.Find("S4_01")), "②S3_08→S4_01 是按键过门，地图上不相邻");
         Check(Adjacent(_layout.Find("S2_02"), _layout.Find("S2_04")) && !HasEdge("S2_02", "S2_04"), "②S2_02|S2_04 相邻但是墙");
-        Check(Adjacent(_layout.Find("S4_03"), _layout.Find("S4_05")) && !HasEdge("S4_03", "S4_05"), "②S4_03|S4_05 相邻但是墙");
+        Check(Adjacent(_layout.Find("S4_08"), _layout.Find("S4_10")) && !HasEdge("S4_08", "S4_10"), "②S4_08|S4_10 相邻但是墙（塔底 ⑦ 和祭坛只隔一道墙）");
         // 攀墙开局就有（关卡几何计划 v3 第 2 节），原来的两道能力门去掉了：S1_04↑S1_08、S2_04↑S2_05 两个方向都没有条件。
         Check(NoRequirement("S1_04", "S1_08") && NoRequirement("S1_08", "S1_04") && NoRequirement("S2_04", "S2_05") && NoRequirement("S2_05", "S2_04"),
             "②原能力门已去掉：S1_04↑S1_08、S2_04↑S2_05 这两条通道存在，两侧出口都没有条件");
@@ -134,9 +140,9 @@ public partial class MapCheck : WorldTestBase
         Check(abilityGates.Count == 0, "②清单里没有任何能力门（所有出口条件都只用剧情标记）" + (abilityGates.Count > 0 ? "：" + string.Join(",", abilityGates) : ""));
         Check(Gate("S1_05", "S1_06", "boss_keeper") && Gate("S2_03", "S2_04", "flood_done") && Gate("S2_04", "S2_06", "boss_dragon")
               && Gate("S3_06", "S3_07", "districts_done"), "②事件门：boss_keeper / flood_done / boss_dragon / districts_done 位置正确");
-        ExitDef sevenGates = _layout.Find("S4_02").Exits.FirstOrDefault(e => e.Target == "S4_03");
+        ExitDef sevenGates = _layout.Find("S4_07").Exits.FirstOrDefault(e => e.Target == "S4_09");
         Check(sevenGates != null && sevenGates.HasBarrier && sevenGates.Requirement.Flags.Select(f => f.ToString()).OrderBy(f => f).SequenceEqual(SevenTablets),
-            "②七道门：S4_02→S4_03 的出口要七块泥板 tablet.gate_1–7 全部读完");
+            "②七道门：⑥ 层 S4_07→回廊 S4_09 的出口要七块泥板 tablet.gate_1–7 全部读完");
 
         var objectProblems = new List<string>();
         foreach (RoomDef room in _layout.Rooms)
@@ -160,7 +166,7 @@ public partial class MapCheck : WorldTestBase
         }
         Check(objectProblems.Count == 0, "②场景里的实体门、过门、存档点和清单一致" + (objectProblems.Count > 0 ? "：" + string.Join("; ", objectProblems.Take(6)) : ""));
         string[] saveRooms = _layout.Rooms.Where(r => r.HasSavePoint).Select(r => r.Id).OrderBy(x => x).ToArray();
-        Check(saveRooms.SequenceEqual(new[] { "S1_04", "S2_02", "S3_03", "S4_04" }), $"②存档点在 S1_04 / S2_02 / S3_03 / S4_04（实际 {string.Join(",", saveRooms)}）");
+        Check(saveRooms.SequenceEqual(new[] { "S1_04", "S2_02", "S3_03", "S4_10" }), $"②存档点在 S1_04 / S2_02 / S3_03 / S4_10（实际 {string.Join(",", saveRooms)}）");
     }
 
     private bool HasEdge(string a, string b) =>
@@ -241,7 +247,7 @@ public partial class MapCheck : WorldTestBase
         Check(diff.Count == 0, "③每格的四个方向边界（-1 房内 / 0 墙 / 1 通道）和场景 UID 都与清单一致" + (diff.Count > 0 ? "：" + string.Join(", ", diff.Take(6)) : ""));
 
         int passages = actual.Values.Sum(v => v.Split('|')[0].Split(',').Count(s => s == "1"));
-        Check(passages == 50, $"③通道边界共 50 个（25 条边通道 × 两侧，实际 {passages}）");
+        Check(passages == 60, $"③通道边界共 60 个（30 条边通道 × 两侧，实际 {passages}）");
     }
 
     // ---------- ④ ----------
@@ -250,10 +256,10 @@ public partial class MapCheck : WorldTestBase
     private static readonly (string Room, string Token)[] Acquisitions =
     {
         ("S1_05", "boss_keeper"), ("S2_03", "flood_done"), ("S2_04", "boss_dragon"),
-        ("S4_02", "tablet.gate_1"), ("S4_02", "tablet.gate_2"), ("S4_02", "tablet.gate_3"), ("S4_02", "tablet.gate_4"),
-        ("S4_02", "tablet.gate_5"), ("S4_02", "tablet.gate_6"), ("S4_02", "tablet.gate_7"),
+        ("S4_02", "tablet.gate_1"), ("S4_0304", "tablet.gate_2"), ("S4_0304", "tablet.gate_3"), ("S4_05", "tablet.gate_4"),
+        ("S4_06", "tablet.gate_5"), ("S4_07", "tablet.gate_6"), ("S4_08", "tablet.gate_7"),
     };
-    /// <summary>七道门：S4_02 里的七块泥板。</summary>
+    /// <summary>七道门：塔里每层一块，共七块泥板。</summary>
     private static readonly string[] SevenTablets = Enumerable.Range(1, 7).Select(k => $"tablet.gate_{k}").ToArray();
     private static readonly string[] Districts = { "S3_04", "S3_05", "S3_06" };
     private const string DistrictsDone = "districts_done";
@@ -298,8 +304,8 @@ public partial class MapCheck : WorldTestBase
     private void Reachability()
     {
         (HashSet<string> rooms, HashSet<string> tokens) = Reach(null);
-        Check(rooms.Count == 27, $"④从 S1_01 出发 27 个房间全部可达（实际 {rooms.Count}，缺 {string.Join(",", _layout.Rooms.Select(r => r.Id).Where(id => !rooms.Contains(id)))}）");
-        Check(rooms.Contains("S4_05"), "④能走到终末之室 S4_05");
+        Check(rooms.Count == 32, $"④从 S1_01 出发 32 个房间全部可达（实际 {rooms.Count}，缺 {string.Join(",", _layout.Rooms.Select(r => r.Id).Where(id => !rooms.Contains(id)))}）");
+        Check(rooms.Contains("S4_11"), "④能走到终末之室 S4_11");
 
         var required = _layout.Rooms.SelectMany(r => r.Exits).SelectMany(Needs).Distinct().ToList();
         var missing = required.Where(t => !tokens.Contains(t)).ToList();
@@ -318,10 +324,10 @@ public partial class MapCheck : WorldTestBase
         HashSet<string> noKeeper = Reach("boss_keeper").Rooms;
         Check(noKeeper.SetEquals(new[] { "S1_01", "S1_02", "S1_03", "S1_04", "S1_05", "S1_08" }), $"④自检：拿不到 boss_keeper 时只能到 S1_01–S1_05 和 S1_08（实际 {string.Join(",", noKeeper.OrderBy(x => x))}），说明条件确实会挡路，S1_08 不再需要能力");
 
-        // 没有能力门：不给任何能力、把全部剧情标记都当作已满足（不考虑剧情标记），27 个房间都可达。
+        // 没有能力门：不给任何能力、把全部剧情标记都当作已满足（不考虑剧情标记），32 个房间都可达。
         string[] allFlags = _layout.Rooms.SelectMany(r => r.Exits).Where(e => e.Requirement != null).SelectMany(e => e.Requirement.Flags).Select(f => f.ToString()).Distinct().ToArray();
         HashSet<string> flagsOnly = Reach(null, allFlags).Rooms;
-        Check(flagsOnly.Count == 27, $"④没有能力门：不给任何能力、不考虑剧情标记时 27 个房间全部可达（实际 {flagsOnly.Count}，缺 {string.Join(",", _layout.Rooms.Select(r => r.Id).Where(id => !flagsOnly.Contains(id)))}）");
+        Check(flagsOnly.Count == 32, $"④没有能力门：不给任何能力、不考虑剧情标记时 32 个房间全部可达（实际 {flagsOnly.Count}，缺 {string.Join(",", _layout.Rooms.Select(r => r.Id).Where(id => !flagsOnly.Contains(id)))}）");
         var hiddenBehindFlags = new List<string>();
         foreach (string flag in allFlags.Append(DistrictsDone))
         {

@@ -136,16 +136,16 @@ public partial class RoomAuditTest : WorldTestBase
         geometry.EraseCell(outside);
         Check(outReported && !Has("铺到了房间外面"), "房间外：在房间右边外面铺一格砖 → 警告“铺到了房间外面”；删掉后消失");
 
-        // 出口门的条件和房间表不一致（S4_02 → S4_03 要七块泥板）
-        var tower = GD.Load<PackedScene>("res://assets/scenes/world/s4/S4_02.tscn").Instantiate<RoomRoot>();
-        var exitGate = tower.GetNode<GateBarrier>("Objects/GateToS4_03");
+        // 出口门的条件和房间表不一致（⑥ 层 S4_07 → 回廊 S4_09 要七块泥板）
+        var tower = GD.Load<PackedScene>("res://assets/scenes/world/s4/S4_07.tscn").Instantiate<RoomRoot>();
+        var exitGate = tower.GetNode<GateBarrier>("Objects/GateToS4_09");
         SonOfMud.Core.GateRequirement kept = exitGate.Requirement;
         exitGate.Requirement = GateBarrier.FlagRequirement("seven_gates", kept.LockedText);
-        bool mismatch = RoomRules.AuditScene(tower, layout).Any(p => p.Contains("出口门 GateToS4_03 的条件和房间表不一样"));
+        bool mismatch = RoomRules.AuditScene(tower, layout).Any(p => p.Contains("出口门 GateToS4_09 的条件和房间表不一样"));
         exitGate.Requirement = kept;
         bool matchAgain = RoomRules.AuditScene(tower, layout).Count == 0;
         tower.Free();
-        Check(mismatch && matchAgain, "出口门条件：把 S4_02 的出口门条件改成旧的 seven_gates → 警告“和房间表不一样”；改回后没有警告");
+        Check(mismatch && matchAgain, "出口门条件：把 S4_07 的出口门条件改成旧的 seven_gates → 警告“和房间表不一样”；改回后没有警告");
         // 判定框被拖离节点（挪的是判定框，不是节点本身）
         var pit = GD.Load<PackedScene>("res://assets/scenes/world/s1/S1_02.tscn").Instantiate<RoomRoot>();
         var tabletShape = pit.GetNode<CollisionShape2D>("Objects/Tablet_nameless_day/Shape");

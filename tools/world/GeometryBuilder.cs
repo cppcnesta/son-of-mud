@@ -298,8 +298,9 @@ public sealed class GeometryBuilder
     /// <summary>
     /// 读全部文字图 → 校验 → 算出每个房间要改的地方。write 为 false 是干跑：只把会变化的房间和节点写进 Changes。
     /// 有任何错误时一个文件都不写，返回 false。
+    /// only 不为空时只改这几个房间（全部文字图照样读、照样校验对齐），其余房间的场景不动。
     /// </summary>
-    public bool RunGeometry(bool write)
+    public bool RunGeometry(bool write, ISet<string> only = null)
     {
         // 用到的 Godot 资源都在用完后放掉托管包装（using），不然 C# 一直拿着它们，退出时会报 Shape2D 泄漏
         using TileSet expectedTiles = TerrainTiles.Build();
@@ -325,6 +326,7 @@ public sealed class GeometryBuilder
         var pending = new List<(RoomDef Room, RoomGrid Grid)>();
         foreach (var (id, grid) in grids)
         {
+            if (only != null && !only.Contains(id)) continue;
             RoomDef room = Layout.Find(id);
             Node root = LoadScene(room, false);
             if (root == null) continue;

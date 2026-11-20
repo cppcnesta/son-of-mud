@@ -25,8 +25,8 @@ public partial class SaveRoundtrip : WorldTestBase
         Check(Saves.CurrentRoom == "S1_04", "SaveService 从 RoomEntered 得知当前房间 S1_04");
         Vector3I visited = MetSysApi.CurrentCoords;
         Check(MetSysApi.IsCellDiscovered(visited, false), $"站过的格子 {visited} 已探索");
-        var unvisited = new Vector3I(9, 21, 0); // S4_05 的一格
-        Check(!MetSysApi.IsCellDiscovered(unvisited, false), "没去过的 S4_05 未探索");
+        var unvisited = new Vector3I(7, 40, 0); // S4_11 的一格
+        Check(!MetSysApi.IsCellDiscovered(unvisited, false), "没去过的 S4_11 未探索");
 
         // 可储存对象（以后的可破坏墙）：标记储存后存档
         var wall = new Node2D { Name = "TestWall" };
