@@ -7,7 +7,7 @@ namespace SonOfMud.Enemy.Bosses.Keeper;
 
 /// <summary>
 /// 守坑人：蝎（boss.md）。状态一个一个类，见 states/：
-/// Dormant → Approach ⇄ 横扫（SweepWindup → SweepStrike → SweepRecover）/ 蝎尾（TailAim → TailStrike → TailRecover 或 Staggered）；
+/// Dormant → Approach（巡游）⇄ 横扫（SweepWindup → SweepStrike → SweepRecover）/ 蝎尾（TailAim → TailStrike → TailRecover 或 Staggered）；
 /// 任何状态下血量归零 → Transform（1 秒闪白，结束时写 boss_keeper 并发 BossDefeated）→ Gone。
 /// 两个技能用「有阻回」的 SkillCooldown：开战时横扫 5/5、蝎尾 0/20，只在开战后、变身前计时。
 /// 子节点：Stats、HurtBox、HitBox（横扫）、TailHitBox（蝎尾竖带）、StaggerWindow、StateMachine。
@@ -44,6 +44,45 @@ public partial class KeeperBoss : BossBody
     /// <summary>横扫命中（含被格挡）让蝎尾冷却真正减少的次数。</summary>
     public int TailReductions { get; set; }
 
+    // ---------- 巡游 ----------
+
+    /// <summary>巡游的三种挑法。</summary>
+    public enum RoamKind { Approach, Retreat, Cross }
+
+    /// <summary>距离下一招还要巡游多久（秒）；开战时为 0，收招 / 反制僵直结束后重新计满 AttackGap。</summary>
+    public float AttackGapRemaining { get; set; }
+    /// <summary>测试用：指定下一次巡游的挑法（用一次就清掉）。</summary>
+    public RoamKind? ForceNextRoam { get; set; }
+    /// <summary>巡游挑法的随机数（跟着 Seed 走，测试可以 SetRoamSeed 固定）。</summary>
+    public RandomNumberGenerator RoamRng { get; } = new();
+    /// <summary>每种挑法用过几次（测试和调试用）。</summary>
+    public int[] RoamCounts { get; } = new int[3];
+    /// <summary>从玩家身下走过去（换到玩家另一边）的次数。</summary>
+    public int Crossings { get; set; }
+
+    public void SetRoamSeed(ulong seed)
+    {
+        if (seed == 0) RoamRng.Randomize();
+        else RoamRng.Seed = seed;
+    }
+
+    /// <summary>身体中心能走到的最左 / 最右（全局 X）：场地两边各扣半个身宽和 ArenaMargin。</summary>
+    public float RoamMinX => ArenaOrigin.X + Arena.Position.X + BodySize.X * 0.5f + Keeper.ArenaMargin;
+    public float RoamMaxX => ArenaOrigin.X + Arena.End.X - BodySize.X * 0.5f - Keeper.ArenaMargin;
+
+    private Vector2 ArenaOrigin => GetParent() is Node2D parent ? parent.GlobalPosition : Vector2.Zero;
+
+    /// <summary>不出招时的朝向：玩家水平距离在转身死区外就面朝玩家，死区内保持原朝向。</summary>
+    public void FaceTargetOutsideDeadzone()
+    {
+        if (!HasTarget) return;
+        float dx = DxToTarget;
+        if (Mathf.Abs(dx) >= Keeper.TurnDeadzone) Facing = Mathf.Sign(dx);
+    }
+
+    /// <summary>收招 / 反制僵直结束：重新计满出招间隔。</summary>
+    public void RestartAttackGap() => AttackGapRemaining = Keeper.AttackGap;
+
     protected override bool ResolvingDefeat => Transforming;
 
     public override void _Ready()
@@ -61,6 +100,7 @@ public partial class KeeperBoss : BossBody
         base._Ready();
         if (TailHitBox != null) RegisterAttackHitBox(TailHitBox, flip: false);
         if (Stagger != null) Stagger.Stats ??= Stats;
+        SetRoamSeed(Seed == 0 ? 0 : Seed + 104729);
     }
 
     public override void _PhysicsProcess(double delta)
@@ -69,6 +109,7 @@ public partial class KeeperBoss : BossBody
         {
             Sweep.Tick((float)delta);
             Tail.Tick((float)delta);
+            if (AttackGapRemaining > 0f) AttackGapRemaining = Mathf.Max(0f, AttackGapRemaining - (float)delta);
         }
         base._PhysicsProcess(delta);
     }
@@ -76,8 +117,7 @@ public partial class KeeperBoss : BossBody
     /// <summary>玩家站在竞技场里（全局坐标判断）。</summary>
     public bool InArena(Vector2 globalPoint)
     {
-        Vector2 origin = GetParent() is Node2D parent ? parent.GlobalPosition : Vector2.Zero;
-        return new Rect2(Arena.Position + origin, Arena.Size).HasPoint(globalPoint);
+        return new Rect2(Arena.Position + ArenaOrigin, Arena.Size).HasPoint(globalPoint);
     }
 
     public Vector2 ArenaCenter
@@ -95,6 +135,7 @@ public partial class KeeperBoss : BossBody
         Sweep = new SkillCooldown(Keeper.SweepCooldown, true);
         Tail = new SkillCooldown(Keeper.TailCooldown, false);
         FightActive = true;
+        AttackGapRemaining = 0f; // 开战第一招不受出招间隔限制
         StartEncounter();
     }
 

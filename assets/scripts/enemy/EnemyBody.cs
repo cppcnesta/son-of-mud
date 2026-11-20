@@ -245,6 +245,27 @@ public partial class EnemyBody : CharacterBody2D
         Velocity = new Vector2(vx, Velocity.Y);
     }
 
+    /// <summary>
+    /// 只移动、不改朝向（守坑人往后退时钳子仍朝玩家）：按 direction 走，悬崖按移动方向检测。
+    /// 前面是悬崖就停下并返回 false；direction 为 0 时停下。
+    /// </summary>
+    public bool Move(float direction, float speed)
+    {
+        if (direction == 0f)
+        {
+            Stop();
+            return false;
+        }
+        float dir = Mathf.Sign(direction);
+        if (LedgeAhead(dir))
+        {
+            Stop();
+            return false;
+        }
+        Velocity = new Vector2(dir * speed, Velocity.Y);
+        return true;
+    }
+
     public void Stop() => Velocity = new Vector2(0f, Velocity.Y);
 
     public void ApplyGravity(float delta)

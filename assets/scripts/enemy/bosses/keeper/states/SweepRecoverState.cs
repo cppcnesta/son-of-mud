@@ -31,6 +31,7 @@ public partial class SweepRecoverState : KeeperState
         Remaining -= dt;
         if (Remaining > 0.000001f) return;
         K.Sweep.EndCast();
+        K.RestartAttackGap(); // 出招间隔从这里重新计满
         Machine.TransitionTo<ApproachState>();
     }
 }

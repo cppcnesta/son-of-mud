@@ -25,6 +25,7 @@ public partial class KeeperLabTest : LabSuiteBase
     /// <summary>站在 y=888 的地面上时身体中心（原点）的 y。</summary>
     private static readonly float FloorY = 888f - PlayerBody.HalfH;
     private const float Dt = 1f / 60f;
+    private const ulong RoamSeed = 20261120;
 
     protected override string ReportName => "keeper_lab_results";
 
@@ -43,6 +44,9 @@ public partial class KeeperLabTest : LabSuiteBase
         try
         {
             await EncounterChecks();
+            await RoamChecks();
+            await AttackGapChecks();
+            await RoamCoverageChecks();
             await SweepHitAndBlockChecks();
             await SweepWhiffChecks();
             await TailUnblockedChecks();
@@ -78,6 +82,7 @@ public partial class KeeperLabTest : LabSuiteBase
         _keeper = null;
         await LoadLab(LabScene);
         _keeper = Lab.GetNode<KeeperBoss>("Keeper");
+        _keeper.SetRoamSeed(_seedOverride != 0 ? _seedOverride : RoamSeed); // 巡游的随机挑法固定种子，每次跑都一样
         _encounters.Clear();
         _defeats.Clear();
         _healthEvents = 0;
@@ -153,12 +158,201 @@ public partial class KeeperLabTest : LabSuiteBase
         Check(Mathf.IsEqualApprox(_sweepChargedAtStart, 5f) && _tailChargedAtStart == 0f && Mathf.IsEqualApprox(_tailRemainingAtStart, 20f),
             $"开战：横扫 {_sweepChargedAtStart}/5 就绪，蝎尾 {_tailChargedAtStart}/20 从头充");
         await Frames(2);
-        float x0 = _keeper.GlobalPosition.X;
-        await Frames(60);
-        float speed = x0 - _keeper.GlobalPosition.X;
-        Check(Mathf.Abs(speed - 120f) <= 3f && _keeper.State is ApproachState, $"逼近：以中速走向玩家（实测 {speed:F1}px/s，Q7：120）");
+        // 巡游：走动时速度是 RoamSpeed（往哪边走看挑法），停下时为 0
+        var roam = _keeper.Machine.Get<ApproachState>();
+        bool speedOk = true;
+        int moving = 0;
+        for (int i = 0; i < 60 && _keeper.State is ApproachState; i++)
+        {
+            await Frames(1);
+            if (_keeper.State is not ApproachState) break;
+            float vx = Mathf.Abs(_keeper.Velocity.X);
+            if (roam.Paused) speedOk &= vx == 0f;
+            else if (vx > 0f) { moving++; speedOk &= Mathf.Abs(vx - _keeper.Keeper.RoamSpeed) < 0.5f; }
+        }
+        Check(speedOk && moving > 10, $"巡游：走动时速度 {_keeper.Keeper.RoamSpeed}，停下时为 0（走了 {moving} 帧）");
         Check(_keeper.Sweep.IsReady && _keeper.Tail.IsRecharging && Mathf.Abs(_keeper.Tail.Remaining - (20f - 64f * Dt)) < 0.1f,
             $"冷却：开战后蝎尾按时间回充（剩 {_keeper.Tail.Remaining:F2}）");
+    }
+
+    // ---------- ①b 巡游（计划 v2 测试 A） ----------
+
+    /// <summary>不让它出招（巡游检查时用）：出招间隔一直没走完。</summary>
+    private void HoldAttacks() => _keeper.AttackGapRemaining = 999f;
+
+    /// <summary>指定下一次挑法并立刻重挑，等它走到并停下；途中记录往远离玩家的方向走的帧里朝向是否一直朝玩家。</summary>
+    private async Task<(bool arrived, bool backingFacesPlayer, int backingFrames)> RoamTo(KeeperBoss.RoamKind kind, int maxFrames = 400)
+    {
+        var roam = _keeper.Machine.Get<ApproachState>();
+        _keeper.ForceNextRoam = kind;
+        roam.Pick();
+        bool facing = true;
+        int backing = 0;
+        for (int i = 0; i < maxFrames; i++)
+        {
+            HoldAttacks();
+            await Frames(1);
+            if (roam.Paused) return (true, facing, backing);
+            float dx = Player.GlobalPosition.X - _keeper.GlobalPosition.X;
+            bool away = _keeper.Velocity.X != 0f && Mathf.Sign(_keeper.Velocity.X) == -Mathf.Sign(dx);
+            if (away && Mathf.Abs(dx) >= _keeper.Keeper.TurnDeadzone + 10f)
+            {
+                backing++;
+                facing &= _keeper.Facing == Mathf.Sign(dx) && _keeper.Animator.Sprite.FlipH == (_keeper.Facing > 0f);
+            }
+        }
+        return (roam.Paused, facing, backing);
+    }
+
+    private async Task RoamChecks()
+    {
+        await Fresh(new Vector2(1000, FloorY));
+        bool started = await WaitFor(() => _keeper.State is ApproachState, 60);
+        Player.HurtBox.SetInvulnerable("roam_test", true);
+        float min = _keeper.RoamMinX, max = _keeper.RoamMaxX, stop = _keeper.Keeper.StopDistance;
+        Check(started && Mathf.IsEqualApprox(min, 660f) && Mathf.IsEqualApprox(max, 1964f),
+            $"巡游：可走范围按场地扣半个身宽和两边各 40 像素余量 = 身体中心 {min:F0}～{max:F0}");
+
+        // 贴近：停在玩家同一侧、离玩家 StopDistance
+        var (arrived, _, _) = await RoamTo(KeeperBoss.RoamKind.Approach);
+        float gap = _keeper.GlobalPosition.X - Player.GlobalPosition.X;
+        Check(arrived && Mathf.Abs(gap - stop) <= 6f && _keeper.Facing < 0f,
+            $"巡游·贴近：走到玩家右边 {stop} 处停下（实际离玩家 {gap:F0}），面朝玩家");
+
+        // 退开：往远离玩家的方向走，钳子仍朝玩家
+        var (retreated, backingFaces, backingFrames) = await RoamTo(KeeperBoss.RoamKind.Retreat);
+        gap = _keeper.GlobalPosition.X - Player.GlobalPosition.X;
+        Check(retreated && (gap >= _keeper.Keeper.RetreatDistance - 6f || Mathf.Abs(_keeper.GlobalPosition.X - max) <= 6f),
+            $"巡游·退开：离玩家至少 {_keeper.Keeper.RetreatDistance}（实际 {gap:F0}）或退到场地边");
+        Check(backingFrames > 20 && backingFaces,
+            $"巡游·后退：往远离玩家的方向走的 {backingFrames} 帧里一直面朝玩家（图翻转也对），没有背对玩家");
+
+        // 横穿：从玩家身下走到另一边，过了玩家以后转身
+        int crossings = _keeper.Crossings;
+        var (crossed, _, _) = await RoamTo(KeeperBoss.RoamKind.Cross, 600);
+        gap = _keeper.GlobalPosition.X - Player.GlobalPosition.X;
+        Check(crossed && gap < 0f && (gap <= -_keeper.Keeper.StopDistance + 6f || Mathf.Abs(_keeper.GlobalPosition.X - min) <= 6f) && _keeper.GlobalPosition.X >= min - 1f && _keeper.Crossings == crossings + 1 && _keeper.Facing > 0f && _keeper.Animator.Sprite.FlipH,
+            $"巡游·横穿：从玩家身下走到左边、离玩家 {stop} 到场地边之间、场地不够就停在边上（离玩家 {gap:F0}，最左 {min:F0}），横穿记 1 次，转身面朝右边的玩家（图翻转）");
+
+        // 转身死区：玩家在头顶附近左右小动，朝向不变
+        float facing = _keeper.Facing;
+        bool steady = true;
+        for (int i = 0; i < 40; i++)
+        {
+            HoldAttacks();
+            PlacePlayer(_keeper.GlobalPosition.X + (i % 10 < 5 ? 30f : -30f));
+            await Frames(1);
+            steady &= _keeper.Facing == facing;
+        }
+        Check(steady, $"转身死区：玩家在它头顶左右 30 像素来回动（死区 {_keeper.Keeper.TurnDeadzone}），朝向不变");
+
+        // 悬崖按移动方向检测：右边是悬崖、左边有地，面朝左往右走 → 停住；往左走照常
+        Vector2 at = _keeper.GlobalPosition;
+        _keeper.GlobalPosition = new Vector2(2200f, at.Y);
+        _keeper.Facing = -1f;
+        bool towardLedge = _keeper.Move(1f, 160f);
+        float vxLedge = _keeper.Velocity.X;
+        bool awayFromLedge = _keeper.Move(-1f, 160f);
+        float vxAway = _keeper.Velocity.X;
+        _keeper.Stop();
+        _keeper.GlobalPosition = at;
+        Check(!towardLedge && vxLedge == 0f && awayFromLedge && vxAway < 0f && _keeper.Facing < 0f,
+            "移动：悬崖按移动方向检测（面朝左、往右走到悬崖边停住；往左走照常），Move 不改朝向");
+        Player.HurtBox.SetInvulnerable("roam_test", false);
+    }
+
+    /// <summary>出招间隔：收招 / 反制僵直刚结束（回到巡游）时调用。两个技能都弄成就绪、玩家放在横扫距离内，量它多久才出下一招。</summary>
+    private async Task CheckAttackGap(string after)
+    {
+        float gapStart = _keeper.AttackGapRemaining;
+        _keeper.Sweep.Reduce(99f);
+        _keeper.Tail.Reduce(99f);
+        PlacePlayer(_keeper.GlobalPosition.X + _keeper.Facing * 300f);
+        int frames = await CountFramesWhile(() => _keeper.State is ApproachState, 200);
+        int expected = Mathf.RoundToInt(_keeper.Keeper.AttackGap * 60f);
+        Check(Mathf.Abs(gapStart - _keeper.Keeper.AttackGap) < 0.05f && Mathf.Abs(frames - expected) <= 3 && _keeper.State is SweepWindupState or TailAimState,
+            $"出招间隔（{after}）：结束后重新计满 {_keeper.Keeper.AttackGap} 秒，技能就绪、玩家在范围内也要等满才出招（{frames} 帧后 {_keeper.State?.DisplayName}）");
+    }
+
+    private async Task AttackGapChecks()
+    {
+        // 横扫收招结束
+        await Fresh(new Vector2(1600, FloorY));
+        Player.HurtBox.SetInvulnerable("gap_test", true);
+        bool windup = await WaitFor(() => _keeper.State is SweepWindupState, 120);
+        // 出招中锁朝向：前摇里玩家绕到背后，朝向不变
+        float locked = _keeper.Facing;
+        PlacePlayer(_keeper.GlobalPosition.X - locked * 250f);
+        await Frames(10);
+        Check(windup && _keeper.State is SweepWindupState && _keeper.Facing == locked,
+            "出招中锁朝向：横扫前摇里玩家绕到背后（在死区外），朝向不变");
+        await WaitFor(() => _keeper.State is ApproachState, 200);
+        await CheckAttackGap("横扫收招");
+
+        // 蝎尾收招结束（没挡住）
+        await WaitFor(() => _keeper.State is ApproachState, 400);
+        _keeper.Machine.TransitionTo<TailAimState>();
+        await WaitFor(() => _keeper.State is ApproachState, 400);
+        await CheckAttackGap("蝎尾收招");
+
+        // 反制僵直结束（不经过普通收招）
+        await WaitFor(() => _keeper.State is ApproachState, 400);
+        _keeper.Machine.TransitionTo<StaggeredState>();
+        await Frames(2);
+        _keeper.Stagger.End();
+        await WaitFor(() => _keeper.State is ApproachState, 10);
+        await CheckAttackGap("反制僵直");
+        Player.HurtBox.SetInvulnerable("gap_test", false);
+    }
+
+    /// <summary>巡游覆盖用的 8 个固定种子（一个种子 20 秒随机性太大，按 8 段一起统计）。</summary>
+    private static readonly ulong[] CoverageSeeds = { 20261120, 1, 2, 3, 4, 5, 6, 7 };
+    private ulong _seedOverride;
+
+    /// <summary>
+    /// 固定种子，玩家站在场地中间不动，每个种子观察 20 秒：走过的范围、三种挑法、不出场地、不出招时死区外朝玩家。
+    /// 8 个种子一起统计：每段覆盖 ≥ 60%，平均 ≥ 75%；至少一半的种子两端都到过（离端点 ≤ 150）；三种挑法总数各 ≥ 5。
+    /// </summary>
+    private async Task RoamCoverageChecks()
+    {
+        var coverages = new List<float>();
+        int bothEnds = 0;
+        int[] totals = new int[3];
+        bool inside = true, facing = true;
+        foreach (ulong seed in CoverageSeeds)
+        {
+            _seedOverride = seed;
+            await Fresh(new Vector2(1312, FloorY));
+            _seedOverride = 0;
+            Player.HurtBox.SetInvulnerable("coverage_test", true);
+            await WaitFor(() => _keeper.State is ApproachState, 60);
+            float min = _keeper.RoamMinX, max = _keeper.RoamMaxX;
+            float lo = _keeper.GlobalPosition.X, hi = lo;
+            int[] before = (int[])_keeper.RoamCounts.Clone();
+            for (int i = 0; i < 1200; i++)
+            {
+                PlacePlayer(1312f);
+                await Frames(1);
+                float x = _keeper.GlobalPosition.X;
+                lo = Mathf.Min(lo, x);
+                hi = Mathf.Max(hi, x);
+                inside &= x >= min - 1f && x <= max + 1f;
+                float dx = Player.GlobalPosition.X - x;
+                if (_keeper.State is ApproachState && Mathf.Abs(dx) >= _keeper.Keeper.TurnDeadzone + 10f) facing &= _keeper.Facing == Mathf.Sign(dx);
+            }
+            for (int k = 0; k < 3; k++) totals[k] += _keeper.RoamCounts[k] - before[k];
+            coverages.Add((hi - lo) / (max - min));
+            if (lo <= min + 150f && hi >= max - 150f) bothEnds++;
+            Player.HurtBox.SetInvulnerable("coverage_test", false);
+        }
+        float average = coverages.Average();
+        Metric("keeper_roam_coverage_avg", average);
+        string each = string.Join("、", coverages.Select(c => $"{c:P0}"));
+        Check(coverages.All(c => c >= 0.6f) && average >= 0.75f && inside,
+            $"巡游覆盖（8 个固定种子各 20 秒）：每段 {each}，都 ≥ 60%、平均 {average:P0}（≥ 75%），没出场地");
+        Check(bothEnds * 2 >= CoverageSeeds.Length, $"巡游覆盖：{bothEnds}/{CoverageSeeds.Length} 段两端都到过（离可走范围端点 ≤ 150）");
+        Check(totals.All(c => c >= 5), $"巡游覆盖：三种挑法都用到了（贴近 {totals[0]}、退开 {totals[1]}、横穿 {totals[2]}）");
+        Check(facing, "巡游覆盖：不出招时，玩家在死区外它始终面朝玩家");
     }
 
     // ---------- ② 横扫 ----------
@@ -212,7 +406,13 @@ public partial class KeeperLabTest : LabSuiteBase
         Check(Mathf.Abs(recoverFrames - recoverFrozen - 30) <= 1, $"横扫收招：固定 0.5 秒，受击不缩短（{recoverFrames} 帧，其中顿帧 {recoverFrozen} 帧，Q4）");
         Check(_keeper.State is ApproachState && _keeper.Sweep.IsRecharging && _keeper.Sweep.Remaining > 4.95f,
             $"横扫：5 秒 CD 在收招结束后才开始算（收招结束时剩 {_keeper.Sweep.Remaining:F2}）");
-        int cdFrames = await CountFramesWhile(() => _keeper.State is not SweepWindupState && _keeper.State is not TailAimState, 600);
+        // 第二次横扫要真的砍到玩家：等冷却时让它一直挑「贴近」（横穿到玩家身下时横扫打不到身后，见计划）
+        int cdFrames = await CountFramesWhile(() =>
+        {
+            _keeper.ForceNextRoam = KeeperBoss.RoamKind.Approach;
+            return _keeper.State is not SweepWindupState && _keeper.State is not TailAimState;
+        }, 600);
+        _keeper.ForceNextRoam = null;
         Check(_keeper.State is SweepWindupState && cdFrames >= 298 && cdFrames <= 302, $"横扫：冷却 5 秒后才再次发动（{cdFrames} 帧）");
 
         // 第二次横扫：真实按 K 格挡
@@ -262,7 +462,7 @@ public partial class KeeperLabTest : LabSuiteBase
         bool ready = await KiteUntilTailReady();
         await Frames(1);
         Check(ready && _keeper.Sweep.IsReady && _keeper.State is ApproachState && _encounters.Count == 1,
-            "蝎尾：开战约 20 秒后充满（期间玩家一直在 500px 外，横扫没发动、仍是就绪）");
+            $"蝎尾：开战约 20 秒后充满（期间玩家一直在 500px 外，横扫没发动、仍是就绪）（ready {ready} sweep {_keeper.Sweep.IsReady} state {_keeper.State?.DisplayName} enc {_encounters.Count} tail {_keeper.Tail.Remaining:F2}）");
         PlacePlayer(_keeper.GlobalPosition.X - 100f);
         bool bothReadyInRange = _keeper.Sweep.IsReady && _keeper.Tail.IsReady && Distance <= _keeper.Keeper.SweepRange;
         await Frames(1);
