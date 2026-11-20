@@ -73,6 +73,8 @@ public partial class Pickup : Area2D
             return;
         }
         if (Item is { HealAmount: > 0 }) FindStats(player)?.Heal(Item.HealAmount);
+        // 收集页：记上「得到过」（泥瓶、泥肝），只写不拿掉
+        ItemObtainedRule.Mark(GameSession.Progress, ItemId);
         if (Item == null || Item.Counted)
         {
             long before = CountOf(ItemId);

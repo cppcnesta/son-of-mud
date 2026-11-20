@@ -83,12 +83,16 @@ public partial class SaveService : Node
     private void OnSaveRequested(StringName savePointId) => SaveToDisk(savePointId);
     private void OnContinueRequested() => LoadFromDisk(0);
 
-    /// <summary>游戏中打赢守坑人（boss_keeper 变成 true）：学会切换形态，提示条说一句。</summary>
+    /// <summary>
+    /// 游戏中打赢守坑人（boss_keeper 变成 true）：学会切换形态，提示条说一句。
+    /// 泥肝数量变成大于 0：记上「得到过」（收集页用）。
+    /// </summary>
     private void OnVariableChanged(StringName key, Variant value)
     {
         if (_restoring) return;
         if (FormUnlockRule.TryUnlock(GameSession.Progress, key, value))
             Events.Instance?.EmitSignal(Events.SignalName.MessageRequested, FormUnlockRule.UnlockText);
+        ItemObtainedRule.OnVariableChanged(GameSession.Progress, key, value);
     }
 
     /// <summary>
@@ -115,6 +119,8 @@ public partial class SaveService : Node
             foreach (string flag in trial.Flags) GameSession.Progress.SetVar(flag, true);
         // 开局只有泥；试玩补的变量里有 boss_keeper 时补上切换形态（不弹提示）
         FormUnlockRule.Reconcile(GameSession.Progress);
+        // 旧存档兼容：身上有泥肝就补上「得到过」（收集页用）
+        ItemObtainedRule.Reconcile(GameSession.Progress);
         _restoring = false;
         Events.Instance?.EmitSignal(Events.SignalName.ProgressRestored);
         // GameStartFinished 等 World 回执“已到达”之后才发（见 OnTravelFinished）。
@@ -170,6 +176,8 @@ public partial class SaveService : Node
         if (InitialAbilities != null) GameSession.Progress.EnsureAbilities(InitialAbilities.Initial);
         // 旧存档迁移：没打赢守坑人的拿掉切换形态，打赢了但没有的补上（不弹提示）。形态不进存档，玩家按开局形态（泥）出现。
         FormUnlockRule.Reconcile(GameSession.Progress);
+        // 旧存档兼容：身上有泥肝就补上「得到过」（收集页用）
+        ItemObtainedRule.Reconcile(GameSession.Progress);
         _restoring = false;
         // 只在进度完全恢复之后发一次（不在上面的 Reset 之后发），玩家的血量上限一步到位，不会先按空进度算一遍。
         Events.Instance?.EmitSignal(Events.SignalName.ProgressRestored);
