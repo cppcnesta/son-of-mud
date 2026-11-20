@@ -11,6 +11,7 @@
 [ext_resource type="Script" path="res://assets/scripts/core/GateRequirement.cs" id="n_req"]
 [ext_resource type="Script" path="res://assets/scripts/narrative/world/StoryTrigger.cs" id="n_story"]
 [ext_resource type="Script" path="res://assets/scripts/narrative/world/TabletPickup.cs" id="n_tablet"]
+[ext_resource type="Texture2D" path="res://assets/art/collectible/spr_collectible_tablet_temple_1x1.png" id="art_tablet_temple"]
 
 [sub_resource type="Resource" id="Gate_S2_03_1"]
 script = ExtResource("n_req")
@@ -141,9 +142,7 @@ VisibleWhen = SubResource("Req_Tablet_after_flood")
 position = Vector2(0, -48)
 shape = SubResource("Shape_Tablet_after_flood")
 
-[node name="Placeholder" type="ColorRect" parent="Objects/Tablet_after_flood" unique_id=1663914224]
-offset_left = -29.0
-offset_top = -77.0
-offset_right = 29.0
-mouse_filter = 2
-color = Color(0.75, 0.6, 0.4, 1)
+[node name="Art" type="Sprite2D" parent="Objects/Tablet_after_flood"]
+scale = Vector2(0.121212, 0.121212)
+texture = ExtResource("art_tablet_temple")
+offset = Vector2(0, -198)

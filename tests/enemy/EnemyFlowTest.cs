@@ -118,24 +118,48 @@ public partial class EnemyFlowTest : EnemyFlowBase
             "掉落：真实攻击打死祈祷泥人（固定掉落种子），World 在当前房间生成泥瓶拾取物");
         if (bottle == null) return;
 
-        // 满血：走上去不捡，留在地上
+        // 泥瓶：满血也捡，捡起来存着（不当场回血），在收集页按 E 喝（这里直接调 DropSpawner.UseItem，界面那一步由 ui_collection 测）
+        string bottleKey = Pickup.CountKey("泥瓶");
         int max = Player.Stats.MaxHealth;
-        bool onTop = Player.Stats.Health == max && await WalkOnto(bottle);
-        await Frames(30);
-        Check(onTop && GodotObject.IsInstanceValid(bottle) && !bottle.Collected && bottle.OverlapsBody(Player) && Player.Stats.Health == max,
-            $"泥瓶：满血（{max}）时站在泥瓶上 30 帧也不捡，泥瓶留在地上");
-
-        // 掉了血（测试直接把血量设成 100，代替挨打）：站在上面立刻捡起，回 30
+        bool picked = Player.Stats.Health == max && await WalkOnto(bottle) && await WaitUntil(() => !GodotObject.IsInstanceValid(bottle), 10);
+        Check(picked && Player.Stats.Health == max && GameSession.Progress.GetVar(bottleKey, 0).AsInt64() == 1,
+            $"泥瓶：满血（{max}）时碰到也捡起来，存着（count.泥瓶 = {GameSession.Progress.GetVar(bottleKey, 0)}），不当场回血");
+        DropSpawner spawner = FindChild<DropSpawner>(MainGame);
+        string full = spawner?.UseItem("泥瓶");
+        Check(full == "血是满的，现在不用喝。" && GameSession.Progress.GetVar(bottleKey, 0).AsInt64() == 1, $"喝泥瓶：满血时喝不了，泥瓶还在（{full}）");
         Player.Stats.SetHealth(max - 40);
-        bool healed = await WaitUntil(() => !GodotObject.IsInstanceValid(bottle), 10);
-        Check(healed && Player.Stats.Health == max - 10, $"泥瓶：没满血时碰到立刻回 30 血（{max - 40} → {Player.Stats.Health}），泥瓶消失");
+        string drank = spawner?.UseItem("泥瓶");
+        Check(drank == null && Player.Stats.Health == max - 10 && GameSession.Progress.GetVar(bottleKey, 0).AsInt64() == 0,
+            $"喝泥瓶：没满血时喝一瓶回 30 血（{max - 40} → {Player.Stats.Health}），泥瓶少一瓶");
+        string none = spawner?.UseItem("泥瓶");
+        Check(none == "没有泥瓶了。" && Player.Stats.Health == max - 10, $"喝泥瓶：没有存货时喝不了（{none}）");
 
-        // 回血不超过上限
-        Player.Stats.SetHealth(max - 15);
-        Pickup second = await DropNear("泥瓶", 90f);
-        bool picked2 = second != null && await WalkOnto(second) && await WaitUntil(() => !GodotObject.IsInstanceValid(second), 10);
-        Check(picked2 && Player.Stats.Health == max, $"泥瓶：差 15 血时捡到，回满到 {Player.Stats.Health}（不超过上限 {max}）");
-        Check(GameSession.Progress.GetVar(Pickup.CountKey("泥瓶"), 0).AsInt64() == 0, "泥瓶：碰到就用掉，不进计数");
+        // 最多存 5 瓶
+        var bottles = new List<long>();
+        for (int i = 0; i < 5; i++)
+        {
+            Pickup b = await DropNear("泥瓶", i % 2 == 0 ? 90f : -90f);
+            if (b == null) break;
+            await WalkOnto(b);
+            await WaitUntil(() => !GodotObject.IsInstanceValid(b), 10);
+            bottles.Add(GameSession.Progress.GetVar(bottleKey, 0).AsInt64());
+        }
+        Pickup extraBottle = await DropNear("泥瓶", 90f);
+        bool onExtra = extraBottle != null && await WalkOnto(extraBottle);
+        await Frames(30);
+        Check(bottles.SequenceEqual(new long[] { 1, 2, 3, 4, 5 }) && onExtra && GodotObject.IsInstanceValid(extraBottle) && GameSession.Progress.GetVar(bottleKey, 0).AsInt64() == 5,
+            $"泥瓶：最多存 5 瓶（依次 {string.Join("→", bottles)}），已有 5 瓶时第 6 瓶留在地上");
+        extraBottle?.QueueFree();
+
+        // 掉落物落到地面：在头顶上方 200 像素处掉落，生成后在地面上（不悬在半空）
+        float floorY = Player.GlobalPosition.Y + PlayerBody.HalfH;
+        var beforeAir = InRoom<Pickup>().Select(p => p.GetInstanceId()).ToHashSet();
+        Events.Instance.EmitSignal(Events.SignalName.ItemDropped, "泥肝", new Vector2(Player.GlobalPosition.X + 200f, floorY - 200f));
+        await Frames(2);
+        Pickup fallen = InRoom<Pickup>().FirstOrDefault(p => !beforeAir.Contains(p.GetInstanceId()));
+        Check(fallen != null && Mathf.Abs(fallen.GlobalPosition.Y - floorY) <= 2f, $"掉落物：在半空（地面上方 200）掉落，生成在地面上（y {fallen?.GlobalPosition.Y:0}，地面 {floorY:0}）");
+        fallen?.QueueFree();
+        await Frames(1);
 
         // 泥肝：每捡一个 count.泥肝 加 1，最多 5 个
         var counts = new List<long>();

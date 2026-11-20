@@ -47,16 +47,13 @@ position = Vector2(560, 524)
 script = ExtResource("n_story")
 ScriptId = "t_site"
 Label = "流星"
-Art = ExtResource("statue_art")
 PromptText = "触碰雕像"
 
 [node name="Shape" type="CollisionShape2D" parent="Objects/Story_Meteor" unique_id=1259668983]
 position = Vector2(0, -80)
 shape = SubResource("Shape_Story_Meteor")
 
-[node name="Placeholder" type="ColorRect" parent="Objects/Story_Meteor" unique_id=404505890]
-offset_left = -29.0
-offset_top = -128.0
-offset_right = 29.0
-mouse_filter = 2
-color = Color(0.45, 0.38, 0.3, 1)
+[node name="Art" type="Sprite2D" parent="Objects/Story_Meteor"]
+scale = Vector2(0.0996678, 0.0996678)
+texture = ExtResource("statue_art")
+offset = Vector2(0, -602)

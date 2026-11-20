@@ -5,6 +5,7 @@
 [ext_resource type="TileSet" path="res://assets/data/world/world_tileset.tres" id="4_v87l8"]
 [ext_resource type="Script" path="res://assets/scripts/world/SpawnPoint.cs" id="5_pjj0q"]
 [ext_resource type="Script" path="res://assets/scripts/narrative/world/TabletPickup.cs" id="n_tablet"]
+[ext_resource type="Texture2D" path="res://assets/art/collectible/spr_collectible_tablet_divination_1x1.png" id="art_tablet_divination"]
 
 [sub_resource type="RectangleShape2D" id="Shape_Tablet_annals"]
 size = Vector2(80, 96)
@@ -60,9 +61,7 @@ TabletId = "annals"
 position = Vector2(0, -48)
 shape = SubResource("Shape_Tablet_annals")
 
-[node name="Placeholder" type="ColorRect" parent="Objects/Tablet_annals" unique_id=634199721]
-offset_left = -29.0
-offset_top = -77.0
-offset_right = 29.0
-mouse_filter = 2
-color = Color(0.75, 0.6, 0.4, 1)
+[node name="Art" type="Sprite2D" parent="Objects/Tablet_annals"]
+scale = Vector2(0.120907, 0.120907)
+texture = ExtResource("art_tablet_divination")
+offset = Vector2(0, -198.5)

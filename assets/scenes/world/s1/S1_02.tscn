@@ -11,6 +11,7 @@
 [ext_resource type="Script" uid="uid://170bxbdwtr2a" path="res://assets/scripts/world/SpawnPoint.cs" id="5_bnf51"]
 [ext_resource type="Script" uid="uid://gcj5me3gasqr" path="res://assets/scripts/narrative/world/StoryTrigger.cs" id="n_story"]
 [ext_resource type="Script" uid="uid://bo6j7mpht131e" path="res://assets/scripts/narrative/world/TabletPickup.cs" id="n_tablet"]
+[ext_resource type="Texture2D" path="res://assets/art/collectible/spr_collectible_tablet_pit_1x1.png" id="art_tablet_pit"]
 
 [sub_resource type="RectangleShape2D" id="Shape_Tablet_nameless_day"]
 size = Vector2(80, 96)
@@ -133,13 +134,11 @@ TabletId = "nameless_day"
 position = Vector2(123, -41)
 shape = SubResource("Shape_Tablet_nameless_day")
 
-[node name="Placeholder" type="ColorRect" parent="Objects/Tablet_nameless_day" unique_id=1570376268]
-offset_left = 80.0
-offset_top = -75.0
-offset_right = 128.0
-offset_bottom = 2.0
-mouse_filter = 2
-color = Color(0.75, 0.6, 0.4, 1)
+[node name="Art" type="Sprite2D" parent="Objects/Tablet_nameless_day"]
+position = Vector2(104, 2)
+scale = Vector2(0.13913, 0.13913)
+texture = ExtResource("art_tablet_pit")
+offset = Vector2(0, -172.5)
 
 [node name="Story_Reflection" type="Area2D" parent="Objects" unique_id=634229649]
 position = Vector2(1200, 940)

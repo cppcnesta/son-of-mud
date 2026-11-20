@@ -12,6 +12,7 @@ namespace SonOfMud.UI;
 /// 打开时 PauseService.Request(Collection, true)，关闭时释放；ProcessMode = Always。开关和互斥由 GameUi 决定。
 /// 选格子：方向键 / WASD（按输入事件），上下换排时选同一列附近的格子；鼠标移到格子上也会选中。说明栏显示选中格子的名字和说明，
 /// 没得到过的显示「？？？ / 还没有得到。」。
+/// 选中泥瓶按 E（交互键）喝一瓶：回 30 血、数量减 1；满血或没有时不喝，说明栏写原因。
 /// 格子节点写在场景里（Slots/Item0..2、Slots/Col0..7），每格有 Icon、Count、Highlight 三个子节点。
 /// </summary>
 public partial class CollectionScreen : Control
@@ -74,6 +75,7 @@ public partial class CollectionScreen : Control
     {
         if (IsOpen) return;
         IsOpen = true;
+        UseMessage = "";
         PauseService.Request(PauseService.Collection, true);
         Visible = true;
         Refresh();
@@ -117,6 +119,7 @@ public partial class CollectionScreen : Control
     public void Select(int index)
     {
         if (_slots.Count == 0) return;
+        if (index != Selected) UseMessage = "";
         Selected = Mathf.Clamp(index, 0, _slots.Count - 1);
         for (int i = 0; i < _slots.Count; i++)
             if (_slots[i].GetNodeOrNull<CanvasItem>("Highlight") is { } h) h.Visible = i == Selected;
@@ -134,7 +137,7 @@ public partial class CollectionScreen : Control
             return;
         }
         NameLabel.Text = entry.DisplayName;
-        BodyLabel.Text = Describe(entry);
+        BodyLabel.Text = Describe(entry) + (entry.Id == BottleEntry && UseMessage != "" ? "\n" + UseMessage : "");
     }
 
     /// <summary>说明文字：泥板类列出已得到的泥板名字和数量。</summary>
@@ -159,10 +162,40 @@ public partial class CollectionScreen : Control
         return Settings.TabletName(id);
     }
 
-    /// <summary>方向键 / WASD 按下时移动选中格（按输入事件处理，一次按键一定只算一次，暂停中也能收到）。</summary>
+    /// <summary>可以在收集页里用掉的道具：格子编号 → 物品编号（泥瓶）。</summary>
+    public const string BottleEntry = "mud_bottle";
+    public static readonly StringName BottleItem = "泥瓶";
+    private static readonly StringName[] Use = { "interact", "ui_accept" };
+
+    /// <summary>最近一次在收集页里用道具的结果（空表示还没用过或用成功了）。</summary>
+    public string UseMessage { get; private set; } = "";
+
+    /// <summary>选中泥瓶时喝一瓶：发 UseItemRequested，World 那边能喝就回血、计数减 1；数量没变就说明喝不了，说明栏写原因。</summary>
+    public bool UseSelected()
+    {
+        CollectionEntry entry = _entries.ElementAtOrDefault(Selected);
+        if (entry == null || entry.Id != BottleEntry) return false;
+        long before = ItemCounts.Get(BottleItem);
+        Events.Instance?.EmitSignal(Events.SignalName.UseItemRequested, BottleItem);
+        long after = ItemCounts.Get(BottleItem);
+        UseMessage = after < before ? "" : before <= 0 ? "没有泥瓶了。" : "血是满的，现在不用喝。";
+        Refresh();
+        return after < before;
+    }
+
+    /// <summary>方向键 / WASD 按下时移动选中格；E 用掉选中的道具（按输入事件处理，一次按键一定只算一次，暂停中也能收到）。</summary>
     public override void _Input(InputEvent @event)
     {
         if (!IsOpen || @event.IsEcho()) return;
+        if (Is(@event, Use))
+        {
+            if (_entries.ElementAtOrDefault(Selected)?.Id == BottleEntry)
+            {
+                UseSelected();
+                GetViewport().SetInputAsHandled();
+            }
+            return;
+        }
         Vector2 dir = Is(@event, Left) ? Vector2.Left : Is(@event, Right) ? Vector2.Right : Is(@event, Up) ? Vector2.Up : Is(@event, Down) ? Vector2.Down : Vector2.Zero;
         if (dir == Vector2.Zero) return;
         Move(dir);

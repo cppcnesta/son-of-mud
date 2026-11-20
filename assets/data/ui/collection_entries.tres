@@ -19,8 +19,10 @@ script = ExtResource("entry")
 Id = "mud_bottle"
 DisplayName = "泥瓶"
 Icon = ExtResource("i1")
-Description = "碰到就喝下，回 30 点血。"
+Description = "最多存 5 瓶。在这里选中它按 E 喝一瓶，回 30 点血。"
 Flags = Array[StringName]([&"obtained.泥瓶"])
+CountKey = &"count.泥瓶"
+MaxCount = 5
 
 [sub_resource type="Resource" id="E_mud_liver"]
 script = ExtResource("entry")
