@@ -14,6 +14,8 @@
 [ext_resource type="Script" uid="uid://bkv2lvag413ju" path="res://assets/scripts/core/GateRequirement.cs" id="n_gate"]
 [ext_resource type="Script" uid="uid://b4i1n1sxdxq8y" path="res://assets/scripts/narrative/world/NpcTalk.cs" id="n_npc"]
 
+[ext_resource type="Script" path="res://assets/scripts/world/CollectiblePickup.cs" id="c_pickup"]
+[ext_resource type="Resource" path="res://assets/data/world/collectibles/clay_figurine.tres" id="c_figurine"]
 [sub_resource type="Resource" id="Resource_yrve7"]
 script = ExtResource("n_gate")
 Flags = Array[StringName]([&"boss_keeper"])
@@ -35,6 +37,10 @@ size = Vector2(96, 144)
 
 [sub_resource type="RectangleShape2D" id="Shape_ArenaLock"]
 size = Vector2(64, 256)
+
+[sub_resource type="Resource" id="Gate_Figurine"]
+script = ExtResource("n_gate")
+Flags = Array[StringName]([&"boss_keeper"])
 
 [node name="S1_05" type="Node2D" unique_id=953535163]
 script = ExtResource("1_ymdne")
@@ -156,6 +162,12 @@ offset_top = -115.0
 offset_right = 29.0
 mouse_filter = 2
 color = Color(0.5, 0.45, 0.35, 1)
+
+[node name="Collectible_clay_figurine" type="Area2D" parent="Objects"]
+position = Vector2(1904, 952)
+script = ExtResource("c_pickup")
+Def = ExtResource("c_figurine")
+VisibleWhen = SubResource("Gate_Figurine")
 
 [node name="Keeper" parent="Objects" unique_id=1826464765 instance=ExtResource("e_keeper")]
 position = Vector2(1904, 952)

@@ -123,9 +123,10 @@ try {
     # enemy_flow / keeper_flow 从正式入口 main_game.tscn 启动，结果写到 tests/output/enemy_flow_results.json、enemy_keeper_flow_results.json；
     # 扔泥肝 liver_throw 也从正式入口启动（真实玩家、真实按键），结果写到 enemy_liver_throw_results.json
     # 敌人美术图自动载入 enemy_art，结果写到 tests/output/enemy_art_results.json
+    # 收集品掉落 collectible_drop 从正式入口启动（打死敌人掉泥片 / 石头、S1_05 小泥偶、按 E 拾取），结果写到 world_collectible_drop_results.json
     $enemyCode = 0
     if ($Suite -eq 'all' -or $Suite -eq 'enemy' -or $Suite -eq 'new') {
-        $enemyScenes = @('tests/enemy/enemy_unit.tscn', 'tests/enemy/enemy_lab.tscn', 'tests/enemy/keeper_lab.tscn', 'tests/enemy/enemy_flow.tscn', 'tests/enemy/keeper_flow.tscn', 'tests/enemy/arena_lock_climb.tscn', 'tests/enemy/devout_lab.tscn', 'tests/player/liver_throw.tscn', 'tests/enemy/enemy_art.tscn')
+        $enemyScenes = @('tests/enemy/enemy_unit.tscn', 'tests/enemy/enemy_lab.tscn', 'tests/enemy/keeper_lab.tscn', 'tests/enemy/enemy_flow.tscn', 'tests/enemy/keeper_flow.tscn', 'tests/enemy/arena_lock_climb.tscn', 'tests/enemy/devout_lab.tscn', 'tests/player/liver_throw.tscn', 'tests/enemy/enemy_art.tscn', 'tests/world/collectible_drop.tscn')
         foreach ($enemyScene in $enemyScenes) {
             $enemyName = [System.IO.Path]::GetFileNameWithoutExtension($enemyScene)
             $enemyArguments = @('--path', $projectPath, '--scene', "res://$enemyScene", '--rendering-method', 'gl_compatibility', '--audio-driver', 'Dummy', '--fixed-fps', '60', '--log-file', (Join-Path $outputPath "enemy_$enemyName.log"))
