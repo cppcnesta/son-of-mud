@@ -5,5 +5,5 @@
 
 [resource]
 script = ExtResource("1")
-Damage = 30.0
+Damage = 12.0
 Feel = ExtResource("feel")

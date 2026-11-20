@@ -128,25 +128,31 @@ public partial class CombatSuite : LabSuiteBase
         return before - dummy.Stats.Health;
     }
 
+    // 手感调整后的攻击数据（策划表 3.2）：伤害、时长都从数据读
+    private static FormConfig WaterForm => GD.Load<FormConfig>("res://assets/data/player_v2/water.tres");
+    private static FormConfig MudForm => GD.Load<FormConfig>("res://assets/data/player_v2/mud.tres");
+    private static int WaterDamage => Mathf.RoundToInt(WaterForm.AttackSpec.Damage);
+    private static int MudDamage => Mathf.RoundToInt(MudForm.AttackSpec.Damage);
+
     private async Task DamageAndDedupChecks()
     {
         await Arrange(Near, Far, 0);
         int hitStops = _hitStops;
         int dealt = await SwingAt(_a, 0);
         Check(_hitStops == hitStops + 1, "命中造成伤害时发出一次 Events.HitStopRequested");
-        Check(dealt == 10 && _a.DamageEvents == 1, $"水形态打假人扣 10，一次挥击跨 6 个有效帧只扣一次（实际 {dealt}，扣血 {_a.DamageEvents} 次）");
+        Check(dealt == WaterDamage && _a.DamageEvents == 1, $"水形态打假人扣 {WaterDamage}，一次挥击跨 6 个有效帧只扣一次（实际 {dealt}，扣血 {_a.DamageEvents} 次）");
         Check(_playerOutcomes.Count == 1 && _playerOutcomes[0] == HitOutcome.Damaged, $"命中回调只有一次，结果 Damaged（{string.Join(",", _playerOutcomes)}）");
 
         await Arrange(Near, Far, 1);
         int events = _a.DamageEvents;
         dealt = await SwingAt(_a, 1);
-        Check(dealt == 24 && _a.DamageEvents == events + 1, $"泥形态打假人扣 24，跨 8 个有效帧只扣一次（实际 {dealt}）");
+        Check(dealt == MudDamage && _a.DamageEvents == events + 1, $"泥形态打假人扣 {MudDamage}，跨 8 个有效帧只扣一次（实际 {dealt}）");
 
         await Arrange(Far, Near, 0);
         events = _b.DamageEvents;
         dealt = await SwingAt(_b, 0);
-        Check(_b.HurtBoxes.Count == 2 && dealt == 10 && _b.DamageEvents == events + 1 && _playerOutcomes.Count == 1,
-            $"同一实体有两个 HurtBox（头、躯干）都在攻击范围内：只扣一次 10（实际 {dealt}，回调 {_playerOutcomes.Count} 次）");
+        Check(_b.HurtBoxes.Count == 2 && dealt == WaterDamage && _b.DamageEvents == events + 1 && _playerOutcomes.Count == 1,
+            $"同一实体有两个 HurtBox（头、躯干）都在攻击范围内：只扣一次 {WaterDamage}（实际 {dealt}，回调 {_playerOutcomes.Count} 次）");
 
         Hit hit = MakeHit("dedup_two_boxes", 10f, Player.GlobalPosition);
         HitOutcome first = _b.HurtBoxes[0].Receive(hit);
@@ -181,34 +187,33 @@ public partial class CombatSuite : LabSuiteBase
     {
         await Arrange(Far, Far, 1);
         await Tap(PlayerActions.Attack);
-        Check(Player.State is AttackState && Player.Timers.AttackInterval > 1.6f, "泥攻击开始：进入前摇并开始攻击间隔");
+        FormConfig mud = MudForm, water = WaterForm;
+        float mudSwing = mud.AttackWindup + mud.AttackActive;
+        Check(Player.State is AttackState && Player.Timers.AttackInterval > mudSwing + mud.AttackRecovery - 2 * Dt, $"泥攻击开始：进入前摇并开始攻击间隔（{Player.Timers.AttackInterval:F2}）");
         int frames = 1;
         while (Player.State is AttackState && frames < 60) { frames++; await Frames(1); }
         ulong recoveryStart = Engine.GetPhysicsFrames();
-        Check(_playerOutcomes.Count == 0 && Player.State is AttackRecoveryState && Mathf.Abs(frames * Dt - 0.26f) <= 2 * Dt,
-            $"泥攻击挥空：没有任何命中回调，仍按自己的计时器在约 0.26 秒后收招进后摇（{frames} 帧）");
+        Check(_playerOutcomes.Count == 0 && Player.State is AttackRecoveryState && Mathf.Abs(frames * Dt - mudSwing) <= 2 * Dt,
+            $"泥攻击挥空：没有任何命中回调，仍按自己的计时器在约 {mudSwing:F2} 秒后收招进后摇（{frames} 帧）");
         Check(Mathf.Abs(Player.Timers.Recovery.Multiplier() - 0.2f) < 0.03f && Player.Timers.Recovery.RecoverySource == MovementRecovery.Source.Attack,
             $"泥后摇起步是 20% 移速（实际 {Player.Timers.Recovery.Multiplier():F3}）");
         float x = Player.GlobalPosition.X;
         Press(PlayerActions.Right);
-        await Frames(15);
+        await Frames(4);
         Release(PlayerActions.Right);
         float moved = Player.GlobalPosition.X - x;
-        Check(Player.State is AttackRecoveryState && moved > 8f && moved < 70f, $"泥后摇 1.5 秒内可以移动，但被减速（15 帧移动 {moved:F1}px）");
-        // 连招窗口（前 0.35 秒）之后、能重新出刀（1.2 秒）之前按的攻击：到点时已过缓冲，作废（连招见 combo_feel）
-        await WaitWhile(() => Player.State is AttackRecoveryState { Elapsed: < 0.5f }, 60);
-        await Tap(PlayerActions.Attack);
-        Check(Player.State is AttackRecoveryState, "泥后摇第 0.5 秒（连招窗口之后、能重新出刀之前）再按攻击无效");
+        Check(Player.State is AttackRecoveryState && moved > 0.5f && moved < mud.MoveSpeed * 4 * Dt, $"泥后摇 {mud.AttackRecovery} 秒内可以移动，但被减速（4 帧移动 {moved:F1}px）");
         await WaitWhile(() => Player.State is AttackRecoveryState, 120);
         float recovery = (Engine.GetPhysicsFrames() - recoveryStart) * Dt;
-        Check(Player.State is IdleState && Mathf.Abs(recovery - 1.5f) <= 2 * Dt, $"泥后摇按时结束回到 Idle（实测 {recovery:F3} 秒）");
+        Check(Player.State is IdleState or RunState && Mathf.Abs(recovery - mud.AttackRecovery) <= 2 * Dt, $"泥后摇按时结束回到自由状态（实测 {recovery:F3} 秒，应 {mud.AttackRecovery}）");
 
         await Arrange(Far, Far, 0);
         await Tap(PlayerActions.Attack);
         frames = 1;
         while (Player.State is AttackState && frames < 60) { frames++; await Frames(1); }
-        Check(_playerOutcomes.Count == 0 && Player.State is IdleState && Mathf.Abs(frames * Dt - 0.34f) <= 2 * Dt,
-            $"水攻击挥空：前摇 0.08 + 判定 0.10 + 后摇 0.16 后按时回到 Idle（{frames} 帧）");
+        float waterSwing = water.AttackWindup + water.AttackActive + water.AttackRecovery;
+        Check(_playerOutcomes.Count == 0 && Player.State is IdleState && Mathf.Abs(frames * Dt - waterSwing) <= 2 * Dt,
+            $"水攻击挥空：前摇 {water.AttackWindup} + 判定 {water.AttackActive} + 后摇 {water.AttackRecovery} 后按时回到 Idle（{frames} 帧）");
     }
 
     private async Task DownAttackAndSlamChecks()
@@ -223,7 +228,8 @@ public partial class CombatSuite : LabSuiteBase
         Release(PlayerActions.Down);
         Check(Player.State is AttackState { Down: true }, "没有下砸能力时空中下+攻击是下劈");
         await WaitWhile(() => Player.State is AttackState, 40);
-        Check(before - _a.Stats.Health == 43, $"泥形态下落中的下劈强化 ×1.8：floor(24×1.8)=43（实际 {before - _a.Stats.Health}）");
+        int down = DamageMath.Final(MudDamage, 1.8f);
+        Check(before - _a.Stats.Health == down, $"泥形态下落中的下劈强化 ×1.8：floor({MudDamage}×1.8)={down}（实际 {before - _a.Stats.Health}）");
 
         GameSession.Progress.Unlock(PlayerAbilities.HeavySlam);
         await Arrange(Near, Far, 1);
@@ -290,7 +296,8 @@ public partial class CombatSuite : LabSuiteBase
         await Arrange(Near, Far, 1);
         Player.Timers.Bonus.Grant(1.6f);
         int dealt = await SwingAt(_a, 1);
-        Check(dealt == 38 && !Player.Timers.Bonus.Ready, $"泥增伤：下一刀 floor(24×1.6)=38，命中后消耗（实际 {dealt}）");
+        int bonus = DamageMath.Final(MudDamage, 1.6f);
+        Check(dealt == bonus && !Player.Timers.Bonus.Ready, $"泥增伤：下一刀 floor({MudDamage}×1.6)={bonus}，命中后消耗（实际 {dealt}）");
 
         await Arrange(Far, Far, 1);
         Player.Timers.Bonus.Grant(1.6f);
@@ -314,7 +321,7 @@ public partial class CombatSuite : LabSuiteBase
         Player.Timers.Bonus.Grant(1.6f);
         _a.Stagger.Begin();
         dealt = await SwingAt(_a, 1);
-        Check(dealt == 48, $"增伤 1.6 和易伤 ×2 同时生效：取 ×2，泥形态一刀 48（实际 {dealt}）");
+        Check(dealt == MudDamage * 2, $"增伤 1.6 和易伤 ×2 同时生效：取 ×2，泥形态一刀 {MudDamage * 2}（实际 {dealt}）");
         _a.Stagger.End();
     }
 
@@ -395,7 +402,7 @@ public partial class CombatSuite : LabSuiteBase
         // 顿帧期间游戏时间不走，僵直计时也不走：只算没顿帧的帧
         float ticked = ((long)(endFrame - startFrame) - FrozenBetween(startFrame, endFrame)) * Dt;
         float reduced = before - _a.Stagger.Remaining - ticked;
-        Check(dealt == 48, $"僵直中泥形态一刀：增伤 1.6 与易伤 ×2 取大 → 48（实际 {dealt}）");
+        Check(dealt == MudDamage * 2, $"僵直中泥形态一刀：增伤 1.6 与易伤 ×2 取大 → {MudDamage * 2}（实际 {dealt}）");
         Check(Mathf.Abs(reduced - 1f) < 0.02f, $"每受一次伤剩余时间额外减 1 秒（扣除自然流逝 {ticked:F3} 秒后减少 {reduced:F3} 秒）");
 
         int hits = 1;

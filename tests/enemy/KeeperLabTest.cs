@@ -205,7 +205,8 @@ public partial class KeeperLabTest : LabSuiteBase
             recoverFrames++;
             if (!released) { RealKeys.Up(RealKeys.Attack); released = true; }
         }
-        Check(bossHp - _keeper.Stats.Health == 20, $"横扫收招：期间玩家水形态一刀打出 {bossHp - _keeper.Stats.Health}（10 × 2）");
+        int waterHit = Mathf.RoundToInt(GD.Load<HitSpec>("res://assets/data/player_v2/water_attack.tres").Damage);
+        Check(bossHp - _keeper.Stats.Health == waterHit * 2, $"横扫收招：期间玩家水形态一刀打出 {bossHp - _keeper.Stats.Health}（{waterHit} × 2）");
         // 期间那一刀会顿帧（游戏时间不走）：扣掉顿帧的帧
         int recoverFrozen = FrozenBetween(recoverStart, Engine.GetPhysicsFrames());
         Check(Mathf.Abs(recoverFrames - recoverFrozen - 30) <= 1, $"横扫收招：固定 0.5 秒，受击不缩短（{recoverFrames} 帧，其中顿帧 {recoverFrozen} 帧，Q4）");
@@ -368,7 +369,8 @@ public partial class KeeperLabTest : LabSuiteBase
         RealKeys.Up(RealKeys.Attack);
         _keeper.Stats.HealthChanged -= OnBossHp;
         await Frames(1);
-        Check(hits.Count >= 2 && hits.All(h => h.dealt == 20), $"反制僵直：期间每刀 {string.Join("/", hits.Select(h => h.dealt))}（水 10 × 2）");
+        int waterDamage = Mathf.RoundToInt(GD.Load<HitSpec>("res://assets/data/player_v2/water_attack.tres").Damage);
+        Check(hits.Count >= 2 && hits.All(h => h.dealt == waterDamage * 2), $"反制僵直：期间每刀 {string.Join("/", hits.Select(h => h.dealt))}（水 {waterDamage} × 2）");
         bool dropsOk = hits.Count >= 2 && hits.All(h => h.ended ? h.before <= 1.03f : h.drop > 0.99f && h.drop < 1.03f);
         Check(dropsOk, $"反制僵直：每受一次伤剩余时间减 1 秒（每刀那一帧减少 {string.Join("/", hits.Select(h => h.drop.ToString("F3") + (h.ended ? "（减到 0 结束）" : "")))}）");
         Check(frames < 300 && _keeper.State is ApproachState or SweepWindupState && _keeper.Tail.IsRecharging && _keeper.Tail.Remaining > 19.9f && _keeper.Stats.IncomingMultiplier == 1f,

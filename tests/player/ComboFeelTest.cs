@@ -60,18 +60,19 @@ public partial class ComboFeelTest : LabSuiteBase
         var mud = GD.Load<FormConfig>("res://assets/data/player_v2/mud.tres");
         var rules = GD.Load<PlayerRules>("res://assets/data/player_v2/rules.tres");
         var table = GD.Load<AbilityTable>("res://assets/data/core/ability_table.tres");
-        Check(water.Attack2Spec?.Damage == 14f && Mathf.IsEqualApprox(water.Attack2Windup, 0.06f) && Mathf.IsEqualApprox(water.Attack2Active, 0.12f)
-              && Mathf.IsEqualApprox(water.Attack2Recovery, 0.24f) && Mathf.IsEqualApprox(water.ComboWindow, 0.16f),
-            "水第 2 下：伤害 14，前摇 / 判定 / 后摇 0.06 / 0.12 / 0.24，接招窗口 = 第 1 下整段后摇 0.16");
-        Check(mud.Attack2Spec?.Damage == 30f && Mathf.IsEqualApprox(mud.Attack2Windup, 0.12f) && Mathf.IsEqualApprox(mud.Attack2Active, 0.14f)
-              && Mathf.IsEqualApprox(mud.ComboWindow, 0.35f),
-            "泥第 2 下：伤害 30，前摇 / 判定 0.12 / 0.14，收势前 0.35 秒接");
+        // 手感调整版（策划表 3.2）：出刀加快，伤害按每秒伤害下调
+        Check(water.AttackSpec?.Damage == 8f && water.Attack2Spec?.Damage == 11f && Mathf.IsEqualApprox(water.Attack2Windup, 0.05f) && Mathf.IsEqualApprox(water.Attack2Active, 0.10f)
+              && Mathf.IsEqualApprox(water.Attack2Recovery, 0.18f) && Mathf.IsEqualApprox(water.ComboWindow, water.AttackRecovery),
+            $"水：伤害 8 / 11，第 2 下前摇 / 判定 / 后摇 0.05 / 0.10 / 0.18，接招窗口 = 第 1 下整段后摇 {water.AttackRecovery}");
+        Check(mud.AttackSpec?.Damage == 9f && mud.Attack2Spec?.Damage == 12f && Mathf.IsEqualApprox(mud.Attack2Windup, 0.10f) && Mathf.IsEqualApprox(mud.Attack2Active, 0.12f)
+              && Mathf.IsEqualApprox(mud.ComboWindow, mud.AttackRecovery) && mud.Attack2Active > 0f,
+            $"泥：伤害 9 / 12，第 2 下前摇 / 判定 0.10 / 0.12（判定不是 0，打得中），接招窗口 = 整段收势 {mud.AttackRecovery}");
         Check(Mathf.IsEqualApprox(water.Attack2Spec.Feel.HitStop, 0.08f) && Mathf.IsEqualApprox(water.Attack2Spec.Feel.ShakeStrength, 3f)
               && Mathf.IsEqualApprox(mud.Attack2Spec.Feel.HitStop, 0.11f) && Mathf.IsEqualApprox(mud.Attack2Spec.Feel.ShakeStrength, 6f),
             "第 2 下打击感加一档：水顿帧 0.08、震屏 3；泥顿帧 0.11、震屏 6");
         Check(Mathf.IsEqualApprox(water.AttackMoveMultiplier, 0.6f) && mud.AttackMoveMultiplier == 0f
-              && Mathf.IsEqualApprox(mud.ReattackAfter, 1.2f) && water.ReattackAfter == 0f,
-            "攻击中移速：水 0.6、泥 0；泥收势 1.2 秒后能重新出刀");
+              && mud.ReattackAfter == 0f && water.ReattackAfter == 0f,
+            "攻击中移速：水 0.6、泥 0；泥收势结束就能重新出刀");
         Check(Mathf.IsEqualApprox(rules.AttackBuffer, 0.25f) && Mathf.IsEqualApprox(rules.ActionBuffer, 0.15f)
               && Mathf.IsEqualApprox(rules.SlamLandAnimSeconds, 0.25f),
             "攻击缓冲 0.25 秒，格挡 / 闪避缓冲仍 0.15 秒；下砸落地动画 0.25 秒");
@@ -127,7 +128,8 @@ public partial class ComboFeelTest : LabSuiteBase
         Check(waited >= 0 && Attack.AnimName == "attack_down" && Player.Animator.CurrentAnimation == "water_attack_down",
             $"水：第 1 下判定里按攻击 → 后摇一开始接第 2 下，播 water_attack_down（{Player.Animator.CurrentAnimation}）");
         await FramesUntil(() => Player.State is not AttackState, 120);
-        Check(_dummy.DamageEvents - before == 2 && _dummy.LastDealt == 14, $"两下都打中，第 2 下扣 14（{_dummy.DamageEvents - before} 次，最后 {_dummy.LastDealt}）");
+        int water2 = Mathf.RoundToInt(Player.Forms.Current.Attack2Spec.Damage);
+        Check(_dummy.DamageEvents - before == 2 && _dummy.LastDealt == water2, $"两下都打中，第 2 下扣 {water2}（{_dummy.DamageEvents - before} 次，最后 {_dummy.LastDealt}）");
         await Tap(PlayerActions.Attack);
         await Frames(1);
         Check(Attack is { ComboStep: 1 }, "第 2 下打完，再按从第 1 下开始");
@@ -139,7 +141,9 @@ public partial class ComboFeelTest : LabSuiteBase
         await Tap(PlayerActions.Attack);
         await FramesUntil(() => Attack is { ComboStep: 2 }, 30);
         int frames = await FramesUntil(() => Player.State is not AttackState, 120);
-        Check(Mathf.Abs(frames - FramesFor(0.42f)) <= 2, $"水第 2 下整段 0.06 + 0.12 + 0.24 = 0.42 秒（{frames} 帧）");
+        FormConfig wc = Player.Forms.Current;
+        float second = wc.Attack2Windup + wc.Attack2Active + wc.Attack2Recovery;
+        Check(Mathf.Abs(frames - FramesFor(second)) <= 2, $"水第 2 下整段 {wc.Attack2Windup} + {wc.Attack2Active} + {wc.Attack2Recovery} = {second:F2} 秒（{frames} 帧）");
         // 窗口外：第 1 下整段收完再按，是第 1 下
         await Frames(10);
         await Tap(PlayerActions.Attack);
@@ -168,27 +172,30 @@ public partial class ComboFeelTest : LabSuiteBase
         int before = _dummy.DamageEvents;
         await Tap(PlayerActions.Attack);
         await FramesUntil(() => Player.State is AttackRecoveryState, 60);
-        await Frames(FramesFor(0.2f));
+        float half = Player.Forms.Current.ComboWindow * 0.5f;
+        await Frames(FramesFor(half) - 2);
         await Tap(PlayerActions.Attack);
         int waited = await FramesUntil(() => Attack is { ComboStep: 2 }, 10);
-        Check(waited >= 0 && Player.Animator.CurrentAnimation == "mud_attack_down", $"泥：收势第 0.2 秒按攻击 → 接第 2 下，播 mud_attack_down（{Player.Animator.CurrentAnimation}）");
+        Check(waited >= 0 && Player.Animator.CurrentAnimation == "mud_attack_down", $"泥：收势第 {half:F2} 秒按攻击 → 接第 2 下，播 mud_attack_down（{Player.Animator.CurrentAnimation}）");
         await FramesUntil(() => Player.State is AttackRecoveryState, 60);
-        await Frames(2);
+        await Frames(1);
         var rec = Player.State as AttackRecoveryState;
         Check(rec is { EndedStep: 2 } && Player.Animator.RecoverFallbackActive && Player.Animator.CurrentAnimation == "mud_attack_down"
               && Player.Animator.Sprite.Frame == Player.Animator.Sprite.SpriteFrames.GetFrameCount("mud_attack_down") - 1,
             "泥第 2 下之后的收势：先停在 attack_down 最后一帧");
-        Check(_dummy.DamageEvents - before == 2 && _dummy.LastDealt == 30, $"两下都打中，第 2 下扣 30（最后 {_dummy.LastDealt}）");
+        int mud2 = Mathf.RoundToInt(Player.Forms.Current.Attack2Spec.Damage);
+        Check(_dummy.DamageEvents - before == 2 && _dummy.LastDealt == mud2, $"两下都打中，第 2 下扣 {mud2}（最后 {_dummy.LastDealt}）");
         await Frames(FramesFor(1.6f));
 
-        // 窗口外（0.35 秒以后）按：不接第 2 下
+        // 窗口外：收势整段走完再按，从第 1 下重新开始
         await Reset(new Vector2(400, FloorY), Mud);
         await Tap(PlayerActions.Attack);
         await FramesUntil(() => Player.State is AttackRecoveryState, 60);
-        await Frames(FramesFor(0.45f));
-        await Tap(PlayerActions.Attack);
+        await FramesUntil(() => Player.State is not AttackRecoveryState, 60);
         await Frames(2);
-        Check(Player.State is AttackRecoveryState, "泥收势第 0.45 秒（窗口外）按攻击：不接第 2 下");
+        await Tap(PlayerActions.Attack);
+        await Frames(1);
+        Check(Attack is { ComboStep: 1 }, "泥收势走完以后再按：从第 1 下重新开始，不接第 2 下");
         await Frames(FramesFor(1.5f));
     }
 
@@ -261,7 +268,9 @@ public partial class ComboFeelTest : LabSuiteBase
 
     private async Task BufferChecks()
     {
-        // 水第 2 下没有连招，攻击间隔 = 0.42 秒；在结束前不同时刻按一次，看结束时出不出第 1 下
+        // 水第 2 下之后没有连招，攻击间隔 = 第 2 下整段；在结束前不同时刻按一次，看结束时出不出第 1 下（攻击缓冲 0.25 秒）
+        FormConfig water = GD.Load<FormConfig>("res://assets/data/player_v2/water.tres");
+        float total = water.Attack2Windup + water.Attack2Active + water.Attack2Recovery;
         foreach ((float before, bool expect) in new[] { (0.2f, true), (0.3f, false) })
         {
             await Reset(Far, Water);
@@ -269,8 +278,8 @@ public partial class ComboFeelTest : LabSuiteBase
             await FramesUntil(() => Attack is { Current: AttackState.Phase.Recovery }, 30);
             await Tap(PlayerActions.Attack);
             await FramesUntil(() => Attack is { ComboStep: 2 }, 10);
-            // 第 2 下从现在起 0.42 秒结束；等到结束前 before 秒按
-            await Frames(FramesFor(0.42f - before) - 2);
+            // 第 2 下从现在起 total 秒结束；等到结束前 before 秒按
+            await Frames(Mathf.Max(0, FramesFor(total - before) - 2));
             await Tap(PlayerActions.Attack);
             int frames = await FramesUntil(() => Player.State is not AttackState, 60);
             await Frames(1);
@@ -280,29 +289,24 @@ public partial class ComboFeelTest : LabSuiteBase
         }
     }
 
-    // ---------- ② D：泥收势后段重新出刀 ----------
+    // ---------- ② D：泥收势结束后重新出刀 ----------
 
     private async Task ReattackChecks()
     {
-        // 反例：收势第 0.40 秒按，到 1.2 秒时已过 0.8 秒，超过 0.25 秒缓冲，不出刀
+        // 第 2 下之后的收势里按攻击（不再接连招）：收势结束（攻击间隔到了）就出第 1 下
         await Reset(new Vector2(400, FloorY), Mud);
+        float recovery = Player.Forms.Current.AttackRecovery;
         await Tap(PlayerActions.Attack);
         await FramesUntil(() => Player.State is AttackRecoveryState, 60);
-        await Frames(FramesFor(0.40f) - 2);
         await Tap(PlayerActions.Attack);
-        int ended = await FramesUntil(() => Player.State is not AttackRecoveryState, FramesFor(1.6f));
-        Check(Player.State is not AttackState && ended >= FramesFor(1.0f), $"泥收势第 0.40 秒按攻击：到 1.2 秒不出刀（收势照常走完，{ended} 帧后结束）");
-        await Frames(10);
-
-        // 到点前 0.2 秒按：到 1.2 秒出第 1 下
-        await Reset(new Vector2(400, FloorY), Mud);
-        await Tap(PlayerActions.Attack);
+        await FramesUntil(() => Attack is { ComboStep: 2 }, 20);
         await FramesUntil(() => Player.State is AttackRecoveryState, 60);
-        await Frames(FramesFor(1.0f) - 2);
+        ulong start = Engine.GetPhysicsFrames();
         await Tap(PlayerActions.Attack);
         int f = await FramesUntil(() => Player.State is AttackState, 40);
-        float at = (FramesFor(1.0f) + f) / 60f;
-        Check(Attack is { ComboStep: 1 } && Mathf.Abs(at - 1.2f) <= 0.05f, $"泥收势第 1.0 秒按攻击：第 {at:F2} 秒重新出第 1 下（应 1.2）");
+        float at = (Engine.GetPhysicsFrames() - start) / 60f;
+        Check(f >= 0 && Attack is { ComboStep: 1 } && Mathf.Abs(at - recovery) <= 0.05f,
+            $"泥第 2 下的收势里按攻击：收势结束（{recovery} 秒）时出第 1 下（实测 {at:F2} 秒）");
         await Frames(FramesFor(1.8f));
     }
 
@@ -347,23 +351,15 @@ public partial class ComboFeelTest : LabSuiteBase
             string anim = Player.Animator.CurrentAnimation;
             Check(rec is { FromSlam: true } && Player.Animator.SlamLandActive && anim.EndsWith("slam_land"),
                 $"{f}下砸落地：收势开头播落地动画（{anim}）");
-            int frames = 0;
-            while (Player.Animator.SlamLandActive && frames < 60) { await Frames(1); frames++; }
-            Check(Mathf.Abs(frames - FramesFor(0.25f)) <= 2, $"{f}：落地动画播 0.25 秒（{frames} 帧）");
-            if (form == Mud)
-            {
-                await Frames(2);
-                Check(Player.State is AttackRecoveryState && !Player.Animator.CurrentAnimation.EndsWith("slam_land"),
-                    $"泥：之后照原来的收势（{Player.Animator.CurrentAnimation}）");
-                int rest = await FramesUntil(() => Player.State is not AttackRecoveryState, 120);
-                float total = (FramesFor(0.25f) + 2 + rest) / 60f;
-                Check(Mathf.Abs(total - 1.5f) <= 0.05f, $"泥收势总时长不变：1.5 秒（{total:F2}）");
-            }
-            else
-            {
-                await Frames(2);
-                Check(Player.State is not AttackRecoveryState, "水：0.25 秒站定收势整段是落地动画，之后收势结束");
-            }
+            // 落地动画占用收势时间、不额外延长：播 min(0.25, 收势时长)。泥的收势跟普通攻击一样（手感调整后 0.15 秒），整段是落地动画
+            float duration = rec?.AnimDuration ?? 0f;
+            float land = Mathf.Min(Player.Rules.SlamLandAnimSeconds, duration);
+            int frames = 1;
+            while (Player.Animator.SlamLandActive && frames < 120) { await Frames(1); frames++; }
+            Check(Mathf.Abs(frames - FramesFor(land)) <= 2, $"{f}：落地动画播 {land:F2} 秒（{frames} 帧）");
+            int rest = await FramesUntil(() => Player.State is not AttackRecoveryState, 120);
+            float total = (frames + rest) / 60f;
+            Check(Mathf.Abs(total - duration) <= 0.05f, $"{f}：落地收势总时长不变 {duration:F2} 秒（{total:F2}）");
             await Frames(20);
         }
         GameSession.Progress.Revoke("heavy_slam");

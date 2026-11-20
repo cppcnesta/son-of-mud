@@ -65,48 +65,41 @@ public partial class FeelChecks : LabSuiteBase
 
     private async Task AttackRecoveryChecks()
     {
+        // 手感调整版：泥收势 0.15 秒（能走、从 20% 移速恢复），整段都是连招窗口和格挡取消窗口，收势结束才能重新出第 1 下
         await Reset(new Vector2(400, FloorY), 1);
+        FormConfig mud = Player.Forms.Current;
         await Tap(PlayerActions.Attack);
         Ok(Player.State is AttackState { Current: AttackState.Phase.Windup }, "泥普通攻击进入前摇");
         await WaitForRecovery();
-        Ok(Player.State is AttackRecoveryState && Mathf.Abs(Player.Timers.Recovery.Remaining - 1.5f) < 0.04f && Player.Timers.Recovery.RecoverySource == Source.Attack,
-            "有效判定后进入1.5秒曲线减速后摇");
+        Ok(Player.State is AttackRecoveryState && Mathf.Abs(Player.Timers.Recovery.Remaining - mud.AttackRecovery) < 0.04f && Player.Timers.Recovery.RecoverySource == Source.Attack,
+            $"有效判定后进入 {mud.AttackRecovery} 秒曲线减速收势");
         float startX = Player.GlobalPosition.X;
         Press(PlayerActions.Right);
-        await Frames(15);
+        await Frames(4);
         Release(PlayerActions.Right);
-        Ok(Player.GlobalPosition.X > startX + 8 && Player.GlobalPosition.X < startX + 70, "攻击后摇期间实际可移动且受减速");
-        // 连招窗口（前 0.35 秒）里按是接第 2 下（见 combo_feel）；窗口之后、能重新出刀（1.2 秒）之前按的作废
-        for (int i = 0; i < 40 && Player.State is AttackRecoveryState { Elapsed: < 0.5f }; i++) await Frames(1);
-        await Tap(PlayerActions.Attack);
-        Ok(Player.State is AttackRecoveryState, "攻击后摇（连招窗口之后、1.2 秒之前）不可连点重开攻击");
-        await Tap(PlayerActions.Block);
-        Ok(Player.State is AttackRecoveryState && Player.Timers.BlockCooldown == 0f, "攻击后摇前1秒拒绝格挡且不消耗CD");
-        for (int i = 0; i < 80 && Player.State is AttackRecoveryState { Remaining: > 0.45f }; i++) await Frames(1);
+        float moved = Player.GlobalPosition.X - startX;
+        Ok(moved > 0.5f && moved < mud.MoveSpeed * 4 * Dt, $"收势期间实际可移动且受减速（4 帧 {moved:F1} 像素，全速 {mud.MoveSpeed * 4 * Dt:F1}）");
+        Ok(mud.BlockCancelWindow >= mud.AttackRecovery && mud.ComboWindow >= mud.AttackRecovery,
+            $"泥收势 {mud.AttackRecovery} 秒整段都能格挡取消（窗口 {mud.BlockCancelWindow}）、都能接第 2 下（窗口 {mud.ComboWindow}）");
         Press(PlayerActions.Block);
         await Frames(2);
-        Ok(Player.State is BlockState, "泥攻击后摇最后0.5秒允许格挡");
+        Ok(Player.State is BlockState, "泥攻击收势里按格挡：取消收势进入格挡");
         float previousInterval = Player.Timers.AttackInterval;
         float previousCd = Player.Timers.BlockCooldown;
         HitOutcome outcome = Player.HurtBox.Receive(MakeHit("feel_mud_parry", 1f, Player.GlobalPosition));
         Ok(outcome == HitOutcome.Blocked && Player.Timers.Bonus.Ready && Player.Timers.BlockCooldown == previousCd && Player.Timers.AttackInterval == previousInterval,
             "泥格挡保留增伤但不刷新水形态专属CD/攻击间隔");
         Release(PlayerActions.Block);
-        await Frames(1);
-        bool free = Player.State is IdleState or RunState;
-        bool intervalLeft = Player.Timers.AttackInterval > 3 * Dt;
+        for (int i = 0; i < 20 && Player.State is not (IdleState or RunState); i++) await Frames(1);
         await Tap(PlayerActions.Attack);
-        Ok(free && intervalLeft && Player.State is not AttackState, "提前松开泥格挡不能绕过剩余攻击间隔（收势开始 1.2 秒才能再出刀）");
-        // 刚才那一下在缓冲里（0.25 秒），攻击间隔一到就出
-        for (int i = 0; i < 20 && Player.State is not AttackState; i++) await Frames(1);
-        Ok(Player.State is AttackState, "攻击间隔一到，0.25 秒内按过的攻击就出");
+        Ok(Player.State is AttackState, "松开格挡回到自由状态后，攻击间隔已过，按攻击就出刀");
         for (int i = 0; i < 200 && Player.State is not (IdleState or RunState); i++) await Frames(1);
         Ok(Player.Timers.Recovery.Remaining == 0f && Player.Timers.AttackReady, "攻击收势到期后可再次攻击");
     }
 
     private async Task DodgeCancelChecks()
     {
-        foreach (int ticks in new[] { 0, 35, 65 })
+        foreach (int ticks in new[] { 0, 4, 7 }) // 泥收势 0.15 秒（9 帧）里的开头、中间、末尾
         {
             await Reset(new Vector2(400, FloorY), 1);
             await Tap(PlayerActions.Attack);
@@ -164,8 +157,8 @@ public partial class FeelChecks : LabSuiteBase
         await Tap(PlayerActions.Attack);
         Release(PlayerActions.Down);
         for (int i = 0; i < 20 && Player.State is SlamState; i++) await Frames(1);
-        Ok(Player.State is AttackRecoveryState { Soft: true } && Player.Timers.Recovery.RecoverySource == Source.Attack && Player.Timers.Recovery.Duration == 1.5f,
-            "泥下砸落地使用1.5秒可移动攻击收势");
+        Ok(Player.State is AttackRecoveryState { Soft: true } && Player.Timers.Recovery.RecoverySource == Source.Attack && Mathf.IsEqualApprox(Player.Timers.Recovery.Duration, Player.Forms.Current.AttackRecovery),
+            $"泥下砸落地使用 {Player.Forms.Current.AttackRecovery} 秒可移动攻击收势（和普通攻击的收势一样）");
         await Tap(PlayerActions.Dodge);
         Ok(Player.State is DodgeState && Player.Timers.AttackInterval == 0f, "泥下砸后摇也可被Shift覆盖");
         for (int i = 0; i < 40 && Player.State is DodgeState; i++) await Frames(1);

@@ -114,10 +114,16 @@ public partial class AnimFallbackTest : LabSuiteBase
         int last = sprite.SpriteFrames.GetFrameCount("mud_attack") - 1;
         Check(Player.State is AttackRecoveryState && anim.RecoverFallbackActive && sprite.Animation == "mud_attack" && sprite.Frame == last && !sprite.IsPlaying(),
             $"泥收势（没有专门的图）：先停在泥攻击的最后一帧（{sprite.Animation} 第 {sprite.Frame} 帧，在播 {sprite.IsPlaying()}）");
-        await Frames(Mathf.CeilToInt(anim.RecoverHoldSeconds * 60f) + 2);
-        Check(Player.State is AttackRecoveryState && sprite.Animation == "mud_idle", $"0.25 秒后站着不动：播待机（{sprite.Animation}）");
+        int hold = Mathf.CeilToInt(anim.RecoverHoldSeconds * 60f);
+        await Frames(hold + 1);
+        Check(Player.State is AttackRecoveryState && sprite.Animation == "mud_idle", $"{anim.RecoverHoldSeconds} 秒后站着不动：播待机（{sprite.Animation}）");
+        // 收势很短（手感调整后 0.15 秒）：再砍一刀，收势一开始就按住右
+        for (int i = 0; i < 60 && Player.State is AttackRecoveryState; i++) await Frames(1);
+        await Frames(2);
+        await Tap(PlayerActions.Attack);
+        for (int i = 0; i < 60 && Player.State is not AttackRecoveryState; i++) await Frames(1);
         Press(PlayerActions.Right);
-        await Frames(6);
+        await Frames(hold + 1);
         Check(Player.State is AttackRecoveryState && sprite.Animation == "mud_run", $"收势里往右走：播跑（{sprite.Animation}）");
         Release(PlayerActions.Right);
         await Frames(100);
