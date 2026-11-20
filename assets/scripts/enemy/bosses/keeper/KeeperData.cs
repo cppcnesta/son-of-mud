@@ -11,9 +11,26 @@ namespace SonOfMud.Enemy.Bosses.Keeper;
 [GlobalClass]
 public partial class KeeperData : EnemyData
 {
-    [ExportGroup("逼近")]
-    /// <summary>逼近时离玩家（水平）还剩这么远就停下，不和玩家重叠。</summary>
+    [ExportGroup("巡游（不出招时在场地里来回走，钳子始终朝玩家）")]
+    /// <summary>贴近 / 横穿时停在离玩家（水平）这么远的地方。</summary>
     [Export] public float StopDistance { get; set; } = 96f;
+    /// <summary>巡游速度（像素/秒）。</summary>
+    [Export] public float RoamSpeed { get; set; } = 160f;
+    /// <summary>走到目标点后停多久（秒，在两者之间随机）。</summary>
+    [Export] public float RoamPauseMin { get; set; } = 0.4f;
+    [Export] public float RoamPauseMax { get; set; } = 0.9f;
+    /// <summary>三种挑法的权重：贴近玩家 / 退开 / 从玩家身下横穿到另一边。</summary>
+    [Export] public float RoamApproachWeight { get; set; } = 50f;
+    [Export] public float RoamRetreatWeight { get; set; } = 30f;
+    [Export] public float RoamCrossWeight { get; set; } = 20f;
+    /// <summary>退开时离玩家至少这么远（不够就退到场地边）。</summary>
+    [Export] public float RetreatDistance { get; set; } = 600f;
+    /// <summary>身体两边离场地边至少留这么多（目标点限制在场地里）。</summary>
+    [Export] public float ArenaMargin { get; set; } = 40f;
+    /// <summary>出招间隔：横扫收招、蝎尾收招、反制僵直结束后，至少巡游这么久才出下一招（秒）。</summary>
+    [Export] public float AttackGap { get; set; } = 1.5f;
+    /// <summary>转身死区：玩家水平距离小于它时不转身（玩家在头顶附近时不来回翻）。</summary>
+    [Export] public float TurnDeadzone { get; set; } = 60f;
 
     [ExportGroup("芦苇杖横扫")]
     [Export] public HitSpec SweepSpec { get; set; }

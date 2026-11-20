@@ -4,7 +4,7 @@ namespace SonOfMud.Enemy.Bosses.Keeper.States;
 
 /// <summary>
 /// 被反制僵直：StaggerWindow.Begin()——5 秒、受到 2 倍伤害、每受一次伤剩余时间减 1 秒（Combat 已有组件计时）。
-/// 僵直结束时蝎尾冷却 EndCast（这时才开始重新充 20 秒）→ 逼近。
+/// 僵直结束时蝎尾冷却 EndCast（这时才开始重新充 20 秒），出招间隔重新计满 → 巡游。
 /// </summary>
 public partial class StaggeredState : KeeperState
 {
@@ -25,6 +25,7 @@ public partial class StaggeredState : KeeperState
         K.ApplyGravity((float)delta);
         if (K.Stagger.Active) return;
         K.Tail.EndCast();
+        K.RestartAttackGap(); // 出招间隔从这里重新计满
         Machine.TransitionTo<ApproachState>();
     }
 }

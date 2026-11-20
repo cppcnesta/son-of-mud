@@ -1,6 +1,6 @@
 namespace SonOfMud.Enemy.Bosses.Keeper.States;
 
-/// <summary>等待：站着不动，等玩家进入竞技场 → 开战（发 BossEncounterStarted）→ 逼近。</summary>
+/// <summary>等待：站着不动，等玩家进入竞技场 → 开战（发 BossEncounterStarted）→ 巡游。</summary>
 public partial class DormantState : KeeperState
 {
     public override string DisplayName => "等待";
