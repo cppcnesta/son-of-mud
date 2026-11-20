@@ -11,6 +11,7 @@ public static class PauseService
     public static readonly StringName Narrative = "narrative";
     public static readonly StringName Map = "map";
     public static readonly StringName PauseMenu = "pause_menu";
+    public static readonly StringName Collection = "collection";
 
     private static readonly SourceSet Sources = new();
 

@@ -1,0 +1,116 @@
+[gd_resource type="Resource" script_class="CollectionTable" format=3]
+
+[ext_resource type="Script" path="res://assets/scripts/ui/CollectionTable.cs" id="table"]
+[ext_resource type="Script" path="res://assets/scripts/ui/CollectionEntry.cs" id="entry"]
+[ext_resource type="Texture2D" path="res://assets/art/item/spr_item_mud_bottle_1x1.png" id="i1"]
+[ext_resource type="Texture2D" path="res://assets/art/item/spr_item_mud_liver_1x1.png" id="i2"]
+[ext_resource type="Texture2D" path="res://assets/art/item/spr_item_life_bread_1x1.png" id="i3"]
+[ext_resource type="Texture2D" path="res://assets/art/collectible/spr_collectible_tablet_pit_1x1.png" id="i4"]
+[ext_resource type="Texture2D" path="res://assets/art/collectible/spr_collectible_tablet_temple_1x1.png" id="i5"]
+[ext_resource type="Texture2D" path="res://assets/art/collectible/spr_collectible_tablet_divination_1x1.png" id="i6"]
+[ext_resource type="Texture2D" path="res://assets/art/collectible/spr_collectible_tablet_summit_1x1.png" id="i7"]
+[ext_resource type="Texture2D" path="res://assets/art/collectible/spr_collectible_tablet_of_destiny_1x1.png" id="i8"]
+[ext_resource type="Texture2D" path="res://assets/art/collectible/spr_collectible_clay_figurine_1x1.png" id="i9"]
+[ext_resource type="Texture2D" path="res://assets/art/collectible/spr_collectible_shard_1x1.png" id="i10"]
+[ext_resource type="Texture2D" path="res://assets/art/collectible/spr_collectible_stone_1x1.png" id="i11"]
+
+[sub_resource type="Resource" id="E_mud_bottle"]
+script = ExtResource("entry")
+Id = "mud_bottle"
+DisplayName = "泥瓶"
+Icon = ExtResource("i1")
+Description = "碰到就喝下，回 30 点血。"
+Flags = Array[StringName]([&"obtained.泥瓶"])
+
+[sub_resource type="Resource" id="E_mud_liver"]
+script = ExtResource("entry")
+Id = "mud_liver"
+DisplayName = "泥肝"
+Icon = ExtResource("i2")
+Description = "按 R 扔出去，伤害 15。最多带 5 个。"
+Flags = Array[StringName]([&"obtained.泥肝"])
+CountKey = &"count.泥肝"
+MaxCount = 5
+
+[sub_resource type="Resource" id="E_life_bread"]
+script = ExtResource("entry")
+Id = "life_bread"
+DisplayName = "生命之面包"
+Icon = ExtResource("i3")
+Description = "吃下以后，血量上限从 70 变成 140。"
+Flags = Array[StringName]([&"item.生命之面包"])
+
+[sub_resource type="Resource" id="E_tablet_pit"]
+script = ExtResource("entry")
+Id = "tablet_pit"
+DisplayName = "残泥板·泥坑"
+Icon = ExtResource("i4")
+Description = ""
+Flags = Array[StringName]([])
+TabletIds = Array[StringName]([&"nameless_day", &"divine_son"])
+
+[sub_resource type="Resource" id="E_tablet_temple"]
+script = ExtResource("entry")
+Id = "tablet_temple"
+DisplayName = "残泥板·塔庙"
+Icon = ExtResource("i5")
+Description = ""
+Flags = Array[StringName]([])
+TabletIds = Array[StringName]([&"smile", &"after_flood"])
+
+[sub_resource type="Resource" id="E_tablet_divination"]
+script = ExtResource("entry")
+Id = "tablet_divination"
+DisplayName = "残泥板·占卜"
+Icon = ExtResource("i6")
+Description = ""
+Flags = Array[StringName]([])
+TabletIds = Array[StringName]([&"hoped_world", &"too_soft", &"curse", &"annals"])
+
+[sub_resource type="Resource" id="E_tablet_summit"]
+script = ExtResource("entry")
+Id = "tablet_summit"
+DisplayName = "残泥板·塔顶"
+Icon = ExtResource("i7")
+Description = ""
+Flags = Array[StringName]([])
+TabletIds = Array[StringName]([&"gate_1", &"gate_2", &"gate_3", &"gate_4", &"gate_5", &"gate_6", &"gate_7", &"name", &"star"])
+
+[sub_resource type="Resource" id="E_destiny"]
+script = ExtResource("entry")
+Id = "destiny"
+DisplayName = "命运石板"
+Icon = ExtResource("i8")
+Description = ""
+Flags = Array[StringName]([])
+TabletIds = Array[StringName]([&"destiny"])
+
+[sub_resource type="Resource" id="E_clay_figurine"]
+script = ExtResource("entry")
+Id = "clay_figurine"
+DisplayName = "小泥偶"
+Icon = ExtResource("i9")
+Description = "一个小小的泥偶。头上带着角冠，耳垂有两枚金耳环，手里握着弯刃。被许多手指摸得很光滑。泥坑边有成百上千个，全都朝着坑底。"
+Flags = Array[StringName]([&"collected.clay_figurine"])
+
+[sub_resource type="Resource" id="E_shard"]
+script = ExtResource("entry")
+Id = "shard"
+DisplayName = "泥片"
+Icon = ExtResource("i10")
+Description = ""
+Flags = Array[StringName]([&"collected.devout_shard", &"collected.prayer_shard"])
+FlagNotes = Array[String](["虔诚泥片：这块土，来自塔姆图的虔诚之子。", "祈祷泥片：这块土，来自塔姆图的祈祷之子。"])
+
+[sub_resource type="Resource" id="E_stone"]
+script = ExtResource("entry")
+Id = "stone"
+DisplayName = "石头"
+Icon = ExtResource("i11")
+Description = "工人们挖地基时挖出来的石头，白得像骨头。他们说这是山的脊柱，在上面刻了祷词：愿睡在泥里的祂，醒来看我们。"
+Flags = Array[StringName]([&"collected.stone_mason", &"collected.stone_guard"])
+
+[resource]
+script = ExtResource("table")
+Items = Array[ExtResource("entry")]([SubResource("E_mud_bottle"), SubResource("E_mud_liver"), SubResource("E_life_bread")])
+Collectibles = Array[ExtResource("entry")]([SubResource("E_tablet_pit"), SubResource("E_tablet_temple"), SubResource("E_tablet_divination"), SubResource("E_tablet_summit"), SubResource("E_destiny"), SubResource("E_clay_figurine"), SubResource("E_shard"), SubResource("E_stone")])
