@@ -232,22 +232,26 @@ public partial class EnemyLabTest : LabSuiteBase
               && recovering && Mathf.Abs(recoverFrames - 36) <= 1,
             $"塔庙泥匠：挥空（没有任何结算回调）也按计时收招——判定 {whiffActive} 帧、收招 {recoverFrames} 帧，之后回到 {_mason.State?.DisplayName}");
 
-        // 打死：水形态基础攻击 4 刀；每次受伤都进受击硬直，从不逃跑
+        // 打死：水形态基础攻击（伤害从数据读，手感调整后 8，40 血要 5 刀）；每次受伤都进受击硬直，从不逃跑
+        int water = WaterDamage;
+        int maxHp = _mason.Stats.Health;
+        int needed = Mathf.CeilToInt(maxHp / (float)water);
+        var expectedHps = Enumerable.Range(1, needed).Select(i => Math.Max(0, maxHp - water * i)).ToArray();
         var hps = new List<int>();
         var outcomes = new List<HitOutcome?>();
         var reactions = new List<string>();
         int reactionsBefore = _mason.Reactions, uninterruptedBefore = _mason.UninterruptedHits;
-        for (int i = 0; i < 4 && !_mason.IsDead; i++)
+        for (int i = 0; i < needed + 1 && !_mason.IsDead; i++)
         {
             outcomes.Add(await StrikeHit(_mason));
             hps.Add(_mason.Stats.Health);
             if (!_mason.IsDead) reactions.Add(_mason.LastReaction);
         }
-        Check(hps.SequenceEqual(new[] { 30, 20, 10, 0 }) && outcomes.Last() == HitOutcome.Killed,
-            $"塔庙泥匠：水形态每刀只扣 10（同一刀只结算一次），4 刀打死（血量 {string.Join("→", hps)}，最后一刀 {outcomes.LastOrDefault()}）");
-        // G5：不在出招时被打进受击硬直；出招中被水打不打断（不进反应）。两种加起来正好是没打死的 3 刀，从不逃跑
+        Check(hps.SequenceEqual(expectedHps) && outcomes.Last() == HitOutcome.Killed,
+            $"塔庙泥匠：水形态每刀只扣 {water}（同一刀只结算一次），{needed} 刀打死（血量 {string.Join("→", hps)}，最后一刀 {outcomes.LastOrDefault()}）");
+        // G5：不在出招时被打进受击硬直；出招中被水打不打断（不进反应）。两种加起来正好是没打死的那几刀，从不逃跑
         int reacted = _mason.Reactions - reactionsBefore, uninterrupted = _mason.UninterruptedHits - uninterruptedBefore;
-        Check(reactions.Count == 3 && reacted + uninterrupted == 3 && reactions.All(r => r is "hurt" or "") && _mason.LastReaction != "flee",
+        Check(reactions.Count == needed - 1 && reacted + uninterrupted == needed - 1 && reactions.All(r => r is "hurt" or "") && _mason.LastReaction != "flee",
             $"塔庙泥匠：不逃跑；每次受伤要么受击硬直（{reacted} 次），要么出招中被水打不打断（{uninterrupted} 次）");
         HitOutcome? after = await StrikeHit(_mason);
         await Frames(30);
@@ -255,6 +259,8 @@ public partial class EnemyLabTest : LabSuiteBase
             $"塔庙泥匠：死亡时 EnemyKilled 恰好一次（{_killed.Count}），死后再打结果是 {after}，不再发");
         Check(_dropped.Count == 0 && !_mason.AttackHitBox.Active, "塔庙泥匠：不掉落；死后判定关闭");
     }
+
+    private static int WaterDamage => Mathf.RoundToInt(GD.Load<FormConfig>("res://assets/data/player_v2/water.tres").AttackSpec.Damage);
 
     // ---------- ② 祈祷泥人绝不主动出手 ----------
 
@@ -281,21 +287,27 @@ public partial class EnemyLabTest : LabSuiteBase
     {
         await Fresh(new Vector2(1500, 576));
         Check(Player.Forms.Form == FormController.Water && !Player.Timers.Bonus.Ready, "祈祷泥人（水）：玩家是水形态，没有泥增伤（只用基础攻击）");
-        // 反应随机数：前两次都逃跑（< 0.5）；掉落随机数：第一次就掉（< 0.3）
-        _prayer.SetSeeds(FindSeed(r => r.Randf() < 0.5f && r.Randf() < 0.5f), FindSeed(r => r.Randf() < 0.3f));
+        // 反应随机数：没打死的每一刀都逃跑（< 0.5）；掉落随机数：第一次就掉（< 0.3）
+        int water = WaterDamage, maxHp = _prayer.Stats.Health;
+        int needed = Mathf.CeilToInt(maxHp / (float)water);
+        _prayer.SetSeeds(FindSeed(r => Enumerable.Range(0, needed - 1).All(_ => r.Randf() < 0.5f)), FindSeed(r => r.Randf() < 0.3f));
         HitOutcome? first = await StrikeHit(_prayer);
         await Frames(3);
-        Check(first == HitOutcome.Damaged && _prayer.Stats.Health == 20 && !_prayer.IsDead, $"祈祷泥人（水）：第一刀打不死，剩 {_prayer.Stats.Health} 血");
+        Check(first == HitOutcome.Damaged && _prayer.Stats.Health == maxHp - water && !_prayer.IsDead, $"祈祷泥人（水）：第一刀打不死，剩 {_prayer.Stats.Health} 血");
         Check(_prayer.LastReaction == "flee" && _prayer.State is FleeState, $"祈祷泥人（水）：被惊动后逃跑（固定种子，实际 {_prayer.LastReaction}）");
         float fleeStart = _prayer.GlobalPosition.X;
         await Frames(20);
         Check(_prayer.GlobalPosition.X > fleeStart + 40f, $"祈祷泥人（水）：背对玩家跑开（{fleeStart:F0} → {_prayer.GlobalPosition.X:F0}）");
-        HitOutcome? second = await StrikeHit(_prayer);
-        Check(second == HitOutcome.Damaged && _prayer.Stats.Health == 10 && !_prayer.IsDead && _prayer.LastReaction == "flee",
-            $"祈祷泥人（水）：补第二刀还活着（剩 {_prayer.Stats.Health}），又逃跑");
-        HitOutcome? third = await StrikeHit(_prayer);
+        bool allFled = true;
+        for (int i = 2; i < needed; i++)
+        {
+            HitOutcome? more = await StrikeHit(_prayer);
+            allFled &= more == HitOutcome.Damaged && _prayer.Stats.Health == maxHp - water * i && !_prayer.IsDead && _prayer.LastReaction == "flee";
+        }
+        Check(allFled, $"祈祷泥人（水）：补到第 {needed - 1} 刀都还活着（剩 {_prayer.Stats.Health}），每次又逃跑");
+        HitOutcome? last = await StrikeHit(_prayer);
         await Frames(5);
-        Check(third == HitOutcome.Killed && _prayer.IsDead && _killed.SequenceEqual(new[] { "prayer" }), "祈祷泥人（水）：补第三刀才死，EnemyKilled 一次");
+        Check(last == HitOutcome.Killed && _prayer.IsDead && _killed.SequenceEqual(new[] { "prayer" }), $"祈祷泥人（水）：第 {needed} 刀才死，EnemyKilled 一次");
         Check(_dropped.SequenceEqual(new[] { "泥瓶" }), $"祈祷泥人：泥坑的掉落表（30%）固定掉落种子 → 掉一个泥瓶（{string.Join(",", _dropped)}）");
         Check(_prayer.AttacksStarted == 0 && _playerDamaged == 0 && Player.Stats.Health == Player.Stats.MaxHealth,
             "祈祷泥人：两次都逃跑时从没出手，全程玩家没掉血");
@@ -315,12 +327,13 @@ public partial class EnemyLabTest : LabSuiteBase
         _prayer.SetSeeds(FindSeed(r => r.Randf() >= 0.5f), FindSeed(r => r.Randf() >= 0.3f));
         var states = TrackStates(_prayer);
         int hp = Player.Stats.Health;
+        int prayerHp = _prayer.Stats.Health, mud = Mathf.RoundToInt(GD.Load<FormConfig>("res://assets/data/player_v2/mud.tres").AttackSpec.Damage);
         float x = _prayer.GlobalPosition.X;
         HitOutcome? first = await StrikeHit(_prayer);
         // 打中时被击退（打击感）：等击退结束，记下停住的位置，之后反击全程不应再动
         await WaitFor(() => _prayer.KnockbackVelocity == 0f, 60);
         float pushedX = _prayer.GlobalPosition.X;
-        Check(first == HitOutcome.Damaged && _prayer.Stats.Health == 6 && !_prayer.IsDead && _prayer.LastReaction == "counter",
+        Check(first == HitOutcome.Damaged && _prayer.Stats.Health == prayerHp - mud && !_prayer.IsDead && _prayer.LastReaction == "counter",
             $"祈祷泥人（泥）：第一刀打不死（剩 {_prayer.Stats.Health}），被惊动后起身反击（固定种子，实际 {_prayer.LastReaction}）");
         bool done = await WaitFor(() => _prayer.State is EnemyIdle, 180);
         var windup = states.FirstOrDefault(s => s.state == "AttackWindup");
@@ -338,10 +351,16 @@ public partial class EnemyLabTest : LabSuiteBase
             await Frames(1);
         }
         Check(quiet && _prayer.AttacksStarted == 1 && _playerDamaged == 1, "祈祷泥人（泥）：反击之后不追、不再主动出手（2 秒内一直跪着）");
-        HitOutcome? second = await StrikeHit(_prayer);
+        HitOutcome? second = null;
+        int extra = 0;
+        for (; extra < 6 && !_prayer.IsDead; extra++)
+        {
+            second = await StrikeHit(_prayer);
+            if (!_prayer.IsDead) await WaitFor(() => _prayer.State is EnemyIdle, 180);
+        }
         await Frames(5);
         Check(second == HitOutcome.Killed && _prayer.IsDead && _killed.SequenceEqual(new[] { "prayer" }) && _dropped.Count == 0,
-            "祈祷泥人（泥）：补一刀就死；固定种子下这次没掉落");
+            $"祈祷泥人（泥）：再补 {extra} 刀打死（泥一刀 {mud}，{prayerHp} 血）；固定种子下这次没掉落");
     }
 
     // ---------- ⑤ 占卜之城：反击可格挡、100% 掉泥瓶 ----------

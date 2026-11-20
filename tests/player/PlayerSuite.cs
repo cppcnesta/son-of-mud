@@ -151,7 +151,7 @@ public partial class PlayerSuite : LabSuiteBase
 
     private async Task WindupChecks()
     {
-        foreach (var (form, expected) in new[] { (0, 0.05f), (1, 0.24f) })
+        foreach (var (form, expected) in new[] { (0, 0.05f), (1, 0.05f) }) // 手感调整：泥起跳前摇 0.24 → 0.05
         {
             await Reset(new Vector2(900, FloorY), form);
             await Tap(PlayerActions.Jump);
@@ -426,9 +426,10 @@ public partial class PlayerSuite : LabSuiteBase
         hud.Refresh();
         // 帧数按实际载入的：有美术图用美术图的帧数（美术表 2 帧），没有就是占位色块的 4 帧
         int windupFrames = Player.Animator.Sprite.SpriteFrames.GetFrameCount("mud_jump_windup");
-        float expected = windupFrames / (12f * 0.24f);
+        float fps = Player.Animator.BaseFps, windup = Player.Forms.Current.JumpWindup;
+        float expected = windupFrames / (fps * windup);
         Check(hud.PlayingAnimation == "mud_jump_windup" && windupFrames > 0 && Mathf.Abs(Player.Animator.CurrentSpeedScale - expected) < 0.001f,
-            $"动画：泥起跳前摇 {windupFrames} 帧、12FPS、0.24 秒 → SpeedScale={expected:F3}（实际 {hud.PlayingAnimation} {Player.Animator.CurrentSpeedScale:F3}）");
+            $"动画：泥起跳前摇 {windupFrames} 帧、{fps}FPS、{windup} 秒 → SpeedScale={expected:F3}（实际 {hud.PlayingAnimation} {Player.Animator.CurrentSpeedScale:F3}）");
         Check(Mathf.Abs(PlayerAnimator.SpeedScaleFor(6, 12f, 0.5f) - 1f) < 0.0001f, "动画：SpeedScale = 帧数 ÷ (基础 FPS × 目标时长)，6 帧 12FPS 0.5 秒 = 1");
         await Reset(new Vector2(900, FloorY), 0);
         await Tap(PlayerActions.Attack);

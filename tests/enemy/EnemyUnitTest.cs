@@ -166,12 +166,12 @@ public partial class EnemyUnitTest : LabSuiteBase
         Check(keeper.Stagger != null && keeper.Stagger.Duration == 5f && keeper.Stagger.DamageMultiplier == 2f && keeper.Stagger.ReducePerHit == 1f && keeper.TransformFlash == 1f,
             "数值：反制僵直 5 秒 / 2 倍 / 每次受伤减 1 秒；变身闪白 1 秒");
 
-        // E2：基础攻击（水 10 / 泥 24）打祈祷泥人
+        // E2：基础攻击打祈祷泥人（手感调整后水 8 / 泥 9，出刀更快、伤害下调；泥格挡后一刀不再能打死）
         var water = GD.Load<FormConfig>("res://assets/data/player_v2/water.tres");
         var mud = GD.Load<FormConfig>("res://assets/data/player_v2/mud.tres");
         int w = DamageMath.Final(water.AttackSpec.Damage), m = DamageMath.Final(mud.AttackSpec.Damage), mBonus = DamageMath.Final(mud.AttackSpec.Damage, mud.BlockBonusMultiplier);
-        Check(w == 10 && m == 24 && 30 - w == 20 && 30 - m == 6 && (30 + w - 1) / w == 3 && (30 + m - 1) / m == 2 && mBonus == 38 && mBonus >= 30,
-            $"数值（E2）：基础攻击第一刀打不死祈祷泥人（水剩 {30 - w}、泥剩 {30 - m}），水 3 刀、泥 2 刀；泥增伤一刀 {mBonus} 可以打死");
+        Check(w == 8 && m == 9 && (30 + w - 1) / w == 4 && (30 + m - 1) / m == 4 && mBonus == 14 && mBonus + 2 * m >= 30,
+            $"数值（E2）：基础攻击第一刀打不死祈祷泥人（水剩 {30 - w}、泥剩 {30 - m}），水 4 刀、泥 4 刀；泥增伤第一刀 {mBonus}，3 刀打死");
 
         foreach (string scene in new[] { "prayer", "devout", "mason", "temple_guard" })
         {

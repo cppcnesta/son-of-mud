@@ -156,6 +156,8 @@ shape = SubResource("slam_shape")
 [node name="PlayerAnimator" type="Node" parent="."]
 script = ExtResource("10")
 Sprite = NodePath("../AnimatedSprite2D")
+BaseFps = 24.0
+RecoverHoldSeconds = 0.1
 
 [node name="Interactor" type="Area2D" parent="."]
 collision_layer = 0

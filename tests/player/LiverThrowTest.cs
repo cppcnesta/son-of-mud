@@ -296,7 +296,7 @@ public partial class LiverThrowTest : EnemyFlowBase
         await PressDuring<DodgeState>(RealKeys.Dodge, "闪避");
         await PressDuring<BlockState>(RealKeys.Block, "格挡");
 
-        // 泥形态：攻击后摇（1.5 秒可移动后摇）也算攻击中
+        // 泥形态：攻击收势（可移动，手感调整后 0.15 秒）也算攻击中
         await Settle();
         await TapKey(RealKeys.SwitchForm);
         await Frames(2);
@@ -306,7 +306,7 @@ public partial class LiverThrowTest : EnemyFlowBase
         RealKeys.Down(RealKeys.Attack);
         bool recovering = await WaitUntil(() => Player.State is AttackRecoveryState, 60);
         RealKeys.Up(RealKeys.Attack);
-        await Frames(10);
+        await Frames(1);
         await TapKey(RealKeys.Throw);
         bool stillRecovering = Player.State is AttackRecoveryState;
         await WaitUntil(() => PlayerFree, 300);
