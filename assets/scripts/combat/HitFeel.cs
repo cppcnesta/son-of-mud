@@ -4,7 +4,8 @@ using SonOfMud.Core;
 namespace SonOfMud.Combat;
 
 /// <summary>
-/// 一种攻击的打击感（顿帧、震屏、闪白、击退、粒子、音效），挂在 HitSpec.Feel 上，随本次 Hit 一起传给受击方。
+/// 一种攻击的打击感（顿帧、震屏、闪白、击退、粒子），挂在 HitSpec.Feel 上，随本次 Hit 一起传给受击方。
+/// 音效不在这里：受击声 / 死亡声由被打的一方按 SoundBank 播（EnemyData.HitSound / DeathSound）。
 /// 只在真正打中（受伤 / 打死）时生效；被格挡、打在无敌期间都不触发。数值都在 .tres 里调。
 /// </summary>
 [GlobalClass]
@@ -33,13 +34,6 @@ public partial class HitFeel : KeptResource
     [Export] public Color SparkColor { get; set; } = new(0.45f, 0.33f, 0.22f);
     [Export] public float SparkSpeed { get; set; } = 360f;
 
-    [ExportGroup("音效（多个随机挑一个，音高随机浮动）")]
-    [Export] public Godot.Collections.Array<AudioStream> SwingSounds { get; set; } = new();
-    [Export] public Godot.Collections.Array<AudioStream> HitSounds { get; set; } = new();
-    [Export] public Godot.Collections.Array<AudioStream> KillSounds { get; set; } = new();
-
     public float HitStopFor(bool killed) => killed ? KillHitStop : HitStop;
     public float ShakeFor(bool killed) => killed ? KillShakeStrength : ShakeStrength;
-    /// <summary>打死时没配打死音效就用打中音效。</summary>
-    public Godot.Collections.Array<AudioStream> SoundsFor(bool killed) => killed && KillSounds.Count > 0 ? KillSounds : HitSounds;
 }

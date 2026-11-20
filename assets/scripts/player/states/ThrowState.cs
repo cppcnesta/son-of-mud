@@ -87,6 +87,7 @@ public partial class ThrowState : PlayerState
         Node parent = P.GetParent() ?? P;
         Projectile projectile = Projectile.Launch(parent, from, velocity, hit, ProjectileTeam.Player, Config.Projectile);
         Thrown++;
+        SoundBank.Play(SoundBank.PlayerRangedAttack);
         LastProjectile = projectile;
         _flying.RemoveAll(p => !IsInstanceValid(p) || p.Ended);
         _flying.Add(projectile);

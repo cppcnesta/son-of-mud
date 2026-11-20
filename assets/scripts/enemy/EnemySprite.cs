@@ -73,6 +73,9 @@ public partial class EnemySprite : AnimatedSprite2D
         string kind = data?.Get("Kind").AsString() ?? "";
         float canvas = data == null ? 128f : (float)data.Get("ArtCanvas").AsDouble();
         if (canvas <= 0f) canvas = 128f;
+        Variant artScaleValue = data?.Get("ArtScale") ?? default;
+        float artScale = artScaleValue.VariantType == Variant.Type.Nil ? 1f : (float)artScaleValue.AsDouble();
+        if (artScale <= 0f) artScale = 1f;
 
         SpriteFrames frames = SpriteFrames;
         SpriteFrames generated = null;
@@ -117,7 +120,8 @@ public partial class EnemySprite : AnimatedSprite2D
         SpriteFrames = frames;
         if (Animation != shown) Animation = shown;
         Frame = 0;
-        EnemyAnimator.Layout(this, height);
+        bool toContent = data != null && data.Get("GroundToContent").VariantType == Variant.Type.Bool && data.Get("GroundToContent").AsBool();
+        EnemyAnimator.Layout(this, height, artScale, toContent ? EnemyAnimator.ContentBottom(frames, shown) : 0f);
         FlipH = PreviewFlip();
         PreviewAction = preview;
         PreviewShown = true;

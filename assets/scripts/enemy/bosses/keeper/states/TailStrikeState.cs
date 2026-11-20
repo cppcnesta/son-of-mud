@@ -25,6 +25,7 @@ public partial class TailStrikeState : KeeperState
         _countered = false;
         LastOutcome = null;
         Remaining = D.TailDelay;
+        SoundBank.Play(SoundBank.BossTailStab);
     }
 
     public override void Exit()
