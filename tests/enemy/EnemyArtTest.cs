@@ -72,6 +72,16 @@ public partial class EnemyArtTest : LabSuiteBase
 
     private static List<AnimatedSprite2D> SpritesOf(Node enemy) => enemy.GetChildren().OfType<AnimatedSprite2D>().ToList();
 
+    /// <summary>
+    /// 脚底在敌人本地坐标里的 y（应当是 0）：一般是帧底边；数据里 GroundToContent 的（守坑人）是这段动画最低的不透明像素。
+    /// </summary>
+    private static float GroundOf(EnemyBody enemy, AnimatedSprite2D sprite, string animation, int frameHeight)
+    {
+        if (!enemy.Data.GroundToContent) return BottomOf(sprite, frameHeight);
+        float content = EnemyAnimator.ContentBottom(sprite.SpriteFrames, animation);
+        return sprite.Position.Y + (sprite.Offset.Y - frameHeight * 0.5f + content) * sprite.Scale.Y;
+    }
+
     /// <summary>帧底边在敌人本地坐标里的 y（应当是 0，也就是脚底）。</summary>
     private static float BottomOf(AnimatedSprite2D sprite, int frameHeight) =>
         sprite.Position.Y + (sprite.Offset.Y + frameHeight * 0.5f) * sprite.Scale.Y;
@@ -148,9 +158,12 @@ public partial class EnemyArtTest : LabSuiteBase
                 int h = EnemyAnimator.FrameHeight(anim.Sprite.SpriteFrames, first);
                 float shown = h * anim.Sprite.Scale.Y;
                 // 固定比例：源图 4 像素 = 游戏 1 像素（标准 512 的格子显示 128；虔诚泥人按 6x5 切，格子约 513 高）
+                // 显示倍数：守坑人的图按 1/4 分辨率导出，ArtScale = 4（源图 1 像素 = 游戏 1 像素）；其他敌人 1
+                float artScale = enemy.Data.ArtScale;
                 Check(anim.CurrentAnimation == first && anim.CurrentIsArt && anim.Sprite.Visible && !enemy.DrawsPlaceholder
-                      && Mathf.IsEqualApprox(shown, h / 4f) && Mathf.IsEqualApprox(anim.Sprite.Scale.Y, 0.25f) && Mathf.Abs(BottomOf(anim.Sprite, h)) < 0.01f,
-                    $"{kind}：仓库里的待机图被载入，固定比例 1/4 显示（源图帧高 {h}，游戏里 {shown:F1}），帧底边在脚底，本体不画色块");
+                      && (kind == "keeper" ? artScale == 4f : artScale == 1f)
+                      && Mathf.IsEqualApprox(shown, h / 4f * artScale) && Mathf.IsEqualApprox(anim.Sprite.Scale.Y, 0.25f * artScale) && Mathf.Abs(GroundOf(enemy, anim.Sprite, first, h)) < 0.01f,
+                    $"{kind}：仓库里的待机图被载入，按 1/4 × 显示倍数 {artScale} 显示（源图帧高 {h}，游戏里 {shown:F1}），帧底边在脚底，本体不画色块");
             }
             else
             {
@@ -406,6 +419,14 @@ public partial class EnemyArtTest : LabSuiteBase
             ["tail_aim"] = 35, ["tail_strike"] = 18, ["tail_recover"] = 11, ["staggered"] = 15, ["transform"] = 15,
         };
         var keeperGot = keeperExpected.Keys.ToDictionary(a => a, a => keeper != null && keeper.HasAnimation(a) ? keeper.GetFrameCount(a) : 0);
+        // 守坑人按 1/4 分辨率导出：显示倍数 4，图已镜像成朝左；每格底下空白不一样，按「动画里最低的不透明像素」贴地
+        var floating = keeperExpected.Keys.Where(a => keeper != null && keeper.HasAnimation(a))
+            .Select(a => (a, gap: EnemyAnimator.FrameHeight(keeper, a) - EnemyAnimator.ContentBottom(keeper, a)))
+            .Where(g => g.gap < 0f || g.gap > 60f).ToList();
+        Check(keeperData.ArtScale == 4f && !keeperData.ArtFacesRight && keeperData.GroundToContent
+              && keeperExpected.Keys.All(a => EnemyAnimator.ContentBottom(keeper, a) > 0f) && floating.Count == 0,
+            "守坑人：显示倍数 4（源图 1 像素 = 游戏 1 像素，接近屏幕大小）、画朝左、每段动画按最低的不透明像素贴地"
+            + (floating.Count > 0 ? "：" + string.Join(", ", floating.Select(f => $"{f.a} 底下空 {f.gap}")) : ""));
         Check(keeperExpected.All(e => keeperGot[e.Key] == e.Value),
             "守坑人正式图：" + string.Join("、", keeperGot.Select(g => $"{g.Key} {g.Value}")));
     }
@@ -442,8 +463,8 @@ public partial class EnemyArtTest : LabSuiteBase
         AnimatedSprite2D sprite = anim.Sprite;
         anim.UseArtDirectory(Fixture);
         await ProcessFrames(1);
-        Check(anim.CurrentAnimation == "dormant" && anim.CurrentIsArt && Mathf.IsEqualApprox(1024f * sprite.Scale.Y, 256f) && Mathf.Abs(BottomOf(sprite, 1024)) < 0.01f,
-            "守坑人：1024 的图显示为 256 高，帧底边在脚底");
+        Check(anim.CurrentAnimation == "dormant" && anim.CurrentIsArt && Mathf.IsEqualApprox(1024f * sprite.Scale.Y, 1024f) && Mathf.Abs(BottomOf(sprite, 1024)) < 0.01f,
+            "守坑人：显示倍数 4，1024 的测试图显示为 1024 高（填满的测试图最低像素就是帧底边），脚底对齐");
 
         // 蝎尾瞄准：有图 → 不画预警竖带
         keeper.Machine.TransitionTo<TailAimState>();
@@ -557,7 +578,7 @@ public partial class EnemyArtTest : LabSuiteBase
             var sprite = enemy.GetNode<EnemySprite>("Sprite");
             sprite.ArtDirectory = Fixture;
             sprite.ShowPreview();
-            float canvas = kind == "keeper" ? 256f : 128f;
+            float canvas = kind == "keeper" ? 1024f : 128f; // 守坑人：256 × 显示倍数 4
             if (sprite.PreviewShown)
             {
                 string preview = kind == "keeper" ? "dormant" : "idle";
@@ -572,7 +593,7 @@ public partial class EnemyArtTest : LabSuiteBase
             enemy.Free();
         }
         Check(shown.SequenceEqual(new[] { "prayer", "keeper" }),
-            $"编辑器显示：测试图里祈祷泥人显示 idle、守坑人显示 dormant（256 高），尺寸和脚底对齐与游戏一致；没有图的不显示（{string.Join(", ", shown)}）");
+            $"编辑器显示：测试图里祈祷泥人显示 idle、守坑人显示 dormant（1024 高，显示倍数 4），尺寸和脚底对齐与游戏一致；没有图的不显示（{string.Join(", ", shown)}）");
 
         var repoShown = new List<string>();
         foreach (string kind in Kinds)

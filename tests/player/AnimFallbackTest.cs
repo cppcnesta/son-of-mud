@@ -63,8 +63,8 @@ public partial class AnimFallbackTest : LabSuiteBase
         var kHit = keeperNode.GetNode<CollisionShape2D>("HitBox/CollisionShape2D");
         Vector2 hitSize = ((RectangleShape2D)kHit.Shape).Size;
         float hitNear = kHit.Position.X - hitSize.X / 2f, hitFar = kHit.Position.X + hitSize.X / 2f;
-        Check(((RectangleShape2D)kBody.Shape).Size.Y <= 80f && ((RectangleShape2D)kHurt.Shape).Size == new Vector2(600, 400) && keeper.ArtFacesRight,
-            "守坑人：走路用的身体只是贴地一块（不卡芦苇平台），受击框 600×400，图画朝右");
+        Check(((RectangleShape2D)kBody.Shape).Size.Y <= 80f && ((RectangleShape2D)kHurt.Shape).Size == new Vector2(600, 400) && !keeper.ArtFacesRight,
+            "守坑人：走路用的身体只是贴地一块（不卡芦苇平台），受击框 600×400，图画朝左（这批图放进工程时已逐格镜像）");
         Check(keeper.StopDistance <= keeper.SweepRange && keeper.StopDistance < keeper.TailTriggerRange
               && keeper.StopDistance >= hitNear && keeper.StopDistance <= hitFar && keeper.SweepRange <= hitFar,
             $"守坑人距离：停步 {keeper.StopDistance} ≤ 横扫 {keeper.SweepRange} < 蝎尾 {keeper.TailTriggerRange}；横扫判定 x∈[{hitNear},{hitFar}] 盖住停步位置和横扫距离");

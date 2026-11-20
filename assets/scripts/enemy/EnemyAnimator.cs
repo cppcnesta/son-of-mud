@@ -130,7 +130,8 @@ void fragment() {
             Sprite.SetFrameAndProgress(0, 0f);
             float seconds = (_body.Machine.Current as EnemyState)?.AnimDuration ?? 0f;
             Sprite.SpeedScale = seconds > 0f ? SpriteStrip.SpeedScaleFor(frames, name, seconds) : 1f;
-            Layout(Sprite, FrameHeight(frames, name));
+            bool toContent = _body.Data?.GroundToContent ?? false;
+            Layout(Sprite, FrameHeight(frames, name), _body.Data?.ArtScale ?? 1f, toContent ? ContentBottom(frames, name) : 0f);
         }
         else
         {
@@ -174,15 +175,57 @@ void fragment() {
     /// </summary>
     public static int FrameHeight(SpriteFrames frames, string animation) => SpriteStrip.FrameHeight(frames, animation);
 
-    /// <summary>固定比例（源图 4 像素 = 游戏 1 像素）、帧底边中点放在原点（脚底）。</summary>
-    public static void Layout(AnimatedSprite2D sprite, int frameHeight)
+    /// <summary>
+    /// 固定比例（源图 4 像素 = 游戏 1 像素，再乘显示倍数）。脚底放在原点：
+    /// contentBottom ≤ 0 时是帧底边中点；&gt; 0 时是「从帧顶往下 contentBottom 像素」那一行（见 <see cref="ContentBottom"/>）。
+    /// </summary>
+    public static void Layout(AnimatedSprite2D sprite, int frameHeight, float artScale = 1f, float contentBottom = 0f)
     {
         if (frameHeight <= 0) return;
-        float scale = 1f / SourceScale;
+        float scale = (artScale > 0f ? artScale : 1f) / SourceScale;
         sprite.Centered = true;
         sprite.Scale = new Vector2(scale, scale);
-        sprite.Offset = new Vector2(0f, -frameHeight * 0.5f);
+        float ground = contentBottom > 0f && contentBottom <= frameHeight ? contentBottom : frameHeight;
+        sprite.Offset = new Vector2(0f, frameHeight * 0.5f - ground);
         sprite.Position = Vector2.Zero;
+    }
+
+    /// <summary>算过的「动画里最低的不透明像素」：图路径 + 区域 → 结果（同一张图只算一次）。</summary>
+    private static readonly Dictionary<string, float> ContentBottomCache = new();
+
+    /// <summary>
+    /// 这段动画所有帧里最低的不透明像素，从帧顶（含补边）往下数的行数；算不出来返回 0（按帧底边贴地）。
+    /// 用于数据里 GroundToContent = true 的敌人：美术每格底下的空白不一样时，让脚踩在地上。
+    /// </summary>
+    public static float ContentBottom(SpriteFrames frames, string animation)
+    {
+        if (frames == null || !frames.HasAnimation(animation)) return 0f;
+        float lowest = 0f;
+        var images = new Dictionary<ulong, Image>();
+        for (int i = 0; i < frames.GetFrameCount(animation); i++)
+        {
+            Texture2D tex = frames.GetFrameTexture(animation, i);
+            Texture2D atlas = tex is AtlasTexture a ? a.Atlas : tex;
+            if (atlas == null) continue;
+            Rect2 region = tex is AtlasTexture b ? b.Region : new Rect2(Vector2.Zero, tex.GetSize());
+            float marginTop = tex is AtlasTexture m ? m.Margin.Position.Y : 0f;
+            string key = $"{atlas.ResourcePath}|{atlas.GetRid()}|{region}";
+            if (!ContentBottomCache.TryGetValue(key, out float bottom))
+            {
+                ulong id = atlas.GetInstanceId();
+                if (!images.TryGetValue(id, out Image image))
+                {
+                    image = atlas.GetImage();
+                    if (image != null && image.IsCompressed()) image.Decompress();
+                    images[id] = image;
+                }
+                Rect2I used = image?.GetRegion(new Rect2I((Vector2I)region.Position, (Vector2I)region.Size)).GetUsedRect() ?? new Rect2I();
+                bottom = used.Size.Y > 0 ? used.End.Y : 0f;
+                ContentBottomCache[key] = bottom;
+            }
+            if (bottom > 0f) lowest = Mathf.Max(lowest, marginTop + bottom);
+        }
+        return lowest;
     }
 
     /// <summary>这个动作要找的文件名（不含目录）：先美术名，再动作名本身。</summary>

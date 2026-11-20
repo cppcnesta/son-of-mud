@@ -27,6 +27,16 @@ public partial class EnemyData : KeptResource
     /// 显示一律固定比例（源图 4 像素 = 游戏里 1 像素），标准格子显示出来就是这个边长；写了行列数的图不看它。
     /// </summary>
     [Export] public float ArtCanvas { get; set; } = 128f;
+    /// <summary>
+    /// 美术图的显示倍数：在固定比例（源图 4 像素 = 游戏 1 像素）之上再乘它。默认 1。
+    /// 美术按小一号的分辨率导出时用它放大回设计尺寸（守坑人的图按 1/4 分辨率导出，填 4，源图 1 像素 = 游戏 1 像素）。
+    /// </summary>
+    [Export] public float ArtScale { get; set; } = 1f;
+    /// <summary>
+    /// 贴地方式。false（默认）：每格底边中点就是脚底。true：每段动画里，所有帧中最低的那个不透明像素对准地面
+    /// （美术每格底下留的空白不一样时用，守坑人这样）。
+    /// </summary>
+    [Export] public bool GroundToContent { get; set; }
     /// <summary>美术图画朝右（默认敌人的图画朝左）。守坑人的图画朝右。</summary>
     [Export] public bool ArtFacesRight { get; set; }
     /// <summary>
