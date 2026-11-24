@@ -22,3 +22,8 @@ tests/output/
 bin/
 obj/
 .vs/
+
+# 音频素材的压缩包、解压出来的文件夹、音效对照表（不是代码，不进仓库）
+assets/audio/*.7z
+assets/audio/*.xlsx
+assets/audio/NNZ*/

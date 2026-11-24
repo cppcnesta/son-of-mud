@@ -7,7 +7,8 @@ namespace SonOfMud.Core;
 
 /// <summary>
 /// 游戏音效库：按《NZZ音效对照表》的文件名自动分组，代码里只写组名。
-/// - 文件放在 assets/audio/sfx/，名字是 SFX_&lt;组名&gt;_&lt;序号&gt;.wav（或 .ogg / .mp3），例如 SFX_Player_Jump_01.wav 属于 Player_Jump 组。
+/// - 文件放在 assets/audio/sfx/ 下（可以按类别分子文件夹：player/、minion/、boss01/……，子文件夹也会找），
+///   名字是 SFX_&lt;组名&gt;_&lt;序号&gt;.wav（或 .ogg / .mp3），例如 SFX_Player_Jump_01.wav 属于 Player_Jump 组。
 ///   以后加 _04、_05 或新的一组，放进文件夹就生效。导出后的游戏里文件夹列出来的是 .import / .remap，同样认。
 /// - Play(组名)：从这一组里随机挑一个（和这一组上一次挑的不一样；只有 1 个就播它），只把挑中的这一个交给
 ///   Events.SoundRequested（打击感服务再随机浮动音高）。这一组还没有文件时什么都不做、不报错。
@@ -60,14 +61,15 @@ public static class SoundBank
     }
 
     /// <summary>
-    /// 把文件夹里的文件名（可以带 .import / .remap）按组名分组，每组按文件名排序。不符合 SFX_&lt;组名&gt;_&lt;序号&gt; 的文件不要。
+    /// 把文件夹里的文件（相对音效文件夹的路径，可以带子文件夹和 .import / .remap）按组名分组，每组按文件名排序。
+    /// 只看文件名本身是否符合 SFX_&lt;组名&gt;_&lt;序号&gt;，不符合的不要。
     /// </summary>
     public static Dictionary<string, string[]> Group(IEnumerable<string> listing)
     {
         var lists = new Dictionary<string, List<string>>();
         foreach (string name in SpriteStrip.SourceFileNames(listing))
         {
-            Match match = FilePattern.Match(name);
+            Match match = FilePattern.Match(name[(name.LastIndexOf('/') + 1)..]);
             if (!match.Success) continue;
             string group = match.Groups[1].Value;
             if (!lists.TryGetValue(group, out List<string> files)) lists[group] = files = new List<string>();
@@ -76,7 +78,7 @@ public static class SoundBank
         var result = new Dictionary<string, string[]>();
         foreach (var (group, files) in lists)
         {
-            files.Sort(string.CompareOrdinal);
+            files.Sort((a, b) => string.CompareOrdinal(a[(a.LastIndexOf('/') + 1)..], b[(b.LastIndexOf('/') + 1)..]));
             result[group] = files.ToArray();
         }
         return result;
@@ -87,10 +89,25 @@ public static class SoundBank
         get
         {
             if (_groups != null) return _groups;
-            string[] listing = DirAccess.DirExistsAbsolute(_directory) ? DirAccess.GetFilesAt(_directory) : NoFiles;
-            _groups = Group(listing);
+            _groups = Group(ListFiles(_directory));
             return _groups;
         }
+    }
+
+    /// <summary>文件夹和所有子文件夹里的文件，路径相对这个文件夹（如 player/SFX_Player_Jump_01.wav.import）；文件夹不存在时是空的。</summary>
+    public static List<string> ListFiles(string directory)
+    {
+        var result = new List<string>();
+        if (string.IsNullOrEmpty(directory) || !DirAccess.DirExistsAbsolute(directory)) return result;
+        Collect(directory.TrimEnd('/'), "", result);
+        return result;
+    }
+
+    private static void Collect(string root, string prefix, List<string> result)
+    {
+        string dir = prefix == "" ? root : $"{root}/{prefix.TrimEnd('/')}";
+        foreach (string file in DirAccess.GetFilesAt(dir)) result.Add(prefix + file);
+        foreach (string sub in DirAccess.GetDirectoriesAt(dir)) Collect(root, $"{prefix}{sub}/", result);
     }
 
     /// <summary>这一组的所有文件（res:// 路径，按文件名排序）；没有时是空的。</summary>

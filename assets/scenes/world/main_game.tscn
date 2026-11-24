@@ -1,4 +1,4 @@
-[gd_scene load_steps=7 format=3]
+[gd_scene format=3]
 
 [ext_resource type="PackedScene" path="res://assets/scenes/world/game.tscn" id="1_game"]
 [ext_resource type="PackedScene" path="res://assets/scenes/player/player_v2.tscn" id="2_player"]
@@ -6,6 +6,8 @@
 [ext_resource type="Resource" path="res://assets/data/world/game_boot_settings.tres" id="4_bootset"]
 [ext_resource type="PackedScene" path="res://assets/scenes/ui/game_ui.tscn" id="5_ui"]
 [ext_resource type="PackedScene" path="res://assets/scenes/narrative/narrative_layer.tscn" id="5_narrative"]
+[ext_resource type="Script" path="res://assets/scripts/world/BgmPlayer.cs" id="6_bgm"]
+[ext_resource type="Resource" path="res://assets/data/audio/bgm_table.tres" id="7_bgmtable"]
 
 [node name="MainGame" type="Node"]
 
@@ -21,3 +23,8 @@ SaveService = NodePath("../Game/SaveService")
 
 [node name="GameUi" parent="." instance=ExtResource("5_ui")]
 [node name="NarrativeLayer" parent="." instance=ExtResource("5_narrative")]
+
+[node name="Music" type="Node" parent="."]
+process_mode = 3
+script = ExtResource("6_bgm")
+Table = ExtResource("7_bgmtable")

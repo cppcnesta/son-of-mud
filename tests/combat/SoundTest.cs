@@ -61,7 +61,7 @@ public partial class SoundTest : LabSuiteBase
     }
 
     private static Dictionary<string, string[]> Group() =>
-        SoundBank.Group(DirAccess.GetFilesAt(SoundBank.Directory));
+        SoundBank.Group(SoundBank.ListFiles(SoundBank.Directory));
 
     private void OnPlayed(string group, AudioStream stream)
     {
@@ -98,20 +98,25 @@ public partial class SoundTest : LabSuiteBase
 
         var expected = new Dictionary<string, int>
         {
-            [SoundBank.MinionHit] = 3, [SoundBank.PlayerFootstep] = 4, [SoundBank.PlayerJump] = 3, [SoundBank.PlayerDodge] = 3, [SoundBank.PlayerBlock] = 3,
+            [SoundBank.MinionHit] = 3, [SoundBank.MinionDeath] = 1,
+            [SoundBank.BossSweep] = 1, [SoundBank.BossTailStab] = 1, [SoundBank.BossDeath] = 1,
+            [SoundBank.PlayerFootstep] = 4, [SoundBank.PlayerJump] = 3, [SoundBank.PlayerDodge] = 3, [SoundBank.PlayerBlock] = 3,
+            [SoundBank.PlayerDeath] = 1, [SoundBank.PlayerRangedAttack] = 1, [SoundBank.PlayerDownSlash] = 1, [SoundBank.PlayerHit] = 1,
         };
         Dictionary<string, string[]> real = Group();
         bool counts = real.Count == expected.Count && expected.All(e => SoundBank.Variants(e.Key).Count == e.Value);
         bool loadable = expected.Keys.SelectMany(SoundBank.Variants).All(p => ResourceLoader.Exists(p) && GD.Load<AudioStream>(p) != null);
-        Check(counts && loadable, $"仓库里的音效：5 组、版本数对得上对照表（{string.Join("；", real.Select(g => g.Key + "×" + g.Value.Length))}），都能载入");
+        Check(counts && loadable, $"仓库里的音效：对照表 13 组都有、版本数对得上（{string.Join("；", real.Select(g => g.Key + "×" + g.Value.Length))}），都能载入");
+        // 按类别分子文件夹：主角 / 小怪 / Boss01
+        string Folder(string group) => SoundBank.Variants(group).Select(p => p[(SoundBank.Directory.Length + 1)..].Split('/')[0]).Distinct().Single();
+        bool sorted = expected.Keys.All(g => Folder(g) == (g.StartsWith("Player_") ? "player" : g.StartsWith("Minion_") ? "minion" : "boss01"));
+        Check(sorted, "音效按类别放在子文件夹里（player / minion / boss01），子文件夹里的也能找到");
 
-        string[] missing = { SoundBank.MinionDeath, SoundBank.BossSweep, SoundBank.BossTailStab, SoundBank.BossDeath, SoundBank.PlayerDeath,
-                             SoundBank.PlayerRangedAttack, SoundBank.PlayerDownSlash, SoundBank.PlayerHit };
         int mark = Mark, requests = _requestSizes.Count;
-        bool silent = missing.All(g => !SoundBank.Has(g) && !SoundBank.Play(g)) && !SoundBank.Play("") && !SoundBank.Play(null);
-        Check(silent && Mark == mark && _requestSizes.Count == requests, "还没交付的 8 组（和空组名）：什么都不播、不报错");
-        bool fallback = SoundBank.PlayFirst(SoundBank.MinionDeath, SoundBank.MinionHit) && Since(mark).SequenceEqual(new[] { SoundBank.MinionHit });
-        Check(fallback, "PlayFirst：死亡声没有文件时用受击声，只播一个");
+        bool silent = !SoundBank.Has("Not_A_Sound") && !SoundBank.Play("Not_A_Sound") && !SoundBank.Play("") && !SoundBank.Play(null);
+        Check(silent && Mark == mark && _requestSizes.Count == requests, "没有文件的组（和空组名）：什么都不播、不报错");
+        bool fallback = SoundBank.PlayFirst("Not_A_Sound", SoundBank.MinionHit) && Since(mark).SequenceEqual(new[] { SoundBank.MinionHit });
+        Check(fallback, "PlayFirst：前一组没有文件时用后一组，只播一个");
     }
 
     // ---------- ② 随机 ----------

@@ -3,12 +3,12 @@
 importer="wav"
 type="AudioStreamWAV"
 uid="uid://857qg75x040"
-path="res://.godot/imported/SFX_Minion_Hit_03.wav-65fce7118593cbea01bc4d0867ddd2ab.sample"
+path="res://.godot/imported/SFX_Minion_Hit_03.wav-c7b1f53d0ddc2c5aad1e93ef8fbc81ef.sample"
 
 [deps]
 
-source_file="res://assets/audio/sfx/SFX_Minion_Hit_03.wav"
-dest_files=["res://.godot/imported/SFX_Minion_Hit_03.wav-65fce7118593cbea01bc4d0867ddd2ab.sample"]
+source_file="res://assets/audio/sfx/minion/SFX_Minion_Hit_03.wav"
+dest_files=["res://.godot/imported/SFX_Minion_Hit_03.wav-c7b1f53d0ddc2c5aad1e93ef8fbc81ef.sample"]
 
 [params]
 
