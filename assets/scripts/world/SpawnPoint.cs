@@ -7,8 +7,8 @@ namespace SonOfMud.World;
 [GlobalClass]
 public partial class SpawnPoint : Marker2D
 {
-    public static readonly StringName DefaultId = "Default";
-    public static readonly StringName SaveId = "Save";
+	public static readonly StringName DefaultId = "Default";
+	public static readonly StringName SaveId = "Save";
 
-    [Export] public StringName SpawnId { get; set; } = "Default";
+	[Export] public StringName SpawnId { get; set; } = "Default";
 }

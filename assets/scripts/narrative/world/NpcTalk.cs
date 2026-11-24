@@ -11,52 +11,52 @@ namespace SonOfMud.Narrative.World;
 [GlobalClass]
 public partial class NpcTalk : Area2D, IInteractable
 {
-    [Export] public string NpcId { get; set; } = "";
-    [Export] public string ScriptId { get; set; } = "";
-    [Export] public string FirstLabel { get; set; } = "";
-    [Export] public string RepeatLabel { get; set; } = "";
-    [Export] public string PromptText { get; set; } = "交谈";
-    [Export] public GateRequirement VisibleWhen { get; set; }
+	[Export] public string NpcId { get; set; } = "";
+	[Export] public string ScriptId { get; set; } = "";
+	[Export] public string FirstLabel { get; set; } = "";
+	[Export] public string RepeatLabel { get; set; } = "";
+	[Export] public string PromptText { get; set; } = "交谈";
+	[Export] public GateRequirement VisibleWhen { get; set; }
 
-    public string TalkedKey => $"talked.{NpcId}";
-    public string Prompt => PromptText;
-    public bool Present { get; private set; }
+	public string TalkedKey => $"talked.{NpcId}";
+	public string Prompt => PromptText;
+	public bool Present { get; private set; }
 
-    /// <summary>现在按 E 会播哪个标签。</summary>
-    public string NextLabel =>
-        GameSession.Progress.Flag(TalkedKey) && !string.IsNullOrEmpty(RepeatLabel) ? RepeatLabel : FirstLabel;
+	/// <summary>现在按 E 会播哪个标签。</summary>
+	public string NextLabel =>
+		GameSession.Progress.Flag(TalkedKey) && !string.IsNullOrEmpty(RepeatLabel) ? RepeatLabel : FirstLabel;
 
-    public override void _EnterTree()
-    {
-        if (Events.Instance != null) Events.Instance.VariableChanged += OnVariableChanged;
-    }
+	public override void _EnterTree()
+	{
+		if (Events.Instance != null) Events.Instance.VariableChanged += OnVariableChanged;
+	}
 
-    public override void _ExitTree()
-    {
-        if (Events.Instance != null) Events.Instance.VariableChanged -= OnVariableChanged;
-    }
+	public override void _ExitTree()
+	{
+		if (Events.Instance != null) Events.Instance.VariableChanged -= OnVariableChanged;
+	}
 
-    public override void _Ready()
-    {
-        CollisionLayer = Layers.Interact;
-        CollisionMask = 0;
-        Monitoring = false;
-        Refresh();
-    }
+	public override void _Ready()
+	{
+		CollisionLayer = Layers.Interact;
+		CollisionMask = 0;
+		Monitoring = false;
+		Refresh();
+	}
 
-    private void OnVariableChanged(StringName key, Variant value) => Refresh();
+	private void OnVariableChanged(StringName key, Variant value) => Refresh();
 
-    public void Refresh()
-    {
-        Present = GameSession.Progress.Meets(VisibleWhen, out _);
-        Visible = Present;
-    }
+	public void Refresh()
+	{
+		Present = GameSession.Progress.Meets(VisibleWhen, out _);
+		Visible = Present;
+	}
 
-    public bool CanInteract(Node2D actor) => Present && !string.IsNullOrEmpty(ScriptId) && !string.IsNullOrEmpty(FirstLabel);
+	public bool CanInteract(Node2D actor) => Present && !string.IsNullOrEmpty(ScriptId) && !string.IsNullOrEmpty(FirstLabel);
 
-    public void Interact(Node2D actor)
-    {
-        if (!CanInteract(actor)) return;
-        Events.Instance?.EmitSignal(Events.SignalName.StoryRequested, ScriptId, NextLabel);
-    }
+	public void Interact(Node2D actor)
+	{
+		if (!CanInteract(actor)) return;
+		Events.Instance?.EmitSignal(Events.SignalName.StoryRequested, ScriptId, NextLabel);
+	}
 }
