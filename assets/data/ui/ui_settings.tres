@@ -23,7 +23,6 @@ SavedText = "已存档"
 TabletFormat = "获得泥板「{0}」"
 HudFadeSeconds = 0.3
 HudNarrativeAlpha = 0.0
-MapPanCellsPerSecond = 10.0
 GameScene = "res://assets/scenes/world/main_game.tscn"
 SaveSlot = 0
 StartErrorTitle = "无法开始旅程"

@@ -10,35 +10,24 @@
 [ext_resource type="Script" uid="uid://bpbbq7nshyvxc" path="res://assets/scripts/ui/ArtifactRing.cs" id="8_ring"]
 [ext_resource type="Script" uid="uid://chvecxe17mg1r" path="res://assets/scripts/ui/ArtifactSlot.cs" id="10_slot"]
 [ext_resource type="Script" uid="uid://bnol082le3oc" path="res://assets/scripts/ui/BossBar.cs" id="11_boss"]
-[ext_resource type="Texture2D" uid="uid://b8g1bbehossba" path="res://assets/art/ui/tex_ui_bossbar_frame.png" id="12_bframe"]
 [ext_resource type="Texture2D" uid="uid://c5yjv6hvgtuw7" path="res://assets/art/ui/tex_ui_bossbar_fill.png" id="13_bfill"]
 [ext_resource type="Texture2D" uid="uid://bjwkrwasmk73x" path="res://assets/art/ui/tex_ui_bossbar_fill_delay.png" id="14_bdelay"]
 [ext_resource type="Script" uid="uid://bxkmyvd6rn0kp" path="res://assets/scripts/ui/InteractPrompt.cs" id="15_prompt"]
 [ext_resource type="Script" uid="uid://bo5blsnumb26d" path="res://assets/scripts/ui/Toast.cs" id="16_toast"]
-[ext_resource type="PackedScene" uid="uid://dch8dyylb7526" path="res://addons/MetroidvaniaSystem/Template/Nodes/Minimap.tscn" id="17_minimap"]
-[ext_resource type="Texture2D" uid="uid://biux767ephpdn" path="res://assets/art/ui/tex_ui_artifact_crown_worn.png" id="20_crown_w"]
-[ext_resource type="Texture2D" uid="uid://c65e15p7vqcfc" path="res://assets/art/ui/tex_ui_artifact_crown_removed.png" id="21_crown_r"]
-[ext_resource type="Texture2D" uid="uid://b3um58ekot6qu" path="res://assets/art/ui/tex_ui_artifact_earring_worn.png" id="22_earring_w"]
-[ext_resource type="Texture2D" uid="uid://b6il2rt8pde0j" path="res://assets/art/ui/tex_ui_artifact_earring_removed.png" id="23_earring_r"]
-[ext_resource type="Texture2D" uid="uid://c6gyhbyva2ew4" path="res://assets/art/ui/tex_ui_artifact_necklace_worn.png" id="24_necklace_w"]
-[ext_resource type="Texture2D" uid="uid://bpn8uusciycou" path="res://assets/art/ui/tex_ui_artifact_necklace_removed.png" id="25_necklace_r"]
-[ext_resource type="Texture2D" uid="uid://dkigk3nngthqo" path="res://assets/art/ui/tex_ui_artifact_pectoral_worn.png" id="26_pectoral_w"]
-[ext_resource type="Texture2D" uid="uid://bah3y60yaa8m8" path="res://assets/art/ui/tex_ui_artifact_pectoral_removed.png" id="27_pectoral_r"]
-[ext_resource type="Texture2D" uid="uid://djd4y440fq83i" path="res://assets/art/ui/tex_ui_artifact_belt_worn.png" id="28_belt_w"]
-[ext_resource type="Texture2D" uid="uid://brxhqe7ofk0ha" path="res://assets/art/ui/tex_ui_artifact_belt_removed.png" id="29_belt_r"]
-[ext_resource type="Texture2D" uid="uid://q2vkagww76j4" path="res://assets/art/ui/tex_ui_artifact_bracelet_worn.png" id="30_bracelet_w"]
-[ext_resource type="Texture2D" uid="uid://bl0w425jp2xet" path="res://assets/art/ui/tex_ui_artifact_bracelet_removed.png" id="31_bracelet_r"]
-[ext_resource type="Texture2D" uid="uid://bipg052b54yoy" path="res://assets/art/ui/tex_ui_artifact_robe_worn.png" id="32_robe_w"]
-[ext_resource type="Texture2D" uid="uid://b4bcxcicbk5de" path="res://assets/art/ui/tex_ui_artifact_robe_removed.png" id="33_robe_r"]
-[ext_resource type="Script" uid="uid://bsjiy8x8gexfd" path="res://assets/scripts/ui/LiverCounter.cs" id="34_liver"]
+[ext_resource type="Texture2D" path="res://assets/art/ui/tex_ui_artifact_slot.png" id="35_slot"]
+[ext_resource type="Script" path="res://assets/scripts/ui/ItemBar.cs" id="37_items"]
+[ext_resource type="Script" path="res://assets/scripts/ui/MiniMap.cs" id="38_minimap"]
+[ext_resource type="PackedScene" path="res://assets/scenes/ui/map_pieces.tscn" id="39_pieces"]
+[ext_resource type="Texture2D" path="res://assets/art/ui/tex_ui_map_border.png" id="40_border"]
+[ext_resource type="Texture2D" path="res://assets/art/ui/tex_ui_bossbar_under.png" id="36_bunder"]
 
-[node name="Hud" type="CanvasLayer" unique_id=1197222111 node_paths=PackedStringArray("Root", "Beads", "Livers", "Artifacts", "Boss", "Prompt", "Toast", "Minimap")]
+[node name="Hud" type="CanvasLayer" unique_id=1197222111 node_paths=PackedStringArray("Root", "Beads", "Items", "Artifacts", "Boss", "Prompt", "Toast", "Minimap")]
 process_mode = 3
 layer = 10
 script = ExtResource("1_hud")
 Root = NodePath("Root")
 Beads = NodePath("Root/HpBeadBar")
-Livers = NodePath("Root/LiverCounter")
+Items = NodePath("Root/ItemBar")
 Artifacts = NodePath("Root/ArtifactRing")
 Boss = NodePath("Root/BossBar")
 Prompt = NodePath("Root/InteractPrompt")
@@ -78,6 +67,7 @@ step = 0.0
 fill_mode = 3
 texture_under = ExtResource("6_bempty")
 texture_progress = ExtResource("5_bfull")
+nine_patch_stretch = true
 script = ExtResource("2_bead")
 
 [node name="Break" type="Sprite2D" parent="Root/HpBeadBar/BeadTemplate" unique_id=892466086]
@@ -86,32 +76,183 @@ texture = ExtResource("7_bbreak")
 centered = false
 hframes = 6
 
-[node name="LiverCounter" type="HBoxContainer" parent="Root" unique_id=1006557441 node_paths=PackedStringArray("Icon", "CountLabel")]
-visible = false
+[node name="ItemBar" type="HBoxContainer" parent="Root"]
 layout_mode = 0
-offset_left = 24.0
+offset_left = 22.0
 offset_top = 58.0
-offset_right = 124.0
-offset_bottom = 86.0
+offset_right = 172.0
+offset_bottom = 104.0
 mouse_filter = 2
-theme_override_constants/separation = 6
-script = ExtResource("34_liver")
-Icon = NodePath("Icon")
-CountLabel = NodePath("Count")
+theme_override_constants/separation = 4
+script = ExtResource("37_items")
 
-[node name="Icon" type="ColorRect" parent="Root/LiverCounter" unique_id=1876857655]
-custom_minimum_size = Vector2(22, 22)
+[node name="Slot0" type="Control" parent="Root/ItemBar"]
+custom_minimum_size = Vector2(46, 46)
 layout_mode = 2
-size_flags_vertical = 4
 mouse_filter = 2
-color = Color(0.55, 0.2, 0.16, 1)
 
-[node name="Count" type="Label" parent="Root/LiverCounter" unique_id=1850711208]
+[node name="Frame" type="TextureRect" parent="Root/ItemBar/Slot0"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("35_slot")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Icon" type="TextureRect" parent="Root/ItemBar/Slot0"]
+visible = false
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -12.0
+offset_top = -14.0
+offset_right = 12.0
+offset_bottom = 10.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Count" type="Label" parent="Root/ItemBar/Slot0"]
+visible = false
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -30.0
+offset_top = -18.0
+offset_right = 4.0
+offset_bottom = 2.0
+grow_horizontal = 0
+grow_vertical = 0
+theme_override_colors/font_color = Color(1, 0.96, 0.86, 1)
+theme_override_colors/font_outline_color = Color(0.18, 0.12, 0.08, 1)
+theme_override_constants/outline_size = 4
+theme_override_font_sizes/font_size = 13
+horizontal_alignment = 2
+
+[node name="Slot1" type="Control" parent="Root/ItemBar"]
+custom_minimum_size = Vector2(46, 46)
 layout_mode = 2
-text = "×0"
-vertical_alignment = 1
+mouse_filter = 2
+
+[node name="Frame" type="TextureRect" parent="Root/ItemBar/Slot1"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("35_slot")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Icon" type="TextureRect" parent="Root/ItemBar/Slot1"]
+visible = false
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -12.0
+offset_top = -14.0
+offset_right = 12.0
+offset_bottom = 10.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Count" type="Label" parent="Root/ItemBar/Slot1"]
+visible = false
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -30.0
+offset_top = -18.0
+offset_right = 4.0
+offset_bottom = 2.0
+grow_horizontal = 0
+grow_vertical = 0
+theme_override_colors/font_color = Color(1, 0.96, 0.86, 1)
+theme_override_colors/font_outline_color = Color(0.18, 0.12, 0.08, 1)
+theme_override_constants/outline_size = 4
+theme_override_font_sizes/font_size = 13
+horizontal_alignment = 2
+
+[node name="Slot2" type="Control" parent="Root/ItemBar"]
+custom_minimum_size = Vector2(46, 46)
+layout_mode = 2
+mouse_filter = 2
+
+[node name="Frame" type="TextureRect" parent="Root/ItemBar/Slot2"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("35_slot")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Icon" type="TextureRect" parent="Root/ItemBar/Slot2"]
+visible = false
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -12.0
+offset_top = -14.0
+offset_right = 12.0
+offset_bottom = 10.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Count" type="Label" parent="Root/ItemBar/Slot2"]
+visible = false
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -30.0
+offset_top = -18.0
+offset_right = 4.0
+offset_bottom = 2.0
+grow_horizontal = 0
+grow_vertical = 0
+theme_override_colors/font_color = Color(1, 0.96, 0.86, 1)
+theme_override_colors/font_outline_color = Color(0.18, 0.12, 0.08, 1)
+theme_override_constants/outline_size = 4
+theme_override_font_sizes/font_size = 13
+horizontal_alignment = 2
 
 [node name="ArtifactRing" type="Control" parent="Root" unique_id=489860242]
+visible = false
 layout_mode = 1
 anchors_preset = 2
 anchor_top = 1.0
@@ -140,15 +281,22 @@ offset_top = -365.0
 offset_right = -23.0
 offset_bottom = -325.0
 mouse_filter = 2
-texture = ExtResource("20_crown_w")
+texture = ExtResource("35_slot")
+expand_mode = 1
+stretch_mode = 5
 
 [node name="Removed" type="TextureRect" parent="Root/ArtifactRing/Slot0" unique_id=1509177135]
 visible = false
 layout_mode = 0
-offset_right = 40.0
-offset_bottom = 40.0
+offset_left = -63.0
+offset_top = -365.0
+offset_right = -23.0
+offset_bottom = -325.0
 mouse_filter = 2
-texture = ExtResource("21_crown_r")
+texture = ExtResource("35_slot")
+expand_mode = 1
+stretch_mode = 5
+self_modulate = Color(0.45, 0.45, 0.45, 0.6)
 
 [node name="Slot1" type="Control" parent="Root/ArtifactRing" unique_id=1139891966]
 anchors_preset = 0
@@ -167,15 +315,22 @@ offset_top = -392.4
 offset_right = -27.699997
 offset_bottom = -352.4
 mouse_filter = 2
-texture = ExtResource("22_earring_w")
+texture = ExtResource("35_slot")
+expand_mode = 1
+stretch_mode = 5
 
 [node name="Removed" type="TextureRect" parent="Root/ArtifactRing/Slot1" unique_id=291736538]
 visible = false
 layout_mode = 0
-offset_right = 40.0
-offset_bottom = 40.0
+offset_left = -67.7
+offset_top = -392.4
+offset_right = -27.699997
+offset_bottom = -352.4
 mouse_filter = 2
-texture = ExtResource("23_earring_r")
+texture = ExtResource("35_slot")
+expand_mode = 1
+stretch_mode = 5
+self_modulate = Color(0.45, 0.45, 0.45, 0.6)
 
 [node name="Slot2" type="Control" parent="Root/ArtifactRing" unique_id=134982984]
 anchors_preset = 0
@@ -194,15 +349,22 @@ offset_top = -451.59998
 offset_right = 6.800003
 offset_bottom = -411.59998
 mouse_filter = 2
-texture = ExtResource("24_necklace_w")
+texture = ExtResource("35_slot")
+expand_mode = 1
+stretch_mode = 5
 
 [node name="Removed" type="TextureRect" parent="Root/ArtifactRing/Slot2" unique_id=780965680]
 visible = false
 layout_mode = 0
-offset_right = 40.0
-offset_bottom = 40.0
+offset_left = -33.199997
+offset_top = -451.59998
+offset_right = 6.800003
+offset_bottom = -411.59998
 mouse_filter = 2
-texture = ExtResource("25_necklace_r")
+texture = ExtResource("35_slot")
+expand_mode = 1
+stretch_mode = 5
+self_modulate = Color(0.45, 0.45, 0.45, 0.6)
 
 [node name="Slot3" type="Control" parent="Root/ArtifactRing" unique_id=91805892]
 anchors_preset = 0
@@ -221,15 +383,22 @@ offset_top = -499.09998
 offset_right = 93.6
 offset_bottom = -459.09998
 mouse_filter = 2
-texture = ExtResource("26_pectoral_w")
+texture = ExtResource("35_slot")
+expand_mode = 1
+stretch_mode = 5
 
 [node name="Removed" type="TextureRect" parent="Root/ArtifactRing/Slot3" unique_id=1345583964]
 visible = false
 layout_mode = 0
-offset_right = 40.0
-offset_bottom = 40.0
+offset_left = 53.6
+offset_top = -499.09998
+offset_right = 93.6
+offset_bottom = -459.09998
 mouse_filter = 2
-texture = ExtResource("27_pectoral_r")
+texture = ExtResource("35_slot")
+expand_mode = 1
+stretch_mode = 5
+self_modulate = Color(0.45, 0.45, 0.45, 0.6)
 
 [node name="Slot4" type="Control" parent="Root/ArtifactRing" unique_id=1154628179]
 anchors_preset = 0
@@ -248,15 +417,22 @@ offset_top = -498.09998
 offset_right = 204.4
 offset_bottom = -458.09998
 mouse_filter = 2
-texture = ExtResource("28_belt_w")
+texture = ExtResource("35_slot")
+expand_mode = 1
+stretch_mode = 5
 
 [node name="Removed" type="TextureRect" parent="Root/ArtifactRing/Slot4" unique_id=362714994]
 visible = false
 layout_mode = 0
-offset_right = 40.0
-offset_bottom = 40.0
+offset_left = 164.4
+offset_top = -498.09998
+offset_right = 204.4
+offset_bottom = -458.09998
 mouse_filter = 2
-texture = ExtResource("29_belt_r")
+texture = ExtResource("35_slot")
+expand_mode = 1
+stretch_mode = 5
+self_modulate = Color(0.45, 0.45, 0.45, 0.6)
 
 [node name="Slot5" type="Control" parent="Root/ArtifactRing" unique_id=427515018]
 anchors_preset = 0
@@ -275,15 +451,22 @@ offset_top = -450.59998
 offset_right = 296.2
 offset_bottom = -410.59998
 mouse_filter = 2
-texture = ExtResource("30_bracelet_w")
+texture = ExtResource("35_slot")
+expand_mode = 1
+stretch_mode = 5
 
 [node name="Removed" type="TextureRect" parent="Root/ArtifactRing/Slot5" unique_id=1922414562]
 visible = false
 layout_mode = 0
-offset_right = 40.0
-offset_bottom = 40.0
+offset_left = 256.2
+offset_top = -450.59998
+offset_right = 296.2
+offset_bottom = -410.59998
 mouse_filter = 2
-texture = ExtResource("31_bracelet_r")
+texture = ExtResource("35_slot")
+expand_mode = 1
+stretch_mode = 5
+self_modulate = Color(0.45, 0.45, 0.45, 0.6)
 
 [node name="Slot6" type="Control" parent="Root/ArtifactRing" unique_id=1397232552]
 anchors_preset = 0
@@ -302,15 +485,22 @@ offset_top = -392.40002
 offset_right = 334.7
 offset_bottom = -352.40002
 mouse_filter = 2
-texture = ExtResource("32_robe_w")
+texture = ExtResource("35_slot")
+expand_mode = 1
+stretch_mode = 5
 
 [node name="Removed" type="TextureRect" parent="Root/ArtifactRing/Slot6" unique_id=1942040453]
 visible = false
 layout_mode = 0
-offset_right = 40.0
-offset_bottom = 40.0
+offset_left = 294.7
+offset_top = -392.40002
+offset_right = 334.7
+offset_bottom = -352.40002
 mouse_filter = 2
-texture = ExtResource("33_robe_r")
+texture = ExtResource("35_slot")
+expand_mode = 1
+stretch_mode = 5
+self_modulate = Color(0.45, 0.45, 0.45, 0.6)
 
 [node name="BossBar" type="Control" parent="Root" unique_id=1155148167 node_paths=PackedStringArray("NameLabel", "Fill", "Delay")]
 visible = false
@@ -321,7 +511,7 @@ anchor_top = 1.0
 anchor_right = 0.5
 anchor_bottom = 1.0
 offset_left = -320.0
-offset_top = -84.0
+offset_top = -100.0
 offset_right = 320.0
 offset_bottom = -24.0
 grow_horizontal = 2
@@ -342,29 +532,24 @@ horizontal_alignment = 1
 layout_mode = 0
 offset_top = 36.0
 offset_right = 640.0
-offset_bottom = 60.0
+offset_bottom = 76.0
 mouse_filter = 2
 step = 0.0
 value = 100.0
+texture_under = ExtResource("36_bunder")
 texture_progress = ExtResource("14_bdelay")
+nine_patch_stretch = true
 
 [node name="Fill" type="TextureProgressBar" parent="Root/BossBar" unique_id=853854017]
 layout_mode = 0
 offset_top = 36.0
 offset_right = 640.0
-offset_bottom = 60.0
+offset_bottom = 76.0
 mouse_filter = 2
 step = 0.0
 value = 100.0
 texture_progress = ExtResource("13_bfill")
-
-[node name="Frame" type="TextureRect" parent="Root/BossBar" unique_id=332931871]
-layout_mode = 0
-offset_top = 36.0
-offset_right = 640.0
-offset_bottom = 60.0
-mouse_filter = 2
-texture = ExtResource("12_bframe")
+nine_patch_stretch = true
 
 [node name="InteractPrompt" type="Label" parent="Root" unique_id=756077711]
 layout_mode = 1
@@ -398,15 +583,47 @@ horizontal_alignment = 1
 vertical_alignment = 1
 script = ExtResource("16_toast")
 
-[node name="Minimap" parent="Root" unique_id=2104332086 instance=ExtResource("17_minimap")]
+[node name="Minimap" type="Control" parent="Root" unique_id=2104332086 node_paths=PackedStringArray("Layer")]
 layout_mode = 1
 anchors_preset = 1
 anchor_left = 1.0
 anchor_right = 1.0
-offset_left = -162.0
-offset_top = 5.0
-offset_right = -18.0
-offset_bottom = 101.0
+offset_left = -300.0
+offset_top = 6.0
+offset_right = -12.0
+offset_bottom = 168.0
 grow_horizontal = 0
 mouse_filter = 2
-display_player_location = true
+script = ExtResource("38_minimap")
+Layer = NodePath("Pieces")
+
+[node name="Bg" type="ColorRect" parent="Root/Minimap"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.451, 0.451, 0.451, 0.55)
+
+[node name="Pieces" parent="Root/Minimap" instance=ExtResource("39_pieces")]
+layout_mode = 0
+offset_left = 36.0
+offset_top = 54.0
+offset_right = 896.0
+offset_bottom = 322.0
+scale = Vector2(0.2512, 0.2512)
+ShowIcons = false
+MarkerScale = 2.5
+
+[node name="Border" type="TextureRect" parent="Root/Minimap"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("40_border")
+expand_mode = 1

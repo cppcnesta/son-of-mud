@@ -177,9 +177,9 @@ public partial class AnimFallbackTest : LabSuiteBase
         Node hud = GD.Load<PackedScene>("res://assets/scenes/ui/hud.tscn").Instantiate();
         AddChild(hud);
         await Frames(1);
-        var counter = hud.FindChildren("LiverCounter", "", true, false).OfType<SonOfMud.UI.LiverCounter>().FirstOrDefault();
-        var iconArt = counter?.Icon?.GetNodeOrNull<TextureRect>("Art");
-        Check(iconArt != null && iconArt.Texture.ResourcePath.Contains("spr_item_mud_liver"), "界面泥肝数量图标：换成泥肝图");
+        var bar = hud.FindChildren("ItemBar", "", true, false).OfType<SonOfMud.UI.ItemBar>().FirstOrDefault();
+        var liverEntry = bar?.Entries.FirstOrDefault(e => e?.Id == "mud_liver");
+        Check(liverEntry?.Icon != null && liverEntry.Icon.ResourcePath.Contains("spr_item_mud_liver"), "界面道具格里的泥肝：用泥肝图");
         hud.QueueFree();
         await Frames(2);
     }

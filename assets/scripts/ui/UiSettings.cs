@@ -50,10 +50,6 @@ public partial class UiSettings : KeptResource
     /// <summary>剧情进行中 HUD 的不透明度。</summary>
     [Export] public float HudNarrativeAlpha { get; set; } = 0f;
 
-    // ---- 大地图 ----
-    /// <summary>按住方向键时每秒平移的格数（按下的那一刻先移一格）。</summary>
-    [Export] public float MapPanCellsPerSecond { get; set; } = 10f;
-
     // ---- 主菜单 ----
     [Export(PropertyHint.File, "*.tscn")] public string GameScene { get; set; } = "res://assets/scenes/world/main_game.tscn";
     [Export] public int SaveSlot { get; set; } = 0;

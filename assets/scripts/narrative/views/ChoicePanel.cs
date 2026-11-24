@@ -7,6 +7,7 @@ namespace SonOfMud.Narrative.Views;
 /// <summary>
 /// 选项面板。界面在 choice_panel.tscn：List（排列选项的容器）、OptionTemplate（选项按钮模板，隐藏；每个选项复制一份，样式以它为准）。
 /// 屏幕中间一列按钮。键盘由剧情层读（上下移动、推进键确认），鼠标悬停改选、点击确认。
+/// 每个选项的外观：Fill（半透明底，颜色在模板的样式里调）、FrameNormal / FrameFocus（没选中 / 选中的框）、Arrow（选中时的箭头）。
 /// 选中后先关面板再回调，回调只会发生一次。
 /// </summary>
 [GlobalClass]
@@ -81,14 +82,23 @@ public partial class ChoicePanel : Control
         Visible = false;
     }
 
+    /// <summary>选中的选项亮起：换成 FrameFocus 框、显示 Arrow 箭头、字变亮；其余用 FrameNormal 框（三个子节点在模板里，跟着复制）。</summary>
     private void SetFocus(int index)
     {
         Focus = index;
         for (int i = 0; i < _buttons.Count; i++)
         {
             bool on = i == index;
-            _buttons[i].Text = (on ? "▶ " : "") + _options[i];
-            _buttons[i].Modulate = on ? Colors.White : new Color(0.7f, 0.7f, 0.7f);
+            Button button = _buttons[i];
+            if (button.GetNodeOrNull<CanvasItem>("FrameFocus") is { } focus) focus.Visible = on;
+            if (button.GetNodeOrNull<CanvasItem>("FrameNormal") is { } normal) normal.Visible = !on;
+            if (button.GetNodeOrNull<CanvasItem>("Arrow") is { } arrow) arrow.Visible = on;
+            Color text = on ? FocusedText : NormalText;
+            foreach (StringName name in TextColors) button.AddThemeColorOverride(name, text);
         }
     }
+
+    private static readonly Color FocusedText = new(1f, 0.94f, 0.78f);
+    private static readonly Color NormalText = new(0.84f, 0.8f, 0.72f);
+    private static readonly StringName[] TextColors = { "font_color", "font_hover_color", "font_focus_color" };
 }

@@ -10,11 +10,12 @@ using SonOfMud.World;
 /// <summary>
 /// 计划第 4 节步骤 3（从正式入口 main_game.tscn 启动）：
 /// ① main_game 里只多了一个 GameUi；Esc 暂停、再按恢复；“继续”按钮；暂停时世界不动。
-/// ② 地图键开关地图，打开时以当前格为中心，方向键平移；再打开重新居中。
+/// ② 地图键开关地图：去过的房间的泥板碎片才显示，「你在这里」在当前房间上，七重塔六层合用一块；方向键不平移。
+///    倒下后「上次倒下的地方」出现在倒下的房间上（见 ⑤ 的最后）。
 /// ③ 剧情对话中（PauseService 的 Narrative 来源）按 Esc / 地图键无效；规格反例：剧情暂停 → 开地图 → 关地图，仍保持暂停。
 /// ④ 地图和暂停菜单互斥：菜单开着按地图键 = 关菜单开地图（中间不恢复）；地图开着按 Esc 只关地图；同一帧两键只开一个；
 ///    反例：即使两者被同时打开，关掉一个也不会解除另一个的暂停。
-/// ⑤ 小地图：开局时中心是当前格；换房、走进新格子后跟着更新。
+/// ⑤ 小地图（大地图的缩略图）：「你在这里」在当前房间的碎片上，换房后跟着更新。
 /// </summary>
 public partial class UiPauseMapTest : UiTestBase
 {
@@ -97,28 +98,28 @@ public partial class UiPauseMapTest : UiTestBase
 
     private async Task MapChecks()
     {
-        Vector2I cell = CurrentCell;
         await Tap(GameUi.MapAction);
         Check(OnlyMap, "按地图键：打开地图，PauseService 的 Map 来源暂停游戏");
-        Check(_ui.Map.Center == cell && _ui.Map.Layer == MetSysApi.CurrentCoords.Z, $"地图打开时以当前格为中心（地图 {_ui.Map.Center}，当前 {cell}）");
-        Check(MetSysApi.IsCellDiscovered(MetSysApi.CurrentCoords, false), "当前格已探索（地图上会显示）");
+        MapScreen map = _ui.Map;
+        string room = map.CurrentRoomId;
+        MapPiece here = map.PieceOf(room);
+        Check(room != "" && here != null && here.Visible && map.HerePiece == here && map.Here.Visible,
+            $"地图打开时：当前房间 {room} 的泥板碎片显示，「你在这里」在它上面（{map.HerePiece?.Name}）");
+        int shown = map.Pieces.Count(p => p.Visible);
+        MapPiece last = map.PieceOf("S4_11");
+        Check(map.Pieces.Count == 27 && last != null && !last.Visible && shown >= 1 && shown < 27,
+            $"没去过的房间（终末之室 S4_11）碎片不显示（共 {map.Pieces.Count} 块，显示 {shown} 块）");
+        MapPiece tower = map.PieceOf("S4_02");
+        bool shared = tower != null && new[] { "S4_0304", "S4_05", "S4_06", "S4_07", "S4_08" }.All(r => map.PieceOf(r) == tower) && map.PieceOf("S4_09") != tower;
+        Check(shared, "七重塔六层（S4_02、S4_0304、S4_05～S4_08）合用一块碎片，血池回廊 S4_09 是另一块");
+        Check(!map.Death.Visible && map.DeathPiece == null, "还没倒下过：没有「上次倒下的地方」");
 
         await Tap("ui_right");
-        Check(_ui.Map.Center == cell + Vector2I.Right, $"方向键右：地图平移一格（{_ui.Map.Center}）");
-        await Tap("ui_left");
-        await Tap("ui_left");
-        Check(_ui.Map.Center == cell + Vector2I.Left, $"方向键左两下：向左平移两格（{_ui.Map.Center}）");
-        Input.ActionPress("ui_down");
-        await Frames(30);
-        Input.ActionRelease("ui_down");
-        await Frames(1);
-        int moved = _ui.Map.Center.Y - cell.Y;
-        Check(moved >= 4 && moved <= 7 && _ui.Map.Center.X == cell.X - 1, $"按住方向键下半秒：连续平移（{moved} 格，设定每秒 10 格）");
-
+        Check(map.IsOpen && map.HerePiece == here, "方向键不再平移地图（整张图一屏放得下）");
         await Tap(GameUi.MapAction);
         Check(NothingOpen && !GetTree().Paused, "再按地图键：关闭地图，恢复");
         await Tap(GameUi.MapAction);
-        Check(OnlyMap && _ui.Map.Center == cell, "重新打开地图：回到以当前格为中心");
+        Check(OnlyMap && map.HerePiece == here, "重新打开地图：「你在这里」还在当前房间");
         await Tap(GameUi.MapAction);
         Check(NothingOpen && !GetTree().Paused, "关闭地图");
     }
@@ -210,27 +211,31 @@ public partial class UiPauseMapTest : UiTestBase
 
     private async Task MinimapChecks()
     {
-        Control minimap = _ui.Hud.Minimap;
+        MiniMap minimap = _ui.Hud.Minimap;
         Check(minimap != null && minimap.IsVisibleInTree() && minimap.GetParent() == _ui.Hud.Root, "HUD 右上角有小地图");
         if (minimap == null) return;
-        Check(MetSysApi.GetMapViewCenter(minimap) == CurrentCell, $"小地图中心是当前格（{MetSysApi.GetMapViewCenter(minimap)} / {CurrentCell}）");
+        string start = minimap.CurrentRoomId;
+        Check(start != "" && minimap.HerePiece != null && minimap.HerePiece == minimap.PieceOf(start) && minimap.HerePiece.Visible,
+            $"小地图是大地图的缩略图：「你在这里」在当前房间 {start} 的碎片上（{minimap.HerePiece?.Name}）");
 
-        Vector2I first = CurrentCell;
-        Input.ActionPress(PlayerActions.Left);
-        bool crossed = await WaitUntil(() => CurrentCell != first, 400);
-        Input.ActionRelease(PlayerActions.Left);
-        await Frames(2);
-        Check(crossed && MetSysApi.GetMapViewCenter(minimap) == CurrentCell,
-            $"走进新格子后小地图跟着更新（{first} → {CurrentCell}，小地图 {MetSysApi.GetMapViewCenter(minimap)}）");
-
-        Vector2I before = CurrentCell;
         World.LoadRoomImmediate("S1_04", SpawnPoint.SaveId);
         await Frames(15);
-        Check(CurrentCell != before && MetSysApi.GetMapViewCenter(minimap) == CurrentCell,
-            $"换到 S1_04 后小地图跟着更新（{before} → {CurrentCell}）");
+        Check(minimap.CurrentRoomId == "S1_04" && minimap.HerePiece == minimap.PieceOf("S1_04") && minimap.HerePiece.Visible && minimap.PieceOf(start).Visible,
+            $"换到 S1_04 后小地图跟着更新：「你在这里」挪到 S1_04，去过的 {start} 还显示（{minimap.CurrentRoomId}）");
 
         await Tap(GameUi.MapAction);
-        Check(OnlyMap && _ui.Map.Center == CurrentCell, "换房后打开大地图，中心也是新的当前格");
+        MapScreen map = _ui.Map;
+        Check(OnlyMap && map.CurrentRoomId == "S1_04" && map.HerePiece == map.PieceOf("S1_04") && map.HerePiece.Visible,
+            $"换房后打开大地图，「你在这里」在新房间 S1_04 的碎片上（{map.CurrentRoomId}）");
+        await Tap(GameUi.MapAction);
+
+        // 在 S1_04 倒下 → 回到检查点；再打开地图，S1_04 上有「上次倒下的地方」
+        Events.Instance.EmitSignal(Events.SignalName.PlayerDied);
+        await Frames(5);
+        await WaitSettled();
+        await Tap(GameUi.MapAction);
+        Check(OnlyMap && map.DeathRoom == "S1_04" && map.DeathPiece == map.PieceOf("S1_04") && map.Death.Visible,
+            $"倒下后打开地图：「上次倒下的地方」在 S1_04 的碎片上（记的房间 {map.DeathRoom}，现在在 {map.CurrentRoomId}）");
         await Tap(GameUi.MapAction);
     }
 }

@@ -14,7 +14,7 @@ using SonOfMud.World;
 /// <summary>
 /// 扔泥肝（C 步），从正式入口 main_game.tscn 启动、真实玩家、真实按键（RealKeys，R = 扔泥肝）：
 /// ① 没有泥肝时按 R 没反应（不进投掷状态、不扣、不生成投掷物），HUD 的泥肝数量隐藏；
-/// ② 有 3 个时按 R：扔出一个、剩 2 个、HUD 显示 ×2；投掷物是玩家方（只打敌人受击框）、伤害 15、倍率 1，
+/// ② 有 3 个时按 R：扔出一个、剩 2 个、HUD 显示 2/5；投掷物是玩家方（只打敌人受击框）、伤害 15、倍率 1，
 ///    朝面向方向飞一段短抛物线（约 300 像素）；投掷状态约 0.2 秒、动画名 throw，之后回 Idle；朝左也能扔；扔到 0 个 HUD 隐藏，再按 R 没反应；
 /// ③ 投掷间隔：0.4 秒内连按只扔一个，间隔约 24 帧后才能扔下一个；
 /// ④ 攻击（水攻击、泥攻击后摇）/ 闪避 / 格挡中按 R 不扔，动作结束后也不补扔；空中能扔，而且不打断下落；
@@ -30,7 +30,7 @@ public partial class LiverThrowTest : EnemyFlowBase
     private const int Damage = 15;
 
     private ThrowState _throw;
-    private LiverCounter _hud;
+    private ItemBar _hud;
     private readonly List<Projectile> _thrown = new();
     private readonly List<string> _states = new();
 
@@ -69,7 +69,7 @@ public partial class LiverThrowTest : EnemyFlowBase
     private void Bind()
     {
         _throw = Player.Machine.Get<ThrowState>();
-        _hud = MainGame != null ? FindChild<LiverCounter>(MainGame) : null;
+        _hud = MainGame != null ? FindChild<ItemBar>(MainGame) : null;
         _thrown.Clear();
         _states.Clear();
         if (_throw != null) _throw.ProjectileThrown += OnThrown;
@@ -89,9 +89,12 @@ public partial class LiverThrowTest : EnemyFlowBase
     private static void SetCount(long n) => ItemCounts.Set(Liver, n);
 
     private bool HudShows(long n) =>
-        _hud != null && GodotObject.IsInstanceValid(_hud) && (n > 0 ? _hud.Visible && _hud.Text == $"×{n}" : !_hud.Visible);
+        _hud != null && GodotObject.IsInstanceValid(_hud) && (n > 0 ? HudCount == $"{n}/5" : HudCount is "" or "0/5");
 
-    private string HudText => _hud == null || !GodotObject.IsInstanceValid(_hud) ? "(无 HUD)" : _hud.Visible ? _hud.Text : "(隐藏)";
+    /// <summary>HUD 道具格里泥肝的数量文字（和收集页一样「现有 / 5」；没得到过时不显示）。</summary>
+    private string HudCount => _hud.CountOf("mud_liver");
+
+    private string HudText => _hud == null || !GodotObject.IsInstanceValid(_hud) ? "(无 HUD)" : HudCount == "" ? "(没有数量)" : HudCount;
 
     private int ThrowStates => _states.Count(s => s == "Throw");
 
@@ -161,7 +164,7 @@ public partial class LiverThrowTest : EnemyFlowBase
         Check(_throw != null && _throw.Config != null && _throw.Config.Hit != null && _throw.AnimName == "throw",
             "玩家的状态机里有 Throw 状态（扔泥肝），配置来自 liver_throw.tres，动画名 throw");
         Check(_hud != null && _hud.GetParent()?.Name == "Root" && HudShows(0) && Count == 0,
-            $"HUD：正式 HUD 里有泥肝数量，开局 0 个时隐藏（{HudText}）");
+            $"HUD：正式 HUD 的道具格里有泥肝，开局没得到过时不显示数量（{HudText}）");
         if (_throw == null) return;
         await Settle();
         int states = _states.Count;
@@ -178,7 +181,7 @@ public partial class LiverThrowTest : EnemyFlowBase
         if (_throw == null) return;
         SetCount(3);
         await Frames(1);
-        Check(HudShows(3), $"有 3 个泥肝时 HUD 显示 ×3（{HudText}）");
+        Check(HudShows(3), $"有 3 个泥肝时 HUD 显示 3/5（{HudText}）");
         await Settle();
         await Face(1f);
         Vector2 at = Player.GlobalPosition;
@@ -190,7 +193,7 @@ public partial class LiverThrowTest : EnemyFlowBase
         Projectile p = _thrown.LastOrDefault();
         await Frames(1);
         Check(entered && _thrown.Count == 1 && _throw.Thrown == 1 && Count == 2 && HudShows(2),
-            $"有 3 个时按 R：进入投掷状态，扔出一个，剩 {Count} 个，HUD 立即显示 ×2（{HudText}）");
+            $"有 3 个时按 R：进入投掷状态，扔出一个，剩 {Count} 个，HUD 立即显示 2/5（{HudText}）");
         Check(anim == "water_throw", $"投掷动画：水形态播 water_throw（实际 {anim}）");
         Check(p != null && GodotObject.IsInstanceValid(p) && p.Team == ProjectileTeam.Player && p.CollisionLayer == Layers.PlayerHit && p.CollisionMask == Layers.EnemyHurt
               && p.Hit?.Damage == Damage && Mathf.IsEqualApprox(p.Hit.Multiplier, 1f) && p.Hit.Source == Player
@@ -220,7 +223,7 @@ public partial class LiverThrowTest : EnemyFlowBase
         await TapKey(RealKeys.Throw);
         Projectile left = _thrown.LastOrDefault();
         Check(_thrown.Count == 2 && Count == 1 && HudShows(1) && left != null && GodotObject.IsInstanceValid(left) && left.Velocity.X < 0f && left.GlobalPosition.X < at.X,
-            $"朝左按 R：泥肝朝左飞，剩 {Count} 个，HUD ×1（{HudText}）");
+            $"朝左按 R：泥肝朝左飞，剩 {Count} 个，HUD 1/5（{HudText}）");
 
         // 扔到 0 个
         await Settle();
@@ -437,11 +440,11 @@ public partial class LiverThrowTest : EnemyFlowBase
         await WaitSettled();
         Bind();
         Check(finished && Starts[^1].success && RoomId == "S1_04" && Count == 3 && HudShows(3),
-            $"读档：泥肝数量回到存档时的 3 个，新的 HUD 显示 ×3（{HudText}）");
+            $"读档：泥肝数量回到存档时的 3 个，新的 HUD 显示 3/5（{HudText}）");
         await Settle();
         await TapKey(RealKeys.Throw);
         await Frames(2);
-        Check(_thrown.Count == 1 && Count == 2 && HudShows(2), "读档后按 R 照常能扔，剩 2 个，HUD ×2");
+        Check(_thrown.Count == 1 && Count == 2 && HudShows(2), "读档后按 R 照常能扔，剩 2 个，HUD 2/5");
 
         Unbind();
         Node oldScene = MainGame;
