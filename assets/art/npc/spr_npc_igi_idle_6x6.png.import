@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dh1arnh1fneam"
-path="res://.godot/imported/spr_enemy_temple_guard_charge_windup_5x5.png-4fb06c08477fe5605bb97cbd8e6a1419.ctex"
+uid="uid://dbe016t0j67ej"
+path="res://.godot/imported/spr_npc_igi_idle_6x6.png-4735029c9bae29bd9fdeed770c2e6ed4.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/art/enemy/spr_enemy_temple_guard_charge_windup_5x5.png"
-dest_files=["res://.godot/imported/spr_enemy_temple_guard_charge_windup_5x5.png-4fb06c08477fe5605bb97cbd8e6a1419.ctex"]
+source_file="res://assets/art/npc/spr_npc_igi_idle_6x6.png"
+dest_files=["res://.godot/imported/spr_npc_igi_idle_6x6.png-4735029c9bae29bd9fdeed770c2e6ed4.ctex"]
 
 [params]
 

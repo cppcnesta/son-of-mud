@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dqobrs4lml5kr"
-path="res://.godot/imported/spr_enemy_mason_hurt_5x6.png-ff7e215bc31eca3eef76a52d22980347.ctex"
+uid="uid://d3ljnc8r1a0i7"
+path="res://.godot/imported/spr_enemy_temple_guard_hurt_4x4.png-3b5c6822e42a4c21a1560a84a3d12f7a.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/art/enemy/spr_enemy_mason_hurt_5x6.png"
-dest_files=["res://.godot/imported/spr_enemy_mason_hurt_5x6.png-ff7e215bc31eca3eef76a52d22980347.ctex"]
+source_file="res://assets/art/enemy/spr_enemy_temple_guard_hurt_4x4.png"
+dest_files=["res://.godot/imported/spr_enemy_temple_guard_hurt_4x4.png-3b5c6822e42a4c21a1560a84a3d12f7a.ctex"]
 
 [params]
 

@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://b6q8fuymnuane"
-path="res://.godot/imported/spr_enemy_devout_throw_windup_5x6.png-82501f1ec4c87781fd64b9a5c87b6b19.ctex"
+uid="uid://dfe2ows60inob"
+path="res://.godot/imported/spr_enemy_devout_idle_6x7.png-7c52e66b8ffa2029b5aa7565928cb1be.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/art/enemy/spr_enemy_devout_throw_windup_5x6.png"
-dest_files=["res://.godot/imported/spr_enemy_devout_throw_windup_5x6.png-82501f1ec4c87781fd64b9a5c87b6b19.ctex"]
+source_file="res://assets/art/enemy/spr_enemy_devout_idle_6x7.png"
+dest_files=["res://.godot/imported/spr_enemy_devout_idle_6x7.png-7c52e66b8ffa2029b5aa7565928cb1be.ctex"]
 
 [params]
 

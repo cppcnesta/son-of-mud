@@ -2,20 +2,21 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://ba8xdo5pd0e56"
-path="res://.godot/imported/spr_enemy_mason_attack_windup_4x4.png-ec1c25b52c5a3fab8e38a06cc9e27d05.ctex"
+uid="uid://cg36wgrvn4hx"
+path.s3tc="res://.godot/imported/spr_enemy_imdugud_swipe_4x2.png-7f4c9431a62aa9a579320ca2f60921ed.s3tc.ctex"
 metadata={
-"vram_texture": false
+"imported_formats": ["s3tc_bptc"],
+"vram_texture": true
 }
 
 [deps]
 
-source_file="res://assets/art/enemy/spr_enemy_mason_attack_windup_4x4.png"
-dest_files=["res://.godot/imported/spr_enemy_mason_attack_windup_4x4.png-ec1c25b52c5a3fab8e38a06cc9e27d05.ctex"]
+source_file="res://assets/art/enemy/spr_enemy_imdugud_swipe_4x2.png"
+dest_files=["res://.godot/imported/spr_enemy_imdugud_swipe_4x2.png-7f4c9431a62aa9a579320ca2f60921ed.s3tc.ctex"]
 
 [params]
 
-compress/mode=0
+compress/mode=2
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0

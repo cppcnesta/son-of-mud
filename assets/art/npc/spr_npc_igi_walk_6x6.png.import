@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://1f4o0772he66"
-path="res://.godot/imported/spr_enemy_mason_attack_2x3.png-a1672c551c6cd95e2cfd8c3e1672d5a9.ctex"
+uid="uid://dtgpyu85014ap"
+path="res://.godot/imported/spr_npc_igi_walk_6x6.png-c17a828909eef92e2de7bfad04d09379.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/art/enemy/spr_enemy_mason_attack_2x3.png"
-dest_files=["res://.godot/imported/spr_enemy_mason_attack_2x3.png-a1672c551c6cd95e2cfd8c3e1672d5a9.ctex"]
+source_file="res://assets/art/npc/spr_npc_igi_walk_6x6.png"
+dest_files=["res://.godot/imported/spr_npc_igi_walk_6x6.png-c17a828909eef92e2de7bfad04d09379.ctex"]
 
 [params]
 

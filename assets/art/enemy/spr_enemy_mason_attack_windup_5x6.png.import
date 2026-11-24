@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://daui47l0hwwfh"
-path="res://.godot/imported/spr_enemy_temple_guard_charge_5x5.png-bcf2219fc55342cb4a2320444a280144.ctex"
+uid="uid://c78wdoffk44m1"
+path="res://.godot/imported/spr_enemy_mason_attack_windup_5x6.png-ff2e993a33ab42049a78c058671bd567.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/art/enemy/spr_enemy_temple_guard_charge_5x5.png"
-dest_files=["res://.godot/imported/spr_enemy_temple_guard_charge_5x5.png-bcf2219fc55342cb4a2320444a280144.ctex"]
+source_file="res://assets/art/enemy/spr_enemy_mason_attack_windup_5x6.png"
+dest_files=["res://.godot/imported/spr_enemy_mason_attack_windup_5x6.png-ff2e993a33ab42049a78c058671bd567.ctex"]
 
 [params]
 
