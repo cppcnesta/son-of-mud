@@ -107,7 +107,7 @@ SpawnId = &"From_S2_01"
 [node name="Objects" type="Node2D" parent="." unique_id=2070517381]
 
 [node name="Story_Song" type="Area2D" parent="Objects" unique_id=1168954654]
-position = Vector2(320, 575)
+position = Vector2(816, 575)
 script = ExtResource("n_story")
 ScriptId = "m_pit"
 Label = "两河源头"
@@ -115,5 +115,5 @@ Mode = 1
 Once = true
 
 [node name="Shape" type="CollisionShape2D" parent="Objects/Story_Song" unique_id=1061557581]
-position = Vector2(496, -160)
+position = Vector2(0, -160)
 shape = SubResource("Shape_Story_Song")

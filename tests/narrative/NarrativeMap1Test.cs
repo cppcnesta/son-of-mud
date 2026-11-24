@@ -115,9 +115,16 @@ public partial class NarrativeMap1Test : NarrativeFlowBase
         await KeyTap(Key.E);
         Check(choice && await FinishDialog(5) && GameSession.Progress.Flag("item.生命之面包"), "S1_04：供桌选“吃下”");
 
-        // S1_04 → S1_05：守坑人（打 Boss 用设变量代替）
-        bool inS105 = await HoldUntil(PlayerActions.Right, () => World.CurrentRoomDef?.Id == "S1_05", 300);
-        Check(inS105, "S1_04 → S1_05：走过房间边缘");
+        // S1_04 → S1_05：守坑人（打 Boss 用设变量代替）；路上地面有一格砖（x≈912），走到跟前跳过去
+        Input.ActionPress(PlayerActions.Right);
+        await WaitUntil(() => LocalX > 820, 240);
+        Input.ActionPress(PlayerActions.Jump);
+        await Frames(10);
+        Input.ActionRelease(PlayerActions.Jump);
+        bool inS105 = await WaitUntil(() => World.CurrentRoomDef?.Id == "S1_05", 300);
+        Input.ActionRelease(PlayerActions.Right);
+        await Frames(2);
+        Check(inS105, "S1_04 → S1_05：跳过地上的砖，走过房间边缘");
         GameSession.Progress.SetVar("boss_keeper", true);
         bool atKeeper = await WalkToPrompt("交谈", PlayerActions.Right);
         await KeyTap(Key.E);
