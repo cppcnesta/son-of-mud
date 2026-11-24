@@ -21,8 +21,6 @@ public partial class UiSettings : KeptResource
     [Export] public float BeadBreakSeconds { get; set; } = 0.3f;
 
     // ---- 器物环（D6：只做显示） ----
-    /// <summary>还没收到 ArtifactsChanged 时显示的状态（bit i = 第 i 件戴着）。</summary>
-    [Export] public int InitialArtifactMask { get; set; } = 127;
 
     // ---- Boss 血条 ----
     [Export] public float BossBarDrainSeconds { get; set; } = 0.15f;

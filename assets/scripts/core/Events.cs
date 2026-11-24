@@ -113,7 +113,6 @@ public partial class Events : Node
     [Signal] public delegate void TabletCollectedEventHandler(StringName tabletId);
 
     // UI
-    [Signal] public delegate void ArtifactsChangedEventHandler(int mask);
     [Signal] public delegate void MapToggleRequestedEventHandler();
 
     // 暂停与输入锁（只由 PauseService / InputLock 发出）

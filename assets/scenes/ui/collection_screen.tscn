@@ -11,6 +11,17 @@
 [ext_resource type="Texture2D" path="res://assets/art/ui/collection/tex_ui_collection_slot_collectible.png" id="slot_col"]
 [ext_resource type="Texture2D" path="res://assets/art/ui/collection/tex_ui_collection_desc.png" id="desc"]
 [ext_resource type="Texture2D" path="res://assets/art/ui/collection/tex_ui_collection_frame.png" id="frame"]
+[ext_resource type="Texture2D" path="res://assets/art/item/spr_item_mud_bottle_1x1.png" id="icon_0"]
+[ext_resource type="Texture2D" path="res://assets/art/item/spr_item_mud_liver_1x1.png" id="icon_1"]
+[ext_resource type="Texture2D" path="res://assets/art/item/spr_item_life_bread_1x1.png" id="icon_2"]
+[ext_resource type="Texture2D" path="res://assets/art/collectible/spr_collectible_tablet_pit_1x1.png" id="icon_3"]
+[ext_resource type="Texture2D" path="res://assets/art/collectible/spr_collectible_tablet_temple_1x1.png" id="icon_4"]
+[ext_resource type="Texture2D" path="res://assets/art/collectible/spr_collectible_tablet_divination_1x1.png" id="icon_5"]
+[ext_resource type="Texture2D" path="res://assets/art/collectible/spr_collectible_tablet_summit_1x1.png" id="icon_6"]
+[ext_resource type="Texture2D" path="res://assets/art/collectible/spr_collectible_tablet_of_destiny_1x1.png" id="icon_7"]
+[ext_resource type="Texture2D" path="res://assets/art/collectible/spr_collectible_clay_figurine_1x1.png" id="icon_8"]
+[ext_resource type="Texture2D" path="res://assets/art/collectible/spr_collectible_shard_1x1.png" id="icon_9"]
+[ext_resource type="Texture2D" path="res://assets/art/collectible/spr_collectible_stone_1x1.png" id="icon_10"]
 
 [sub_resource type="StyleBoxFlat" id="Highlight"]
 draw_center = false
@@ -103,7 +114,6 @@ texture = ExtResource("slot_item")
 expand_mode = 1
 
 [node name="Icon" type="TextureRect" parent="Slots/Item0"]
-visible = false
 layout_mode = 0
 offset_left = 18.9
 offset_top = 18.9
@@ -112,6 +122,7 @@ offset_bottom = 92.1
 mouse_filter = 2
 expand_mode = 1
 stretch_mode = 5
+texture = ExtResource("icon_0")
 
 [node name="Count" type="Label" parent="Slots/Item0"]
 visible = false
@@ -146,7 +157,6 @@ texture = ExtResource("slot_item")
 expand_mode = 1
 
 [node name="Icon" type="TextureRect" parent="Slots/Item1"]
-visible = false
 layout_mode = 0
 offset_left = 18.9
 offset_top = 18.9
@@ -155,6 +165,7 @@ offset_bottom = 92.1
 mouse_filter = 2
 expand_mode = 1
 stretch_mode = 5
+texture = ExtResource("icon_1")
 
 [node name="Count" type="Label" parent="Slots/Item1"]
 visible = false
@@ -189,7 +200,6 @@ texture = ExtResource("slot_item")
 expand_mode = 1
 
 [node name="Icon" type="TextureRect" parent="Slots/Item2"]
-visible = false
 layout_mode = 0
 offset_left = 18.9
 offset_top = 18.9
@@ -198,6 +208,7 @@ offset_bottom = 92.1
 mouse_filter = 2
 expand_mode = 1
 stretch_mode = 5
+texture = ExtResource("icon_2")
 
 [node name="Count" type="Label" parent="Slots/Item2"]
 visible = false
@@ -232,7 +243,6 @@ texture = ExtResource("slot_col")
 expand_mode = 1
 
 [node name="Icon" type="TextureRect" parent="Slots/Col0"]
-visible = false
 layout_mode = 0
 offset_left = 15.6
 offset_top = 15.6
@@ -241,6 +251,7 @@ offset_bottom = 76.4
 mouse_filter = 2
 expand_mode = 1
 stretch_mode = 5
+texture = ExtResource("icon_3")
 
 [node name="Count" type="Label" parent="Slots/Col0"]
 visible = false
@@ -275,7 +286,6 @@ texture = ExtResource("slot_col")
 expand_mode = 1
 
 [node name="Icon" type="TextureRect" parent="Slots/Col1"]
-visible = false
 layout_mode = 0
 offset_left = 15.6
 offset_top = 15.6
@@ -284,6 +294,7 @@ offset_bottom = 76.4
 mouse_filter = 2
 expand_mode = 1
 stretch_mode = 5
+texture = ExtResource("icon_4")
 
 [node name="Count" type="Label" parent="Slots/Col1"]
 visible = false
@@ -318,7 +329,6 @@ texture = ExtResource("slot_col")
 expand_mode = 1
 
 [node name="Icon" type="TextureRect" parent="Slots/Col2"]
-visible = false
 layout_mode = 0
 offset_left = 15.6
 offset_top = 15.6
@@ -327,6 +337,7 @@ offset_bottom = 76.4
 mouse_filter = 2
 expand_mode = 1
 stretch_mode = 5
+texture = ExtResource("icon_5")
 
 [node name="Count" type="Label" parent="Slots/Col2"]
 visible = false
@@ -361,7 +372,6 @@ texture = ExtResource("slot_col")
 expand_mode = 1
 
 [node name="Icon" type="TextureRect" parent="Slots/Col3"]
-visible = false
 layout_mode = 0
 offset_left = 15.6
 offset_top = 15.6
@@ -370,6 +380,7 @@ offset_bottom = 76.4
 mouse_filter = 2
 expand_mode = 1
 stretch_mode = 5
+texture = ExtResource("icon_6")
 
 [node name="Count" type="Label" parent="Slots/Col3"]
 visible = false
@@ -404,7 +415,6 @@ texture = ExtResource("slot_col")
 expand_mode = 1
 
 [node name="Icon" type="TextureRect" parent="Slots/Col4"]
-visible = false
 layout_mode = 0
 offset_left = 15.6
 offset_top = 15.6
@@ -413,6 +423,7 @@ offset_bottom = 76.4
 mouse_filter = 2
 expand_mode = 1
 stretch_mode = 5
+texture = ExtResource("icon_7")
 
 [node name="Count" type="Label" parent="Slots/Col4"]
 visible = false
@@ -447,7 +458,6 @@ texture = ExtResource("slot_col")
 expand_mode = 1
 
 [node name="Icon" type="TextureRect" parent="Slots/Col5"]
-visible = false
 layout_mode = 0
 offset_left = 15.6
 offset_top = 15.6
@@ -456,6 +466,7 @@ offset_bottom = 76.4
 mouse_filter = 2
 expand_mode = 1
 stretch_mode = 5
+texture = ExtResource("icon_8")
 
 [node name="Count" type="Label" parent="Slots/Col5"]
 visible = false
@@ -490,7 +501,6 @@ texture = ExtResource("slot_col")
 expand_mode = 1
 
 [node name="Icon" type="TextureRect" parent="Slots/Col6"]
-visible = false
 layout_mode = 0
 offset_left = 15.6
 offset_top = 15.6
@@ -499,6 +509,7 @@ offset_bottom = 76.4
 mouse_filter = 2
 expand_mode = 1
 stretch_mode = 5
+texture = ExtResource("icon_9")
 
 [node name="Count" type="Label" parent="Slots/Col6"]
 visible = false
@@ -533,7 +544,6 @@ texture = ExtResource("slot_col")
 expand_mode = 1
 
 [node name="Icon" type="TextureRect" parent="Slots/Col7"]
-visible = false
 layout_mode = 0
 offset_left = 15.6
 offset_top = 15.6
@@ -542,6 +552,7 @@ offset_bottom = 76.4
 mouse_filter = 2
 expand_mode = 1
 stretch_mode = 5
+texture = ExtResource("icon_10")
 
 [node name="Count" type="Label" parent="Slots/Col7"]
 visible = false

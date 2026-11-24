@@ -4,7 +4,7 @@ namespace SonOfMud.UI;
 
 /// <summary>
 /// 一颗泥珠：按比例从下往上填充（Amount / Capacity）。从有血掉到空时播放碎裂效果。
-/// 贴图、填充方向都在 hud.tscn 的模板珠子 BeadTemplate 上设置好；碎裂是它的子节点 Break（Sprite2D，横排 N 帧）。
+/// 贴图、填充方向都在 hud.tscn 的模板珠子 BeadTemplate 上设置好；碎裂动画是可选的子节点 Break（Sprite2D，横排 N 帧），现在没有放（等美术出新的碎裂帧），只计数 BreakCount。
 /// 由 HpBeadBar 复制模板创建并设置，不自己订阅事件。C# 里不引用任何贴图资源（原因见 UiSettings.Shared）。
 /// </summary>
 public partial class HpBead : TextureProgressBar

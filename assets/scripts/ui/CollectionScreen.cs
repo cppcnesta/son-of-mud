@@ -8,7 +8,7 @@ namespace SonOfMud.UI;
 /// <summary>
 /// 收集页（Tab）：左边主角立绘，右边上排 3 个道具格、下面 2 × 4 共 8 个收集品格，最下面是说明栏。
 /// 格子内容来自 CollectionTable（assets/data/ui/collection_entries.tres），每次打开时按当前进度刷新：
-/// 得到过的画图（泥肝写「现有 / 5」，有几件的类别写「已得到 / 总数」），没得到过的是空格。
+/// 得到过的显示图（图存在场景里每格的 Icon 上，编辑器里看得到、能换；泥肝写「现有 / 5」，有几件的类别写「已得到 / 总数」），没得到过的是空格。
 /// 打开时 PauseService.Request(Collection, true)，关闭时释放；ProcessMode = Always。开关和互斥由 GameUi 决定。
 /// 选格子：方向键 / WASD（按输入事件），上下换排时选同一列附近的格子；鼠标移到格子上也会选中。说明栏显示选中格子的名字和说明，
 /// 没得到过的显示「？？？ / 还没有得到。」。
@@ -98,11 +98,8 @@ public partial class CollectionScreen : Control
         {
             CollectionEntry entry = _entries[i];
             bool obtained = entry != null && entry.Obtained(progress);
-            if (_slots[i].GetNodeOrNull<TextureRect>("Icon") is { } icon)
-            {
-                icon.Texture = obtained ? entry.Icon : null;
-                icon.Visible = obtained && entry.Icon != null;
-            }
+            // 道具图存在场景里（Slots/xxx/Icon 的 Texture），这里只管得到过才显示
+            if (_slots[i].GetNodeOrNull<TextureRect>("Icon") is { } icon) icon.Visible = obtained && icon.Texture != null;
             if (_slots[i].GetNodeOrNull<Label>("Count") is { } count)
             {
                 count.Text = obtained ? entry.CountText(progress) : "";

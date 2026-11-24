@@ -7,7 +7,7 @@ namespace SonOfMud.UI;
 
 /// <summary>
 /// 泥珠下面的道具格：收集页（Tab）上排的 3 个道具（泥瓶、泥肝、生命之面包，来自 CollectionTable.Items），
-/// 每格是场景里的 Slot0..2，子节点 Frame（道具图标框）、Icon（道具图）、Count（数量，和收集页一样写「现有 / 上限」）。
+/// 每格是场景里的 Slot0..2，子节点 Frame（道具图标框）、Icon（道具图，存在场景里）、Count（数量，和收集页一样写「现有 / 上限」）。
 /// 得到过的显示道具图和数量；没得到过的只有框（变暗）。
 /// 只读进度变量，不引用玩家：VariableChanged 时立即更新；新游戏 / 读档 / 重开时进度是整份替换的，不逐个发 VariableChanged，
 /// 所以在 RoomEntered、GameStartFinished、PlayerSpawned 时也重新读一次。
@@ -15,6 +15,8 @@ namespace SonOfMud.UI;
 public partial class ItemBar : HBoxContainer
 {
     public CollectionTable Table { get; set; }
+    /// <summary>没得到过的道具格，框变成这个颜色（变暗变淡）。</summary>
+    [Export] public Color MissingTint { get; set; } = new(0.55f, 0.55f, 0.55f, 0.7f);
 
     private readonly List<Control> _slots = new();
     private readonly List<CollectionEntry> _entries = new();
@@ -66,12 +68,8 @@ public partial class ItemBar : HBoxContainer
         {
             CollectionEntry entry = _entries[i];
             bool obtained = entry != null && entry.Obtained(progress);
-            if (_slots[i].GetNodeOrNull<CanvasItem>("Frame") is { } frame) frame.SelfModulate = obtained ? Colors.White : new Color(0.55f, 0.55f, 0.55f, 0.7f);
-            if (_slots[i].GetNodeOrNull<TextureRect>("Icon") is { } icon)
-            {
-                icon.Texture = obtained ? entry.Icon : null;
-                icon.Visible = obtained && entry.Icon != null;
-            }
+            if (_slots[i].GetNodeOrNull<CanvasItem>("Frame") is { } frame) frame.SelfModulate = obtained ? Colors.White : MissingTint;
+            if (_slots[i].GetNodeOrNull<TextureRect>("Icon") is { } icon) icon.Visible = obtained && icon.Texture != null;
             if (_slots[i].GetNodeOrNull<Label>("Count") is { } count)
             {
                 count.Text = obtained ? entry.CountText(progress) : "";
@@ -87,10 +85,10 @@ public partial class ItemBar : HBoxContainer
         return i >= 0 && _slots[i].GetNodeOrNull<Label>("Count") is { Visible: true } l ? l.Text : "";
     }
 
-    /// <summary>某个道具格子里显示的道具图（没显示时是 null）。</summary>
+    /// <summary>某个道具格子里的道具图（场景里设好的，不管现在显不显示）。</summary>
     public Texture2D IconOf(string entryId)
     {
         int i = _entries.FindIndex(e => e?.Id == entryId);
-        return i >= 0 && _slots[i].GetNodeOrNull<TextureRect>("Icon") is { Visible: true } t ? t.Texture : null;
+        return i >= 0 ? _slots[i].GetNodeOrNull<TextureRect>("Icon")?.Texture : null;
     }
 }
