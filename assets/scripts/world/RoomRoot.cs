@@ -19,306 +19,306 @@ namespace SonOfMud.World;
 [GlobalClass]
 public partial class RoomRoot : Node2D
 {
-    [Export] public string RoomId { get; set; } = "";
-    [Export] public string DisplayName { get; set; } = "";
+	[Export] public string RoomId { get; set; } = "";
+	[Export] public string DisplayName { get; set; } = "";
 
-    /// <summary>按命名把最远景 / 中景 / 近景 / 物件导入成场景里的普通节点；已经导入过的只补缺的、只换图，不动缩放和位置。可以 Ctrl+Z 撤销。</summary>
-    [ExportToolButton("按命名导入背景")]
-    public Callable ImportBackgroundButton => Callable.From(ImportBackgroundInEditor);
+	/// <summary>按命名把最远景 / 中景 / 近景 / 物件导入成场景里的普通节点；已经导入过的只补缺的、只换图，不动缩放和位置。可以 Ctrl+Z 撤销。</summary>
+	[ExportToolButton("按命名导入背景")]
+	public Callable ImportBackgroundButton => Callable.From(ImportBackgroundInEditor);
 
-    /// <summary>把这个房间场景（地形、出生点、敌人和剧情触发器的位置）写回文字图。房间还有关卡警告时不导出。</summary>
-    [ExportToolButton("导出文字图")]
-    public Callable ExportTextButton => Callable.From(ExportTextInEditor);
+	/// <summary>把这个房间场景（地形、出生点、敌人和剧情触发器的位置）写回文字图。房间还有关卡警告时不导出。</summary>
+	[ExportToolButton("导出文字图")]
+	public Callable ExportTextButton => Callable.From(ExportTextInEditor);
 
-    /// <summary>用正式游戏的全部系统，从这个房间、检查器里选的出生点开始玩（见 <see cref="DebugStart"/>）。试玩不写存档。</summary>
-    [ExportToolButton("从这里试玩")]
-    public Callable TrialButton => Callable.From(TrialInEditor);
+	/// <summary>用正式游戏的全部系统，从这个房间、检查器里选的出生点开始玩（见 <see cref="DebugStart"/>）。试玩不写存档。</summary>
+	[ExportToolButton("从这里试玩")]
+	public Callable TrialButton => Callable.From(TrialInEditor);
 
-    private const string TrialSpawnProperty = "trial_spawn";
-    private const string TrialFillProperty = "trial_fill";
-    private string _trialSpawn = "Default";
-    private bool _trialFill = true;
+	private const string TrialSpawnProperty = "trial_spawn";
+	private const string TrialFillProperty = "trial_fill";
+	private string _trialSpawn = "Default";
+	private bool _trialFill = true;
 
-    private string[] _warnings = Array.Empty<string>();
-    private double _checkLeft;
+	private string[] _warnings = Array.Empty<string>();
+	private double _checkLeft;
 
-    private const string PreviewOnProperty = "preview_parallax";
-    private const string PreviewXProperty = "preview_camera_x";
-    private const string PreviewYProperty = "preview_camera_y";
-    private bool _previewOn;
-    private float _previewX, _previewY;
-    /// <summary>预览改过位置的 Parallax2D 和它们原来的位置（还原用）。</summary>
-    private readonly Dictionary<ulong, (Parallax2D node, Vector2 position)> _previewSaved = new();
+	private const string PreviewOnProperty = "preview_parallax";
+	private const string PreviewXProperty = "preview_camera_x";
+	private const string PreviewYProperty = "preview_camera_y";
+	private bool _previewOn;
+	private float _previewX, _previewY;
+	/// <summary>预览改过位置的 Parallax2D 和它们原来的位置（还原用）。</summary>
+	private readonly Dictionary<ulong, (Parallax2D node, Vector2 position)> _previewSaved = new();
 
-    public override void _Ready()
-    {
-        SetProcess(Engine.IsEditorHint());
-    }
+	public override void _Ready()
+	{
+		SetProcess(Engine.IsEditorHint());
+	}
 
-    public override void _Process(double delta)
-    {
-        if (!Engine.IsEditorHint()) return;
-        if (_previewOn) ApplyPreview();
-        _checkLeft -= delta;
-        if (_checkLeft > 0) return;
-        _checkLeft = 0.5;
-        string[] now = RoomRules.AuditScene(this).Select(p => "关卡：" + p)
-            .Concat(BackgroundImporter.CoverageProblems(this, BackgroundSettings.LoadDefault(), checkNodeMoves: !_previewOn)).ToArray();
-        if (now.SequenceEqual(_warnings)) return;
-        _warnings = now;
-        UpdateConfigurationWarnings();
-    }
+	public override void _Process(double delta)
+	{
+		if (!Engine.IsEditorHint()) return;
+		if (_previewOn) ApplyPreview();
+		_checkLeft -= delta;
+		if (_checkLeft > 0) return;
+		_checkLeft = 0.5;
+		string[] now = RoomRules.AuditScene(this).Select(p => "关卡：" + p)
+			.Concat(BackgroundImporter.CoverageProblems(this, BackgroundSettings.LoadDefault(), checkNodeMoves: !_previewOn)).ToArray();
+		if (now.SequenceEqual(_warnings)) return;
+		_warnings = now;
+		UpdateConfigurationWarnings();
+	}
 
-    public override void _Notification(int what)
-    {
-        if (what == NotificationEditorPreSave || what == NotificationExitTree) RestorePreview();
-        else if (what == NotificationEditorPostSave && _previewOn) ApplyPreview();
-    }
+	public override void _Notification(int what)
+	{
+		if (what == NotificationEditorPreSave || what == NotificationExitTree) RestorePreview();
+		else if (what == NotificationEditorPostSave && _previewOn) ApplyPreview();
+	}
 
-    // =================================================================
-    // 背景视差预览（只在检查器里显示，不存进场景）
-    // =================================================================
+	// =================================================================
+	// 背景视差预览（只在检查器里显示，不存进场景）
+	// =================================================================
 
-    public override Godot.Collections.Array<Godot.Collections.Dictionary> _GetPropertyList() => new()
-    {
-        new() { ["name"] = "背景视差预览（不存进场景）", ["type"] = (int)Variant.Type.Nil, ["usage"] = (int)PropertyUsageFlags.Group, ["hint_string"] = "preview_" },
-        new() { ["name"] = PreviewOnProperty, ["type"] = (int)Variant.Type.Bool, ["usage"] = (int)PropertyUsageFlags.Editor },
-        new() { ["name"] = PreviewXProperty, ["type"] = (int)Variant.Type.Float, ["usage"] = (int)PropertyUsageFlags.Editor, ["hint"] = (int)PropertyHint.Range, ["hint_string"] = "0,1,0.01" },
-        new() { ["name"] = PreviewYProperty, ["type"] = (int)Variant.Type.Float, ["usage"] = (int)PropertyUsageFlags.Editor, ["hint"] = (int)PropertyHint.Range, ["hint_string"] = "0,1,0.01" },
-        new() { ["name"] = "试玩（不存进场景）", ["type"] = (int)Variant.Type.Nil, ["usage"] = (int)PropertyUsageFlags.Group, ["hint_string"] = "trial_" },
-        new() { ["name"] = TrialSpawnProperty, ["type"] = (int)Variant.Type.String, ["usage"] = (int)PropertyUsageFlags.Editor, ["hint"] = (int)PropertyHint.Enum, ["hint_string"] = string.Join(",", TrialSpawns()) },
-        new() { ["name"] = TrialFillProperty, ["type"] = (int)Variant.Type.Bool, ["usage"] = (int)PropertyUsageFlags.Editor },
-    };
+	public override Godot.Collections.Array<Godot.Collections.Dictionary> _GetPropertyList() => new()
+	{
+		new() { ["name"] = "背景视差预览（不存进场景）", ["type"] = (int)Variant.Type.Nil, ["usage"] = (int)PropertyUsageFlags.Group, ["hint_string"] = "preview_" },
+		new() { ["name"] = PreviewOnProperty, ["type"] = (int)Variant.Type.Bool, ["usage"] = (int)PropertyUsageFlags.Editor },
+		new() { ["name"] = PreviewXProperty, ["type"] = (int)Variant.Type.Float, ["usage"] = (int)PropertyUsageFlags.Editor, ["hint"] = (int)PropertyHint.Range, ["hint_string"] = "0,1,0.01" },
+		new() { ["name"] = PreviewYProperty, ["type"] = (int)Variant.Type.Float, ["usage"] = (int)PropertyUsageFlags.Editor, ["hint"] = (int)PropertyHint.Range, ["hint_string"] = "0,1,0.01" },
+		new() { ["name"] = "试玩（不存进场景）", ["type"] = (int)Variant.Type.Nil, ["usage"] = (int)PropertyUsageFlags.Group, ["hint_string"] = "trial_" },
+		new() { ["name"] = TrialSpawnProperty, ["type"] = (int)Variant.Type.String, ["usage"] = (int)PropertyUsageFlags.Editor, ["hint"] = (int)PropertyHint.Enum, ["hint_string"] = string.Join(",", TrialSpawns()) },
+		new() { ["name"] = TrialFillProperty, ["type"] = (int)Variant.Type.Bool, ["usage"] = (int)PropertyUsageFlags.Editor },
+	};
 
-    public override Variant _Get(StringName property) => property.ToString() switch
-    {
-        PreviewOnProperty => _previewOn,
-        PreviewXProperty => _previewX,
-        PreviewYProperty => _previewY,
-        TrialSpawnProperty => _trialSpawn,
-        TrialFillProperty => _trialFill,
-        _ => default,
-    };
+	public override Variant _Get(StringName property) => property.ToString() switch
+	{
+		PreviewOnProperty => _previewOn,
+		PreviewXProperty => _previewX,
+		PreviewYProperty => _previewY,
+		TrialSpawnProperty => _trialSpawn,
+		TrialFillProperty => _trialFill,
+		_ => default,
+	};
 
-    /// <summary>这个房间 Spawns 下的出生点编号（试玩的下拉框）；Default 排第一个。</summary>
-    public List<string> TrialSpawns()
-    {
-        var ids = new List<string>();
-        if (GetNodeOrNull("Spawns") is Node spawns)
-            foreach (Node child in spawns.GetChildren())
-            {
-                string id = child.Get("SpawnId").AsString();
-                if (string.IsNullOrEmpty(id)) id = child.Name;
-                if (!ids.Contains(id)) ids.Add(id);
-            }
-        ids.Remove(SpawnPoint.DefaultId.ToString());
-        ids.Insert(0, SpawnPoint.DefaultId.ToString());
-        return ids;
-    }
+	/// <summary>这个房间 Spawns 下的出生点编号（试玩的下拉框）；Default 排第一个。</summary>
+	public List<string> TrialSpawns()
+	{
+		var ids = new List<string>();
+		if (GetNodeOrNull("Spawns") is Node spawns)
+			foreach (Node child in spawns.GetChildren())
+			{
+				string id = child.Get("SpawnId").AsString();
+				if (string.IsNullOrEmpty(id)) id = child.Name;
+				if (!ids.Contains(id)) ids.Add(id);
+			}
+		ids.Remove(SpawnPoint.DefaultId.ToString());
+		ids.Insert(0, SpawnPoint.DefaultId.ToString());
+		return ids;
+	}
 
-    /// <summary>「从这里试玩」：写一次性请求，再让编辑器启动试玩场景。</summary>
-    public void TrialInEditor()
-    {
+	/// <summary>「从这里试玩」：写一次性请求，再让编辑器启动试玩场景。</summary>
+	public void TrialInEditor()
+	{
 #if TOOLS
-        string spawn = TrialSpawns().Contains(_trialSpawn) ? _trialSpawn : SpawnPoint.DefaultId.ToString();
-        DebugStart.WriteRequest(RoomId, spawn, _trialFill);
-        GD.Print($"[试玩] {RoomId} / {spawn}（{(_trialFill ? "补齐进度" : "白纸")}）");
-        EditorInterface.Singleton.PlayCustomScene(DebugStart.TrialScene);
+		string spawn = TrialSpawns().Contains(_trialSpawn) ? _trialSpawn : SpawnPoint.DefaultId.ToString();
+		DebugStart.WriteRequest(RoomId, spawn, _trialFill);
+		GD.Print($"[试玩] {RoomId} / {spawn}（{(_trialFill ? "补齐进度" : "白纸")}）");
+		EditorInterface.Singleton.PlayCustomScene(DebugStart.TrialScene);
 #endif
-    }
+	}
 
-    public override bool _Set(StringName property, Variant value)
-    {
-        switch (property.ToString())
-        {
-            case PreviewOnProperty: SetPreview(value.AsBool(), _previewX, _previewY); return true;
-            case PreviewXProperty: SetPreview(_previewOn, (float)value.AsDouble(), _previewY); return true;
-            case PreviewYProperty: SetPreview(_previewOn, _previewX, (float)value.AsDouble()); return true;
-            case TrialSpawnProperty: _trialSpawn = value.AsString(); return true;
-            case TrialFillProperty: _trialFill = value.AsBool(); return true;
-            default: return false;
-        }
-    }
+	public override bool _Set(StringName property, Variant value)
+	{
+		switch (property.ToString())
+		{
+			case PreviewOnProperty: SetPreview(value.AsBool(), _previewX, _previewY); return true;
+			case PreviewXProperty: SetPreview(_previewOn, (float)value.AsDouble(), _previewY); return true;
+			case PreviewYProperty: SetPreview(_previewOn, _previewX, (float)value.AsDouble()); return true;
+			case TrialSpawnProperty: _trialSpawn = value.AsString(); return true;
+			case TrialFillProperty: _trialFill = value.AsBool(); return true;
+			default: return false;
+		}
+	}
 
-    public bool PreviewOn => _previewOn;
+	public bool PreviewOn => _previewOn;
 
-    /// <summary>打开 / 关闭预览。x、y：镜头在房间里的位置，0 = 房间左 / 上边，1 = 右 / 下边。关闭时各层回到原来的位置。</summary>
-    public void SetPreview(bool on, float x, float y)
-    {
-        _previewX = Mathf.Clamp(x, 0f, 1f);
-        _previewY = Mathf.Clamp(y, 0f, 1f);
-        _previewOn = on;
-        if (on) ApplyPreview();
-        else RestorePreview();
-        QueueRedraw();
-    }
+	/// <summary>打开 / 关闭预览。x、y：镜头在房间里的位置，0 = 房间左 / 上边，1 = 右 / 下边。关闭时各层回到原来的位置。</summary>
+	public void SetPreview(bool on, float x, float y)
+	{
+		_previewX = Mathf.Clamp(x, 0f, 1f);
+		_previewY = Mathf.Clamp(y, 0f, 1f);
+		_previewOn = on;
+		if (on) ApplyPreview();
+		else RestorePreview();
+		QueueRedraw();
+	}
 
-    /// <summary>预览时镜头画面左上角在房间里的坐标（镜头范围 = 房间范围）。</summary>
-    public Vector2 PreviewCameraTopLeft()
-    {
-        if (!BackgroundImporter.TryRoomSize(RoomId, out Vector2 room)) return Vector2.Zero;
-        Vector2 travel = (room - BackgroundImporter.ProjectScreenSize()).Max(Vector2.Zero);
-        return travel * new Vector2(_previewX, _previewY);
-    }
+	/// <summary>预览时镜头画面左上角在房间里的坐标（镜头范围 = 房间范围）。</summary>
+	public Vector2 PreviewCameraTopLeft()
+	{
+		if (!BackgroundImporter.TryRoomSize(RoomId, out Vector2 room)) return Vector2.Zero;
+		Vector2 travel = (room - BackgroundImporter.ProjectScreenSize()).Max(Vector2.Zero);
+		return travel * new Vector2(_previewX, _previewY);
+	}
 
-    private void ApplyPreview()
-    {
-        Vector2 c = PreviewCameraTopLeft();
-        foreach (Parallax2D parallax in BackgroundImporter.ParallaxNodes(GetNodeOrNull(BackgroundImporter.NodeName)))
-        {
-            ulong id = parallax.GetInstanceId();
-            if (!_previewSaved.ContainsKey(id)) _previewSaved[id] = (parallax, parallax.Position);
-            parallax.Position = BackgroundImporter.RuntimePosition(parallax, c);
-        }
-    }
+	private void ApplyPreview()
+	{
+		Vector2 c = PreviewCameraTopLeft();
+		foreach (Parallax2D parallax in BackgroundImporter.ParallaxNodes(GetNodeOrNull(BackgroundImporter.NodeName)))
+		{
+			ulong id = parallax.GetInstanceId();
+			if (!_previewSaved.ContainsKey(id)) _previewSaved[id] = (parallax, parallax.Position);
+			parallax.Position = BackgroundImporter.RuntimePosition(parallax, c);
+		}
+	}
 
-    private void RestorePreview()
-    {
-        foreach ((Parallax2D node, Vector2 position) in _previewSaved.Values)
-            if (IsInstanceValid(node)) node.Position = position;
-        _previewSaved.Clear();
-    }
+	private void RestorePreview()
+	{
+		foreach ((Parallax2D node, Vector2 position) in _previewSaved.Values)
+			if (IsInstanceValid(node)) node.Position = position;
+		_previewSaved.Clear();
+	}
 
-    public override void _Draw()
-    {
-        if (!_previewOn || !Engine.IsEditorHint()) return;
-        DrawRect(new Rect2(PreviewCameraTopLeft(), BackgroundImporter.ProjectScreenSize()), new Color(1f, 0.75f, 0.2f), false, 6f);
-    }
+	public override void _Draw()
+	{
+		if (!_previewOn || !Engine.IsEditorHint()) return;
+		DrawRect(new Rect2(PreviewCameraTopLeft(), BackgroundImporter.ProjectScreenSize()), new Color(1f, 0.75f, 0.2f), false, 6f);
+	}
 
-    // =================================================================
-    // 旧版物件包一层视差节点（撤销管理器调用）
-    // =================================================================
+	// =================================================================
+	// 旧版物件包一层视差节点（撤销管理器调用）
+	// =================================================================
 
-    /// <summary>把 item 换成 wrapper（放在 item 原来的位置），item 改名 Image 放进 wrapper；物件标识记在 wrapper 上。</summary>
-    public void WrapToolItem(Node2D item, Parallax2D wrapper)
-    {
-        Node parent = item.GetParent();
-        int index = item.GetIndex();
-        parent.RemoveChild(item);
-        item.Name = BackgroundImporter.ImageName;
-        if (item.HasMeta(BackgroundImporter.ToolMeta)) item.RemoveMeta(BackgroundImporter.ToolMeta);
-        wrapper.AddChild(item);
-        parent.AddChild(wrapper);
-        parent.MoveChild(wrapper, index);
-        AssignOwner(wrapper);
-    }
+	/// <summary>把 item 换成 wrapper（放在 item 原来的位置），item 改名 Image 放进 wrapper；物件标识记在 wrapper 上。</summary>
+	public void WrapToolItem(Node2D item, Parallax2D wrapper)
+	{
+		Node parent = item.GetParent();
+		int index = item.GetIndex();
+		parent.RemoveChild(item);
+		item.Name = BackgroundImporter.ImageName;
+		if (item.HasMeta(BackgroundImporter.ToolMeta)) item.RemoveMeta(BackgroundImporter.ToolMeta);
+		wrapper.AddChild(item);
+		parent.AddChild(wrapper);
+		parent.MoveChild(wrapper, index);
+		AssignOwner(wrapper);
+	}
 
-    /// <summary>WrapToolItem 的撤销：拆掉 wrapper，item 放回 wrapper 所在的位置，名字和原来的标识还原。</summary>
-    public void UnwrapToolItem(Node2D item, Parallax2D wrapper, string oldMeta)
-    {
-        Node parent = wrapper.GetParent();
-        int index = wrapper.GetIndex();
-        parent.RemoveChild(wrapper);
-        wrapper.RemoveChild(item);
-        item.Name = wrapper.Name;
-        if (!string.IsNullOrEmpty(oldMeta)) item.SetMeta(BackgroundImporter.ToolMeta, oldMeta);
-        parent.AddChild(item);
-        parent.MoveChild(item, index);
-        AssignOwner(item);
-    }
+	/// <summary>WrapToolItem 的撤销：拆掉 wrapper，item 放回 wrapper 所在的位置，名字和原来的标识还原。</summary>
+	public void UnwrapToolItem(Node2D item, Parallax2D wrapper, string oldMeta)
+	{
+		Node parent = wrapper.GetParent();
+		int index = wrapper.GetIndex();
+		parent.RemoveChild(wrapper);
+		wrapper.RemoveChild(item);
+		item.Name = wrapper.Name;
+		if (!string.IsNullOrEmpty(oldMeta)) item.SetMeta(BackgroundImporter.ToolMeta, oldMeta);
+		parent.AddChild(item);
+		parent.MoveChild(item, index);
+		AssignOwner(item);
+	}
 
-    public override string[] _GetConfigurationWarnings() => _warnings;
+	public override string[] _GetConfigurationWarnings() => _warnings;
 
-    /// <summary>「导出文字图」按钮做的事（测试也直接调它）。</summary>
-    public void ExportTextInEditor()
-    {
+	/// <summary>「导出文字图」按钮做的事（测试也直接调它）。</summary>
+	public void ExportTextInEditor()
+	{
 #if TOOLS
-        List<string> problems = RoomRules.AuditScene(this);
-        if (problems.Count > 0)
-        {
-            GD.PushWarning($"[文字图] {RoomId} 还有 {problems.Count} 条关卡警告，先修好再导出：" + string.Join(" | ", problems));
-            return;
-        }
-        RestorePreview();
-        var layout = GD.Load<WorldLayout>(WorldLayout.DefaultPath);
-        RoomDef room = layout?.Find(RoomId);
-        if (room == null)
-        {
-            GD.PushWarning($"[文字图] 房间清单里找不到 {RoomId}。");
-            return;
-        }
-        var builder = new SonOfMud.Tools.GeometryBuilder(layout, RoomRules.CellSize());
-        string text = builder.ExportRoom(room, this);
-        foreach (string note in builder.Notes) GD.Print("[文字图] " + note);
-        if (text == null)
-        {
-            GD.PushWarning("[文字图] 导出失败：" + string.Join(" | ", builder.Errors));
-            return;
-        }
-        string path = RoomGrid.PathFor(room.Id);
-        // 保留原来文字图开头写的说明（和命令行 --export-text 一样）
-        if (FileAccess.FileExists(path)) text = SonOfMud.Tools.GeometryBuilder.KeepDescription(FileAccess.GetFileAsString(path), text);
-        using FileAccess file = FileAccess.Open(path, FileAccess.ModeFlags.Write);
-        if (file == null)
-        {
-            GD.PushWarning($"[文字图] 写 {path} 失败：{FileAccess.GetOpenError()}");
-            return;
-        }
-        file.StoreString(text);
-        GD.Print($"[文字图] 已写 {path}。");
+		List<string> problems = RoomRules.AuditScene(this);
+		if (problems.Count > 0)
+		{
+			GD.PushWarning($"[文字图] {RoomId} 还有 {problems.Count} 条关卡警告，先修好再导出：" + string.Join(" | ", problems));
+			return;
+		}
+		RestorePreview();
+		var layout = GD.Load<WorldLayout>(WorldLayout.DefaultPath);
+		RoomDef room = layout?.Find(RoomId);
+		if (room == null)
+		{
+			GD.PushWarning($"[文字图] 房间清单里找不到 {RoomId}。");
+			return;
+		}
+		var builder = new SonOfMud.Tools.GeometryBuilder(layout, RoomRules.CellSize());
+		string text = builder.ExportRoom(room, this);
+		foreach (string note in builder.Notes) GD.Print("[文字图] " + note);
+		if (text == null)
+		{
+			GD.PushWarning("[文字图] 导出失败：" + string.Join(" | ", builder.Errors));
+			return;
+		}
+		string path = RoomGrid.PathFor(room.Id);
+		// 保留原来文字图开头写的说明（和命令行 --export-text 一样）
+		if (FileAccess.FileExists(path)) text = SonOfMud.Tools.GeometryBuilder.KeepDescription(FileAccess.GetFileAsString(path), text);
+		using FileAccess file = FileAccess.Open(path, FileAccess.ModeFlags.Write);
+		if (file == null)
+		{
+			GD.PushWarning($"[文字图] 写 {path} 失败：{FileAccess.GetOpenError()}");
+			return;
+		}
+		file.StoreString(text);
+		GD.Print($"[文字图] 已写 {path}。");
 #endif
-    }
+	}
 
-    /// <summary>把 node 及其所有子节点的 owner 设成这个房间，保存场景时才会写进去（编辑器撤销管理器也会调用）。</summary>
-    public void AssignOwner(Node node)
-    {
-        node.Owner = this;
-        foreach (Node child in node.GetChildren()) AssignOwner(child);
-    }
+	/// <summary>把 node 及其所有子节点的 owner 设成这个房间，保存场景时才会写进去（编辑器撤销管理器也会调用）。</summary>
+	public void AssignOwner(Node node)
+	{
+		node.Owner = this;
+		foreach (Node child in node.GetChildren()) AssignOwner(child);
+	}
 
-    private void ImportBackgroundInEditor()
-    {
-        // 预览改过的位置先还原，导入时读到的才是场景里真正的值（导入完下一帧会重新预览）
-        RestorePreview();
-        BackgroundImporter.ImportPlan plan = BackgroundImporter.PlanImport(this, BackgroundSettings.LoadDefault());
-        foreach (string message in plan.Messages) GD.Print("[背景] " + message);
-        if (plan.Empty) return;
+	private void ImportBackgroundInEditor()
+	{
+		// 预览改过的位置先还原，导入时读到的才是场景里真正的值（导入完下一帧会重新预览）
+		RestorePreview();
+		BackgroundImporter.ImportPlan plan = BackgroundImporter.PlanImport(this, BackgroundSettings.LoadDefault());
+		foreach (string message in plan.Messages) GD.Print("[背景] " + message);
+		if (plan.Empty) return;
 #if TOOLS
-        if (Engine.IsEditorHint())
-        {
-            EditorUndoRedoManager undo = EditorInterface.Singleton.GetEditorUndoRedo();
-            undo.CreateAction($"导入背景 {RoomId}", UndoRedo.MergeMode.Disable, this);
-            BackgroundImporter.Record(this, plan, new EditorSink(undo));
-            undo.CommitAction();
-            _checkLeft = 0;
-            return;
-        }
+		if (Engine.IsEditorHint())
+		{
+			EditorUndoRedoManager undo = EditorInterface.Singleton.GetEditorUndoRedo();
+			undo.CreateAction($"导入背景 {RoomId}", UndoRedo.MergeMode.Disable, this);
+			BackgroundImporter.Record(this, plan, new EditorSink(undo));
+			undo.CommitAction();
+			_checkLeft = 0;
+			return;
+		}
 #endif
-        BackgroundImporter.Apply(this, plan);
-    }
+		BackgroundImporter.Apply(this, plan);
+	}
 
 #if TOOLS
-    /// <summary>把导入操作交给编辑器的撤销管理器（Ctrl+Z / Ctrl+Y）。</summary>
-    private sealed class EditorSink : BackgroundImporter.IUndoSink
-    {
-        private readonly EditorUndoRedoManager _undo;
-        public EditorSink(EditorUndoRedoManager undo) => _undo = undo;
-        public void DoMethod(GodotObject target, StringName method, params Variant[] args) => _undo.AddDoMethod(target, method, args);
-        public void UndoMethod(GodotObject target, StringName method, params Variant[] args) => _undo.AddUndoMethod(target, method, args);
-        public void DoProperty(GodotObject target, StringName property, Variant value) => _undo.AddDoProperty(target, property, value);
-        public void UndoProperty(GodotObject target, StringName property, Variant value) => _undo.AddUndoProperty(target, property, value);
-        public void DoReference(GodotObject target) => _undo.AddDoReference(target);
-    }
+	/// <summary>把导入操作交给编辑器的撤销管理器（Ctrl+Z / Ctrl+Y）。</summary>
+	private sealed class EditorSink : BackgroundImporter.IUndoSink
+	{
+		private readonly EditorUndoRedoManager _undo;
+		public EditorSink(EditorUndoRedoManager undo) => _undo = undo;
+		public void DoMethod(GodotObject target, StringName method, params Variant[] args) => _undo.AddDoMethod(target, method, args);
+		public void UndoMethod(GodotObject target, StringName method, params Variant[] args) => _undo.AddUndoMethod(target, method, args);
+		public void DoProperty(GodotObject target, StringName property, Variant value) => _undo.AddDoProperty(target, property, value);
+		public void UndoProperty(GodotObject target, StringName property, Variant value) => _undo.AddUndoProperty(target, property, value);
+		public void DoReference(GodotObject target) => _undo.AddDoReference(target);
+	}
 #endif
 
-    /// <summary>按 SpawnId 找出生点；找不到时退回 Default，再找不到返回 null。</summary>
-    public SpawnPoint FindSpawn(StringName spawnId)
-    {
-        SpawnPoint exact = Search(this, spawnId);
-        if (exact != null) return exact;
-        SpawnPoint fallback = Search(this, SpawnPoint.DefaultId);
-        GD.PushWarning($"房间 {RoomId} 没有出生点 {spawnId}，改用 Default。");
-        return fallback;
-    }
+	/// <summary>按 SpawnId 找出生点；找不到时退回 Default，再找不到返回 null。</summary>
+	public SpawnPoint FindSpawn(StringName spawnId)
+	{
+		SpawnPoint exact = Search(this, spawnId);
+		if (exact != null) return exact;
+		SpawnPoint fallback = Search(this, SpawnPoint.DefaultId);
+		GD.PushWarning($"房间 {RoomId} 没有出生点 {spawnId}，改用 Default。");
+		return fallback;
+	}
 
-    private static SpawnPoint Search(Node node, StringName spawnId)
-    {
-        foreach (Node child in node.GetChildren())
-        {
-            if (child is SpawnPoint spawn && spawn.SpawnId == spawnId) return spawn;
-            SpawnPoint found = Search(child, spawnId);
-            if (found != null) return found;
-        }
-        return null;
-    }
+	private static SpawnPoint Search(Node node, StringName spawnId)
+	{
+		foreach (Node child in node.GetChildren())
+		{
+			if (child is SpawnPoint spawn && spawn.SpawnId == spawnId) return spawn;
+			SpawnPoint found = Search(child, spawnId);
+			if (found != null) return found;
+		}
+		return null;
+	}
 }
