@@ -9,9 +9,9 @@
 [ext_resource type="Texture2D" uid="uid://5wks0p80fkga" path="res://assets/art/world/bg/s1/tex_bg_s1_02_far_04.png" id="4_dlfd2"]
 [ext_resource type="Texture2D" uid="uid://byhncebf425fk" path="res://assets/art/world/bg/s1/tex_bg_s1_02_front.png" id="5_5qdvp"]
 [ext_resource type="Script" uid="uid://170bxbdwtr2a" path="res://assets/scripts/world/SpawnPoint.cs" id="5_bnf51"]
+[ext_resource type="Texture2D" uid="uid://dyxx3cysof1o1" path="res://assets/art/collectible/spr_collectible_tablet_pit_1x1.png" id="art_tablet_pit"]
 [ext_resource type="Script" uid="uid://gcj5me3gasqr" path="res://assets/scripts/narrative/world/StoryTrigger.cs" id="n_story"]
 [ext_resource type="Script" uid="uid://bo6j7mpht131e" path="res://assets/scripts/narrative/world/TabletPickup.cs" id="n_tablet"]
-[ext_resource type="Texture2D" path="res://assets/art/collectible/spr_collectible_tablet_pit_1x1.png" id="art_tablet_pit"]
 
 [sub_resource type="RectangleShape2D" id="Shape_Tablet_nameless_day"]
 size = Vector2(80, 96)
@@ -134,7 +134,7 @@ TabletId = "nameless_day"
 position = Vector2(0, -41)
 shape = SubResource("Shape_Tablet_nameless_day")
 
-[node name="Art" type="Sprite2D" parent="Objects/Tablet_nameless_day"]
+[node name="Art" type="Sprite2D" parent="Objects/Tablet_nameless_day" unique_id=4286156]
 position = Vector2(-19, 2)
 scale = Vector2(0.13913, 0.13913)
 texture = ExtResource("art_tablet_pit")

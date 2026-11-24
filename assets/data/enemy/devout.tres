@@ -13,12 +13,19 @@ Chance = 0.3
 [resource]
 script = ExtResource("1")
 Kind = &"devout"
-ArtNames = Dictionary[String, String]({"patrol": "walk", "chase": "walk", "attack_windup": "throw_windup", "attack_active": "throw", "attack_recover": "throw_recover", "dead": "death"})
 DisplayName = "虔诚泥人"
 MaxHealth = 40
 Behaviour = 3
 BodySize = Vector2(32, 80)
 Tint = Color(0.6, 0.45, 0.32, 1)
+ArtNames = Dictionary[String, String]({
+"attack_active": "throw",
+"attack_recover": "throw_recover",
+"attack_windup": "throw_windup",
+"chase": "walk",
+"dead": "death",
+"patrol": "walk"
+})
 VisionRange = 400.0
 PatrolDistance = 64.0
 AttackSpec = ExtResource("2")

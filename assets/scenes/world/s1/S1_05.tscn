@@ -1,12 +1,9 @@
 [gd_scene format=4 uid="uid://3oxjj5geffmy"]
 
 [ext_resource type="Script" uid="uid://bp6qc4ftue0bq" path="res://assets/scripts/world/RoomRoot.cs" id="1_ymdne"]
-[ext_resource type="Texture2D" uid="uid://di8eq3n0b34j7" path="res://assets/art/world/bg/s1/tex_bg_s1_05_far.png" id="2_a27yu"]
 [ext_resource type="PackedScene" uid="uid://bsg0351mx3b4u" path="res://addons/MetroidvaniaSystem/Nodes/RoomInstance.tscn" id="2_t2bmx"]
-[ext_resource type="Texture2D" uid="uid://ofsfc4oi3w4h" path="res://assets/art/world/bg/s1/tex_bg_s1_05_mid.png" id="3_7l6ec"]
 [ext_resource type="TileSet" uid="uid://cjutdcfket0jk" path="res://assets/data/world/world_tileset.tres" id="4_1d1jg"]
 [ext_resource type="Script" uid="uid://ch5qwe022smnk" path="res://assets/scripts/world/ConditionalTerrain.cs" id="4_4vmye"]
-[ext_resource type="Texture2D" uid="uid://pvhc5qlrll1i" path="res://assets/art/world/bg/s1/tex_bg_s1_05_front.png" id="4_m43fo"]
 [ext_resource type="Script" uid="uid://170bxbdwtr2a" path="res://assets/scripts/world/SpawnPoint.cs" id="5_4vmye"]
 [ext_resource type="Script" uid="uid://bnmfp8jkabjx3" path="res://assets/scripts/world/GateBarrier.cs" id="6_yrve7"]
 [ext_resource type="PackedScene" path="res://assets/scenes/enemy/keeper.tscn" id="e_keeper"]
@@ -16,6 +13,10 @@
 
 [ext_resource type="Script" path="res://assets/scripts/world/CollectiblePickup.cs" id="c_pickup"]
 [ext_resource type="Resource" path="res://assets/data/world/collectibles/clay_figurine.tres" id="c_figurine"]
+[ext_resource type="Texture2D" uid="uid://byqrwqliqvr3h" path="res://assets/art/world/bg/s1/tex_bg_s1_05_far_01.png" id="bg_2_7l6ec"]
+[ext_resource type="Texture2D" uid="uid://creo7vnl1ek6q" path="res://assets/art/world/bg/s1/tex_bg_s1_05_far_02.png" id="bg_3_m43fo"]
+[ext_resource type="Texture2D" uid="uid://nvuwvd3sx0s" path="res://assets/art/world/bg/s1/tex_bg_s1_05_far_03.png" id="bg_4_bi30h"]
+[ext_resource type="Texture2D" uid="uid://b7c8udwqwvbg3" path="res://assets/art/world/bg/s1/tex_bg_s1_05_front.png" id="bg_4_m43fo"]
 [sub_resource type="Resource" id="Resource_yrve7"]
 script = ExtResource("n_gate")
 Flags = Array[StringName]([&"boss_keeper"])
@@ -47,41 +48,57 @@ script = ExtResource("1_ymdne")
 RoomId = "S1_05"
 DisplayName = "守坑人"
 
-[node name="Background" type="Node2D" parent="." unique_id=958211091]
+[node name="Background" type="Node2D" parent="." unique_id=2047126954]
 z_index = -100
 metadata/bg_version = 2
 
-[node name="Far" type="Parallax2D" parent="Background" unique_id=1107482864]
+[node name="Far" type="Node2D" parent="Background" unique_id=597827998]
+
+[node name="Far01" type="Parallax2D" parent="Background/Far" unique_id=480445379]
 z_index = -100
 z_as_relative = false
 scroll_scale = Vector2(0.15, 0.15)
+metadata/bg_piece = "far_01"
 
-[node name="Image" type="Sprite2D" parent="Background/Far" unique_id=1598551961]
-position = Vector2(-1105, -58.000015)
-scale = Vector2(0.21084817, 0.28585973)
-texture = ExtResource("2_a27yu")
+[node name="Image" type="Sprite2D" parent="Background/Far/Far01" unique_id=1845278459]
+position = Vector2(-3.6000001, -3.6000001)
+scale = Vector2(0.4056484, 0.4056484)
+texture = ExtResource("bg_2_7l6ec")
 centered = false
 
-[node name="Mid" type="Parallax2D" parent="Background" unique_id=2023124856]
-z_index = -80
+[node name="Far02" type="Parallax2D" parent="Background/Far" unique_id=154324195]
+z_index = -101
 z_as_relative = false
-scroll_scale = Vector2(0.5, 0.5)
+scroll_scale = Vector2(0.15, 0.15)
+metadata/bg_piece = "far_02"
 
-[node name="Image" type="Sprite2D" parent="Background/Mid" unique_id=590276130]
-position = Vector2(-192, 236.00002)
-scale = Vector2(0.74171996, 0.70849055)
-texture = ExtResource("3_7l6ec")
+[node name="Image" type="Sprite2D" parent="Background/Far/Far02" unique_id=2122106397]
+position = Vector2(-3.6000001, -3.6000001)
+scale = Vector2(0.4056484, 0.4056484)
+texture = ExtResource("bg_3_m43fo")
 centered = false
 
-[node name="Front" type="Parallax2D" parent="Background" unique_id=1617797852]
+[node name="Far03" type="Parallax2D" parent="Background/Far" unique_id=499174805]
+z_index = -102
+z_as_relative = false
+scroll_scale = Vector2(0.15, 0.15)
+metadata/bg_piece = "far_03"
+
+[node name="Image" type="Sprite2D" parent="Background/Far/Far03" unique_id=1623936169]
+position = Vector2(-3.6000001, -3.6000001)
+scale = Vector2(0.4056484, 0.4056484)
+texture = ExtResource("bg_4_bi30h")
+centered = false
+
+[node name="Front" type="Parallax2D" parent="Background" unique_id=205409828]
 z_index = -60
 z_as_relative = false
 scroll_scale = Vector2(0.8, 0.8)
 
-[node name="Image" type="Sprite2D" parent="Background/Front" unique_id=1123531176]
-position = Vector2(46.000015, 26)
-scale = Vector2(0.6141777, 0.72507685)
-texture = ExtResource("4_m43fo")
+[node name="Image" type="Sprite2D" parent="Background/Front" unique_id=772170326]
+position = Vector2(-19.2, -19.2)
+scale = Vector2(0.5450144, 0.5450144)
+texture = ExtResource("bg_4_m43fo")
 centered = false
 
 [node name="RoomInstance" parent="." unique_id=1246059462 instance=ExtResource("2_t2bmx")]

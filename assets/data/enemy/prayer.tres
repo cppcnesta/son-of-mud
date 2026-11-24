@@ -12,11 +12,17 @@ Chance = 0.3
 [resource]
 script = ExtResource("1")
 Kind = &"prayer"
-ArtNames = Dictionary[String, String]({"idle": "pray", "attack_windup": "counter_windup", "attack_active": "counter", "attack_recover": "counter_recover", "dead": "death"})
 DisplayName = "祈祷泥人"
 MoveSpeed = 0.0
 BodySize = Vector2(44, 108)
 Tint = Color(0.55, 0.5, 0.42, 1)
+ArtNames = Dictionary[String, String]({
+"attack_active": "counter",
+"attack_recover": "counter_recover",
+"attack_windup": "counter_windup",
+"dead": "death",
+"idle": "pray"
+})
 VisionRange = 0.0
 AttackSpec = ExtResource("3")
 AttackRange = 90.0

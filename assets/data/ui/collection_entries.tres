@@ -25,7 +25,7 @@ MaxCount = 5
 script = ExtResource("entry")
 Id = "life_bread"
 DisplayName = "生命之面包"
-Description = "吃下以后，血量上限从 70 变成 140。"
+Description = "创造者告诉他，混沌的食物有毒。他听了话。后来他才知道，那是不死的面包。"
 Flags = Array[StringName]([&"item.生命之面包"])
 
 [sub_resource type="Resource" id="E_tablet_pit"]

@@ -1,19 +1,17 @@
 [gd_scene format=4 uid="uid://uy1xe2evf5ka"]
 
 [ext_resource type="Script" uid="uid://bp6qc4ftue0bq" path="res://assets/scripts/world/RoomRoot.cs" id="1_0vlwq"]
-[ext_resource type="Texture2D" uid="uid://wgv7woyhxgm6" path="res://assets/art/world/bg/s1/tex_bg_s1_03_far.png" id="2_5sw5w"]
 [ext_resource type="PackedScene" uid="uid://bsg0351mx3b4u" path="res://addons/MetroidvaniaSystem/Nodes/RoomInstance.tscn" id="2_ioub0"]
-[ext_resource type="Texture2D" uid="uid://b1x07t81m248o" path="res://assets/art/world/bg/s1/tex_bg_s1_03_mid_01.png" id="3_3sj33"]
 [ext_resource type="TileSet" uid="uid://cjutdcfket0jk" path="res://assets/data/world/world_tileset.tres" id="4_eivtb"]
-[ext_resource type="Texture2D" uid="uid://c50edn4myfiem" path="res://assets/art/world/bg/s1/tex_bg_s1_03_mid_02.png" id="4_o2x7x"]
-[ext_resource type="Texture2D" uid="uid://b2dujs1jqbjjr" path="res://assets/art/world/bg/s1/tex_bg_s1_03_front.png" id="4_yeldr"]
-[ext_resource type="Texture2D" uid="uid://72cseppwhyyp" path="res://assets/art/world/bg/s1/tex_bg_s1_03_tool_tree.png" id="5_3sj33"]
 [ext_resource type="Script" uid="uid://170bxbdwtr2a" path="res://assets/scripts/world/SpawnPoint.cs" id="5_5sw5w"]
-[ext_resource type="Texture2D" uid="uid://bg5g7r6kcl1fj" path="res://assets/art/world/bg/s1/tex_bg_s1_03_tool_cloud.png" id="6_o2x7x"]
 [ext_resource type="PackedScene" path="res://assets/scenes/enemy/devout.tscn" id="e_devout"]
 [ext_resource type="PackedScene" path="res://assets/scenes/enemy/prayer.tscn" id="e_prayer"]
 [ext_resource type="Script" uid="uid://gcj5me3gasqr" path="res://assets/scripts/narrative/world/StoryTrigger.cs" id="n_story"]
 
+[ext_resource type="Texture2D" uid="uid://cggk0j8opa46f" path="res://assets/art/world/bg/s1/tex_bg_s1_03_far_01.png" id="bg_2_a1vh8"]
+[ext_resource type="Texture2D" uid="uid://l560jvoy1svw" path="res://assets/art/world/bg/s1/tex_bg_s1_03_far_02.png" id="bg_3_yeldr"]
+[ext_resource type="Texture2D" uid="uid://baqbpntyexnip" path="res://assets/art/world/bg/s1/tex_bg_s1_03_mid.png" id="bg_4_3sj33"]
+[ext_resource type="Texture2D" uid="uid://b2dujs1jqbjjr" path="res://assets/art/world/bg/s1/tex_bg_s1_03_front.png" id="bg_4_yeldr"]
 [sub_resource type="RectangleShape2D" id="Shape_Story_Pilgrims"]
 size = Vector2(128, 256)
 
@@ -22,79 +20,56 @@ script = ExtResource("1_0vlwq")
 RoomId = "S1_03"
 DisplayName = "朝圣者之路"
 
-[node name="Background" type="Node2D" parent="." unique_id=514875534]
+[node name="Background" type="Node2D" parent="." unique_id=5669598]
 z_index = -100
 metadata/bg_version = 2
 
-[node name="Far" type="Parallax2D" parent="Background" unique_id=1084470887]
+[node name="Far" type="Node2D" parent="Background" unique_id=216810714]
+
+[node name="Far01" type="Parallax2D" parent="Background/Far" unique_id=399235503]
 z_index = -100
 z_as_relative = false
-scroll_scale = Vector2(0.15, 0.15)
+metadata/bg_piece = "far_01"
 
-[node name="Image" type="Sprite2D" parent="Background/Far" unique_id=1394952874]
-position = Vector2(-32, -341.40002)
-scale = Vector2(0.41799828, 0.29113036)
-texture = ExtResource("2_5sw5w")
+[node name="Image" type="Sprite2D" parent="Background/Far/Far01" unique_id=851784317]
+position = Vector2(4.999878, 242.99997)
+scale = Vector2(0.82166827, 0.628336)
+texture = ExtResource("bg_2_a1vh8")
 centered = false
 
-[node name="Mid" type="Node2D" parent="Background" unique_id=1436610155]
+[node name="Far02" type="Parallax2D" parent="Background/Far" unique_id=841092632]
+z_index = -101
+z_as_relative = false
+scroll_scale = Vector2(0.15, 0.15)
+metadata/bg_piece = "far_02"
 
-[node name="Mid01" type="Parallax2D" parent="Background/Mid" unique_id=687713301]
+[node name="Image" type="Sprite2D" parent="Background/Far/Far02" unique_id=1886356813]
+position = Vector2(-137, -171.40015)
+scale = Vector2(0.85666347, 0.793138)
+texture = ExtResource("bg_3_yeldr")
+centered = false
+
+[node name="Mid" type="Parallax2D" parent="Background" unique_id=1687616548]
 z_index = -80
 z_as_relative = false
 scroll_scale = Vector2(0.5, 0.5)
-metadata/bg_piece = "mid_01"
 
-[node name="Image" type="Sprite2D" parent="Background/Mid/Mid01" unique_id=1087189802]
-position = Vector2(22, -368)
-scale = Vector2(0.76387954, 0.8206284)
-texture = ExtResource("3_3sj33")
+[node name="Image" type="Sprite2D" parent="Background/Mid" unique_id=1902920597]
+position = Vector2(439, 213)
+scale = Vector2(0.65213084, 0.6122881)
+texture = ExtResource("bg_4_3sj33")
 centered = false
 
-[node name="Mid02" type="Parallax2D" parent="Background/Mid" unique_id=2032562463]
-z_index = -81
-z_as_relative = false
-metadata/bg_piece = "mid_02"
-
-[node name="Image" type="Sprite2D" parent="Background/Mid/Mid02" unique_id=2052870248]
-position = Vector2(-7.999999, -12.999999)
-scale = Vector2(0.7649944, 0.6323715)
-texture = ExtResource("4_o2x7x")
-centered = false
-
-[node name="front" type="Parallax2D" parent="Background" unique_id=2021514907]
+[node name="Front" type="Parallax2D" parent="Background" unique_id=33326213]
 z_index = -60
 z_as_relative = false
-scroll_scale = Vector2(0.15, 0.15)
+scroll_scale = Vector2(0.8, 0.8)
 
-[node name="Image" type="Sprite2D" parent="Background/front" unique_id=1501115081]
-position = Vector2(-2, -358.4)
-scale = Vector2(0.82679594, 0.6652906)
-texture = ExtResource("4_yeldr")
+[node name="Image" type="Sprite2D" parent="Background/Front" unique_id=257043339]
+position = Vector2(-69.79997, 360.2)
+scale = Vector2(1.3045502, 1.4196184)
+texture = ExtResource("bg_4_yeldr")
 centered = false
-
-[node name="tool" type="Parallax2D" parent="Background" unique_id=1883008663]
-
-[node name="tooltree" type="Parallax2D" parent="Background/tool" unique_id=1059207724]
-z_index = -40
-z_as_relative = false
-metadata/bg_tool = "tree"
-
-[node name="Image" type="Sprite2D" parent="Background/tool/tooltree" unique_id=30233833]
-z_index = -38
-position = Vector2(2844, 720)
-scale = Vector2(0.32001394, 0.28209838)
-texture = ExtResource("5_3sj33")
-
-[node name="toolcloud" type="Parallax2D" parent="Background/tool" unique_id=1050565747]
-z_index = -40
-z_as_relative = false
-metadata/bg_tool = "cloud"
-
-[node name="Image" type="Sprite2D" parent="Background/tool/toolcloud" unique_id=1880822846]
-position = Vector2(1682.0001, 641)
-scale = Vector2(0.23367277, 0.3448812)
-texture = ExtResource("6_o2x7x")
 
 [node name="RoomInstance" parent="." unique_id=1246059462 instance=ExtResource("2_ioub0")]
 
