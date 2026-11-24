@@ -100,7 +100,7 @@ public partial class DoorTest : WorldTestBase
         Check(World.CurrentRoomDef?.Id == "S4_01" && World.RoomsContainer.GetChildCount() == 1, "结束后当前房间是 S4_01，旧房间已卸载");
         Check(!InputLock.IsLocked && !World.IsTransitioning, "结束后输入已解锁");
         Check(Mover.TeleportCount - teleportsBefore == 1 && Mover.Velocity.X == 0f, "替身收到一次 PlayerTeleported 并清零速度");
-        Check(Cam.LimitRight == 1728 && Cam.LimitBottom == 648, $"镜头边界换成 S4_01 的 3×2 格（{Cam.LimitRight}×{Cam.LimitBottom}）");
+        Check(Cam.LimitRight == 1152 && Cam.LimitBottom == 648, $"镜头边界换成 S4_01 的 2×2 格（{Cam.LimitRight}×{Cam.LimitBottom}）");
 
         // 回程：S4_01 的门回到 S3_08
         RoomDoor back = FindChild<RoomDoor>(World.CurrentRoom);

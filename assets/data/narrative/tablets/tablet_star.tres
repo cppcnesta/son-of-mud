@@ -6,6 +6,6 @@
 script = ExtResource("1_tablet")
 Id = "star"
 Title = "星𒀭"
-Room = "S4_05"
+Room = "S4_11"
 PartialText = "……（…?）……"
 FullText = "他爱我。可是只有一颗星落下那么久。"

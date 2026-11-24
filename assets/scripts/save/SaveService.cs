@@ -24,6 +24,8 @@ public partial class SaveService : Node
     /// <summary>存档点所在房间里，复活 / 读档使用的出生点（生成器放在存档点脚下）。</summary>
     [Export] public StringName SavePointSpawn { get; set; } = "Save";
     [Export] public AbilityTable InitialAbilities { get; set; }
+    /// <summary>旧存档迁移表；不填就读 assets/data/save/room_migrations.tres。</summary>
+    public SaveRoomMigrations Migrations { get; set; }
 
     /// <summary>最近存档点所在房间；还没存过档时是新游戏起点。</summary>
     public string CheckpointRoom { get; private set; }
@@ -181,8 +183,12 @@ public partial class SaveService : Node
         _restoring = false;
         // 只在进度完全恢复之后发一次（不在上面的 Reset 之后发），玩家的血量上限一步到位，不会先按空进度算一遍。
         Events.Instance?.EmitSignal(Events.SignalName.ProgressRestored);
-        CheckpointRoom = data.Room;
-        CheckpointSavePoint = data.SavePoint;
+        // 旧存档迁移：改地图后旧的检查点房间号 / 存档点编号已经不存在时，按迁移表换成新的（地图四：旧祭坛 S4_04 → 新祭坛 S4_10）
+        string room = data.Room, savePoint = data.SavePoint;
+        if ((Migrations ??= SaveRoomMigrations.LoadDefault()).Apply(ref room, ref savePoint))
+            GD.Print($"[存档] 旧存档迁移：检查点 {data.Room} / {data.SavePoint} → {room} / {savePoint}");
+        CheckpointRoom = room;
+        CheckpointSavePoint = savePoint;
         LastError = "";
         // GameLoaded 等 World 回执“已到达”之后才发（见 OnTravelFinished）。
         PendingNewGameId = -1;

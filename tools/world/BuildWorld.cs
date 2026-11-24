@@ -37,12 +37,12 @@ public partial class BuildWorld : Node
     {
         var args = new HashSet<string>(OS.GetCmdlineUserArgs().Concat(OS.GetCmdlineArgs()));
         int code;
-        // --rooms=S1_01,S1_02：只导出这几个房间（其余房间的文字图不动）
+        // --rooms=S1_01,S1_02：只导出 / 只生成这几个房间（其余房间的文字图、场景不动）
         string roomsArg = args.FirstOrDefault(a => a.StartsWith("--rooms="));
         HashSet<string> only = roomsArg == null ? null
             : new HashSet<string>(roomsArg["--rooms=".Length..].Split(',', System.StringSplitOptions.RemoveEmptyEntries | System.StringSplitOptions.TrimEntries));
         if (args.Contains("--export-text")) code = RunExport(args.Contains("--force"), only);
-        else if (args.Contains("--geometry")) code = RunGeometry(!args.Contains("--check"));
+        else if (args.Contains("--geometry")) code = RunGeometry(!args.Contains("--check"), only);
         else code = RunSkeleton();
         GetTree().Quit(code);
     }
@@ -57,10 +57,10 @@ public partial class BuildWorld : Node
         return ok ? 0 : 1;
     }
 
-    private static int RunGeometry(bool write)
+    private static int RunGeometry(bool write, HashSet<string> only)
     {
         GeometryBuilder builder = GeometryBuilder.ForProject();
-        bool ok = builder.RunGeometry(write);
+        bool ok = builder.RunGeometry(write, only);
         foreach (string note in builder.Notes) GD.Print("BuildWorld --geometry：" + note);
         foreach (string change in builder.Changes) GD.Print((write ? "BuildWorld --geometry 改动：" : "BuildWorld --geometry --check 会改：") + change);
         foreach (string error in builder.Errors) GD.PushError("BuildWorld --geometry：" + error);
