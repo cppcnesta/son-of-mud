@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dx4rbh3gerf2k"
-path="res://.godot/imported/spr_enemy_prayer_idle.png-05414bbccc6339ad91c08d3532aa665f.ctex"
+uid="uid://iu5axlaxejoh"
+path="res://.godot/imported/spr_enemy_prayer_idle_4x2.png-5fb4c5344e332e46b8be8105d84291d7.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/art/enemy/spr_enemy_prayer_idle.png"
-dest_files=["res://.godot/imported/spr_enemy_prayer_idle.png-05414bbccc6339ad91c08d3532aa665f.ctex"]
+source_file="res://assets/art/enemy/spr_enemy_prayer_idle_4x2.png"
+dest_files=["res://.godot/imported/spr_enemy_prayer_idle_4x2.png-5fb4c5344e332e46b8be8105d84291d7.ctex"]
 
 [params]
 

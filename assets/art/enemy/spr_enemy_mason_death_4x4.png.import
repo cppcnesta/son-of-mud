@@ -2,21 +2,20 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://cg36wgrvn4hx"
-path.s3tc="res://.godot/imported/spr_enemy_imdugud_swipe_4x2.png-7f4c9431a62aa9a579320ca2f60921ed.s3tc.ctex"
+uid="uid://ci0xbwlm8q00g"
+path="res://.godot/imported/spr_enemy_mason_death_4x4.png-1fe07f90c558ff1a9afc9c10fa250930.ctex"
 metadata={
-"imported_formats": ["s3tc_bptc"],
-"vram_texture": true
+"vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/art/enemy/spr_enemy_imdugud_swipe_4x2.png"
-dest_files=["res://.godot/imported/spr_enemy_imdugud_swipe_4x2.png-7f4c9431a62aa9a579320ca2f60921ed.s3tc.ctex"]
+source_file="res://assets/art/enemy/spr_enemy_mason_death_4x4.png"
+dest_files=["res://.godot/imported/spr_enemy_mason_death_4x4.png-1fe07f90c558ff1a9afc9c10fa250930.ctex"]
 
 [params]
 
-compress/mode=2
+compress/mode=0
 compress/high_quality=false
 compress/lossy_quality=0.7
 compress/uastc_level=0
