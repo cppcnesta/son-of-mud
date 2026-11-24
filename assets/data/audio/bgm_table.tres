@@ -1,0 +1,28 @@
+[gd_resource type="Resource" script_class="BgmTable" format=3]
+
+[ext_resource type="Script" path="res://assets/scripts/world/BgmTable.cs" id="1_table"]
+[ext_resource type="Script" path="res://assets/scripts/world/BgmTrack.cs" id="2_track"]
+[ext_resource type="AudioStream" path="res://assets/audio/bgm/bgm_s1.wav" id="3_s1"]
+[ext_resource type="AudioStream" path="res://assets/audio/bgm/bgm_s2.wav" id="4_s2"]
+[ext_resource type="AudioStream" path="res://assets/audio/bgm/bgm_s3.wav" id="5_s3"]
+
+[sub_resource type="Resource" id="Track_S1"]
+script = ExtResource("2_track")
+Region = "S1"
+Stream = ExtResource("3_s1")
+
+[sub_resource type="Resource" id="Track_S2"]
+script = ExtResource("2_track")
+Region = "S2"
+Stream = ExtResource("4_s2")
+
+[sub_resource type="Resource" id="Track_S3"]
+script = ExtResource("2_track")
+Region = "S3"
+Stream = ExtResource("5_s3")
+
+[resource]
+script = ExtResource("1_table")
+Tracks = Array[ExtResource("2_track")]([SubResource("Track_S1"), SubResource("Track_S2"), SubResource("Track_S3")])
+VolumeDb = -6.0
+FadeSeconds = 1.0
