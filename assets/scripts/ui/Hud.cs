@@ -4,7 +4,7 @@ using SonOfMud.Core;
 namespace SonOfMud.UI;
 
 /// <summary>
-/// 游戏中的 HUD：泥珠、泥肝数量、器物环、Boss 血条、交互提示、提示条、小地图都放在 Root 下面，各自订阅自己的事件。
+/// 游戏中的 HUD：泥珠、道具格、器物环（现在隐藏）、Boss 血条、交互提示、提示条、小地图都放在 Root 下面，各自订阅自己的事件。
 /// Hud 本身只做一件事：NarrativeStarted 时整体淡出，NarrativeFinished 时淡回（按开始 / 结束配对计数）。
 /// ProcessMode = Always，剧情暂停期间淡入淡出照常进行。
 /// </summary>
@@ -14,14 +14,14 @@ public partial class Hud : CanvasLayer
     public UiSettings Settings { get; set; }
     [Export] public Control Root { get; set; }
     [Export] public HpBeadBar Beads { get; set; }
-    /// <summary>泥珠下面的泥肝数量（0 个时隐藏）。</summary>
-    [Export] public LiverCounter Livers { get; set; }
+    /// <summary>泥珠下面的道具格（收集页的 3 个道具和数量）。</summary>
+    [Export] public ItemBar Items { get; set; }
     [Export] public ArtifactRing Artifacts { get; set; }
     [Export] public BossBar Boss { get; set; }
     [Export] public InteractPrompt Prompt { get; set; }
     [Export] public Toast Toast { get; set; }
-    /// <summary>右上角的小地图（MetSys Minimap.tscn 实例，track_position=true，3×3）。</summary>
-    [Export] public Control Minimap { get; set; }
+    /// <summary>右上角的小地图（大地图泥板碎片的缩略图）。</summary>
+    [Export] public MiniMap Minimap { get; set; }
 
     public float RootAlpha => Root?.Modulate.A ?? 1f;
     public bool NarrativeActive => _narrativeDepth > 0;

@@ -15,7 +15,7 @@ using SonOfMud.World;
 /// ③ 剧情对话中（PauseService 的 Narrative 来源）按 Esc / 地图键无效；规格反例：剧情暂停 → 开地图 → 关地图，仍保持暂停。
 /// ④ 地图和暂停菜单互斥：菜单开着按地图键 = 关菜单开地图（中间不恢复）；地图开着按 Esc 只关地图；同一帧两键只开一个；
 ///    反例：即使两者被同时打开，关掉一个也不会解除另一个的暂停。
-/// ⑤ 小地图：开局时中心是当前格；换房、走进新格子后跟着更新。
+/// ⑤ 小地图（大地图的缩略图）：「你在这里」在当前房间的碎片上，换房后跟着更新。
 /// </summary>
 public partial class UiPauseMapTest : UiTestBase
 {
@@ -211,24 +211,17 @@ public partial class UiPauseMapTest : UiTestBase
 
     private async Task MinimapChecks()
     {
-        Control minimap = _ui.Hud.Minimap;
+        MiniMap minimap = _ui.Hud.Minimap;
         Check(minimap != null && minimap.IsVisibleInTree() && minimap.GetParent() == _ui.Hud.Root, "HUD 右上角有小地图");
         if (minimap == null) return;
-        Check(MetSysApi.GetMapViewCenter(minimap) == CurrentCell, $"小地图中心是当前格（{MetSysApi.GetMapViewCenter(minimap)} / {CurrentCell}）");
+        string start = minimap.CurrentRoomId;
+        Check(start != "" && minimap.HerePiece != null && minimap.HerePiece == minimap.PieceOf(start) && minimap.HerePiece.Visible,
+            $"小地图是大地图的缩略图：「你在这里」在当前房间 {start} 的碎片上（{minimap.HerePiece?.Name}）");
 
-        Vector2I first = CurrentCell;
-        Input.ActionPress(PlayerActions.Left);
-        bool crossed = await WaitUntil(() => CurrentCell != first, 400);
-        Input.ActionRelease(PlayerActions.Left);
-        await Frames(2);
-        Check(crossed && MetSysApi.GetMapViewCenter(minimap) == CurrentCell,
-            $"走进新格子后小地图跟着更新（{first} → {CurrentCell}，小地图 {MetSysApi.GetMapViewCenter(minimap)}）");
-
-        Vector2I before = CurrentCell;
         World.LoadRoomImmediate("S1_04", SpawnPoint.SaveId);
         await Frames(15);
-        Check(CurrentCell != before && MetSysApi.GetMapViewCenter(minimap) == CurrentCell,
-            $"换到 S1_04 后小地图跟着更新（{before} → {CurrentCell}）");
+        Check(minimap.CurrentRoomId == "S1_04" && minimap.HerePiece == minimap.PieceOf("S1_04") && minimap.HerePiece.Visible && minimap.PieceOf(start).Visible,
+            $"换到 S1_04 后小地图跟着更新：「你在这里」挪到 S1_04，去过的 {start} 还显示（{minimap.CurrentRoomId}）");
 
         await Tap(GameUi.MapAction);
         MapScreen map = _ui.Map;
