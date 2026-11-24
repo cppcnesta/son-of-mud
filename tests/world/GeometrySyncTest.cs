@@ -17,7 +17,7 @@ public partial class GeometrySyncTest : WorldTestBase
     {
         var layout = GD.Load<WorldLayout>(WorldLayout.DefaultPath);
         int texts = layout.Rooms.Count(r => FileAccess.FileExists(RoomGrid.PathFor(r.Id)));
-        Check(texts == 27, $"27 个房间都有文字图（实际 {texts}）");
+        Check(texts == 32, $"32 个房间都有文字图（实际 {texts}）");
 
         GeometryBuilder builder = GeometryBuilder.ForProject();
         bool ok = builder.RunGeometry(write: false);

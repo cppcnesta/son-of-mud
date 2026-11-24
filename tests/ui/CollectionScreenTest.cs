@@ -259,8 +259,10 @@ public partial class CollectionScreenTest : EnemyFlowBase
         Player.HurtBox.Receive(new SonOfMud.Combat.Hit { AttackId = "collection_test_hurt", Damage = 20f, SourcePosition = Player.GlobalPosition, Blockable = false });
         await WaitUntil(() => PlayerFree, 120);
         int hurt = Player.Stats.Health, max = Player.Stats.MaxHealth;
+        // 祈祷泥人按几率掉泥瓶，打死时可能已经自动捡了一瓶：先清零，让这里只算测试掉的这一瓶
+        GameSession.Progress.SetVar(Pickup.CountKey("泥瓶"), 0);
         Events.Instance.EmitSignal(Events.SignalName.ItemDropped, "泥瓶", BodyFeet.FeetOffset(Player) * Vector2.Down + Player.GlobalPosition);
-        await WaitUntil(() => GameSession.Progress.Flag("obtained.泥瓶"), 60);
+        await WaitUntil(() => Pickup.CountOf("泥瓶") == 1, 60);
         info = await SlotAfterTab(0);
         Check(info.StartsWith("True|1/5|泥瓶|") && Player.Stats.Health == hurt, $"真实碰到泥瓶 → 泥瓶格亮、存着 1/5，不当场回血（血 {Player.Stats.Health}，{info}）");
 

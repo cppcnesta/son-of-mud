@@ -6,5 +6,5 @@
 script = ExtResource("1_tablet")
 Id = "gate_4"
 Title = "四"
-Room = "S4_02"
+Room = "S4_05"
 PartialText = "祂终于抬头看我，很久以来祂第一次正视我。从父亲的目光中，我也知晓了自己的命运。"

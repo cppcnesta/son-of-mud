@@ -6,5 +6,5 @@
 script = ExtResource("1_tablet")
 Id = "gate_3"
 Title = "三"
-Room = "S4_02"
+Room = "S4_0304"
 PartialText = "我有很多话想对祂说，可喉咙里只有泥。"

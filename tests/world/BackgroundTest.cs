@@ -39,7 +39,7 @@ public partial class BackgroundTest : FlowTestBase
         PureChecks();
         bool started = await EnterMainGame(StartMode.NewGame);
         await WaitSettled();
-        // 背景测试会传送进有“走进来自动播”剧情的房间（S4_02 七道门等）：都当作已经看过，免得剧情暂停游戏
+        // 背景测试会传送进有“走进来自动播”剧情的房间（S4_11 塔顶等）：都当作已经看过，免得剧情暂停游戏
         foreach (string seen in new[] { "t_site.工地入口", "c_city.城门", "c_city.登塔", "h_tower.七道门", "h_tower.塔顶" })
             GameSession.Progress.SetVar("seen." + seen, true);
         Check(started && World != null && Cam != null && Player != null, "正式入口开新游戏成功，有 WorldGame、RoomCamera、玩家");
@@ -47,7 +47,7 @@ public partial class BackgroundTest : FlowTestBase
 
         await NoAutoBackground();
         await FitChecks("S1_03");
-        await FitChecks("S4_02");
+        await FitChecks("S4_11");
         await ReimportChecks();
         await FileLookupChecks();
         await ToolImportChecks();
@@ -83,8 +83,8 @@ public partial class BackgroundTest : FlowTestBase
         Vector2 s103Mid = BackgroundImporter.RequiredSize(new Vector2(3456, 972), screen, _settings.MidScroll, _settings.ShakeMargin);
         Vector2 s402Far = BackgroundImporter.RequiredSize(new Vector2(2304, 3240), screen, _settings.FarScroll, _settings.ShakeMargin);
         Check(Mathf.CeilToInt(s103Mid.X) == 2328 && Mathf.CeilToInt(s103Mid.Y) == 834, $"尺寸：S1_03 中景至少 2328×834（{s103Mid}）");
-        Check(Mathf.CeilToInt(s402Far.X) == 1332 && Mathf.CeilToInt(s402Far.Y) == 1044, $"尺寸：S4_02 远景至少 1332×1044（{s402Far}）");
-        Check(BackgroundImporter.TryRoomSize("S4_02", out Vector2 shaft) && shaft == new Vector2(2304, 3240), $"尺寸：房间像素尺寸从房间清单和 MetSys 格子算出（S4_02 = {shaft}）");
+        Check(Mathf.CeilToInt(s402Far.X) == 1332 && Mathf.CeilToInt(s402Far.Y) == 1044, $"尺寸：2304×3240 的竖井房间远景至少 1332×1044（{s402Far}）");
+        Check(BackgroundImporter.TryRoomSize("S4_11", out Vector2 shaft) && shaft == new Vector2(1728, 1296), $"尺寸：房间像素尺寸从房间清单和 MetSys 格子算出（S4_11 = {shaft}）");
 
         // 你放的 S1_03 中景是 4232×1577：应缩小到刚好盖满 2328×834
         (float scale, _) = BackgroundImporter.CoverFit(new Vector2(4232, 1577), s103Mid, _settings.MidScroll, _settings.ShakeMargin);
@@ -1072,11 +1072,10 @@ public partial class BackgroundTest : FlowTestBase
             await Watch(60);
         }
 
-        await Teleport("S4_02", SpawnPoint.DefaultId);
+        await Teleport("S4_11", SpawnPoint.DefaultId);
         bool oldFreed = await WaitUntil(() => !GodotObject.IsInstanceIdValid(bgId), 30);
         ImportSized(1f, 1f);
-        // 七道门塔：打开第一层的活板门（左边第 3–6 列），从塔顶附近穿过它落到第二层（约 760 像素）
-        GameSession.Progress.SetVar("tablet.gate_1", true);
+        // 终末之室（3×4 格，地图四最高的房间）：从顶上附近一路落到地面（约 1100 像素）
         await Frames(2);
         Player.GlobalPosition = Room.GlobalPosition + new Vector2(160, 120);
         Player.Velocity = Vector2.Zero;
@@ -1084,7 +1083,6 @@ public partial class BackgroundTest : FlowTestBase
         float y0 = Player.GlobalPosition.Y;
         await Watch(300);
         float fell = Player.GlobalPosition.Y - y0;
-        GameSession.Progress.SetVar("tablet.gate_1", false);
 
         Check(problems.Count == 0, $"动态逐帧（{frames} 帧，S1_03 跑了 {run:0} 像素，竖井掉了 {fell:0} 像素，边界处震屏 {maxShake}）：每一帧三层都盖满画面"
                                    + (problems.Count == 0 ? "" : "：" + string.Join(" | ", problems)));
