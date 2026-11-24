@@ -102,6 +102,8 @@ public partial class Events : Node
     [Signal] public delegate void BossDefeatedEventHandler(StringName bossId, Vector2 position);
     [Signal] public delegate void EnemyKilledEventHandler(StringName enemyKind, Vector2 position);
     [Signal] public delegate void ItemDroppedEventHandler(StringName itemId, Vector2 position);
+    /// <summary>界面要用掉一个存着的道具（收集页里选中泥瓶按 E）。World 的 DropSpawner 处理：能用就用、计数减 1。</summary>
+    [Signal] public delegate void UseItemRequestedEventHandler(StringName itemId);
 
     // Narrative
     [Signal] public delegate void StoryRequestedEventHandler(string scriptId, string label);

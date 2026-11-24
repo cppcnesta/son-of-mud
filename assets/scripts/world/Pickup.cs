@@ -7,8 +7,9 @@ namespace SonOfMud.World;
 /// <summary>
 /// 掉落的拾取物（泥瓶、泥肝……）。规则来自 PickupItem（没有定义时当作普通计数物品，不播台词）：
 /// - 玩家身体和它重叠时尝试拾取（每个物理帧都看，所以站在上面时条件一满足就捡起来）；
-/// - 回血道具：玩家满血不捡；没满就回 HealAmount（不超过上限）；
-/// - 计数道具：count.&lt;ItemId&gt; 加 1；到了 MaxCount 就不捡；
+/// - 计数道具：count.&lt;ItemId&gt; 加 1；到了 MaxCount 就不捡。泥瓶也是计数道具（最多 5 瓶）：捡起来存着，满血也捡，
+///   在收集页（Tab）选中泥瓶按 E 才喝、回 HealAmount（见 DropSpawner.UseItem）；
+/// - 不计数的回血道具（现在没有）：玩家满血不捡；没满就当场回 HealAmount（不超过上限）；
 /// - PlaysLine 为真时，第一次拾取（加之前是 0）发 StoryRequested("pickups", ItemId) 播拾取台词。
 /// 捡不起来就留在地上，随房间一起释放。只认 PlayerRegistry.Current（玩家只当 Node2D 用，血量从它的 Combat.Stats 子节点读）。
 /// 拾取在本帧末尾结算，避免在物理回调里改状态。
@@ -53,7 +54,7 @@ public partial class Pickup : Area2D
     public bool CanCollect(Node2D player)
     {
         if (Item == null) return true;
-        if (Item.HealAmount > 0)
+        if (Item.HealAmount > 0 && !Item.Counted)
         {
             Stats stats = FindStats(player);
             if (stats == null || stats.Health >= stats.MaxHealth || stats.IsDepleted) return false;
@@ -72,7 +73,7 @@ public partial class Pickup : Area2D
             Collected = false;
             return;
         }
-        if (Item is { HealAmount: > 0 }) FindStats(player)?.Heal(Item.HealAmount);
+        if (Item is { HealAmount: > 0, Counted: false }) FindStats(player)?.Heal(Item.HealAmount);
         // 收集页：记上「得到过」（泥瓶、泥肝），只写不拿掉
         ItemObtainedRule.Mark(GameSession.Progress, ItemId);
         if (Item == null || Item.Counted)
@@ -85,7 +86,7 @@ public partial class Pickup : Area2D
         QueueFree();
     }
 
-    private static Stats FindStats(Node2D player)
+    public static Stats FindStats(Node2D player)
     {
         foreach (Node child in player.GetChildren())
             if (child is Stats stats) return stats;

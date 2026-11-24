@@ -9,6 +9,7 @@ namespace SonOfMud.Narrative.World;
 /// - Enter：检测玩家身体层（Layers.PlayerBody），身体进入区域时触发。
 /// 条件：Requirement 不满足、HideFlag 为 true、或 Once 且已经看过（seen.&lt;剧本&gt;.&lt;标签&gt;，剧情层播完后写）时不触发，并隐藏占位外观。
 /// 触发器本身不写任何进度变量；没有剧情层时（测试容器 game.tscn）只是发一个没人接的事件。
+/// 外观（例如祈祷者雕像）是场景里的子节点 Art（Sprite2D），在编辑器里直接换图、调大小；没有美术图的触发点用占位色块 Placeholder。
 /// </summary>
 [GlobalClass]
 public partial class StoryTrigger : Area2D, IInteractable
@@ -41,14 +42,8 @@ public partial class StoryTrigger : Area2D, IInteractable
         if (Events.Instance != null) Events.Instance.VariableChanged -= OnVariableChanged;
     }
 
-    /// <summary>这个触发点显示的图（例如祈祷者雕像）；为空时照旧显示占位色块。</summary>
-    [Export] public Texture2D Art { get; set; }
-    /// <summary>图显示的高度（像素），底边中点在节点原点。雕像和主角一样高。</summary>
-    [Export] public float ArtHeight { get; set; } = 120f;
-
     public override void _Ready()
     {
-        ArtSprite.Attach(this, Art, ArtHeight);
         if (Mode == TriggerMode.Interact)
         {
             CollisionLayer = Layers.Interact;

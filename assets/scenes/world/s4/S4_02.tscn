@@ -14,6 +14,7 @@
 [ext_resource type="Script" path="res://assets/scripts/core/GateRequirement.cs" id="8_f08j3"]
 [ext_resource type="Script" path="res://assets/scripts/narrative/world/StoryTrigger.cs" id="n_story"]
 [ext_resource type="Script" path="res://assets/scripts/narrative/world/TabletPickup.cs" id="n_tablet"]
+[ext_resource type="Texture2D" path="res://assets/art/collectible/spr_collectible_tablet_summit_1x1.png" id="art_tablet_summit"]
 
 [sub_resource type="RectangleShape2D" id="Shape_Tablet_gate_1"]
 size = Vector2(80, 96)
@@ -164,13 +165,10 @@ TabletId = "gate_1"
 position = Vector2(0, -48)
 shape = SubResource("Shape_Tablet_gate_1")
 
-[node name="Placeholder" type="ColorRect" parent="Objects/Tablet_gate_1" unique_id=409987956]
-visible = false
-offset_left = -24.0
-offset_top = -77.0
-offset_right = 24.0
-mouse_filter = 2
-color = Color(0.75, 0.6, 0.4, 1)
+[node name="Art" type="Sprite2D" parent="Objects/Tablet_gate_1"]
+scale = Vector2(0.142433, 0.142433)
+texture = ExtResource("art_tablet_summit")
+offset = Vector2(0, -168.5)
 
 [node name="Story_SevenGates" type="Area2D" parent="Objects" unique_id=897271031]
 position = Vector2(496, 192)

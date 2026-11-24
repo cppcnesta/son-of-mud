@@ -142,23 +142,31 @@ public partial class AnimFallbackTest : LabSuiteBase
         await Frames(1);
         var statue = room.GetNode<Node2D>("Objects/Story_Reshape");
         var art = statue.GetNodeOrNull<Sprite2D>(ArtSprite.NodeName);
-        Check(art != null && Mathf.IsEqualApprox(ShownHeight(art), 120f) && !statue.GetNode<CanvasItem>("Placeholder").Visible
+        Check(art != null && art.Owner == room && Mathf.Abs(ShownHeight(art) - 120f) <= 0.5f && statue.GetNodeOrNull("Placeholder") == null
               && art.Texture.ResourcePath.Contains("spr_collectible_prayer_statue"),
-            $"祈祷者雕像「重塑」：显示雕像图，高 {(art == null ? 0 : ShownHeight(art)):F0}（和主角一样高），占位色块藏起来");
+            $"祈祷者雕像「重塑」：场景里保存的 Art 节点显示雕像图，高 {(art == null ? 0 : ShownHeight(art)):F0}（和主角一样高），没有占位色块");
         room.QueueFree();
 
-        Node room2 = GD.Load<PackedScene>("res://assets/scenes/world/s1/S1_02.tscn").Instantiate();
-        AddChild(room2);
-        await Frames(1);
-        var tablet = room2.GetNode<Node2D>("Objects/Tablet_nameless_day");
-        var tArt = tablet.GetNodeOrNull<Sprite2D>(ArtSprite.NodeName);
-        Check(tArt != null && Mathf.IsEqualApprox(ShownHeight(tArt), TabletPickup.ArtHeight) && !tablet.GetNode<CanvasItem>("Placeholder").Visible
-              && tArt.Texture.ResourcePath.Contains("spr_collectible_tablet_pit"),
-            "泥板（S1）：显示残泥板·泥坑的图，高 48，占位色块藏起来");
-        room2.QueueFree();
-        Check(TabletPickup.ArtName("destiny", "S2_04") == "spr_collectible_tablet_of_destiny" && TabletPickup.ArtName("smile", "S2_02") == "spr_collectible_tablet_temple"
-              && TabletPickup.ArtName("curse", "S3_06") == "spr_collectible_tablet_divination" && TabletPickup.ArtName("gate_1", "S4_02") == "spr_collectible_tablet_summit",
-            "泥板按地图换图：S2 塔庙、S3 占卜、S4 塔顶，命运石板用自己的图");
+        // 泥板：每块泥板的图都是场景里保存的 Art 节点（编辑器里看得到、能换图），按地图用对应的残泥板，命运石板用自己的图
+        (string room, string node, string art)[] tablets =
+        {
+            ("s1/S1_02", "Tablet_nameless_day", "spr_collectible_tablet_pit"), ("s2/S2_02", "Tablet_smile", "spr_collectible_tablet_temple"),
+            ("s2/S2_04", "Tablet_destiny", "spr_collectible_tablet_of_destiny"), ("s3/S3_07", "Tablet_annals", "spr_collectible_tablet_divination"),
+            ("s4/S4_02", "Tablet_gate_1", "spr_collectible_tablet_summit"),
+        };
+        var wrong = new System.Collections.Generic.List<string>();
+        foreach (var (path, node, name) in tablets)
+        {
+            Node r = GD.Load<PackedScene>($"res://assets/scenes/world/{path}.tscn").Instantiate();
+            var t = r.GetNodeOrNull<Node2D>("Objects/" + node);
+            var tArt = t?.GetNodeOrNull<Sprite2D>(ArtSprite.NodeName);
+            if (tArt == null || tArt.Owner != r || Mathf.Abs(ShownHeight(tArt) - TabletPickup.ArtHeight) > 0.5f || t.GetNodeOrNull("Placeholder") != null
+                || !tArt.Texture.ResourcePath.Contains(name))
+                wrong.Add($"{path}/{node}（图 {tArt?.Texture?.ResourcePath}）");
+            r.Free();
+        }
+        Check(wrong.Count == 0, "泥板：图是场景里保存的 Art 节点（高 48，没有占位色块），S1 泥坑、S2 塔庙、S3 占卜、S4 塔顶，命运石板用自己的图" +
+                                (wrong.Count > 0 ? "：" + string.Join("；", wrong) : ""));
 
         var bottle = GD.Load<PickupItem>("res://assets/data/world/items/mud_bottle.tres");
         var liver = GD.Load<PickupItem>("res://assets/data/world/items/mud_liver.tres");

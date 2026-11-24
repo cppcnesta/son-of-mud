@@ -187,29 +187,56 @@ public partial class NarrativeStoryTest : NarrativeFlowBase
         Check(again && liver.FirstOrDefault()?.StartsWith("伊吉：神的心意，写在肝上。") == true && !liver.Any(l => l.Contains("我是伊吉")) && liver.LastOrDefault() == "穆尔图库尔：塔姆图？",
             $"S3_03 再和伊吉对话：只播肝占卜（{Show(liver)}）");
 
+        // 肝占卜：三个街区各一个征兆，伊吉提问；先答错一次（再问一次），再答对
+        Check(Obj("Tablet_hoped_world") == null, "S3_04 地上没有泥板「期望的世界」（答对肝占卜后由剧情显示）");
         await Enter("S3_04");
-        bool hoped = await Use("Tablet_hoped_world", "拾取泥板");
-        List<string> world = await Play();
-        Check(hoped && world.FirstOrDefault() == "泥板「期望的世界」" && world.LastOrDefault() == "？？？：我的神子，我的冠军。", $"S3_04 泥板「期望的世界」后接对话（{Show(world)}）");
-
-        await Enter("S3_05");
-        bool clay = await Use("Story_Clay", "触碰雕像");
-        List<string> mud = await Play();
-        Check(clay && mud.Contains("[clay]齐：……齐。") && mud.LastOrDefault()?.EndsWith("而父亲爱的，偏偏是泥。") == true, $"S3_05 触碰雕像：CG5「泥」（{mud.Count} 段）");
-        bool soft = await Use("Tablet_too_soft", "拾取泥板");
-        Check(soft && Narr.Tablet.CurrentText.Contains("祂为什么要碰它们"), "S3_05 泥板「他们太软了」");
-        await Play(5);
+        List<string> world = await Divine("Story_Omen1", wrong: 0, right: 1, "S3_04 第一街区", "神看见的是什么？");
+        Check(world.Contains("泥板「期望的世界」") && world.LastOrDefault() == "？？？：我的神子，我的冠军。" && Flag("liver.1") && !Obj("Story_Omen1").Visible,
+            $"S3_04 第一街区答对“两条河”：泥板「期望的世界」→ 穆尔图库尔两句 → “我的神子，我的冠军。”，征兆消失（{Show(world)}）");
 
         await Enter("S3_06");
-        Check(!GateOpen("S3_07"), "S3_06 读出泥肝之前：通往 S3_07 的门关着");
-        bool crack = await Use("Story_Crack", "（占位）读出泥肝");
+        Check(!GateOpen("S3_07") && !Obj("Story_Crack").Visible, "S3_06 三块没读完：“让伊吉读泥肝”还没出现，通往 S3_07 的门关着");
+
+        await Enter("S3_05");
+        Check(Obj("Tablet_too_soft") == null, "S3_05 地上没有泥板「他们太软了」");
+        List<string> mud = await Divine("Story_Omen2", wrong: 0, right: 2, "S3_05 第二街区", "手里捧着的是什么？");
+        Check(mud.Contains("[clay]齐：……齐。") && mud.Contains("泥板「他们太软了」") && Flag("liver.2") && !Narr.Cg.IsShowing,
+            $"S3_05 第二街区答对“泥”：CG5「泥」→ 泥板「他们太软了」（{mud.Count} 段）");
+
+        await Enter("S3_06");
+        List<string> curse = await Divine("Story_Omen3", wrong: 2, right: 1, "S3_06 第三街区", "七道痕，说的是什么？");
+        Check(curse.Contains("泥板「诅咒」") && Flag("liver.3") && Obj("Story_Crack").Visible, $"S3_06 第三街区答对“七个夜晚”：泥板「诅咒」，“让伊吉读泥肝”出现（{Show(curse)}）");
+        bool crack = await Use("Story_Crack", "让伊吉读泥肝");
         List<string> found = await Play();
         Check(crack && found.LastOrDefault() == "穆尔图库尔：父亲在找我！我就在这里。" && Flag("districts_done") && GateOpen("S3_07"),
-            "S3_06 占位“读出泥肝”：伊吉读出裂痕，districts_done 成立，门打开");
+            "S3_06 三块都读出后“让伊吉读泥肝”：伊吉读出裂痕，districts_done 成立，门打开");
 
         await Enter("S3_08");
         List<string> ascend = await Play();
         Check(ascend.FirstOrDefault() == "伊吉：祂在跟谁说话？" && ascend.LastOrDefault() == "？？？：我的儿子！上来。我在上面等你。", $"S3_08 走到登塔入口自动播（{Show(ascend)}）");
+    }
+
+    /// <summary>选第 index 个选项（从 0 数，真实按键：按下 index 次再按 E）。</summary>
+    private async Task Choose(int index)
+    {
+        await WaitUntil(() => Narr.Choice.IsOpen, 300);
+        for (int i = 0; i < index; i++) await Tap(PlayerActions.Down);
+        await KeyTap(Key.E);
+        await Frames(2);
+    }
+
+    /// <summary>按 E 查看征兆：伊吉提问 → 先选错（伊吉说“……不是这样读的。”再问一次）→ 再选对 → 播完。返回选对之后播的内容。</summary>
+    private async Task<List<string>> Divine(string omen, int wrong, int right, string where, string question)
+    {
+        bool used = await Use(omen, "查看征兆");
+        List<string> asked = await Play();
+        Check(used && Narr.Choice.IsOpen && Narr.Dialog.CurrentName == "伊吉" && Narr.Dialog.CurrentText.EndsWith(question),
+            $"{where}：按 E 查看征兆，伊吉问“{question}”，出现选项（{Narr.Dialog.CurrentText}）");
+        await Choose(wrong);
+        List<string> retry = await Play();
+        Check(retry.FirstOrDefault() == "伊吉：……不是这样读的。" && Narr.Choice.IsOpen, $"{where}：选错 → 伊吉“……不是这样读的。”，再问一次（{Show(retry)}）");
+        await Choose(right);
+        return await Play(120);
     }
 
     // ---------- 地图四 ----------

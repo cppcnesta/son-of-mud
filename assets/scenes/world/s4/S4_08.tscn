@@ -5,6 +5,7 @@
 [ext_resource type="TileSet" path="res://assets/data/world/world_tileset.tres" id="4_ytefb"]
 [ext_resource type="Script" path="res://assets/scripts/world/SpawnPoint.cs" id="5_ox1q2"]
 [ext_resource type="Script" path="res://assets/scripts/narrative/world/TabletPickup.cs" id="n_tablet"]
+[ext_resource type="Texture2D" path="res://assets/art/collectible/spr_collectible_tablet_summit_1x1.png" id="art_tablet_summit"]
 
 [sub_resource type="RectangleShape2D" id="Shape_Tablet_gate_7"]
 size = Vector2(80, 96)
@@ -50,9 +51,7 @@ TabletId = "gate_7"
 position = Vector2(0, -48)
 shape = SubResource("Shape_Tablet_gate_7")
 
-[node name="Placeholder" type="ColorRect" parent="Objects/Tablet_gate_7" unique_id=169027496]
-offset_left = -24.0
-offset_top = -77.0
-offset_right = 24.0
-mouse_filter = 2
-color = Color(0.75, 0.6, 0.4, 1)
+[node name="Art" type="Sprite2D" parent="Objects/Tablet_gate_7"]
+scale = Vector2(0.142433, 0.142433)
+texture = ExtResource("art_tablet_summit")
+offset = Vector2(0, -168.5)

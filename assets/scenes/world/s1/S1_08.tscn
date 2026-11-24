@@ -7,6 +7,7 @@
 [ext_resource type="Script" path="res://assets/scripts/narrative/world/StoryTrigger.cs" id="n_story"]
 [ext_resource type="Script" path="res://assets/scripts/narrative/world/TabletPickup.cs" id="n_tablet"]
 [ext_resource type="Texture2D" path="res://assets/art/collectible/spr_collectible_prayer_statue_1x1.png" id="statue_art"]
+[ext_resource type="Texture2D" path="res://assets/art/collectible/spr_collectible_tablet_pit_1x1.png" id="art_tablet_pit"]
 
 [sub_resource type="RectangleShape2D" id="Shape_Story_Reshape"]
 size = Vector2(96, 160)
@@ -51,19 +52,16 @@ position = Vector2(752, 636)
 script = ExtResource("n_story")
 ScriptId = "m_pit"
 Label = "重塑"
-Art = ExtResource("statue_art")
 PromptText = "触碰雕像"
 
 [node name="Shape" type="CollisionShape2D" parent="Objects/Story_Reshape" unique_id=394549222]
 position = Vector2(0, -80)
 shape = SubResource("Shape_Story_Reshape")
 
-[node name="Placeholder" type="ColorRect" parent="Objects/Story_Reshape" unique_id=133581965]
-offset_left = -29.0
-offset_top = -128.0
-offset_right = 29.0
-mouse_filter = 2
-color = Color(0.45, 0.38, 0.3, 1)
+[node name="Art" type="Sprite2D" parent="Objects/Story_Reshape"]
+scale = Vector2(0.0996678, 0.0996678)
+texture = ExtResource("statue_art")
+offset = Vector2(0, -602)
 
 [node name="Tablet_divine_son" type="Area2D" parent="Objects" unique_id=608138903]
 position = Vector2(944, 636)
@@ -74,9 +72,7 @@ TabletId = "divine_son"
 position = Vector2(0, -48)
 shape = SubResource("Shape_Tablet_divine_son")
 
-[node name="Placeholder" type="ColorRect" parent="Objects/Tablet_divine_son" unique_id=476686759]
-offset_left = -24.0
-offset_top = -77.0
-offset_right = 24.0
-mouse_filter = 2
-color = Color(0.75, 0.6, 0.4, 1)
+[node name="Art" type="Sprite2D" parent="Objects/Tablet_divine_son"]
+scale = Vector2(0.13913, 0.13913)
+texture = ExtResource("art_tablet_pit")
+offset = Vector2(0, -172.5)

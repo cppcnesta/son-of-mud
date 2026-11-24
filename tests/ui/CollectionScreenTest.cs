@@ -255,13 +255,32 @@ public partial class CollectionScreenTest : EnemyFlowBase
         Check(shard != null && info == "True|1/2|泥片|祈祷泥片：这块土，来自塔姆图的祈祷之子。",
             $"真实打死祈祷泥人、按 E 捡起泥片 → 收集页泥片格亮、1/2、说明对（掉了 {(shard != null ? "有" : "没有")}，捡起 {GameSession.Progress.Flag("collected.prayer_shard")}，{info}）");
 
-        // 真实碰到泥瓶：先掉一点血，掉一个泥瓶在脚下
+        // 真实碰到泥瓶：先掉一点血，掉一个泥瓶在脚下 → 捡起来存着，不当场回血
         Player.HurtBox.Receive(new SonOfMud.Combat.Hit { AttackId = "collection_test_hurt", Damage = 20f, SourcePosition = Player.GlobalPosition, Blockable = false });
         await WaitUntil(() => PlayerFree, 120);
+        int hurt = Player.Stats.Health, max = Player.Stats.MaxHealth;
+        // 祈祷泥人按几率掉泥瓶，打死时可能已经自动捡了一瓶：先清零，让这里只算测试掉的这一瓶
+        GameSession.Progress.SetVar(Pickup.CountKey("泥瓶"), 0);
         Events.Instance.EmitSignal(Events.SignalName.ItemDropped, "泥瓶", BodyFeet.FeetOffset(Player) * Vector2.Down + Player.GlobalPosition);
-        await WaitUntil(() => GameSession.Progress.Flag("obtained.泥瓶"), 60);
+        await WaitUntil(() => Pickup.CountOf("泥瓶") == 1, 60);
         info = await SlotAfterTab(0);
-        Check(info.StartsWith("True||泥瓶|"), $"真实碰到泥瓶 → 泥瓶格亮（不显示数量）（{info}）");
+        Check(info.StartsWith("True|1/5|泥瓶|") && Player.Stats.Health == hurt, $"真实碰到泥瓶 → 泥瓶格亮、存着 1/5，不当场回血（血 {Player.Stats.Health}，{info}）");
+
+        // Tab 打开收集页，选中泥瓶按 E：喝一瓶回 30（不超过上限），变成 0/5；再按 E 说明栏写“没有泥瓶了。”
+        await WaitUntil(() => NoPauseOrLock(), 120);
+        await Tab();
+        await WaitUntil(() => Screen.IsOpen, 10);
+        Screen.Select(0);
+        await Frames(1);
+        await KeyTap(RealKeys.Interact);
+        await Frames(2);
+        bool drank = Player.Stats.Health == Mathf.Min(hurt + 30, max) && Screen.CountOf(0) == "0/5" && Screen.IsOpen;
+        await KeyTap(RealKeys.Interact);
+        await Frames(2);
+        string empty = Screen.BodyLabel.Text;
+        await Tab();
+        await Frames(2);
+        Check(drank && empty.EndsWith("没有泥瓶了。"), $"收集页里选中泥瓶按 E：喝一瓶，血 {hurt} → {Player.Stats.Health}，剩 0/5；再按 E 提示“没有泥瓶了。”（{empty}）");
 
         await SaveAndContinue();
         info = await SlotAfterTab(9);

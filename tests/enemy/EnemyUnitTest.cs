@@ -144,8 +144,8 @@ public partial class EnemyUnitTest : LabSuiteBase
 
         var bottle = GD.Load<SonOfMud.World.PickupItem>("res://assets/data/world/items/mud_bottle.tres");
         var liver = GD.Load<SonOfMud.World.PickupItem>("res://assets/data/world/items/mud_liver.tres");
-        Check(bottle.ItemId == "泥瓶" && bottle.HealAmount == 30 && !bottle.Counted && !bottle.PlaysLine,
-            "拾取物：泥瓶碰到回 30 血（不计数），没有拾取台词");
+        Check(bottle.ItemId == "泥瓶" && bottle.HealAmount == 30 && bottle.Counted && bottle.MaxCount == 5 && !bottle.PlaysLine,
+            "拾取物：泥瓶捡起来存着（计数，最多 5 瓶），在收集页喝一瓶回 30 血，没有拾取台词");
         Check(liver.ItemId == "泥肝" && liver.HealAmount == 0 && liver.Counted && liver.MaxCount == 5 && !liver.PlaysLine,
             "拾取物：泥肝计数 count.泥肝，最多 5 个，没有拾取台词");
         Node game = GD.Load<PackedScene>("res://assets/scenes/world/game.tscn").Instantiate();
