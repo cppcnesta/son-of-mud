@@ -178,8 +178,8 @@ public partial class AnimFallbackTest : LabSuiteBase
         AddChild(hud);
         await Frames(1);
         var bar = hud.FindChildren("ItemBar", "", true, false).OfType<SonOfMud.UI.ItemBar>().FirstOrDefault();
-        var liverEntry = bar?.Entries.FirstOrDefault(e => e?.Id == "mud_liver");
-        Check(liverEntry?.Icon != null && liverEntry.Icon.ResourcePath.Contains("spr_item_mud_liver"), "界面道具格里的泥肝：用泥肝图");
+        Texture2D liverIcon = bar?.IconOf("mud_liver");
+        Check(liverIcon != null && liverIcon.ResourcePath.Contains("spr_item_mud_liver"), "界面道具格里的泥肝：场景里存的是泥肝图");
         hud.QueueFree();
         await Frames(2);
     }

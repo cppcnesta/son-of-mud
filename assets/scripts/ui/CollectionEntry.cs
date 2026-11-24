@@ -15,7 +15,6 @@ public partial class CollectionEntry : KeptResource
 {
     [Export] public string Id { get; set; } = "";
     [Export] public string DisplayName { get; set; } = "";
-    [Export] public Texture2D Icon { get; set; }
     [Export(PropertyHint.MultilineText)] public string Description { get; set; } = "";
     /// <summary>判断「得到过」的进度变量（任意一个为真就算）。</summary>
     [Export] public Godot.Collections.Array<StringName> Flags { get; set; } = new();

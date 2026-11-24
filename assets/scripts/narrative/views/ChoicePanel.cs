@@ -15,6 +15,10 @@ public partial class ChoicePanel : Control
 {
     public const string ScenePath = "res://assets/scenes/narrative/views/choice_panel.tscn";
 
+    /// <summary>选中 / 没选中的选项文字颜色（在 choice_panel.tscn 根节点上调）。</summary>
+    [Export] public Color FocusedTextColor { get; set; } = new(1f, 0.94f, 0.78f);
+    [Export] public Color NormalTextColor { get; set; } = new(0.84f, 0.8f, 0.72f);
+
     public bool IsOpen { get; private set; }
     public int Focus { get; private set; }
     public IReadOnlyList<string> Options => _options;
@@ -93,12 +97,10 @@ public partial class ChoicePanel : Control
             if (button.GetNodeOrNull<CanvasItem>("FrameFocus") is { } focus) focus.Visible = on;
             if (button.GetNodeOrNull<CanvasItem>("FrameNormal") is { } normal) normal.Visible = !on;
             if (button.GetNodeOrNull<CanvasItem>("Arrow") is { } arrow) arrow.Visible = on;
-            Color text = on ? FocusedText : NormalText;
+            Color text = on ? FocusedTextColor : NormalTextColor;
             foreach (StringName name in TextColors) button.AddThemeColorOverride(name, text);
         }
     }
 
-    private static readonly Color FocusedText = new(1f, 0.94f, 0.78f);
-    private static readonly Color NormalText = new(0.84f, 0.8f, 0.72f);
     private static readonly StringName[] TextColors = { "font_color", "font_hover_color", "font_focus_color" };
 }

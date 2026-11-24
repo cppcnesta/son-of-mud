@@ -12,7 +12,7 @@ using SonOfMud.UI;
 /// ① 泥珠（珠子数 = ⌊上限 / 20⌋、至少 1 颗，每颗容量 = 上限 / 珠子数）：70 → 3 颗满；60 → 2 颗满 + 第 3 颗 0.57；
 ///    140 → 7 颗满；130 → 6 颗满 + 1 颗半；0 → 全空（掉空的珠子播碎裂）；最大 150 → 7 颗；160 → 8 颗；19 → 1 颗；静态规则逐个血量检查。
 /// ② 交互提示、提示条（出现约 2 秒后自动消失）、剧情开始 / 结束时 HUD 淡出 / 淡回。
-/// ③ 器物环：mask 0..127 每个都显示正确；7 个槽摆成环。
+/// ③ 道具格：泥瓶、泥肝、面包 3 格，图存在场景里；没得到过只有框，得到后显示数量。
 /// ④ Boss 血条：开战、平滑扣血、换阶段、击败收起；别的 bossId 的事件不理会。
 /// ⑤ 源码扫描：UI 脚本只引用 Core 和 UI 自己；UI 场景只挂 UI 脚本和 MetSys 的 Minimap。
 /// </summary>
@@ -34,7 +34,7 @@ public partial class UiHudTest : UiTestBase
         bool ready = error == Error.Ok && await WaitUntil(() => GetTree().CurrentScene?.SceneFilePath == LabScene && GetTree().CurrentScene.IsNodeReady(), 120);
         await Frames(3);
         _hud = GetTree().CurrentScene?.GetNodeOrNull<GameUi>("GameUi")?.Hud;
-        Check(ready && _hud != null && _hud.Beads != null && _hud.Artifacts != null && _hud.Boss != null && _hud.Prompt != null && _hud.Toast != null && _hud.Minimap != null,
+        Check(ready && _hud != null && _hud.Beads != null && _hud.Items != null && _hud.Boss != null && _hud.Prompt != null && _hud.Toast != null && _hud.Minimap != null,
             "ui_lab.tscn：GameUi 下的 HUD 和各个组件都在");
         if (_hud == null) return;
 
@@ -42,7 +42,7 @@ public partial class UiHudTest : UiTestBase
         await PromptChecks();
         await ToastChecks();
         await NarrativeFadeChecks();
-        ArtifactChecks();
+        await ItemBarChecks();
         await BossChecks();
         SourceScan();
     }
@@ -123,13 +123,13 @@ public partial class UiHudTest : UiTestBase
         int[] breaksBefore = Enumerable.Range(0, 7).Select(i => bar.GetBead(i).BreakCount).ToArray();
         Emit(Events.SignalName.PlayerHealthChanged, 0, 140);
         await Frames(3);
-        bool breaking = Enumerable.Range(0, 6).All(i => bar.GetBead(i).BreakPlaying);
         int[] breaksAfter = Enumerable.Range(0, 7).Select(i => bar.GetBead(i).BreakCount).ToArray();
         await Frames(30);
         Check(bar.BeadCount == 7 && FillsMatch(0, 140, false) && FillsMatch(0, 140, true), $"0/140：7 颗全空（{Fills(bar)}）");
-        Check(Enumerable.Range(0, 6).All(i => breaksAfter[i] == breaksBefore[i] + 1) && breaksAfter[6] == breaksBefore[6] && breaking,
-            $"掉空的 6 颗各播一次碎裂，原本就空的第 7 颗不播（碎裂次数 {string.Join(",", breaksAfter)}）");
-        Check(Enumerable.Range(0, 7).All(i => !bar.GetBead(i).BreakPlaying), "碎裂效果播完后自动收起");
+        // 碎裂动画先去掉了（等美术出新的碎裂帧），这里只核对“碎了几次”的计数
+        Check(Enumerable.Range(0, 6).All(i => breaksAfter[i] == breaksBefore[i] + 1) && breaksAfter[6] == breaksBefore[6],
+            $"掉空的 6 颗各记一次碎裂，原本就空的第 7 颗不记（碎裂次数 {string.Join(",", breaksAfter)}）");
+        Check(Enumerable.Range(0, 7).All(i => !bar.GetBead(i).BreakPlaying), "没有碎裂动画节点：不会有动画留在屏幕上");
 
         // 不是基准倍数的上限：向下取整，容量平分
         await Health(150, 150, 3);
@@ -264,46 +264,24 @@ public partial class UiHudTest : UiTestBase
         Check(_hud.RootAlpha > 0.99f && !_hud.NarrativeActive, "HUD：全部结束后淡回");
     }
 
-    // ---------- ③ 器物环 ----------
+    // ---------- ③ 道具格 ----------
 
-    private void ArtifactChecks()
+    private async Task ItemBarChecks()
     {
-        ArtifactRing ring = _hud.Artifacts;
-        Check(ring.Slots.Count == 7 && ring.Slots.Select(s => s.Index).SequenceEqual(Enumerable.Range(0, 7)), "器物环：7 个槽，编号 0..6");
-        Check(ring.Mask == 127 && ring.Slots.All(s => s.IsWorn), "器物环：开局（没收到事件时）7 件都戴着");
+        ItemBar bar = _hud.Items;
+        string[] ids = { "mud_bottle", "mud_liver", "life_bread" };
+        string[] art = { "spr_item_mud_bottle", "spr_item_mud_liver", "spr_item_life_bread" };
+        Check(bar.Entries.Select(e => e?.Id).SequenceEqual(ids) && ids.Select((id, i) => bar.IconOf(id)?.ResourcePath.Contains(art[i]) == true).All(x => x),
+            "道具格：泥瓶、泥肝、生命之面包 3 格，道具图存在场景里（编辑器里看得到）");
+        Check(ids.All(id => bar.CountOf(id) == ""), "道具格：开局都没得到过，只有框，不显示数量");
 
-        Vector2 center = ring.Size / 2f;
-        float[] radii = ring.Slots.Select(s => (s.Position + s.Size / 2f).DistanceTo(center)).ToArray();
-        float[] angles = ring.Slots.Select(s => (s.Position + s.Size / 2f - center).Angle()).OrderBy(a => a).ToArray();
-        bool evenlySpaced = Enumerable.Range(0, 7).All(i =>
-        {
-            float next = i == 6 ? angles[0] + Mathf.Tau : angles[i + 1];
-            return Mathf.Abs(next - angles[i] - Mathf.Tau / 7f) < 0.05f;
-        });
-        Check(radii.Max() - radii.Min() < 1.5f && radii.Min() > 40f && evenlySpaced, $"器物环：7 个槽等距摆成环（半径 {radii.Min():0.0}..{radii.Max():0.0}）");
-
-        var wrong = new List<int>();
-        for (int mask = 0; mask <= 127; mask++)
-        {
-            Emit(Events.SignalName.ArtifactsChanged, mask);
-            bool ok = ring.Mask == mask;
-            foreach (ArtifactSlot slot in ring.Slots)
-            {
-                bool worn = (mask & (1 << slot.Index)) != 0;
-                ok &= slot.IsWorn == worn && ring.IsWorn(slot.Index) == worn && (worn ? slot.ShowsWorn : slot.ShowsRemoved);
-            }
-            if (!ok) wrong.Add(mask);
-        }
-        Check(wrong.Count == 0, $"器物环：mask 0..127 共 128 种都显示正确（错误 {wrong.Count} 种{(wrong.Count > 0 ? "：" + string.Join(",", wrong.Take(10)) : "")}）");
-        // 美术给的是同一张道具图标：“已放下”用同一张图，但变暗变淡
-        Check(ring.Slots.All(s => s.GetNode<TextureRect>("Worn").Texture is { } w && s.GetNode<TextureRect>("Removed") is { Texture: { } r } removed
-                                  && w.ResourcePath.EndsWith("tex_ui_artifact_slot.png") && r == w
-                                  && removed.SelfModulate.V < 0.6f && removed.SelfModulate.A < 1f),
-            "器物环：每个槽“戴着”和“已放下”都是道具图标，“已放下”变暗变淡");
-
-        Emit(Events.SignalName.ArtifactsChanged, 0b1111_1010);
-        Check(ring.Mask == 0b111_1010 && !ring.IsWorn(0) && ring.IsWorn(1), "器物环：超出 7 位的部分被忽略");
-        Emit(Events.SignalName.ArtifactsChanged, 127);
+        CollectionEntry liver = bar.Entries[1];
+        GameSession.Progress.SetVar(liver.Flags[0], true);
+        ItemCounts.Set("泥肝", 2);
+        await Frames(1);
+        Check(bar.CountOf("mud_liver") == "2/5" && bar.CountOf("mud_bottle") == "", $"道具格：得到 2 个泥肝后，泥肝格显示 2/5，泥瓶格不变（{bar.CountOf("mud_liver")}）");
+        ItemCounts.Set("泥肝", 0);
+        GameSession.Progress.SetVar(liver.Flags[0], false);
     }
 
     // ---------- ④ Boss 血条 ----------
