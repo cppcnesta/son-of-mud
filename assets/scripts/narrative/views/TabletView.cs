@@ -4,7 +4,8 @@ using Godot;
 namespace SonOfMud.Narrative.Views;
 
 /// <summary>
-/// 泥板 / 铭文阅读界面。界面在 tablet_view.tscn：Dim（压暗）、Panel（泥板底图）→ Title / Body / Hint。推进键关闭（由剧情层读键）。
+/// 泥板 / 铭文阅读界面。界面在 tablet_view.tscn：Dim（压暗）、Panel（对话框那套边框 Frame，底色在 Frame/Fill 调）→ Title / Body / Hint。
+/// 推进键关闭（由剧情层读键）。正文放不下时用鼠标滚轮滚动（字号不缩小）。
 /// </summary>
 [GlobalClass]
 public partial class TabletView : Control
@@ -36,6 +37,8 @@ public partial class TabletView : Control
         _onClosed = onClosed;
         _title.Text = title ?? "";
         _body.Text = text ?? "";
+        // 字号不缩小：放不下时正文可以用滚轮上下滚，每次打开从头看
+        _body.ScrollToLine(0);
         ShowingFull = full;
         IsOpen = true;
         Visible = true;

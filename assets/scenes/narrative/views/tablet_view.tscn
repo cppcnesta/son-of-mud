@@ -1,15 +1,9 @@
-[gd_scene load_steps=4 format=3]
+[gd_scene format=3]
 
 [ext_resource type="Script" path="res://assets/scripts/narrative/views/TabletView.cs" id="1_tablet"]
 [ext_resource type="Theme" path="res://assets/data/narrative/narrative_theme.tres" id="2_theme"]
-
-[sub_resource type="StyleBoxFlat" id="Style_Tablet"]
-bg_color = Color(0.36, 0.27, 0.19, 1)
-border_width_left = 4
-border_width_top = 4
-border_width_right = 4
-border_width_bottom = 4
-border_color = Color(0.2, 0.14, 0.1, 1)
+[ext_resource type="Texture2D" path="res://assets/art/ui/tex_ui_dialog_fill.png" id="3_fill"]
+[ext_resource type="Texture2D" path="res://assets/art/ui/tex_ui_dialog_frame.png" id="4_frame"]
 
 [node name="Tablet" type="Control"]
 visible = false
@@ -33,46 +27,113 @@ grow_vertical = 2
 mouse_filter = 2
 color = Color(0, 0, 0, 0.6)
 
-[node name="Panel" type="Panel" parent="."]
+[node name="Panel" type="Control" parent="."]
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -320.0
-offset_top = -240.0
-offset_right = 320.0
-offset_bottom = 240.0
+offset_left = -470.0
+offset_top = -165.0
+offset_right = 470.0
+offset_bottom = 165.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
-theme_override_styles/panel = SubResource("Style_Tablet")
+
+[node name="Frame" type="Control" parent="Panel"]
+layout_mode = 1
+anchors_preset = 0
+offset_right = 1139.4
+offset_bottom = 400.0
+scale = Vector2(0.825, 0.825)
+mouse_filter = 2
+
+[node name="Fill" type="Control" parent="Panel/Frame"]
+modulate = Color(0.353, 0.353, 0.353, 0.65)
+layout_mode = 0
+anchors_preset = 0
+offset_right = 1139.4
+offset_bottom = 400.0
+mouse_filter = 2
+
+[node name="Left" type="NinePatchRect" parent="Panel/Frame/Fill"]
+layout_mode = 0
+offset_right = 569.7
+offset_bottom = 400.0
+mouse_filter = 2
+texture = ExtResource("3_fill")
+region_rect = Rect2(0, 0, 704, 400)
+patch_margin_left = 123
+patch_margin_right = 73
+
+[node name="Right" type="NinePatchRect" parent="Panel/Frame/Fill"]
+layout_mode = 0
+offset_left = 569.7
+offset_right = 1139.4
+offset_bottom = 400.0
+mouse_filter = 2
+texture = ExtResource("3_fill")
+region_rect = Rect2(704, 0, 682, 400)
+patch_margin_left = 73
+patch_margin_right = 123
+
+[node name="Lines" type="Control" parent="Panel/Frame"]
+layout_mode = 0
+anchors_preset = 0
+offset_right = 1139.4
+offset_bottom = 400.0
+mouse_filter = 2
+
+[node name="Left" type="NinePatchRect" parent="Panel/Frame/Lines"]
+layout_mode = 0
+offset_right = 569.7
+offset_bottom = 400.0
+mouse_filter = 2
+texture = ExtResource("4_frame")
+region_rect = Rect2(0, 0, 704, 400)
+patch_margin_left = 123
+patch_margin_right = 73
+
+[node name="Right" type="NinePatchRect" parent="Panel/Frame/Lines"]
+layout_mode = 0
+offset_left = 569.7
+offset_right = 1139.4
+offset_bottom = 400.0
+mouse_filter = 2
+texture = ExtResource("4_frame")
+region_rect = Rect2(704, 0, 682, 400)
+patch_margin_left = 73
+patch_margin_right = 123
 
 [node name="Title" type="Label" parent="Panel"]
 layout_mode = 0
-offset_left = 32.0
-offset_top = 24.0
-offset_right = 608.0
-offset_bottom = 64.0
+offset_left = 150.0
+offset_top = 50.0
+offset_right = 790.0
+offset_bottom = 84.0
+theme_override_colors/font_color = Color(0.94, 0.84, 0.59, 1)
 theme_override_font_sizes/font_size = 26
 horizontal_alignment = 1
 
 [node name="Body" type="RichTextLabel" parent="Panel"]
 layout_mode = 0
-offset_left = 40.0
-offset_top = 84.0
-offset_right = 600.0
-offset_bottom = 424.0
-mouse_filter = 2
+offset_left = 150.0
+offset_top = 90.0
+offset_right = 790.0
+offset_bottom = 248.0
+theme_override_colors/default_color = Color(0.95, 0.92, 0.86, 1)
 bbcode_enabled = true
-scroll_active = false
+scroll_following = false
 
 [node name="Hint" type="Label" parent="Panel"]
 layout_mode = 0
-offset_left = 32.0
-offset_top = 436.0
-offset_right = 608.0
-offset_bottom = 466.0
+offset_left = 150.0
+offset_top = 248.0
+offset_right = 790.0
+offset_bottom = 272.0
+theme_override_colors/font_color = Color(0.92, 0.88, 0.78, 0.85)
+theme_override_font_sizes/font_size = 16
 text = "按 E / 空格 继续"
 horizontal_alignment = 2
