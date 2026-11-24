@@ -1,17 +1,17 @@
 [gd_scene format=4 uid="uid://dm7g7kysegv7j"]
 
 [ext_resource type="Script" uid="uid://bp6qc4ftue0bq" path="res://assets/scripts/world/RoomRoot.cs" id="1_u5ry8"]
-[ext_resource type="Texture2D" uid="uid://jxi31r8e60h2" path="res://assets/art/world/bg/s1/tex_bg_s1_04_far.png" id="2_8qafu"]
 [ext_resource type="PackedScene" uid="uid://bsg0351mx3b4u" path="res://addons/MetroidvaniaSystem/Nodes/RoomInstance.tscn" id="2_j2iaj"]
-[ext_resource type="Texture2D" uid="uid://bliwb1muwrgsr" path="res://assets/art/world/bg/s1/tex_bg_s1_04_mid_01.png" id="3_neb4k"]
-[ext_resource type="Texture2D" uid="uid://ccv8okrdd6yrh" path="res://assets/art/world/bg/s1/tex_bg_s1_04_mid_02.png" id="4_5gylj"]
 [ext_resource type="TileSet" uid="uid://cjutdcfket0jk" path="res://assets/data/world/world_tileset.tres" id="4_gxail"]
-[ext_resource type="Texture2D" uid="uid://c7kbjxgg52q63" path="res://assets/art/world/bg/s1/tex_bg_s1_04_front.png" id="5_0sopn"]
 [ext_resource type="Script" uid="uid://170bxbdwtr2a" path="res://assets/scripts/world/SpawnPoint.cs" id="5_8qafu"]
 [ext_resource type="Script" uid="uid://8xspa70en46t" path="res://assets/scripts/save/SavePoint.cs" id="6_neb4k"]
 [ext_resource type="PackedScene" path="res://assets/scenes/enemy/prayer.tscn" id="11_neb4k"]
 [ext_resource type="Script" uid="uid://gcj5me3gasqr" path="res://assets/scripts/narrative/world/StoryTrigger.cs" id="n_story"]
 
+[ext_resource type="Texture2D" uid="uid://dll8bucqa5p1" path="res://assets/art/world/bg/s1/tex_bg_s1_04_far_01.png" id="bg_2_neb4k"]
+[ext_resource type="Texture2D" uid="uid://bnn47u5vmgern" path="res://assets/art/world/bg/s1/tex_bg_s1_04_far_02.png" id="bg_3_5gylj"]
+[ext_resource type="Texture2D" uid="uid://c6f8nvrcj1d8j" path="res://assets/art/world/bg/s1/tex_bg_s1_04_far_03.png" id="bg_4_0sopn"]
+[ext_resource type="Texture2D" uid="uid://c7kbjxgg52q63" path="res://assets/art/world/bg/s1/tex_bg_s1_04_front.png" id="bg_5_0sopn"]
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_5gylj"]
 size = Vector2(106, 52)
 
@@ -23,56 +23,56 @@ script = ExtResource("1_u5ry8")
 RoomId = "S1_04"
 DisplayName = "供桌"
 
-[node name="Background" type="Node2D" parent="." unique_id=1978034298]
+[node name="Background" type="Node2D" parent="." unique_id=1626083146]
 z_index = -100
 metadata/bg_version = 2
 
-[node name="Far" type="Parallax2D" parent="Background" unique_id=1265120321]
+[node name="Far" type="Node2D" parent="Background" unique_id=73059178]
+
+[node name="Far01" type="Parallax2D" parent="Background/Far" unique_id=1506946236]
 z_index = -100
 z_as_relative = false
+metadata/bg_piece = "far_01"
+
+[node name="Image" type="Sprite2D" parent="Background/Far/Far01" unique_id=1752405917]
+position = Vector2(-3.6000001, -20.735987)
+scale = Vector2(0.5796, 0.5796)
+texture = ExtResource("bg_2_neb4k")
+centered = false
+
+[node name="Far02" type="Parallax2D" parent="Background/Far" unique_id=1022379423]
+z_index = -101
+z_as_relative = false
 scroll_scale = Vector2(0.15, 0.15)
+metadata/bg_piece = "far_02"
 
-[node name="Image" type="Sprite2D" parent="Background/Far" unique_id=1085111743]
-position = Vector2(-1000.00006, 3)
-scale = Vector2(0.18529412, 0.18529412)
-texture = ExtResource("2_8qafu")
+[node name="Image" type="Sprite2D" parent="Background/Far/Far02" unique_id=695608921]
+position = Vector2(-3.6000001, -20.735987)
+scale = Vector2(0.5796, 0.5796)
+texture = ExtResource("bg_3_5gylj")
 centered = false
 
-[node name="Mid" type="Node2D" parent="Background" unique_id=520939053]
-
-[node name="Mid01" type="Parallax2D" parent="Background/Mid" unique_id=1352258254]
-z_index = -80
+[node name="Far03" type="Parallax2D" parent="Background/Far" unique_id=132935392]
+z_index = -102
 z_as_relative = false
-scroll_scale = Vector2(0.5, 0.5)
-metadata/bg_piece = "mid_01"
+scroll_scale = Vector2(0.15, 0.15)
+metadata/bg_piece = "far_03"
 
-[node name="Image" type="Sprite2D" parent="Background/Mid/Mid01" unique_id=350537127]
-position = Vector2(180, 147)
-scale = Vector2(0.6029197, 0.47574624)
-texture = ExtResource("3_neb4k")
+[node name="Image" type="Sprite2D" parent="Background/Far/Far03" unique_id=1697838608]
+position = Vector2(-3.6000001, -20.735987)
+scale = Vector2(0.5796, 0.5796)
+texture = ExtResource("bg_4_0sopn")
 centered = false
 
-[node name="Mid02" type="Parallax2D" parent="Background/Mid" unique_id=56454159]
-z_index = -81
-z_as_relative = false
-scroll_scale = Vector2(0.5, 0.5)
-metadata/bg_piece = "mid_02"
-
-[node name="Image" type="Sprite2D" parent="Background/Mid/Mid02" unique_id=98056859]
-position = Vector2(-38, 83)
-scale = Vector2(1.0427716, 1.1014761)
-texture = ExtResource("4_5gylj")
-centered = false
-
-[node name="Front" type="Parallax2D" parent="Background" unique_id=1760674464]
+[node name="Front" type="Parallax2D" parent="Background" unique_id=1454095105]
 z_index = -60
 z_as_relative = false
 scroll_scale = Vector2(0.8, 0.8)
 
-[node name="Image" type="Sprite2D" parent="Background/Front" unique_id=1379877989]
-position = Vector2(19.999992, -17.000008)
-scale = Vector2(0.76861316, 0.62168294)
-texture = ExtResource("5_0sopn")
+[node name="Image" type="Sprite2D" parent="Background/Front" unique_id=898534644]
+position = Vector2(-19.2, -23.231983)
+scale = Vector2(0.5952, 0.5952)
+texture = ExtResource("bg_5_0sopn")
 centered = false
 
 [node name="RoomInstance" parent="." unique_id=1246059462 instance=ExtResource("2_j2iaj")]
