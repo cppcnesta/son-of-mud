@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bliwb1muwrgsr"
-path="res://.godot/imported/tex_bg_s1_04_mid_01.png-46eb837ad234c8ce7ee63c9fa5dc0319.ctex"
+uid="uid://bjrel3ec5pbdh"
+path="res://.godot/imported/por_mul_tukul_full.png-dae60d1bfff03dd901e31f9d700b612d.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/art/world/bg/s1/tex_bg_s1_04_mid_01.png"
-dest_files=["res://.godot/imported/tex_bg_s1_04_mid_01.png-46eb837ad234c8ce7ee63c9fa5dc0319.ctex"]
+source_file="res://assets/data/narrative/portrait/por_mul_tukul_full.png"
+dest_files=["res://.godot/imported/por_mul_tukul_full.png-dae60d1bfff03dd901e31f9d700b612d.ctex"]
 
 [params]
 

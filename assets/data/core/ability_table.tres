@@ -1,4 +1,4 @@
-[gd_resource type="Resource" script_class="AbilityTable" load_steps=7 format=3]
+[gd_resource type="Resource" script_class="AbilityTable" format=3 uid="uid://beuspmhblfot4"]
 
 [ext_resource type="Script" uid="uid://bysc0kiog71ip" path="res://assets/scripts/core/AbilityTable.cs" id="1_table"]
 [ext_resource type="Script" uid="uid://bn0vv7o000knc" path="res://assets/scripts/core/AbilityDef.cs" id="2_def"]

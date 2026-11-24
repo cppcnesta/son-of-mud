@@ -1,17 +1,14 @@
-[gd_resource type="Resource" script_class="WorldLayout" format=3]
+[gd_resource type="Resource" script_class="WorldLayout" format=3 uid="uid://moovkliwkcj7"]
 
-[ext_resource type="Script" path="res://assets/scripts/world/WorldLayout.cs" id="1_layout"]
-[ext_resource type="Script" path="res://assets/scripts/world/RoomDef.cs" id="2_room"]
-[ext_resource type="Script" path="res://assets/scripts/world/ExitDef.cs" id="3_exit"]
-[ext_resource type="Script" path="res://assets/scripts/core/GateRequirement.cs" id="4_gate"]
+[ext_resource type="Script" uid="uid://cnicf5ri7apfl" path="res://assets/scripts/world/WorldLayout.cs" id="1_layout"]
+[ext_resource type="Script" uid="uid://cdrgugpxsxyrt" path="res://assets/scripts/world/RoomDef.cs" id="2_room"]
+[ext_resource type="Script" uid="uid://6x60hcig8aq8" path="res://assets/scripts/world/ExitDef.cs" id="3_exit"]
+[ext_resource type="Script" uid="uid://bkv2lvag413ju" path="res://assets/scripts/core/GateRequirement.cs" id="4_gate"]
 
 [sub_resource type="Resource" id="Exit_S1_01_0"]
 script = ExtResource("3_exit")
-Side = 0
 Offset = 1
 Target = "S1_02"
-Kind = 0
-Requirement = null
 
 [sub_resource type="Resource" id="Room_S1_01"]
 script = ExtResource("2_room")
@@ -20,8 +17,6 @@ DisplayName = "苏醒"
 ScenePath = "res://assets/scenes/world/s1/S1_01.tscn"
 Origin = Vector2i(0, 5)
 Size = Vector2i(2, 2)
-Layer = 0
-HasSavePoint = false
 Exits = Array[ExtResource("3_exit")]([SubResource("Exit_S1_01_0")])
 
 [sub_resource type="Resource" id="Exit_S1_02_0"]
@@ -29,16 +24,11 @@ script = ExtResource("3_exit")
 Side = 2
 Offset = 1
 Target = "S1_01"
-Kind = 0
-Requirement = null
 
 [sub_resource type="Resource" id="Exit_S1_02_1"]
 script = ExtResource("3_exit")
-Side = 0
 Offset = 1
 Target = "S1_03"
-Kind = 0
-Requirement = null
 
 [sub_resource type="Resource" id="Room_S1_02"]
 script = ExtResource("2_room")
@@ -47,8 +37,6 @@ DisplayName = "坑底"
 ScenePath = "res://assets/scenes/world/s1/S1_02.tscn"
 Origin = Vector2i(2, 5)
 Size = Vector2i(3, 3)
-Layer = 0
-HasSavePoint = false
 Exits = Array[ExtResource("3_exit")]([SubResource("Exit_S1_02_0"), SubResource("Exit_S1_02_1")])
 
 [sub_resource type="Resource" id="Exit_S1_03_0"]
@@ -56,16 +44,10 @@ script = ExtResource("3_exit")
 Side = 2
 Offset = 2
 Target = "S1_02"
-Kind = 0
-Requirement = null
 
 [sub_resource type="Resource" id="Exit_S1_03_1"]
 script = ExtResource("3_exit")
-Side = 0
-Offset = 0
 Target = "S1_04"
-Kind = 0
-Requirement = null
 
 [sub_resource type="Resource" id="Room_S1_03"]
 script = ExtResource("2_room")
@@ -74,8 +56,6 @@ DisplayName = "朝圣者之路"
 ScenePath = "res://assets/scenes/world/s1/S1_03.tscn"
 Origin = Vector2i(5, 4)
 Size = Vector2i(6, 3)
-Layer = 0
-HasSavePoint = false
 Exits = Array[ExtResource("3_exit")]([SubResource("Exit_S1_03_0"), SubResource("Exit_S1_03_1")])
 
 [sub_resource type="Resource" id="Exit_S1_04_0"]
@@ -83,24 +63,16 @@ script = ExtResource("3_exit")
 Side = 2
 Offset = 1
 Target = "S1_03"
-Kind = 0
-Requirement = null
 
 [sub_resource type="Resource" id="Exit_S1_04_1"]
 script = ExtResource("3_exit")
-Side = 0
 Offset = 1
 Target = "S1_05"
-Kind = 0
-Requirement = null
 
 [sub_resource type="Resource" id="Exit_S1_04_2"]
 script = ExtResource("3_exit")
 Side = 3
-Offset = 0
 Target = "S1_08"
-Kind = 0
-Requirement = null
 
 [sub_resource type="Resource" id="Room_S1_04"]
 script = ExtResource("2_room")
@@ -109,7 +81,6 @@ DisplayName = "供桌"
 ScenePath = "res://assets/scenes/world/s1/S1_04.tscn"
 Origin = Vector2i(11, 3)
 Size = Vector2i(2, 2)
-Layer = 0
 HasSavePoint = true
 Exits = Array[ExtResource("3_exit")]([SubResource("Exit_S1_04_0"), SubResource("Exit_S1_04_1"), SubResource("Exit_S1_04_2")])
 
@@ -118,21 +89,15 @@ script = ExtResource("3_exit")
 Side = 2
 Offset = 2
 Target = "S1_04"
-Kind = 0
-Requirement = null
 
 [sub_resource type="Resource" id="Gate_S1_05_1"]
 script = ExtResource("4_gate")
-Abilities = Array[StringName]([])
 Flags = Array[StringName]([&"boss_keeper"])
 LockedText = "守坑人还挡着路。"
 
 [sub_resource type="Resource" id="Exit_S1_05_1"]
 script = ExtResource("3_exit")
-Side = 0
-Offset = 0
 Target = "S1_06"
-Kind = 0
 Requirement = SubResource("Gate_S1_05_1")
 
 [sub_resource type="Resource" id="Room_S1_05"]
@@ -142,8 +107,6 @@ DisplayName = "守坑人"
 ScenePath = "res://assets/scenes/world/s1/S1_05.tscn"
 Origin = Vector2i(13, 2)
 Size = Vector2i(4, 3)
-Layer = 0
-HasSavePoint = false
 Exits = Array[ExtResource("3_exit")]([SubResource("Exit_S1_05_0"), SubResource("Exit_S1_05_1")])
 
 [sub_resource type="Resource" id="Exit_S1_06_0"]
@@ -151,16 +114,10 @@ script = ExtResource("3_exit")
 Side = 2
 Offset = 1
 Target = "S1_05"
-Kind = 0
-Requirement = null
 
 [sub_resource type="Resource" id="Exit_S1_06_1"]
 script = ExtResource("3_exit")
-Side = 0
-Offset = 0
 Target = "S1_07"
-Kind = 0
-Requirement = null
 
 [sub_resource type="Resource" id="Room_S1_06"]
 script = ExtResource("2_room")
@@ -169,8 +126,6 @@ DisplayName = "祈祷者雕像「七夜」"
 ScenePath = "res://assets/scenes/world/s1/S1_06.tscn"
 Origin = Vector2i(17, 1)
 Size = Vector2i(2, 2)
-Layer = 0
-HasSavePoint = false
 Exits = Array[ExtResource("3_exit")]([SubResource("Exit_S1_06_0"), SubResource("Exit_S1_06_1")])
 
 [sub_resource type="Resource" id="Exit_S1_07_0"]
@@ -178,16 +133,11 @@ script = ExtResource("3_exit")
 Side = 2
 Offset = 1
 Target = "S1_06"
-Kind = 0
-Requirement = null
 
 [sub_resource type="Resource" id="Exit_S1_07_1"]
 script = ExtResource("3_exit")
-Side = 0
 Offset = 1
 Target = "S2_01"
-Kind = 0
-Requirement = null
 
 [sub_resource type="Resource" id="Room_S1_07"]
 script = ExtResource("2_room")
@@ -196,17 +146,12 @@ DisplayName = "两河源头"
 ScenePath = "res://assets/scenes/world/s1/S1_07.tscn"
 Origin = Vector2i(19, 0)
 Size = Vector2i(2, 2)
-Layer = 0
-HasSavePoint = false
 Exits = Array[ExtResource("3_exit")]([SubResource("Exit_S1_07_0"), SubResource("Exit_S1_07_1")])
 
 [sub_resource type="Resource" id="Exit_S1_08_0"]
 script = ExtResource("3_exit")
 Side = 1
-Offset = 0
 Target = "S1_04"
-Kind = 0
-Requirement = null
 
 [sub_resource type="Resource" id="Room_S1_08"]
 script = ExtResource("2_room")
@@ -215,8 +160,6 @@ DisplayName = "回溯"
 ScenePath = "res://assets/scenes/world/s1/S1_08.tscn"
 Origin = Vector2i(11, 1)
 Size = Vector2i(2, 2)
-Layer = 0
-HasSavePoint = false
 Exits = Array[ExtResource("3_exit")]([SubResource("Exit_S1_08_0")])
 
 [sub_resource type="Resource" id="Exit_S2_01_0"]
@@ -224,16 +167,11 @@ script = ExtResource("3_exit")
 Side = 2
 Offset = 1
 Target = "S1_07"
-Kind = 0
-Requirement = null
 
 [sub_resource type="Resource" id="Exit_S2_01_1"]
 script = ExtResource("3_exit")
-Side = 0
 Offset = 1
 Target = "S2_02"
-Kind = 0
-Requirement = null
 
 [sub_resource type="Resource" id="Room_S2_01"]
 script = ExtResource("2_room")
@@ -242,8 +180,6 @@ DisplayName = "工地入口"
 ScenePath = "res://assets/scenes/world/s2/S2_01.tscn"
 Origin = Vector2i(21, 0)
 Size = Vector2i(3, 3)
-Layer = 0
-HasSavePoint = false
 Exits = Array[ExtResource("3_exit")]([SubResource("Exit_S2_01_0"), SubResource("Exit_S2_01_1")])
 
 [sub_resource type="Resource" id="Exit_S2_02_0"]
@@ -251,16 +187,12 @@ script = ExtResource("3_exit")
 Side = 2
 Offset = 2
 Target = "S2_01"
-Kind = 0
-Requirement = null
 
 [sub_resource type="Resource" id="Exit_S2_02_1"]
 script = ExtResource("3_exit")
 Side = 1
 Offset = 1
 Target = "S2_03"
-Kind = 0
-Requirement = null
 
 [sub_resource type="Resource" id="Room_S2_02"]
 script = ExtResource("2_room")
@@ -269,7 +201,6 @@ DisplayName = "壁画长廊"
 ScenePath = "res://assets/scenes/world/s2/S2_02.tscn"
 Origin = Vector2i(24, -1)
 Size = Vector2i(3, 3)
-Layer = 0
 HasSavePoint = true
 Exits = Array[ExtResource("3_exit")]([SubResource("Exit_S2_02_0"), SubResource("Exit_S2_02_1")])
 
@@ -278,21 +209,15 @@ script = ExtResource("3_exit")
 Side = 3
 Offset = 1
 Target = "S2_02"
-Kind = 0
-Requirement = null
 
 [sub_resource type="Resource" id="Gate_S2_03_1"]
 script = ExtResource("4_gate")
-Abilities = Array[StringName]([])
 Flags = Array[StringName]([&"flood_done"])
 LockedText = "水闸还没打开。"
 
 [sub_resource type="Resource" id="Exit_S2_03_1"]
 script = ExtResource("3_exit")
-Side = 0
-Offset = 0
 Target = "S2_04"
-Kind = 0
 Requirement = SubResource("Gate_S2_03_1")
 
 [sub_resource type="Resource" id="Room_S2_03"]
@@ -302,8 +227,6 @@ DisplayName = "水闸"
 ScenePath = "res://assets/scenes/world/s2/S2_03.tscn"
 Origin = Vector2i(24, 2)
 Size = Vector2i(3, 3)
-Layer = 0
-HasSavePoint = false
 Exits = Array[ExtResource("3_exit")]([SubResource("Exit_S2_03_0"), SubResource("Exit_S2_03_1")])
 
 [sub_resource type="Resource" id="Exit_S2_04_0"]
@@ -311,21 +234,16 @@ script = ExtResource("3_exit")
 Side = 2
 Offset = 3
 Target = "S2_03"
-Kind = 0
-Requirement = null
 
 [sub_resource type="Resource" id="Gate_S2_04_1"]
 script = ExtResource("4_gate")
-Abilities = Array[StringName]([])
 Flags = Array[StringName]([&"boss_dragon"])
 LockedText = "龙蛇泥人还挡着路。"
 
 [sub_resource type="Resource" id="Exit_S2_04_1"]
 script = ExtResource("3_exit")
-Side = 0
 Offset = 3
 Target = "S2_06"
-Kind = 0
 Requirement = SubResource("Gate_S2_04_1")
 
 [sub_resource type="Resource" id="Exit_S2_04_2"]
@@ -333,8 +251,6 @@ script = ExtResource("3_exit")
 Side = 3
 Offset = 3
 Target = "S2_05"
-Kind = 0
-Requirement = null
 
 [sub_resource type="Resource" id="Room_S2_04"]
 script = ExtResource("2_room")
@@ -343,8 +259,6 @@ DisplayName = "龙蛇泥人"
 ScenePath = "res://assets/scenes/world/s2/S2_04.tscn"
 Origin = Vector2i(27, -1)
 Size = Vector2i(5, 4)
-Layer = 0
-HasSavePoint = false
 Exits = Array[ExtResource("3_exit")]([SubResource("Exit_S2_04_0"), SubResource("Exit_S2_04_1"), SubResource("Exit_S2_04_2")])
 
 [sub_resource type="Resource" id="Exit_S2_05_0"]
@@ -352,8 +266,6 @@ script = ExtResource("3_exit")
 Side = 1
 Offset = 1
 Target = "S2_04"
-Kind = 0
-Requirement = null
 
 [sub_resource type="Resource" id="Room_S2_05"]
 script = ExtResource("2_room")
@@ -362,8 +274,6 @@ DisplayName = "掌心深处"
 ScenePath = "res://assets/scenes/world/s2/S2_05.tscn"
 Origin = Vector2i(29, -3)
 Size = Vector2i(3, 2)
-Layer = 0
-HasSavePoint = false
 Exits = Array[ExtResource("3_exit")]([SubResource("Exit_S2_05_0")])
 
 [sub_resource type="Resource" id="Exit_S2_06_0"]
@@ -371,16 +281,11 @@ script = ExtResource("3_exit")
 Side = 2
 Offset = 4
 Target = "S2_04"
-Kind = 0
-Requirement = null
 
 [sub_resource type="Resource" id="Exit_S2_06_1"]
 script = ExtResource("3_exit")
-Side = 0
 Offset = 4
 Target = "S3_01"
-Kind = 0
-Requirement = null
 
 [sub_resource type="Resource" id="Room_S2_06"]
 script = ExtResource("2_room")
@@ -389,8 +294,6 @@ DisplayName = "工地尽头"
 ScenePath = "res://assets/scenes/world/s2/S2_06.tscn"
 Origin = Vector2i(32, -2)
 Size = Vector2i(3, 5)
-Layer = 0
-HasSavePoint = false
 Exits = Array[ExtResource("3_exit")]([SubResource("Exit_S2_06_0"), SubResource("Exit_S2_06_1")])
 
 [sub_resource type="Resource" id="Exit_S3_01_0"]
@@ -398,16 +301,11 @@ script = ExtResource("3_exit")
 Side = 2
 Offset = 1
 Target = "S2_06"
-Kind = 0
-Requirement = null
 
 [sub_resource type="Resource" id="Exit_S3_01_1"]
 script = ExtResource("3_exit")
-Side = 0
 Offset = 1
 Target = "S3_02"
-Kind = 0
-Requirement = null
 
 [sub_resource type="Resource" id="Room_S3_01"]
 script = ExtResource("2_room")
@@ -416,8 +314,6 @@ DisplayName = "城门"
 ScenePath = "res://assets/scenes/world/s3/S3_01.tscn"
 Origin = Vector2i(35, 1)
 Size = Vector2i(2, 2)
-Layer = 0
-HasSavePoint = false
 Exits = Array[ExtResource("3_exit")]([SubResource("Exit_S3_01_0"), SubResource("Exit_S3_01_1")])
 
 [sub_resource type="Resource" id="Exit_S3_02_0"]
@@ -425,16 +321,12 @@ script = ExtResource("3_exit")
 Side = 2
 Offset = 1
 Target = "S3_01"
-Kind = 0
-Requirement = null
 
 [sub_resource type="Resource" id="Exit_S3_02_1"]
 script = ExtResource("3_exit")
 Side = 3
 Offset = 3
 Target = "S3_03"
-Kind = 0
-Requirement = null
 
 [sub_resource type="Resource" id="Room_S3_02"]
 script = ExtResource("2_room")
@@ -443,8 +335,6 @@ DisplayName = "跪拜的街道"
 ScenePath = "res://assets/scenes/world/s3/S3_02.tscn"
 Origin = Vector2i(37, 1)
 Size = Vector2i(4, 2)
-Layer = 0
-HasSavePoint = false
 Exits = Array[ExtResource("3_exit")]([SubResource("Exit_S3_02_0"), SubResource("Exit_S3_02_1")])
 
 [sub_resource type="Resource" id="Exit_S3_03_0"]
@@ -452,16 +342,11 @@ script = ExtResource("3_exit")
 Side = 1
 Offset = 1
 Target = "S3_02"
-Kind = 0
-Requirement = null
 
 [sub_resource type="Resource" id="Exit_S3_03_1"]
 script = ExtResource("3_exit")
-Side = 0
 Offset = 2
 Target = "S3_04"
-Kind = 0
-Requirement = null
 
 [sub_resource type="Resource" id="Room_S3_03"]
 script = ExtResource("2_room")
@@ -470,7 +355,6 @@ DisplayName = "塔庙底层神殿"
 ScenePath = "res://assets/scenes/world/s3/S3_03.tscn"
 Origin = Vector2i(39, -2)
 Size = Vector2i(4, 3)
-Layer = 0
 HasSavePoint = true
 Exits = Array[ExtResource("3_exit")]([SubResource("Exit_S3_03_0"), SubResource("Exit_S3_03_1")])
 
@@ -479,16 +363,11 @@ script = ExtResource("3_exit")
 Side = 2
 Offset = 1
 Target = "S3_03"
-Kind = 0
-Requirement = null
 
 [sub_resource type="Resource" id="Exit_S3_04_1"]
 script = ExtResource("3_exit")
-Side = 0
 Offset = 1
 Target = "S3_05"
-Kind = 0
-Requirement = null
 
 [sub_resource type="Resource" id="Room_S3_04"]
 script = ExtResource("2_room")
@@ -497,8 +376,6 @@ DisplayName = "第一街区"
 ScenePath = "res://assets/scenes/world/s3/S3_04.tscn"
 Origin = Vector2i(43, -1)
 Size = Vector2i(3, 3)
-Layer = 0
-HasSavePoint = false
 Exits = Array[ExtResource("3_exit")]([SubResource("Exit_S3_04_0"), SubResource("Exit_S3_04_1")])
 
 [sub_resource type="Resource" id="Exit_S3_05_0"]
@@ -506,16 +383,11 @@ script = ExtResource("3_exit")
 Side = 2
 Offset = 2
 Target = "S3_04"
-Kind = 0
-Requirement = null
 
 [sub_resource type="Resource" id="Exit_S3_05_1"]
 script = ExtResource("3_exit")
-Side = 0
 Offset = 1
 Target = "S3_06"
-Kind = 0
-Requirement = null
 
 [sub_resource type="Resource" id="Room_S3_05"]
 script = ExtResource("2_room")
@@ -524,8 +396,6 @@ DisplayName = "第二街区"
 ScenePath = "res://assets/scenes/world/s3/S3_05.tscn"
 Origin = Vector2i(46, -2)
 Size = Vector2i(3, 3)
-Layer = 0
-HasSavePoint = false
 Exits = Array[ExtResource("3_exit")]([SubResource("Exit_S3_05_0"), SubResource("Exit_S3_05_1")])
 
 [sub_resource type="Resource" id="Exit_S3_06_0"]
@@ -533,21 +403,15 @@ script = ExtResource("3_exit")
 Side = 2
 Offset = 2
 Target = "S3_05"
-Kind = 0
-Requirement = null
 
 [sub_resource type="Resource" id="Gate_S3_06_1"]
 script = ExtResource("4_gate")
-Abilities = Array[StringName]([])
 Flags = Array[StringName]([&"districts_done"])
 LockedText = "三个街区还没有解开。"
 
 [sub_resource type="Resource" id="Exit_S3_06_1"]
 script = ExtResource("3_exit")
-Side = 0
-Offset = 0
 Target = "S3_07"
-Kind = 0
 Requirement = SubResource("Gate_S3_06_1")
 
 [sub_resource type="Resource" id="Room_S3_06"]
@@ -557,8 +421,6 @@ DisplayName = "第三街区"
 ScenePath = "res://assets/scenes/world/s3/S3_06.tscn"
 Origin = Vector2i(49, -3)
 Size = Vector2i(3, 3)
-Layer = 0
-HasSavePoint = false
 Exits = Array[ExtResource("3_exit")]([SubResource("Exit_S3_06_0"), SubResource("Exit_S3_06_1")])
 
 [sub_resource type="Resource" id="Exit_S3_07_0"]
@@ -566,16 +428,11 @@ script = ExtResource("3_exit")
 Side = 2
 Offset = 1
 Target = "S3_06"
-Kind = 0
-Requirement = null
 
 [sub_resource type="Resource" id="Exit_S3_07_1"]
 script = ExtResource("3_exit")
-Side = 0
 Offset = 1
 Target = "S3_08"
-Kind = 0
-Requirement = null
 
 [sub_resource type="Resource" id="Room_S3_07"]
 script = ExtResource("2_room")
@@ -584,8 +441,6 @@ DisplayName = "档案室"
 ScenePath = "res://assets/scenes/world/s3/S3_07.tscn"
 Origin = Vector2i(52, -4)
 Size = Vector2i(3, 2)
-Layer = 0
-HasSavePoint = false
 Exits = Array[ExtResource("3_exit")]([SubResource("Exit_S3_07_0"), SubResource("Exit_S3_07_1")])
 
 [sub_resource type="Resource" id="Exit_S3_08_0"]
@@ -593,8 +448,6 @@ script = ExtResource("3_exit")
 Side = 2
 Offset = 1
 Target = "S3_07"
-Kind = 0
-Requirement = null
 
 [sub_resource type="Resource" id="Exit_S3_08_1"]
 script = ExtResource("3_exit")
@@ -602,7 +455,6 @@ Side = 3
 Offset = 1
 Target = "S4_01"
 Kind = 1
-Requirement = null
 
 [sub_resource type="Resource" id="Room_S3_08"]
 script = ExtResource("2_room")
@@ -611,8 +463,6 @@ DisplayName = "登塔入口"
 ScenePath = "res://assets/scenes/world/s3/S3_08.tscn"
 Origin = Vector2i(55, -4)
 Size = Vector2i(2, 2)
-Layer = 0
-HasSavePoint = false
 Exits = Array[ExtResource("3_exit")]([SubResource("Exit_S3_08_0"), SubResource("Exit_S3_08_1")])
 
 [sub_resource type="Resource" id="Exit_S4_01_0"]
@@ -620,16 +470,12 @@ script = ExtResource("3_exit")
 Side = 1
 Offset = 1
 Target = "S4_02"
-Kind = 0
-Requirement = null
 
 [sub_resource type="Resource" id="Exit_S4_01_1"]
 script = ExtResource("3_exit")
 Side = 3
-Offset = 0
 Target = "S3_08"
 Kind = 1
-Requirement = null
 
 [sub_resource type="Resource" id="Room_S4_01"]
 script = ExtResource("2_room")
@@ -638,8 +484,6 @@ DisplayName = "心室入口"
 ScenePath = "res://assets/scenes/world/s4/S4_01.tscn"
 Origin = Vector2i(0, 30)
 Size = Vector2i(2, 2)
-Layer = 0
-HasSavePoint = false
 Exits = Array[ExtResource("3_exit")]([SubResource("Exit_S4_01_0"), SubResource("Exit_S4_01_1")])
 
 [sub_resource type="Resource" id="Exit_S4_02_0"]
@@ -647,16 +491,12 @@ script = ExtResource("3_exit")
 Side = 3
 Offset = 1
 Target = "S4_01"
-Kind = 0
-Requirement = null
 
 [sub_resource type="Resource" id="Exit_S4_02_1"]
 script = ExtResource("3_exit")
 Side = 1
 Offset = 2
 Target = "S4_0304"
-Kind = 0
-Requirement = null
 
 [sub_resource type="Resource" id="Room_S4_02"]
 script = ExtResource("2_room")
@@ -665,8 +505,6 @@ DisplayName = "七道门·一"
 ScenePath = "res://assets/scenes/world/s4/S4_02.tscn"
 Origin = Vector2i(0, 32)
 Size = Vector2i(3, 2)
-Layer = 0
-HasSavePoint = false
 Exits = Array[ExtResource("3_exit")]([SubResource("Exit_S4_02_0"), SubResource("Exit_S4_02_1")])
 
 [sub_resource type="Resource" id="Exit_S4_0304_0"]
@@ -674,16 +512,12 @@ script = ExtResource("3_exit")
 Side = 3
 Offset = 2
 Target = "S4_02"
-Kind = 0
-Requirement = null
 
 [sub_resource type="Resource" id="Exit_S4_0304_1"]
 script = ExtResource("3_exit")
 Side = 1
 Offset = 3
 Target = "S4_05"
-Kind = 0
-Requirement = null
 
 [sub_resource type="Resource" id="Room_S4_0304"]
 script = ExtResource("2_room")
@@ -692,8 +526,6 @@ DisplayName = "七道门·二三"
 ScenePath = "res://assets/scenes/world/s4/S4_0304.tscn"
 Origin = Vector2i(0, 34)
 Size = Vector2i(4, 2)
-Layer = 0
-HasSavePoint = false
 Exits = Array[ExtResource("3_exit")]([SubResource("Exit_S4_0304_0"), SubResource("Exit_S4_0304_1")])
 
 [sub_resource type="Resource" id="Exit_S4_05_0"]
@@ -701,16 +533,11 @@ script = ExtResource("3_exit")
 Side = 3
 Offset = 2
 Target = "S4_0304"
-Kind = 0
-Requirement = null
 
 [sub_resource type="Resource" id="Exit_S4_05_1"]
 script = ExtResource("3_exit")
 Side = 1
-Offset = 0
 Target = "S4_06"
-Kind = 0
-Requirement = null
 
 [sub_resource type="Resource" id="Room_S4_05"]
 script = ExtResource("2_room")
@@ -719,8 +546,6 @@ DisplayName = "七道门·四"
 ScenePath = "res://assets/scenes/world/s4/S4_05.tscn"
 Origin = Vector2i(1, 36)
 Size = Vector2i(3, 2)
-Layer = 0
-HasSavePoint = false
 Exits = Array[ExtResource("3_exit")]([SubResource("Exit_S4_05_0"), SubResource("Exit_S4_05_1")])
 
 [sub_resource type="Resource" id="Exit_S4_06_0"]
@@ -728,16 +553,12 @@ script = ExtResource("3_exit")
 Side = 3
 Offset = 1
 Target = "S4_05"
-Kind = 0
-Requirement = null
 
 [sub_resource type="Resource" id="Exit_S4_06_1"]
 script = ExtResource("3_exit")
 Side = 1
 Offset = 1
 Target = "S4_07"
-Kind = 0
-Requirement = null
 
 [sub_resource type="Resource" id="Room_S4_06"]
 script = ExtResource("2_room")
@@ -746,8 +567,6 @@ DisplayName = "七道门·五"
 ScenePath = "res://assets/scenes/world/s4/S4_06.tscn"
 Origin = Vector2i(0, 38)
 Size = Vector2i(3, 2)
-Layer = 0
-HasSavePoint = false
 Exits = Array[ExtResource("3_exit")]([SubResource("Exit_S4_06_0"), SubResource("Exit_S4_06_1")])
 
 [sub_resource type="Resource" id="Exit_S4_07_0"]
@@ -755,29 +574,22 @@ script = ExtResource("3_exit")
 Side = 3
 Offset = 1
 Target = "S4_06"
-Kind = 0
-Requirement = null
 
 [sub_resource type="Resource" id="Exit_S4_07_1"]
 script = ExtResource("3_exit")
 Side = 1
 Offset = 2
 Target = "S4_08"
-Kind = 0
-Requirement = null
 
 [sub_resource type="Resource" id="Gate_S4_07_2"]
 script = ExtResource("4_gate")
-Abilities = Array[StringName]([])
 Flags = Array[StringName]([&"tablet.gate_1", &"tablet.gate_2", &"tablet.gate_3", &"tablet.gate_4", &"tablet.gate_5", &"tablet.gate_6", &"tablet.gate_7"])
 LockedText = "七道门还没有走完。"
 
 [sub_resource type="Resource" id="Exit_S4_07_2"]
 script = ExtResource("3_exit")
-Side = 0
 Offset = 1
 Target = "S4_09"
-Kind = 0
 Requirement = SubResource("Gate_S4_07_2")
 
 [sub_resource type="Resource" id="Room_S4_07"]
@@ -787,8 +599,6 @@ DisplayName = "七道门·六"
 ScenePath = "res://assets/scenes/world/s4/S4_07.tscn"
 Origin = Vector2i(0, 40)
 Size = Vector2i(3, 3)
-Layer = 0
-HasSavePoint = false
 Exits = Array[ExtResource("3_exit")]([SubResource("Exit_S4_07_0"), SubResource("Exit_S4_07_1"), SubResource("Exit_S4_07_2")])
 
 [sub_resource type="Resource" id="Exit_S4_08_0"]
@@ -796,8 +606,6 @@ script = ExtResource("3_exit")
 Side = 3
 Offset = 2
 Target = "S4_07"
-Kind = 0
-Requirement = null
 
 [sub_resource type="Resource" id="Room_S4_08"]
 script = ExtResource("2_room")
@@ -806,8 +614,6 @@ DisplayName = "七道门·七"
 ScenePath = "res://assets/scenes/world/s4/S4_08.tscn"
 Origin = Vector2i(0, 43)
 Size = Vector2i(3, 2)
-Layer = 0
-HasSavePoint = false
 Exits = Array[ExtResource("3_exit")]([SubResource("Exit_S4_08_0")])
 
 [sub_resource type="Resource" id="Exit_S4_09_0"]
@@ -815,16 +621,12 @@ script = ExtResource("3_exit")
 Side = 2
 Offset = 1
 Target = "S4_07"
-Kind = 0
-Requirement = null
 
 [sub_resource type="Resource" id="Exit_S4_09_1"]
 script = ExtResource("3_exit")
 Side = 1
 Offset = 3
 Target = "S4_10"
-Kind = 0
-Requirement = null
 
 [sub_resource type="Resource" id="Room_S4_09"]
 script = ExtResource("2_room")
@@ -833,8 +635,6 @@ DisplayName = "血池回廊"
 ScenePath = "res://assets/scenes/world/s4/S4_09.tscn"
 Origin = Vector2i(3, 40)
 Size = Vector2i(4, 2)
-Layer = 0
-HasSavePoint = false
 Exits = Array[ExtResource("3_exit")]([SubResource("Exit_S4_09_0"), SubResource("Exit_S4_09_1")])
 
 [sub_resource type="Resource" id="Exit_S4_10_0"]
@@ -842,16 +642,11 @@ script = ExtResource("3_exit")
 Side = 3
 Offset = 3
 Target = "S4_09"
-Kind = 0
-Requirement = null
 
 [sub_resource type="Resource" id="Exit_S4_10_1"]
 script = ExtResource("3_exit")
-Side = 0
 Offset = 1
 Target = "S4_11"
-Kind = 0
-Requirement = null
 
 [sub_resource type="Resource" id="Room_S4_10"]
 script = ExtResource("2_room")
@@ -860,7 +655,6 @@ DisplayName = "心室祭坛"
 ScenePath = "res://assets/scenes/world/s4/S4_10.tscn"
 Origin = Vector2i(3, 42)
 Size = Vector2i(4, 2)
-Layer = 0
 HasSavePoint = true
 Exits = Array[ExtResource("3_exit")]([SubResource("Exit_S4_10_0"), SubResource("Exit_S4_10_1")])
 
@@ -869,8 +663,6 @@ script = ExtResource("3_exit")
 Side = 2
 Offset = 3
 Target = "S4_10"
-Kind = 0
-Requirement = null
 
 [sub_resource type="Resource" id="Room_S4_11"]
 script = ExtResource("2_room")
@@ -879,8 +671,6 @@ DisplayName = "终末之室"
 ScenePath = "res://assets/scenes/world/s4/S4_11.tscn"
 Origin = Vector2i(7, 40)
 Size = Vector2i(3, 4)
-Layer = 0
-HasSavePoint = false
 Exits = Array[ExtResource("3_exit")]([SubResource("Exit_S4_11_0")])
 
 [resource]
