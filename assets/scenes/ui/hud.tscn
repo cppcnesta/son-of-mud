@@ -18,14 +18,8 @@
 [ext_resource type="Script" path="res://assets/scripts/ui/ItemBar.cs" id="37_items"]
 [ext_resource type="Script" path="res://assets/scripts/ui/MiniMap.cs" id="38_minimap"]
 [ext_resource type="PackedScene" path="res://assets/scenes/ui/map_pieces.tscn" id="39_pieces"]
+[ext_resource type="Texture2D" path="res://assets/art/ui/tex_ui_map_border.png" id="40_border"]
 [ext_resource type="Texture2D" path="res://assets/art/ui/tex_ui_bossbar_under.png" id="36_bunder"]
-
-[sub_resource type="StyleBoxFlat" id="Style_MiniBg"]
-bg_color = Color(0.451, 0.451, 0.451, 0.55)
-corner_radius_top_left = 8
-corner_radius_top_right = 8
-corner_radius_bottom_right = 8
-corner_radius_bottom_left = 8
 
 [node name="Hud" type="CanvasLayer" unique_id=1197222111 node_paths=PackedStringArray("Root", "Beads", "Items", "Artifacts", "Boss", "Prompt", "Toast", "Minimap")]
 process_mode = 3
@@ -594,16 +588,16 @@ layout_mode = 1
 anchors_preset = 1
 anchor_left = 1.0
 anchor_right = 1.0
-offset_left = -252.0
+offset_left = -300.0
 offset_top = 6.0
 offset_right = -12.0
-offset_bottom = 90.0
+offset_bottom = 168.0
 grow_horizontal = 0
 mouse_filter = 2
 script = ExtResource("38_minimap")
 Layer = NodePath("Pieces")
 
-[node name="Bg" type="Panel" parent="Root/Minimap"]
+[node name="Bg" type="ColorRect" parent="Root/Minimap"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -611,14 +605,25 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
-theme_override_styles/panel = SubResource("Style_MiniBg")
+color = Color(0.451, 0.451, 0.451, 0.55)
 
 [node name="Pieces" parent="Root/Minimap" instance=ExtResource("39_pieces")]
 layout_mode = 0
-offset_left = 6.0
-offset_top = 6.0
-offset_right = 866.0
-offset_bottom = 274.0
-scale = Vector2(0.265, 0.265)
+offset_left = 36.0
+offset_top = 54.0
+offset_right = 896.0
+offset_bottom = 322.0
+scale = Vector2(0.2512, 0.2512)
 ShowIcons = false
-MarkerScale = 2.6
+MarkerScale = 2.5
+
+[node name="Border" type="TextureRect" parent="Root/Minimap"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("40_border")
+expand_mode = 1
