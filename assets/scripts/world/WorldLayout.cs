@@ -10,11 +10,24 @@ namespace SonOfMud.World;
 /// </summary>
 [Tool]
 [GlobalClass]
-public partial class WorldLayout : KeptResource
+public partial class WorldLayout : KeptResource, RoomCatalog.IProvider
 {
     public const string DefaultPath = "res://assets/data/world/world_layout.tres";
 
     [Export] public Array<RoomDef> Rooms { get; set; } = new();
+
+    /// <summary>RoomCatalog：房间占的全部格。</summary>
+    public System.Collections.Generic.IEnumerable<Vector3I> CellsOf(string roomId)
+    {
+        RoomDef room = Find(roomId);
+        if (room == null) yield break;
+        for (int y = room.Origin.Y; y < room.Origin.Y + room.Size.Y; y++)
+            for (int x = room.Origin.X; x < room.Origin.X + room.Size.X; x++)
+                yield return new Vector3I(x, y, room.Layer);
+    }
+
+    /// <summary>RoomCatalog：这一格属于哪个房间。</summary>
+    public string RoomAt(Vector3I cell) => RoomAtCell(new Vector2I(cell.X, cell.Y), cell.Z)?.Id ?? "";
 
     public RoomDef Find(string id)
     {

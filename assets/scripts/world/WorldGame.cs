@@ -52,6 +52,8 @@ public partial class WorldGame : Node
     public override void _EnterTree()
     {
         Layout ??= GD.Load<WorldLayout>(WorldLayout.DefaultPath);
+        // 给大地图等界面查房间格子用（界面不能直接引用 World）
+        RoomCatalog.Provider = Layout;
         _rooms = GetNodeOrNull<Node2D>("Rooms");
         if (_rooms == null)
         {
@@ -81,6 +83,7 @@ public partial class WorldGame : Node
         }
         if (_metSysHooked) MetSysApi.RoomChanged -= OnMetSysRoomChanged;
         _metSysHooked = false;
+        if (RoomCatalog.Provider == Layout) RoomCatalog.Provider = null;
     }
 
     public void SetPlayer(Node2D player) => Player = player;
