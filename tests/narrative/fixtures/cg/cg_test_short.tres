@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="CgData" format=3]
+
+[ext_resource type="Script" path="res://assets/scripts/narrative/data/CgData.cs" id="1_cg"]
+[ext_resource type="PackedScene" path="res://tests/narrative/fixtures/cg/cg_test_short.tscn" id="2_scene"]
+
+[resource]
+script = ExtResource("1_cg")
+Id = "test_short"
+Title = "测试短动画"
+AnimatedScene = ExtResource("2_scene")

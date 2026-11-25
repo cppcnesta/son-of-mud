@@ -229,6 +229,14 @@ public partial class NarrativeDirector : CanvasLayer
     // 结束
     // =================================================================
 
+    /// <summary>中途停止正在播的主剧情（不算看过）：执行器取消正在等的一切（动画 CG 会停下并释放），界面收起，暂停照常释放。</summary>
+    public void StopMain()
+    {
+        if (!MainActive) return;
+        Main.Stop();
+        EndMain(false);
+    }
+
     private void OnMainFinished() => EndMain(true);
 
     private void OnMainFailed(string message) => EndMain(false);

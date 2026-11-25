@@ -1,0 +1,69 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://assets/scripts/narrative/views/AnimatedCg.cs" id="s_cg"]
+[ext_resource type="Script" path="res://assets/scripts/narrative/data/CgSubtitle.cs" id="s_sub"]
+
+[sub_resource type="Resource" id="Sub_0"]
+script = ExtResource("s_sub")
+Speaker = "旁白"
+Text = "测试用的短动画 CG。"
+Start = 0.2
+End = 1.8
+
+[sub_resource type="Animation" id="Anim_play"]
+resource_name = "play"
+length = 2.0
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Bg:modulate")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 2),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [Color(1, 1, 1, 1), Color(0.5, 0.5, 0.5, 1)]
+}
+
+[sub_resource type="AnimationLibrary" id="Lib"]
+_data = {
+&"play": SubResource("Anim_play")
+}
+
+[node name="CgTestShort" type="Control" node_paths=PackedStringArray("Timeline", "Who", "Line")]
+process_mode = 3
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+script = ExtResource("s_cg")
+Timeline = NodePath("Timeline")
+Subtitles = Array[ExtResource("s_sub")]([SubResource("Sub_0")])
+Who = NodePath("Who")
+Line = NodePath("Line")
+
+[node name="Bg" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+color = Color(0.1, 0.1, 0.2, 1)
+
+[node name="Who" type="Label" parent="."]
+layout_mode = 0
+offset_right = 200.0
+offset_bottom = 30.0
+
+[node name="Line" type="Label" parent="."]
+layout_mode = 0
+offset_top = 40.0
+offset_right = 600.0
+offset_bottom = 80.0
+
+[node name="Timeline" type="AnimationPlayer" parent="."]
+libraries = {
+&"": SubResource("Lib")
+}

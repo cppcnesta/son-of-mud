@@ -1,0 +1,9 @@
+[gd_resource type="Resource" script_class="CgData" format=3]
+
+[ext_resource type="Script" path="res://assets/scripts/narrative/data/CgData.cs" id="1_cg"]
+
+[resource]
+script = ExtResource("1_cg")
+Id = "test_static"
+Title = "测试静态 CG"
+PlaceholderColor = Color(0.3, 0.1, 0.1, 1)
