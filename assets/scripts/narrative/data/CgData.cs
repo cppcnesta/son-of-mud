@@ -15,4 +15,9 @@ public partial class CgData : KeptResource
     [Export] public string Title { get; set; } = "";
     [Export] public Texture2D Texture { get; set; }
     [Export] public Color PlaceholderColor { get; set; } = new(0.12f, 0.1f, 0.09f);
+    /// <summary>
+    /// 动画 CG 的场景（根节点挂 AnimatedCg）。填了就是动画 CG：剧本遇到 [CG Id 秒数] 时收起对话框、从头播到尾（不能跳过，台词在场景的字幕里），
+    /// 播完才继续往下走；不填就是静态图（Texture）。
+    /// </summary>
+    [Export] public PackedScene AnimatedScene { get; set; }
 }

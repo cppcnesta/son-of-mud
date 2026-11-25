@@ -159,9 +159,15 @@ public partial class NarrativeStoryTest : NarrativeFlowBase
 
         await Enter("S2_05");
         bool meteor = await Use("Story_Meteor", "触碰雕像");
-        List<string> star = await Play();
-        Check(meteor && star.Any(l => l == "[meteor]伊姆杜：星。") && star.LastOrDefault()?.EndsWith("只有那么久。") == true,
-            $"S2_05 触碰流星雕像：CG4「流星」（{star.Count} 句）");
+        // CG4「流星」是动画 CG：台词在动画字幕里，从头播到尾、不用按键（细节见 AnimatedCgTest）
+        bool animated = await WaitUntil(() => Narr.Cg.Animated != null, 120);
+        double length = Narr.Cg.Animated?.Duration ?? 0;
+        bool dialog = false;
+        bool ended = await WaitUntil(() => { dialog |= Narr.Dialog.IsOpen; return !Narr.MainActive; }, (int)((length + 10) * 60));
+        await WaitUntil(() => !PauseService.IsPaused, 60);
+        await Frames(3);
+        Check(meteor && animated && length > 30 && ended && !dialog,
+            $"S2_05 触碰流星雕像：CG4「流星」动画从头播到尾（{length:0.0} 秒），不出对话框，播完自动结束");
     }
 
     // ---------- 地图三 ----------

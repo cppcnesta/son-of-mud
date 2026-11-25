@@ -1,0 +1,794 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://assets/scripts/narrative/views/AnimatedCg.cs" id="s_cg"]
+[ext_resource type="Script" path="res://assets/scripts/narrative/data/CgSubtitle.cs" id="s_sub"]
+[ext_resource type="Shader" path="res://assets/shaders/cg_blend.gdshader" id="sh_blend"]
+[ext_resource type="Shader" path="res://assets/shaders/cg_aurora.gdshader" id="sh_aurora"]
+[ext_resource type="FontFile" path="res://assets/fonts/SiyinSong-Regular.otf" id="font"]
+[ext_resource type="Texture2D" path="res://assets/art/cg/meteor/tex_cg_meteor_bg.png" id="t_bg"]
+[ext_resource type="Texture2D" path="res://assets/art/cg/meteor/tex_cg_meteor_trail.png" id="t_trail"]
+[ext_resource type="Texture2D" path="res://assets/art/cg/meteor/tex_cg_meteor_trail_dodge.png" id="t_trail_dodge"]
+[ext_resource type="Texture2D" path="res://assets/art/cg/meteor/tex_cg_meteor_stars.png" id="t_stars"]
+[ext_resource type="Texture2D" path="res://assets/art/cg/meteor/tex_cg_meteor_tuk_long_hair.png" id="t_tuk_long_hair"]
+[ext_resource type="Texture2D" path="res://assets/art/cg/meteor/tex_cg_meteor_tuk_body.png" id="t_tuk_body"]
+[ext_resource type="Texture2D" path="res://assets/art/cg/meteor/tex_cg_meteor_tuk_front_hair.png" id="t_tuk_front_hair"]
+[ext_resource type="Texture2D" path="res://assets/art/cg/meteor/tex_cg_meteor_imd_lower.png" id="t_imd_lower"]
+[ext_resource type="Texture2D" path="res://assets/art/cg/meteor/tex_cg_meteor_imd_right_hand.png" id="t_imd_right_hand"]
+[ext_resource type="Texture2D" path="res://assets/art/cg/meteor/tex_cg_meteor_imd_left_hand.png" id="t_imd_left_hand"]
+[ext_resource type="Texture2D" path="res://assets/art/cg/meteor/tex_cg_meteor_imd_long_hair.png" id="t_imd_long_hair"]
+[ext_resource type="Texture2D" path="res://assets/art/cg/meteor/tex_cg_meteor_glow.png" id="t_glow"]
+[ext_resource type="Texture2D" path="res://assets/art/cg/meteor/tex_cg_meteor_filtered.png" id="t_filtered"]
+[ext_resource type="Texture2D" path="res://assets/art/cg/meteor/tex_cg_meteor_glint.png" id="t_glint"]
+
+[sub_resource type="ShaderMaterial" id="Mat_Screen"]
+shader = ExtResource("sh_blend")
+shader_parameter/mode = 0
+shader_parameter/strength = 1.0
+
+[sub_resource type="ShaderMaterial" id="Mat_Dodge"]
+shader = ExtResource("sh_blend")
+shader_parameter/mode = 1
+shader_parameter/strength = 1.0
+
+[sub_resource type="ShaderMaterial" id="Mat_Color"]
+shader = ExtResource("sh_blend")
+shader_parameter/mode = 2
+shader_parameter/strength = 1.0
+
+[sub_resource type="ShaderMaterial" id="Mat_Aurora"]
+shader = ExtResource("sh_aurora")
+shader_parameter/intensity = 0.85
+shader_parameter/speed = 1.0
+
+[sub_resource type="CanvasItemMaterial" id="Mat_Add"]
+blend_mode = 1
+
+[sub_resource type="Curve" id="Glint_Size"]
+_data = [Vector2(0, 0), 0.0, 0.0, 0, 0, Vector2(0.5, 1), 0.0, 0.0, 0, 0, Vector2(1, 0), 0.0, 0.0, 0, 0]
+point_count = 3
+
+[sub_resource type="Gradient" id="Vignette_Grad"]
+offsets = PackedFloat32Array(0, 0.62, 1)
+colors = PackedColorArray(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0.45)
+
+[sub_resource type="GradientTexture2D" id="Vignette_Tex"]
+gradient = SubResource("Vignette_Grad")
+width = 256
+height = 256
+fill = 1
+fill_from = Vector2(0.5, 0.55)
+fill_to = Vector2(1.2, 0.55)
+
+[sub_resource type="FontVariation" id="Italic"]
+base_font = ExtResource("font")
+variation_transform = Transform2D(1, 0, 0.22, 1, 0, 0)
+
+[sub_resource type="Resource" id="Sub_0"]
+script = ExtResource("s_sub")
+Speaker = "旁白"
+Text = "在第二个世界的某一天夜里，祂依旧在重塑他的身体，那是十年中的某一个瞬间，有一颗星从天上划过。"
+Start = 2.25
+End = 10.99
+
+[sub_resource type="Resource" id="Sub_1"]
+script = ExtResource("s_sub")
+Speaker = "穆尔图库尔"
+Text = "那是什么？"
+Start = 11.44
+End = 14.04
+
+[sub_resource type="Resource" id="Sub_2"]
+script = ExtResource("s_sub")
+Speaker = "伊姆杜"
+Text = "星。"
+Start = 14.49
+End = 17.09
+
+[sub_resource type="Resource" id="Sub_3"]
+script = ExtResource("s_sub")
+Speaker = "穆尔图库尔"
+Text = "它为什么会掉下来？"
+Start = 17.54
+End = 20.14
+
+[sub_resource type="Resource" id="Sub_4"]
+script = ExtResource("s_sub")
+Speaker = "伊姆杜"
+Text = "星是神写在天上的命运。写完了，就会落下来。"
+Start = 20.59
+End = 24.58
+
+[sub_resource type="Resource" id="Sub_5"]
+script = ExtResource("s_sub")
+Speaker = "穆尔图库尔"
+Text = "那您写的是什么？"
+Start = 25.03
+End = 27.63
+
+[sub_resource type="Resource" id="Sub_6"]
+script = ExtResource("s_sub")
+Speaker = "旁白"
+Text = "父亲看了那颗星很久。他把手放在我的头上，星从天这头落到那头。然后他收回手，站起来。"
+Start = 28.08
+End = 35.87
+
+[sub_resource type="Resource" id="Sub_7"]
+script = ExtResource("s_sub")
+Speaker = "伊姆杜"
+Text = "穆尔图库尔，闭上眼睛吧。"
+Start = 36.32
+End = 38.92
+
+[sub_resource type="Resource" id="Sub_8"]
+script = ExtResource("s_sub")
+Speaker = "旁白"
+Text = "父亲继续修复我破碎的躯体，时隔一个百年，我再次感受他的心跳和手指的纹路。我希望这一刻像永远一样久。"
+Start = 39.37
+End = 48.68
+
+[sub_resource type="Resource" id="Sub_9"]
+script = ExtResource("s_sub")
+Speaker = "旁白"
+Text = "然而就如同那颗星从天这头落到那头。他的手在我头上，停了那么久。"
+Start = 49.13
+End = 55.02
+
+[sub_resource type="Resource" id="Sub_10"]
+script = ExtResource("s_sub")
+Speaker = "旁白"
+Text = "只有那么久。"
+Start = 55.47
+End = 59.57
+
+[sub_resource type="Animation" id="Anim_Drift"]
+resource_name = "drift"
+length = 80.0
+loop_mode = 1
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Bg:scale")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1),
+"update": 0,
+"values": [Vector2(1.00, 1.00), Vector2(1.00, 1.00), Vector2(1.00, 1.00), Vector2(1.00, 1.00), Vector2(1.00, 1.00), Vector2(1.00, 1.00), Vector2(1.00, 1.00), Vector2(1.00, 1.00), Vector2(1.00, 1.00), Vector2(1.00, 1.00), Vector2(1.00, 1.00), Vector2(1.01, 1.01), Vector2(1.01, 1.01), Vector2(1.01, 1.01), Vector2(1.01, 1.01), Vector2(1.01, 1.01), Vector2(1.01, 1.01), Vector2(1.01, 1.01), Vector2(1.01, 1.01), Vector2(1.01, 1.01), Vector2(1.01, 1.01), Vector2(1.02, 1.02), Vector2(1.02, 1.02), Vector2(1.02, 1.02), Vector2(1.02, 1.02), Vector2(1.02, 1.02), Vector2(1.02, 1.02), Vector2(1.02, 1.02), Vector2(1.02, 1.02), Vector2(1.02, 1.02), Vector2(1.03, 1.03), Vector2(1.03, 1.03), Vector2(1.03, 1.03), Vector2(1.03, 1.03), Vector2(1.03, 1.03), Vector2(1.03, 1.03), Vector2(1.03, 1.03), Vector2(1.03, 1.03), Vector2(1.03, 1.03), Vector2(1.03, 1.03), Vector2(1.03, 1.03), Vector2(1.03, 1.03), Vector2(1.03, 1.03), Vector2(1.03, 1.03), Vector2(1.03, 1.03), Vector2(1.03, 1.03), Vector2(1.03, 1.03), Vector2(1.03, 1.03), Vector2(1.03, 1.03), Vector2(1.03, 1.03), Vector2(1.03, 1.03), Vector2(1.02, 1.02), Vector2(1.02, 1.02), Vector2(1.02, 1.02), Vector2(1.02, 1.02), Vector2(1.02, 1.02), Vector2(1.02, 1.02), Vector2(1.02, 1.02), Vector2(1.02, 1.02), Vector2(1.02, 1.02), Vector2(1.01, 1.01), Vector2(1.01, 1.01), Vector2(1.01, 1.01), Vector2(1.01, 1.01), Vector2(1.01, 1.01), Vector2(1.01, 1.01), Vector2(1.01, 1.01), Vector2(1.01, 1.01), Vector2(1.01, 1.01), Vector2(1.01, 1.01), Vector2(1.00, 1.00), Vector2(1.00, 1.00), Vector2(1.00, 1.00), Vector2(1.00, 1.00), Vector2(1.00, 1.00), Vector2(1.00, 1.00), Vector2(1.00, 1.00), Vector2(1.00, 1.00), Vector2(1.00, 1.00), Vector2(1.00, 1.00), Vector2(1.00, 1.00)]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("Bg:position")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1),
+"update": 0,
+"values": [Vector2(0.00, 0.00), Vector2(-0.01, -0.00), Vector2(-0.04, -0.02), Vector2(-0.10, -0.04), Vector2(-0.17, -0.06), Vector2(-0.26, -0.10), Vector2(-0.38, -0.14), Vector2(-0.51, -0.19), Vector2(-0.66, -0.25), Vector2(-0.83, -0.31), Vector2(-1.01, -0.38), Vector2(-1.21, -0.45), Vector2(-1.42, -0.53), Vector2(-1.65, -0.62), Vector2(-1.89, -0.71), Vector2(-2.13, -0.80), Vector2(-2.39, -0.90), Vector2(-2.65, -0.99), Vector2(-2.92, -1.09), Vector2(-3.18, -1.19), Vector2(-3.46, -1.30), Vector2(-3.73, -1.40), Vector2(-4.00, -1.50), Vector2(-4.26, -1.60), Vector2(-4.52, -1.70), Vector2(-4.78, -1.79), Vector2(-5.02, -1.88), Vector2(-5.26, -1.97), Vector2(-5.49, -2.06), Vector2(-5.70, -2.14), Vector2(-5.90, -2.21), Vector2(-6.08, -2.28), Vector2(-6.25, -2.34), Vector2(-6.40, -2.40), Vector2(-6.54, -2.45), Vector2(-6.65, -2.49), Vector2(-6.74, -2.53), Vector2(-6.82, -2.56), Vector2(-6.87, -2.58), Vector2(-6.90, -2.59), Vector2(-6.91, -2.59), Vector2(-6.90, -2.59), Vector2(-6.87, -2.58), Vector2(-6.82, -2.56), Vector2(-6.74, -2.53), Vector2(-6.65, -2.49), Vector2(-6.54, -2.45), Vector2(-6.40, -2.40), Vector2(-6.25, -2.34), Vector2(-6.08, -2.28), Vector2(-5.90, -2.21), Vector2(-5.70, -2.14), Vector2(-5.49, -2.06), Vector2(-5.26, -1.97), Vector2(-5.02, -1.88), Vector2(-4.78, -1.79), Vector2(-4.52, -1.70), Vector2(-4.26, -1.60), Vector2(-4.00, -1.50), Vector2(-3.73, -1.40), Vector2(-3.46, -1.30), Vector2(-3.18, -1.19), Vector2(-2.92, -1.09), Vector2(-2.65, -0.99), Vector2(-2.39, -0.90), Vector2(-2.13, -0.80), Vector2(-1.89, -0.71), Vector2(-1.65, -0.62), Vector2(-1.42, -0.53), Vector2(-1.21, -0.45), Vector2(-1.01, -0.38), Vector2(-0.83, -0.31), Vector2(-0.66, -0.25), Vector2(-0.51, -0.19), Vector2(-0.38, -0.14), Vector2(-0.26, -0.10), Vector2(-0.17, -0.06), Vector2(-0.10, -0.04), Vector2(-0.04, -0.02), Vector2(-0.01, -0.00), Vector2(0.00, 0.00)]
+}
+
+[sub_resource type="AnimationLibrary" id="Anim_Drift_Lib"]
+_data = {
+&"drift": SubResource("Anim_Drift")
+}
+
+[sub_resource type="Animation" id="Anim_StreakA"]
+resource_name = "streak"
+length = 7.0
+loop_mode = 1
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("TrailA1:position")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2, 2.25, 2.5, 2.75, 3, 3.25, 3.5, 3.75, 4, 4.25, 4.5, 4.75, 5, 5.25, 5.5, 5.75, 6, 6.25, 6.5, 6.75, 7),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1),
+"update": 0,
+"values": [Vector2(83.75, -19.07), Vector2(80.98, -17.71), Vector2(78.21, -16.34), Vector2(75.44, -14.98), Vector2(72.67, -13.62), Vector2(69.91, -12.26), Vector2(67.14, -10.90), Vector2(64.37, -9.53), Vector2(61.61, -8.17), Vector2(58.84, -6.81), Vector2(56.07, -5.45), Vector2(53.30, -4.09), Vector2(50.54, -2.72), Vector2(47.77, -1.36), Vector2(45.00, 0.00), Vector2(42.23, 1.36), Vector2(39.47, 2.72), Vector2(36.70, 4.09), Vector2(33.93, 5.45), Vector2(31.16, 6.81), Vector2(28.39, 8.17), Vector2(25.63, 9.53), Vector2(22.86, 10.90), Vector2(20.09, 12.26), Vector2(17.32, 13.62), Vector2(14.56, 14.98), Vector2(11.79, 16.34), Vector2(9.02, 17.71), Vector2(83.75, -19.07)]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("TrailA1:modulate")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0, 0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2, 2.25, 2.5, 2.75, 3, 3.25, 3.5, 3.75, 4, 4.25, 4.5, 4.75, 5, 5.25, 5.5, 5.75, 6, 6.25, 6.5, 6.75, 7),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1),
+"update": 0,
+"values": [Color(1.000, 1.000, 1.000, 0.000), Color(1.000, 1.000, 1.000, 0.100), Color(1.000, 1.000, 1.000, 0.200), Color(1.000, 1.000, 1.000, 0.300), Color(1.000, 1.000, 1.000, 0.400), Color(1.000, 1.000, 1.000, 0.500), Color(1.000, 1.000, 1.000, 0.600), Color(1.000, 1.000, 1.000, 0.700), Color(1.000, 1.000, 1.000, 0.700), Color(1.000, 1.000, 1.000, 0.700), Color(1.000, 1.000, 1.000, 0.700), Color(1.000, 1.000, 1.000, 0.700), Color(1.000, 1.000, 1.000, 0.700), Color(1.000, 1.000, 1.000, 0.700), Color(1.000, 1.000, 1.000, 0.700), Color(1.000, 1.000, 1.000, 0.700), Color(1.000, 1.000, 1.000, 0.700), Color(1.000, 1.000, 1.000, 0.700), Color(1.000, 1.000, 1.000, 0.700), Color(1.000, 1.000, 1.000, 0.700), Color(1.000, 1.000, 1.000, 0.667), Color(1.000, 1.000, 1.000, 0.583), Color(1.000, 1.000, 1.000, 0.500), Color(1.000, 1.000, 1.000, 0.417), Color(1.000, 1.000, 1.000, 0.333), Color(1.000, 1.000, 1.000, 0.250), Color(1.000, 1.000, 1.000, 0.167), Color(1.000, 1.000, 1.000, 0.083), Color(1.000, 1.000, 1.000, 0.000)]
+}
+tracks/2/type = "value"
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/path = NodePath("TrailB1:position")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/keys = {
+"times": PackedFloat32Array(0, 0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2, 2.25, 2.5, 2.75, 3, 3.25, 3.5, 3.75, 4, 4.25, 4.5, 4.75, 5, 5.25, 5.5, 5.75, 6, 6.25, 6.5, 6.75, 7),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1),
+"update": 0,
+"values": [Vector2(40.32, -22.68), Vector2(37.44, -21.06), Vector2(34.56, -19.44), Vector2(31.68, -17.82), Vector2(28.80, -16.20), Vector2(25.92, -14.58), Vector2(23.04, -12.96), Vector2(20.16, -11.34), Vector2(17.28, -9.72), Vector2(14.40, -8.10), Vector2(11.52, -6.48), Vector2(8.64, -4.86), Vector2(5.76, -3.24), Vector2(2.88, -1.62), Vector2(0.00, 0.00), Vector2(-2.88, 1.62), Vector2(-5.76, 3.24), Vector2(-8.64, 4.86), Vector2(-11.52, 6.48), Vector2(-14.40, 8.10), Vector2(-17.28, 9.72), Vector2(-20.16, 11.34), Vector2(-23.04, 12.96), Vector2(-25.92, 14.58), Vector2(-28.80, 16.20), Vector2(-31.68, 17.82), Vector2(-34.56, 19.44), Vector2(-37.44, 21.06), Vector2(40.32, -22.68)]
+}
+tracks/3/type = "value"
+tracks/3/imported = false
+tracks/3/enabled = true
+tracks/3/path = NodePath("TrailB1:modulate")
+tracks/3/interp = 1
+tracks/3/loop_wrap = true
+tracks/3/keys = {
+"times": PackedFloat32Array(0, 0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2, 2.25, 2.5, 2.75, 3, 3.25, 3.5, 3.75, 4, 4.25, 4.5, 4.75, 5, 5.25, 5.5, 5.75, 6, 6.25, 6.5, 6.75, 7),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1),
+"update": 0,
+"values": [Color(1.000, 1.000, 1.000, 0.000), Color(1.000, 1.000, 1.000, 0.143), Color(1.000, 1.000, 1.000, 0.286), Color(1.000, 1.000, 1.000, 0.429), Color(1.000, 1.000, 1.000, 0.571), Color(1.000, 1.000, 1.000, 0.714), Color(1.000, 1.000, 1.000, 0.857), Color(1.000, 1.000, 1.000, 1.000), Color(1.000, 1.000, 1.000, 1.000), Color(1.000, 1.000, 1.000, 1.000), Color(1.000, 1.000, 1.000, 1.000), Color(1.000, 1.000, 1.000, 1.000), Color(1.000, 1.000, 1.000, 1.000), Color(1.000, 1.000, 1.000, 1.000), Color(1.000, 1.000, 1.000, 1.000), Color(1.000, 1.000, 1.000, 1.000), Color(1.000, 1.000, 1.000, 1.000), Color(1.000, 1.000, 1.000, 1.000), Color(1.000, 1.000, 1.000, 1.000), Color(1.000, 1.000, 1.000, 1.000), Color(1.000, 1.000, 1.000, 0.952), Color(1.000, 1.000, 1.000, 0.833), Color(1.000, 1.000, 1.000, 0.714), Color(1.000, 1.000, 1.000, 0.595), Color(1.000, 1.000, 1.000, 0.476), Color(1.000, 1.000, 1.000, 0.357), Color(1.000, 1.000, 1.000, 0.238), Color(1.000, 1.000, 1.000, 0.119), Color(1.000, 1.000, 1.000, 0.000)]
+}
+
+[sub_resource type="AnimationLibrary" id="Anim_StreakA_Lib"]
+_data = {
+&"streak": SubResource("Anim_StreakA")
+}
+
+[sub_resource type="Animation" id="Anim_StreakB"]
+resource_name = "streak"
+length = 7.0
+loop_mode = 1
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("TrailA2:position")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2, 2.25, 2.5, 2.75, 3, 3.25, 3.5, 3.75, 4, 4.25, 4.5, 4.75, 5, 5.25, 5.5, 5.75, 6, 6.25, 6.5, 6.75, 7),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1),
+"update": 0,
+"values": [Vector2(45.00, 0.00), Vector2(42.23, 1.36), Vector2(39.47, 2.72), Vector2(36.70, 4.09), Vector2(33.93, 5.45), Vector2(31.16, 6.81), Vector2(28.39, 8.17), Vector2(25.63, 9.53), Vector2(22.86, 10.90), Vector2(20.09, 12.26), Vector2(17.32, 13.62), Vector2(14.56, 14.98), Vector2(11.79, 16.34), Vector2(9.02, 17.71), Vector2(83.75, -19.07), Vector2(80.98, -17.71), Vector2(78.21, -16.34), Vector2(75.44, -14.98), Vector2(72.67, -13.62), Vector2(69.91, -12.26), Vector2(67.14, -10.90), Vector2(64.37, -9.53), Vector2(61.61, -8.17), Vector2(58.84, -6.81), Vector2(56.07, -5.45), Vector2(53.30, -4.09), Vector2(50.54, -2.72), Vector2(47.77, -1.36), Vector2(45.00, 0.00)]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("TrailA2:modulate")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0, 0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2, 2.25, 2.5, 2.75, 3, 3.25, 3.5, 3.75, 4, 4.25, 4.5, 4.75, 5, 5.25, 5.5, 5.75, 6, 6.25, 6.5, 6.75, 7),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1),
+"update": 0,
+"values": [Color(1.000, 1.000, 1.000, 0.700), Color(1.000, 1.000, 1.000, 0.700), Color(1.000, 1.000, 1.000, 0.700), Color(1.000, 1.000, 1.000, 0.700), Color(1.000, 1.000, 1.000, 0.700), Color(1.000, 1.000, 1.000, 0.700), Color(1.000, 1.000, 1.000, 0.667), Color(1.000, 1.000, 1.000, 0.583), Color(1.000, 1.000, 1.000, 0.500), Color(1.000, 1.000, 1.000, 0.417), Color(1.000, 1.000, 1.000, 0.333), Color(1.000, 1.000, 1.000, 0.250), Color(1.000, 1.000, 1.000, 0.167), Color(1.000, 1.000, 1.000, 0.083), Color(1.000, 1.000, 1.000, 0.000), Color(1.000, 1.000, 1.000, 0.100), Color(1.000, 1.000, 1.000, 0.200), Color(1.000, 1.000, 1.000, 0.300), Color(1.000, 1.000, 1.000, 0.400), Color(1.000, 1.000, 1.000, 0.500), Color(1.000, 1.000, 1.000, 0.600), Color(1.000, 1.000, 1.000, 0.700), Color(1.000, 1.000, 1.000, 0.700), Color(1.000, 1.000, 1.000, 0.700), Color(1.000, 1.000, 1.000, 0.700), Color(1.000, 1.000, 1.000, 0.700), Color(1.000, 1.000, 1.000, 0.700), Color(1.000, 1.000, 1.000, 0.700), Color(1.000, 1.000, 1.000, 0.700)]
+}
+tracks/2/type = "value"
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/path = NodePath("TrailB2:position")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/keys = {
+"times": PackedFloat32Array(0, 0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2, 2.25, 2.5, 2.75, 3, 3.25, 3.5, 3.75, 4, 4.25, 4.5, 4.75, 5, 5.25, 5.5, 5.75, 6, 6.25, 6.5, 6.75, 7),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1),
+"update": 0,
+"values": [Vector2(0.00, 0.00), Vector2(-2.88, 1.62), Vector2(-5.76, 3.24), Vector2(-8.64, 4.86), Vector2(-11.52, 6.48), Vector2(-14.40, 8.10), Vector2(-17.28, 9.72), Vector2(-20.16, 11.34), Vector2(-23.04, 12.96), Vector2(-25.92, 14.58), Vector2(-28.80, 16.20), Vector2(-31.68, 17.82), Vector2(-34.56, 19.44), Vector2(-37.44, 21.06), Vector2(40.32, -22.68), Vector2(37.44, -21.06), Vector2(34.56, -19.44), Vector2(31.68, -17.82), Vector2(28.80, -16.20), Vector2(25.92, -14.58), Vector2(23.04, -12.96), Vector2(20.16, -11.34), Vector2(17.28, -9.72), Vector2(14.40, -8.10), Vector2(11.52, -6.48), Vector2(8.64, -4.86), Vector2(5.76, -3.24), Vector2(2.88, -1.62), Vector2(0.00, 0.00)]
+}
+tracks/3/type = "value"
+tracks/3/imported = false
+tracks/3/enabled = true
+tracks/3/path = NodePath("TrailB2:modulate")
+tracks/3/interp = 1
+tracks/3/loop_wrap = true
+tracks/3/keys = {
+"times": PackedFloat32Array(0, 0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2, 2.25, 2.5, 2.75, 3, 3.25, 3.5, 3.75, 4, 4.25, 4.5, 4.75, 5, 5.25, 5.5, 5.75, 6, 6.25, 6.5, 6.75, 7),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1),
+"update": 0,
+"values": [Color(1.000, 1.000, 1.000, 1.000), Color(1.000, 1.000, 1.000, 1.000), Color(1.000, 1.000, 1.000, 1.000), Color(1.000, 1.000, 1.000, 1.000), Color(1.000, 1.000, 1.000, 1.000), Color(1.000, 1.000, 1.000, 1.000), Color(1.000, 1.000, 1.000, 0.952), Color(1.000, 1.000, 1.000, 0.833), Color(1.000, 1.000, 1.000, 0.714), Color(1.000, 1.000, 1.000, 0.595), Color(1.000, 1.000, 1.000, 0.476), Color(1.000, 1.000, 1.000, 0.357), Color(1.000, 1.000, 1.000, 0.238), Color(1.000, 1.000, 1.000, 0.119), Color(1.000, 1.000, 1.000, 0.000), Color(1.000, 1.000, 1.000, 0.143), Color(1.000, 1.000, 1.000, 0.286), Color(1.000, 1.000, 1.000, 0.429), Color(1.000, 1.000, 1.000, 0.571), Color(1.000, 1.000, 1.000, 0.714), Color(1.000, 1.000, 1.000, 0.857), Color(1.000, 1.000, 1.000, 1.000), Color(1.000, 1.000, 1.000, 1.000), Color(1.000, 1.000, 1.000, 1.000), Color(1.000, 1.000, 1.000, 1.000), Color(1.000, 1.000, 1.000, 1.000), Color(1.000, 1.000, 1.000, 1.000), Color(1.000, 1.000, 1.000, 1.000), Color(1.000, 1.000, 1.000, 1.000)]
+}
+
+[sub_resource type="AnimationLibrary" id="Anim_StreakB_Lib"]
+_data = {
+&"streak": SubResource("Anim_StreakB")
+}
+
+[sub_resource type="Animation" id="Anim_Twinkle"]
+resource_name = "twinkle"
+length = 2.6
+loop_mode = 1
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("StarsTwinkle:modulate")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 2, 2.1, 2.2, 2.3, 2.4, 2.5, 2.6),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1),
+"update": 0,
+"values": [Color(1.000, 1.000, 1.000, 0.150), Color(1.009, 1.009, 1.009, 0.162), Color(1.034, 1.034, 1.034, 0.199), Color(1.075, 1.075, 1.075, 0.257), Color(1.130, 1.130, 1.130, 0.334), Color(1.194, 1.194, 1.194, 0.424), Color(1.264, 1.264, 1.264, 0.524), Color(1.336, 1.336, 1.336, 0.626), Color(1.406, 1.406, 1.406, 0.726), Color(1.470, 1.470, 1.470, 0.816), Color(1.525, 1.525, 1.525, 0.893), Color(1.566, 1.566, 1.566, 0.951), Color(1.591, 1.591, 1.591, 0.988), Color(1.600, 1.600, 1.600, 1.000), Color(1.591, 1.591, 1.591, 0.988), Color(1.566, 1.566, 1.566, 0.951), Color(1.525, 1.525, 1.525, 0.893), Color(1.470, 1.470, 1.470, 0.816), Color(1.406, 1.406, 1.406, 0.726), Color(1.336, 1.336, 1.336, 0.626), Color(1.264, 1.264, 1.264, 0.524), Color(1.194, 1.194, 1.194, 0.424), Color(1.130, 1.130, 1.130, 0.334), Color(1.075, 1.075, 1.075, 0.257), Color(1.034, 1.034, 1.034, 0.199), Color(1.009, 1.009, 1.009, 0.162), Color(1.000, 1.000, 1.000, 0.150)]
+}
+
+[sub_resource type="AnimationLibrary" id="Anim_Twinkle_Lib"]
+_data = {
+&"twinkle": SubResource("Anim_Twinkle")
+}
+
+[sub_resource type="Animation" id="Anim_SwayTukLong"]
+resource_name = "sway"
+length = 5.2
+loop_mode = 1
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("TukLongHair:rotation")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 2, 2.1, 2.2, 2.3, 2.4, 2.5, 2.6, 2.7, 2.8, 2.9, 3, 3.1, 3.2, 3.3, 3.4, 3.5, 3.6, 3.7, 3.8, 3.9, 4, 4.1, 4.2, 4.3, 4.4, 4.5, 4.6, 4.7, 4.8, 4.9, 5, 5.1, 5.2),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1),
+"update": 0,
+"values": [-0.01222, -0.01212, -0.01181, -0.01131, -0.01062, -0.00975, -0.00871, -0.00751, -0.00619, -0.00474, -0.00321, -0.00160, 0.00006, 0.00175, 0.00343, 0.00509, 0.00670, 0.00823, 0.00968, 0.01100, 0.01220, 0.01324, 0.01411, 0.01480, 0.01530, 0.01561, 0.01571, 0.01561, 0.01530, 0.01480, 0.01411, 0.01324, 0.01220, 0.01100, 0.00968, 0.00823, 0.00670, 0.00509, 0.00343, 0.00175, 0.00006, -0.00160, -0.00321, -0.00474, -0.00619, -0.00751, -0.00871, -0.00975, -0.01062, -0.01131, -0.01181, -0.01212, -0.01222]
+}
+
+[sub_resource type="AnimationLibrary" id="Anim_SwayTukLong_Lib"]
+_data = {
+&"sway": SubResource("Anim_SwayTukLong")
+}
+
+[sub_resource type="Animation" id="Anim_SwayTukFront"]
+resource_name = "sway"
+length = 4.1
+loop_mode = 1
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("TukFrontHair:rotation")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 2, 2.1, 2.2, 2.3, 2.4, 2.5, 2.6, 2.7, 2.8, 2.9, 3, 3.1, 3.2, 3.3, 3.4, 3.5, 3.6, 3.7, 3.8, 3.9, 4, 4.1),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1),
+"update": 0,
+"values": [-0.02094, -0.02072, -0.02005, -0.01895, -0.01745, -0.01558, -0.01338, -0.01092, -0.00823, -0.00540, -0.00248, 0.00046, 0.00334, 0.00611, 0.00869, 0.01103, 0.01307, 0.01476, 0.01606, 0.01695, 0.01740, 0.01740, 0.01695, 0.01606, 0.01476, 0.01307, 0.01103, 0.00869, 0.00611, 0.00334, 0.00046, -0.00248, -0.00540, -0.00823, -0.01092, -0.01338, -0.01558, -0.01745, -0.01895, -0.02005, -0.02072, -0.02094]
+}
+
+[sub_resource type="AnimationLibrary" id="Anim_SwayTukFront_Lib"]
+_data = {
+&"sway": SubResource("Anim_SwayTukFront")
+}
+
+[sub_resource type="Animation" id="Anim_SwayImdLong"]
+resource_name = "sway"
+length = 6.4
+loop_mode = 1
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("ImdLongHair:rotation")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 2, 2.1, 2.2, 2.3, 2.4, 2.5, 2.6, 2.7, 2.8, 2.9, 3, 3.1, 3.2, 3.3, 3.4, 3.5, 3.6, 3.7, 3.8, 3.9, 4, 4.1, 4.2, 4.3, 4.4, 4.5, 4.6, 4.7, 4.8, 4.9, 5, 5.1, 5.2, 5.3, 5.4, 5.5, 5.6, 5.7, 5.8, 5.9, 6, 6.1, 6.2, 6.3, 6.4),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1),
+"update": 0,
+"values": [0.00611, 0.00608, 0.00597, 0.00581, 0.00558, 0.00528, 0.00493, 0.00452, 0.00406, 0.00356, 0.00301, 0.00242, 0.00180, 0.00115, 0.00049, -0.00019, -0.00087, -0.00156, -0.00223, -0.00290, -0.00354, -0.00416, -0.00475, -0.00530, -0.00581, -0.00627, -0.00668, -0.00703, -0.00732, -0.00755, -0.00772, -0.00782, -0.00785, -0.00782, -0.00772, -0.00755, -0.00732, -0.00703, -0.00668, -0.00627, -0.00581, -0.00530, -0.00475, -0.00416, -0.00354, -0.00290, -0.00223, -0.00156, -0.00087, -0.00019, 0.00049, 0.00115, 0.00180, 0.00242, 0.00301, 0.00356, 0.00406, 0.00452, 0.00493, 0.00528, 0.00558, 0.00581, 0.00597, 0.00608, 0.00611]
+}
+
+[sub_resource type="AnimationLibrary" id="Anim_SwayImdLong_Lib"]
+_data = {
+&"sway": SubResource("Anim_SwayImdLong")
+}
+
+[sub_resource type="Animation" id="Anim_SwayHand"]
+resource_name = "sway"
+length = 6.4
+loop_mode = 1
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("ImdRightHand:rotation")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 2, 2.1, 2.2, 2.3, 2.4, 2.5, 2.6, 2.7, 2.8, 2.9, 3, 3.1, 3.2, 3.3, 3.4, 3.5, 3.6, 3.7, 3.8, 3.9, 4, 4.1, 4.2, 4.3, 4.4, 4.5, 4.6, 4.7, 4.8, 4.9, 5, 5.1, 5.2, 5.3, 5.4, 5.5, 5.6, 5.7, 5.8, 5.9, 6, 6.1, 6.2, 6.3, 6.4),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1),
+"update": 0,
+"values": [0.00000, -0.00003, -0.00010, -0.00023, -0.00040, -0.00062, -0.00088, -0.00119, -0.00153, -0.00191, -0.00233, -0.00277, -0.00323, -0.00372, -0.00421, -0.00472, -0.00524, -0.00575, -0.00626, -0.00676, -0.00724, -0.00770, -0.00814, -0.00856, -0.00894, -0.00928, -0.00959, -0.00985, -0.01007, -0.01025, -0.01037, -0.01045, -0.01047, -0.01045, -0.01037, -0.01025, -0.01007, -0.00985, -0.00959, -0.00928, -0.00894, -0.00856, -0.00814, -0.00770, -0.00724, -0.00676, -0.00626, -0.00575, -0.00524, -0.00472, -0.00421, -0.00372, -0.00323, -0.00277, -0.00233, -0.00191, -0.00153, -0.00119, -0.00088, -0.00062, -0.00040, -0.00023, -0.00010, -0.00003, 0.00000]
+}
+
+[sub_resource type="AnimationLibrary" id="Anim_SwayHand_Lib"]
+_data = {
+&"sway": SubResource("Anim_SwayHand")
+}
+
+[sub_resource type="Animation" id="Anim_Timeline"]
+resource_name = "play"
+length = 60.57
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Curtain:modulate")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.2, 2.7, 60.57),
+"transitions": PackedFloat32Array(1, 1, 1, 1),
+"update": 0,
+"values": [Color(1.000, 1.000, 1.000, 1.000), Color(1.000, 1.000, 1.000, 1.000), Color(1.000, 1.000, 1.000, 0.000), Color(1.000, 1.000, 1.000, 0.000)]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("Glow:modulate")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0, 39.37, 48.37, 60.57),
+"transitions": PackedFloat32Array(1, 1, 1, 1),
+"update": 0,
+"values": [Color(1.000, 1.000, 1.000, 0.000), Color(1.000, 1.000, 1.000, 0.000), Color(1.000, 1.000, 1.000, 0.710), Color(1.000, 1.000, 1.000, 0.710)]
+}
+tracks/2/type = "value"
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/path = NodePath("Tint:modulate")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/keys = {
+"times": PackedFloat32Array(0, 39.37, 48.37, 60.57),
+"transitions": PackedFloat32Array(1, 1, 1, 1),
+"update": 0,
+"values": [Color(1.000, 1.000, 1.000, 0.000), Color(1.000, 1.000, 1.000, 0.000), Color(1.000, 1.000, 1.000, 0.900), Color(1.000, 1.000, 1.000, 0.900)]
+}
+
+[sub_resource type="AnimationLibrary" id="Anim_Timeline_Lib"]
+_data = {
+&"play": SubResource("Anim_Timeline")
+}
+
+[node name="CgMeteor" type="Control" node_paths=PackedStringArray("Timeline", "Who", "Line")]
+process_mode = 3
+clip_contents = true
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("s_cg")
+Timeline = NodePath("Timeline")
+TimelineAnimation = "play"
+Subtitles = Array[ExtResource("s_sub")]([SubResource("Sub_0"), SubResource("Sub_1"), SubResource("Sub_2"), SubResource("Sub_3"), SubResource("Sub_4"), SubResource("Sub_5"), SubResource("Sub_6"), SubResource("Sub_7"), SubResource("Sub_8"), SubResource("Sub_9"), SubResource("Sub_10")])
+Who = NodePath("Subtitle/Who")
+Line = NodePath("Subtitle/Line")
+NarrationFont = SubResource("Italic")
+
+[node name="Bg" type="TextureRect" parent="."]
+layout_mode = 0
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 1152.00
+offset_bottom = 648.00
+pivot_offset = Vector2(576.00, 324.00)
+mouse_filter = 2
+texture = ExtResource("t_bg")
+expand_mode = 1
+
+[node name="Aurora" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+material = SubResource("Mat_Aurora")
+
+[node name="TrailA1" type="TextureRect" parent="."]
+layout_mode = 0
+offset_left = 45.0
+offset_top = 0.0
+offset_right = 1152.00
+offset_bottom = 544.80
+mouse_filter = 2
+texture = ExtResource("t_trail")
+expand_mode = 1
+modulate = Color(1, 1, 1, 0.7)
+
+[node name="TrailA2" type="TextureRect" parent="."]
+layout_mode = 0
+offset_left = 45.0
+offset_top = 0.0
+offset_right = 1152.00
+offset_bottom = 544.80
+mouse_filter = 2
+texture = ExtResource("t_trail")
+expand_mode = 1
+modulate = Color(1, 1, 1, 0)
+
+[node name="CopyB1" type="BackBufferCopy" parent="."]
+copy_mode = 2
+
+[node name="TrailB1" type="TextureRect" parent="."]
+layout_mode = 0
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 1152.00
+offset_bottom = 648.00
+mouse_filter = 2
+texture = ExtResource("t_trail_dodge")
+expand_mode = 1
+material = SubResource("Mat_Dodge")
+
+[node name="CopyB2" type="BackBufferCopy" parent="."]
+copy_mode = 2
+
+[node name="TrailB2" type="TextureRect" parent="."]
+layout_mode = 0
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 1152.00
+offset_bottom = 648.00
+mouse_filter = 2
+texture = ExtResource("t_trail_dodge")
+expand_mode = 1
+modulate = Color(1, 1, 1, 0)
+material = SubResource("Mat_Dodge")
+
+[node name="StarsBase" type="TextureRect" parent="."]
+layout_mode = 0
+offset_left = 22.8
+offset_top = 0.0
+offset_right = 1138.80
+offset_bottom = 574.20
+mouse_filter = 2
+texture = ExtResource("t_stars")
+expand_mode = 1
+modulate = Color(1, 1, 1, 0.65)
+
+[node name="CopyStars" type="BackBufferCopy" parent="."]
+copy_mode = 2
+
+[node name="StarsTwinkle" type="TextureRect" parent="."]
+layout_mode = 0
+offset_left = 22.8
+offset_top = 0.0
+offset_right = 1138.80
+offset_bottom = 574.20
+mouse_filter = 2
+texture = ExtResource("t_stars")
+expand_mode = 1
+material = SubResource("Mat_Screen")
+
+[node name="Sparkle" type="CPUParticles2D" parent="."]
+material = SubResource("Mat_Add")
+position = Vector2(576, 243)
+amount = 26
+lifetime = 4.0
+preprocess = 4.0
+texture = ExtResource("t_glint")
+emission_shape = 3
+emission_rect_extents = Vector2(576, 243)
+gravity = Vector2(0, 0)
+scale_amount_min = 0.25
+scale_amount_max = 0.55
+scale_amount_curve = SubResource("Glint_Size")
+
+[node name="TukLongHair" type="TextureRect" parent="."]
+layout_mode = 0
+offset_left = 145.2
+offset_top = 142.8
+offset_right = 665.40
+offset_bottom = 610.80
+pivot_offset = Vector2(316.80, 7.20)
+mouse_filter = 2
+texture = ExtResource("t_tuk_long_hair")
+expand_mode = 1
+
+[node name="TukBody" type="TextureRect" parent="."]
+layout_mode = 0
+offset_left = 357.0
+offset_top = 125.4
+offset_right = 565.80
+offset_bottom = 648.00
+mouse_filter = 2
+texture = ExtResource("t_tuk_body")
+expand_mode = 1
+
+[node name="TukFrontHair" type="TextureRect" parent="."]
+layout_mode = 0
+offset_left = 422.4
+offset_top = 103.8
+offset_right = 547.80
+offset_bottom = 411.00
+pivot_offset = Vector2(60.60, 7.20)
+mouse_filter = 2
+texture = ExtResource("t_tuk_front_hair")
+expand_mode = 1
+
+[node name="ImdLower" type="TextureRect" parent="."]
+layout_mode = 0
+offset_left = 512.4
+offset_top = 398.4
+offset_right = 817.80
+offset_bottom = 648.00
+mouse_filter = 2
+texture = ExtResource("t_imd_lower")
+expand_mode = 1
+
+[node name="ImdRightHand" type="TextureRect" parent="."]
+layout_mode = 0
+offset_left = 478.2
+offset_top = 81.0
+offset_right = 617.40
+offset_bottom = 170.40
+pivot_offset = Vector2(127.80, 81.00)
+mouse_filter = 2
+texture = ExtResource("t_imd_right_hand")
+expand_mode = 1
+
+[node name="ImdLeftHand" type="TextureRect" parent="."]
+layout_mode = 0
+offset_left = 393.0
+offset_top = 184.2
+offset_right = 622.80
+offset_bottom = 610.80
+mouse_filter = 2
+texture = ExtResource("t_imd_left_hand")
+expand_mode = 1
+
+[node name="ImdLongHair" type="TextureRect" parent="."]
+layout_mode = 0
+offset_left = 433.8
+offset_top = 43.8
+offset_right = 1137.00
+offset_bottom = 648.00
+pivot_offset = Vector2(142.20, 13.20)
+mouse_filter = 2
+texture = ExtResource("t_imd_long_hair")
+expand_mode = 1
+
+[node name="CopyGlow" type="BackBufferCopy" parent="."]
+copy_mode = 2
+
+[node name="Glow" type="TextureRect" parent="."]
+layout_mode = 0
+offset_left = 0.0
+offset_top = 205.8
+offset_right = 1138.80
+offset_bottom = 648.00
+mouse_filter = 2
+texture = ExtResource("t_glow")
+expand_mode = 1
+modulate = Color(1, 1, 1, 0)
+material = SubResource("Mat_Screen")
+
+[node name="CopyTint" type="BackBufferCopy" parent="."]
+copy_mode = 2
+
+[node name="Tint" type="TextureRect" parent="."]
+layout_mode = 0
+offset_left = 0
+offset_top = 0
+offset_right = 1152.00
+offset_bottom = 648.00
+mouse_filter = 2
+texture = ExtResource("t_filtered")
+expand_mode = 1
+modulate = Color(1, 1, 1, 0)
+material = SubResource("Mat_Color")
+
+[node name="Vignette" type="TextureRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = SubResource("Vignette_Tex")
+expand_mode = 1
+
+[node name="Subtitle" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 69.0
+offset_top = -150.0
+offset_right = -69.0
+offset_bottom = -39.0
+grow_horizontal = 2
+grow_vertical = 0
+mouse_filter = 2
+
+[node name="Who" type="Label" parent="Subtitle"]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_bottom = 26.0
+grow_horizontal = 2
+theme_override_colors/font_color = Color(0.91, 0.76, 0.48, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 0.85)
+theme_override_constants/outline_size = 5
+theme_override_font_sizes/font_size = 17
+horizontal_alignment = 1
+
+[node name="Line" type="Label" parent="Subtitle"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = 28.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(0.95, 0.94, 0.91, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 0.9)
+theme_override_constants/outline_size = 6
+theme_override_font_sizes/font_size = 21
+horizontal_alignment = 1
+autowrap_mode = 3
+
+[node name="Curtain" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0, 0, 0, 1)
+
+[node name="Timeline" type="AnimationPlayer" parent="."]
+libraries = {
+&"": SubResource("Anim_Timeline_Lib")
+}
+
+[node name="Drift" type="AnimationPlayer" parent="."]
+libraries = {
+&"": SubResource("Anim_Drift_Lib")
+}
+autoplay = "drift"
+
+[node name="StreakA" type="AnimationPlayer" parent="."]
+libraries = {
+&"": SubResource("Anim_StreakA_Lib")
+}
+autoplay = "streak"
+
+[node name="StreakB" type="AnimationPlayer" parent="."]
+libraries = {
+&"": SubResource("Anim_StreakB_Lib")
+}
+autoplay = "streak"
+
+[node name="Twinkle" type="AnimationPlayer" parent="."]
+libraries = {
+&"": SubResource("Anim_Twinkle_Lib")
+}
+autoplay = "twinkle"
+
+[node name="SwayTukLong" type="AnimationPlayer" parent="."]
+libraries = {
+&"": SubResource("Anim_SwayTukLong_Lib")
+}
+autoplay = "sway"
+
+[node name="SwayTukFront" type="AnimationPlayer" parent="."]
+libraries = {
+&"": SubResource("Anim_SwayTukFront_Lib")
+}
+autoplay = "sway"
+
+[node name="SwayImdLong" type="AnimationPlayer" parent="."]
+libraries = {
+&"": SubResource("Anim_SwayImdLong_Lib")
+}
+autoplay = "sway"
+
+[node name="SwayHand" type="AnimationPlayer" parent="."]
+libraries = {
+&"": SubResource("Anim_SwayHand_Lib")
+}
+autoplay = "sway"

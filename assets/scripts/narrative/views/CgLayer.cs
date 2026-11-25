@@ -34,6 +34,7 @@ public partial class CgLayer : Control
     public void Show(CgData data, float seconds)
     {
         if (data == null) return;
+        FreeAnimated();
         CurrentId = data.Id;
         _image.Texture = data.Texture;
         _image.Visible = data.Texture != null;
@@ -50,6 +51,52 @@ public partial class CgLayer : Control
         FadeTo(0f, seconds);
     }
 
+    // ---------- 动画 CG ----------
+
+    /// <summary>现在放着的动画 CG 实例（没有是 null）。</summary>
+    public AnimatedCg Animated { get; private set; }
+
+    /// <summary>放出这个 CG 的动画场景（盖在静态图上面），淡入 CG 层。场景根节点不是 AnimatedCg 时返回 null。</summary>
+    public AnimatedCg ShowAnimated(CgData data, float seconds)
+    {
+        if (data?.AnimatedScene == null) return null;
+        FreeAnimated();
+        Node node = data.AnimatedScene.Instantiate();
+        if (node is not AnimatedCg cg)
+        {
+            node.QueueFree();
+            return null;
+        }
+        cg.Name = "Animated";
+        AddChild(cg);
+        Animated = cg;
+        CurrentId = data.Id;
+        _image.Visible = false;
+        _caption.Text = "";
+        _placeholder.Color = Colors.Black;
+        Visible = true;
+        FadeTo(1f, seconds);
+        return cg;
+    }
+
+    /// <summary>马上拿掉这个动画 CG 实例（取消播放时用）；它不是现在放着的那个就不动 CG 层。</summary>
+    public void RemoveAnimated(AnimatedCg cg)
+    {
+        if (cg == null || !IsInstanceValid(cg)) return;
+        bool current = cg == Animated;
+        cg.QueueFree();
+        if (!current) return;
+        Animated = null;
+        CurrentId = "";
+        FadeTo(0f, 0f);
+    }
+
+    private void FreeAnimated()
+    {
+        if (Animated != null && IsInstanceValid(Animated)) Animated.QueueFree();
+        Animated = null;
+    }
+
     private void FadeTo(float alpha, float seconds)
     {
         _tween?.Kill();
@@ -58,11 +105,12 @@ public partial class CgLayer : Control
         {
             Modulate = new Color(1, 1, 1, alpha);
             Visible = alpha > 0f;
+            if (alpha <= 0f && !IsShowing) FreeAnimated();
             return;
         }
         _tween = CreateTween();
         _tween.SetPauseMode(Tween.TweenPauseMode.Process);
         _tween.TweenProperty(this, "modulate:a", alpha, seconds);
-        if (alpha <= 0f) _tween.TweenCallback(Callable.From(() => Visible = false));
+        if (alpha <= 0f) _tween.TweenCallback(Callable.From(() => { Visible = false; if (!IsShowing) FreeAnimated(); }));
     }
 }
