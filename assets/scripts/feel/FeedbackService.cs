@@ -206,7 +206,7 @@ public partial class FeedbackService : Node
         foreach (Variant v in streams)
             if (v.AsGodotObject() is AudioStream stream) typed.Add(stream);
         if (typed.Count == 0 || !IsInsideTree()) return;
-        GodotObject effect = NewEffect("sound_effect.gd", new() { ["streams"] = Variant.From(typed), ["pitch_min"] = 0.92f, ["pitch_max"] = 1.08f });
+        GodotObject effect = NewEffect("sound_effect.gd", new() { ["streams"] = Variant.From(typed), ["pitch_min"] = 0.92f, ["pitch_max"] = 1.08f, ["bus"] = AudioSettings.SfxBus });
         effect?.Call("apply", this);
     }
 
