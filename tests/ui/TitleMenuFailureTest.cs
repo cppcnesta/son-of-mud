@@ -28,7 +28,7 @@ public partial class TitleMenuFailureTest : UiTestBase
         return (failed, finished ? Starts[^1].error : "(没收到 GameStartFinished)", back);
     }
 
-    private static bool Usable(Button button) =>
+    private static bool Usable(BaseButton button) =>
         button != null && button.IsVisibleInTree() && !button.Disabled && button.MouseFilter == Control.MouseFilterEnum.Stop;
 
     private async Task RunCase(string name, byte[] bytes, string expectedReason)

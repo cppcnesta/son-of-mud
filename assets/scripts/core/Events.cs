@@ -24,6 +24,8 @@ public partial class Events : Node
             return;
         }
         Instance = this;
+        // 游戏一启动就把存下的音量套到音乐 / 音效音轨上（不用先打开设置）
+        AudioSettings.LoadAndApply();
     }
 
     public override void _ExitTree()

@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Godot;
+using SonOfMud.Core;
 using SonOfMud.Narrative.Data;
 using SonOfMud.Narrative.Runtime;
 
@@ -19,7 +20,7 @@ public partial class NarrativeAudio : Node
     public override void _Ready()
     {
         Settings ??= new NarrativeSettings();
-        _player = new AudioStreamPlayer { Name = "Sfx" };
+        _player = new AudioStreamPlayer { Name = "Sfx", Bus = AudioSettings.SfxBus };   // 音量跟着设置里的「音效」走
         AddChild(_player);
     }
 

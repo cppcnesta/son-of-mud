@@ -36,6 +36,7 @@ public partial class BgmPlayer : Node
     {
         var player = GetNodeOrNull<AudioStreamPlayer>(name) ?? new AudioStreamPlayer { Name = name };
         player.ProcessMode = ProcessModeEnum.Always;
+        player.Bus = AudioSettings.MusicBus;   // 音量跟着设置里的「音乐」走
         if (player.GetParent() == null) AddChild(player);
         return player;
     }
