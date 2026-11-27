@@ -26,6 +26,8 @@ public partial class Events : Node
         Instance = this;
         // 游戏一启动就把存下的音量套到音乐 / 音效音轨上（不用先打开设置）
         AudioSettings.LoadAndApply();
+        // 主页面「收集」的跨存档记录：捡泥板、走到结局时记下
+        CollectionRecord.Attach(this);
     }
 
     public override void _ExitTree()

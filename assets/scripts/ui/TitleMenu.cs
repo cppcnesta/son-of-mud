@@ -7,12 +7,13 @@ namespace SonOfMud.UI;
 
 /// <summary>
 /// 主菜单（项目的 run/main_scene）。画面在 title_menu.tscn：PSD 各层、5 个图片按钮（Buttons/Wake…Quit，按钮上的字是子节点 Label）、
-/// 动画播放器 Idle（AnimationPlayer）里的开场 intro 和待机 idle（标题光晕、双手、线稿人物）、飘尘 Dust（粒子），以及设置 / 制作人员名单两个面板。
+/// 动画播放器 Idle（AnimationPlayer）里的开场 intro 和待机 idle（标题光晕、双手、线稿人物）、飘尘 Dust（粒子），以及收集 / 制作人员名单两个面板。
 /// - 开场：每次进主页面先播 intro（黑底 + 边框 → 背景亮起 → 人物淡入 → 双手从两边伸进来 → 标题落下 → 5 个按钮依次出现），
 ///   播完接 idle 循环。开场中按钮不能点；按任意键 / 点鼠标直接跳到开场结尾。时间在场景的 intro 动画里改。
 /// - 醒来：PendingStart = NewGame，切到 main_game.tscn。
 /// - 再续征程：存档槽里没有文件时变暗、点不了（SavePaths.Exists）；有就 PendingStart = Continue 再切场景。
-/// - 设置：音乐 / 音效音量（AudioSettings，存到 user://settings.cfg）。制作人员名单：文字在场景里改。
+/// - 收集：泥板和 CG（TitleCollectionPanel，内容按跨存档记录 CollectionRecord）。进主页面时先把存档里捡过的泥板导入记录并写盘，
+///   在开场期间、任何按钮能点之前完成，所以开新档覆盖旧档之前一定已经导入过。制作人员名单：文字在场景里改。
 /// - 退出。
 /// - 选中（鼠标移上去或方向键）的按钮放大、变亮、轻轻浮动，其余略暗（数值在检查器里调）。
 /// - 面板打开时：遮罩挡住鼠标，5 个按钮暂时不能点、不能获得焦点，开局 / 退出直接拒绝；焦点进到面板里，
@@ -26,14 +27,12 @@ public partial class TitleMenu : Control
     [Export] public BaseButton NewGameButton { get; set; }
     [Export] public BaseButton ContinueButton { get; set; }
     [Export] public BaseButton QuitButton { get; set; }
-    [Export] public BaseButton SettingsButton { get; set; }
+    [Export] public BaseButton CollectionButton { get; set; }
     [Export] public BaseButton CreditsButton { get; set; }
     [Export] public Control Overlay { get; set; }
-    [Export] public Control SettingsPanel { get; set; }
+    [Export] public TitleCollectionPanel CollectionPanel { get; set; }
     [Export] public Control CreditsPanel { get; set; }
-    [Export] public Range MusicSlider { get; set; }
-    [Export] public Range SfxSlider { get; set; }
-    [Export] public BaseButton SettingsBack { get; set; }
+    [Export] public BaseButton CollectionBack { get; set; }
     [Export] public BaseButton CreditsBack { get; set; }
     [Export] public Control ErrorPopup { get; set; }
     [Export] public Label ErrorTitle { get; set; }
@@ -61,17 +60,19 @@ public partial class TitleMenu : Control
     public bool ErrorShowing => ErrorPopup != null && ErrorPopup.Visible;
     /// <summary>弹出提示时显示的原因（关掉后保留，便于检查）。</summary>
     public string ShownError { get; private set; } = "";
-    /// <summary>现在打开的面板（设置 / 名单），没有是 null。</summary>
+    /// <summary>现在打开的面板（收集 / 名单），没有是 null。</summary>
     public Control OpenPanel { get; private set; }
     public bool PanelOpen => OpenPanel != null;
     /// <summary>现在选中（放大）的按钮。</summary>
     public BaseButton Selected { get; private set; }
+    /// <summary>这次进主页面时从存档导入了几块泥板（测试用）。</summary>
+    public int ImportedTablets { get; private set; }
 
     private readonly Dictionary<BaseButton, Vector2> _basePositions = new();
     private BaseButton _opener;
     private double _time;
 
-    public BaseButton[] MainButtons => new[] { NewGameButton, ContinueButton, SettingsButton, CreditsButton, QuitButton }.Where(b => b != null).ToArray();
+    public BaseButton[] MainButtons => new[] { NewGameButton, ContinueButton, CollectionButton, CreditsButton, QuitButton }.Where(b => b != null).ToArray();
 
     public override void _Ready()
     {
@@ -79,31 +80,23 @@ public partial class TitleMenu : Control
         if (NewGameButton != null) NewGameButton.Pressed += () => Start(StartMode.NewGame);
         if (ContinueButton != null) ContinueButton.Pressed += OnContinue;
         if (QuitButton != null) QuitButton.Pressed += OnQuit;
-        if (SettingsButton != null) SettingsButton.Pressed += OpenSettings;
+        if (CollectionButton != null) CollectionButton.Pressed += OpenCollection;
         if (CreditsButton != null) CreditsButton.Pressed += OpenCredits;
-        if (SettingsBack != null) SettingsBack.Pressed += ClosePanel;
+        if (CollectionBack != null) CollectionBack.Pressed += ClosePanel;
         if (CreditsBack != null) CreditsBack.Pressed += ClosePanel;
         if (ErrorOkButton != null) ErrorOkButton.Pressed += DismissError;
-        foreach (BaseButton button in MainButtons.Concat(new[] { SettingsBack, CreditsBack }).Where(b => b != null))
+        foreach (BaseButton button in MainButtons.Concat(new[] { CollectionBack, CreditsBack }).Where(b => b != null))
         {
             BaseButton b = button;
             _basePositions[b] = b.Position;
             b.FocusEntered += () => Select(b);
             b.MouseEntered += () => { if (!b.Disabled && b.FocusMode != FocusModeEnum.None) b.GrabFocus(); };
         }
-        if (MusicSlider != null)
-        {
-            MusicSlider.Value = AudioSettings.MusicVolume * 100f;
-            MusicSlider.ValueChanged += v => AudioSettings.SetMusic((float)v / 100f);
-        }
-        if (SfxSlider != null)
-        {
-            SfxSlider.Value = AudioSettings.SfxVolume * 100f;
-            SfxSlider.ValueChanged += v => AudioSettings.SetSfx((float)v / 100f);
-        }
         if (Overlay != null) Overlay.Visible = false;
-        if (SettingsPanel != null) SettingsPanel.Visible = false;
+        if (CollectionPanel != null) CollectionPanel.Visible = false;
         if (CreditsPanel != null) CreditsPanel.Visible = false;
+        // 旧档里捡过的泥板并进跨存档记录（写盘）；按钮在开场结束前都点不了，所以一定早于开新档
+        ImportedTablets = CollectionRecord.ImportFromSave(SavePaths.SlotPath(Settings.SaveSlot));
         StartIntro();
         ShowStartError();
         if (!ErrorShowing) FocusFirstButton();
@@ -196,7 +189,12 @@ public partial class TitleMenu : Control
 
     // ---------- 面板 ----------
 
-    public void OpenSettings() => OpenPanelFrom(SettingsPanel, SettingsButton);
+    public void OpenCollection()
+    {
+        if (CollectionPanel == null || Leaving || IntroPlaying) return;
+        CollectionPanel.Refresh();
+        OpenPanelFrom(CollectionPanel, CollectionButton);
+    }
     public void OpenCredits() => OpenPanelFrom(CreditsPanel, CreditsButton);
 
     private void OpenPanelFrom(Control panel, BaseButton opener)
@@ -208,7 +206,7 @@ public partial class TitleMenu : Control
         if (Overlay != null) Overlay.Visible = true;
         panel.Visible = true;
         RefreshButtons();
-        Control first = panel == SettingsPanel ? (Control)MusicSlider ?? SettingsBack : CreditsBack;
+        Control first = panel == CollectionPanel ? (Control)CollectionPanel.List ?? CollectionBack : CreditsBack;
         first?.GrabFocus();
     }
 
@@ -279,7 +277,7 @@ public partial class TitleMenu : Control
 
     private void FocusFirstButton()
     {
-        foreach (BaseButton button in new[] { ContinueButton, NewGameButton, SettingsButton, CreditsButton, QuitButton })
+        foreach (BaseButton button in new[] { ContinueButton, NewGameButton, CollectionButton, CreditsButton, QuitButton })
         {
             if (button == null || button.Disabled || !button.IsVisibleInTree()) continue;
             button.GrabFocus();

@@ -141,7 +141,7 @@ public partial class TitleMenuTest : UiTestBase
             "跳过开场的那一下按键不会顺带按下“醒来”");
     }
 
-    // ---------- 美术、5 个按钮、设置 / 名单面板（没有存档时） ----------
+    // ---------- 美术、5 个按钮、收集 / 名单面板（没有存档时） ----------
 
     private async Task ArtAndPanelChecks(TitleMenu menu)
     {
@@ -152,12 +152,12 @@ public partial class TitleMenuTest : UiTestBase
             "主页面换成 PSD 的图（场景里的背景、标题、双手、人物线稿节点），旧的占位背景和 logo 已删除");
         var expected = new (BaseButton button, string art, string text)[]
         {
-            (menu.NewGameButton, "btn_wake", "醒来"), (menu.ContinueButton, "btn_continue", "再续征程"), (menu.SettingsButton, "btn_settings", "设置"),
+            (menu.NewGameButton, "btn_wake", "醒来"), (menu.ContinueButton, "btn_continue", "再续征程"), (menu.CollectionButton, "btn_settings", "收集"),
             (menu.CreditsButton, "btn_credits", "制作人员名单"), (menu.QuitButton, "btn_quit", "退出"),
         };
         Check(expected.All(e => e.button is TextureButton tb && tb.TextureNormal.ResourcePath.EndsWith($"tex_ui_title_{e.art}.png")
                                 && tb.GetNode<Label>("Label").Text == e.text && tb.IsVisibleInTree()),
-            "5 个按钮：醒来 / 再续征程 / 设置 / 制作人员名单 / 退出，图和字都在场景里");
+            "5 个按钮：醒来 / 再续征程 / 收集 / 制作人员名单 / 退出，图和字都在场景里");
         var idle = menu.GetNodeOrNull<AnimationPlayer>("Idle");
         var dust = menu.GetNodeOrNull<CpuParticles2D>("Dust");
         Check(idle != null && idle.IsPlaying() && idle.CurrentAnimation == "idle" && dust != null && dust.Emitting,
@@ -166,13 +166,14 @@ public partial class TitleMenuTest : UiTestBase
         Check(menu.Selected == menu.NewGameButton && menu.NewGameButton.Scale.X > 1.01f && menu.QuitButton.Scale.X < 1.01f,
             "选中的按钮放大，其余不放大");
 
-        // 设置面板：打开后底层按钮被隔离
+        // 收集面板：打开后底层按钮被隔离；设置面板和音量滑块已删掉
+        Check(menu.GetNodeOrNull("SettingsPanel") == null && menu.GetNodeOrNull("Buttons/Settings") == null, "设置按钮和设置面板（音量）已删掉");
         int starts = Starts.Count;
-        bool opened = await Activate(menu.SettingsButton);
+        bool opened = await Activate(menu.CollectionButton);
         await Frames(2);
         bool isolated = menu.MainButtons.All(b => b.Disabled && b.FocusMode == Control.FocusModeEnum.None);
-        Check(opened && menu.OpenPanel == menu.SettingsPanel && menu.Overlay.Visible && menu.MusicSlider.HasFocus() && isolated,
-            "设置：面板打开、压暗遮罩显示，焦点在音乐滑块上，5 个按钮暂时不能点、不能获得焦点");
+        Check(opened && menu.OpenPanel == menu.CollectionPanel && menu.Overlay.Visible && menu.CollectionPanel.List.HasFocus() && isolated,
+            "收集：面板打开、压暗遮罩显示，焦点在条目列表上，5 个按钮暂时不能点、不能获得焦点");
         foreach (BaseButton target in new[] { menu.NewGameButton, menu.QuitButton })
             await ClickAt(target.GetGlobalRect().GetCenter());
         await Frames(10);
@@ -186,27 +187,21 @@ public partial class TitleMenuTest : UiTestBase
             await Frames(1);
         }
         Control focus = GetViewport().GuiGetFocusOwner();
-        Check(Starts.Count == starts && GameSession.PendingStart == StartMode.None && focus != null && menu.SettingsPanel.IsAncestorOf(focus),
+        Check(Starts.Count == starts && GameSession.PendingStart == StartMode.None && focus != null && menu.CollectionPanel.IsAncestorOf(focus),
             $"面板开着时按方向键、确认键：焦点只在面板里移动（现在在 {focus?.Name}），不会开局或读档");
-
-        // 音量滑块改音轨音量
-        menu.MusicSlider.Value = 0;
-        bool musicMuted = AudioSettings.BusState(AudioSettings.MusicBus).muted;
-        menu.MusicSlider.Value = 100;
-        Check(musicMuted && !AudioSettings.BusState(AudioSettings.MusicBus).muted, "音乐滑块拖到 0：音乐音轨静音；拖回来恢复");
 
         // 两个面板互斥
         menu.OpenCredits();
         await Frames(1);
-        Check(menu.OpenPanel == menu.CreditsPanel && menu.CreditsPanel.Visible && !menu.SettingsPanel.Visible, "设置开着时再打开名单：只剩名单一个面板");
+        Check(menu.OpenPanel == menu.CreditsPanel && menu.CreditsPanel.Visible && !menu.CollectionPanel.Visible, "收集开着时再打开名单：只剩名单一个面板");
 
         // Esc 只关闭面板，焦点回到原按钮；“再续征程”仍按存档决定（没有存档 → 仍不能点）
         await PressKey(Key.Escape);   // 真实的 Esc 按键事件（ui_cancel / menu）
         await Frames(2);
-        Check(!menu.PanelOpen && !menu.Overlay.Visible && menu.SettingsButton.HasFocus() && GetTree().CurrentScene == menu,
-            "Esc：关闭面板，焦点回到打开它的“设置”，还在主菜单");
+        Check(!menu.PanelOpen && !menu.Overlay.Visible && menu.CollectionButton.HasFocus() && GetTree().CurrentScene == menu,
+            "Esc：关闭面板，焦点回到打开它的“收集”，还在主菜单");
         Check(menu.ContinueButton.Disabled && !menu.NewGameButton.Disabled && !menu.QuitButton.Disabled,
-            "无存档 → 打开设置 → 关闭：“再续征程”仍然不能点，其余按钮恢复");
+            "无存档 → 打开收集 → 关闭：“再续征程”仍然不能点，其余按钮恢复");
 
         // 名单：打开 → 返回
         opened = await Activate(menu.CreditsButton);
