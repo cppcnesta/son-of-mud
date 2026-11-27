@@ -3,10 +3,10 @@
 [ext_resource type="Script" uid="uid://df6w3mltslp4d" path="res://assets/scripts/narrative/NarrativeDirector.cs" id="1_director"]
 [ext_resource type="Resource" path="res://assets/data/narrative/settings.tres" id="2_settings"]
 [ext_resource type="PackedScene" path="res://assets/scenes/narrative/views/cg_layer.tscn" id="3_cg"]
-[ext_resource type="PackedScene" path="res://assets/scenes/narrative/views/dialog_box.tscn" id="4_dialog"]
+[ext_resource type="PackedScene" uid="uid://5r404p6o4xfl" path="res://assets/scenes/narrative/views/dialog_box.tscn" id="4_dialog"]
 [ext_resource type="PackedScene" path="res://assets/scenes/narrative/views/subtitle_bar.tscn" id="5_subtitle"]
-[ext_resource type="PackedScene" path="res://assets/scenes/narrative/views/choice_panel.tscn" id="6_choice"]
-[ext_resource type="PackedScene" path="res://assets/scenes/narrative/views/tablet_view.tscn" id="7_tablet"]
+[ext_resource type="PackedScene" uid="uid://6p5xd4pwwwo3" path="res://assets/scenes/narrative/views/choice_panel.tscn" id="6_choice"]
+[ext_resource type="PackedScene" uid="uid://csip1kbuj014v" path="res://assets/scenes/narrative/views/tablet_view.tscn" id="7_tablet"]
 [ext_resource type="PackedScene" path="res://assets/scenes/narrative/views/fade_layer.tscn" id="8_fade"]
 
 [node name="NarrativeLayer" type="CanvasLayer" unique_id=419066300]

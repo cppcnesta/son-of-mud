@@ -1,6 +1,6 @@
-[gd_scene load_steps=4 format=3]
+[gd_scene format=3 uid="uid://cxmgmor2j6j28"]
 
-[ext_resource type="Script" path="res://assets/scripts/narrative/views/SubtitleBar.cs" id="1_subtitle"]
+[ext_resource type="Script" uid="uid://dfh1dqnpx04su" path="res://assets/scripts/narrative/views/SubtitleBar.cs" id="1_subtitle"]
 [ext_resource type="Theme" path="res://assets/data/narrative/narrative_theme.tres" id="2_theme"]
 
 [sub_resource type="StyleBoxFlat" id="Style_Bar"]
@@ -10,7 +10,7 @@ content_margin_right = 16.0
 content_margin_bottom = 8.0
 bg_color = Color(0, 0, 0, 0.55)
 
-[node name="Subtitle" type="Control"]
+[node name="Subtitle" type="Control" unique_id=592075344]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -21,7 +21,7 @@ mouse_filter = 2
 theme = ExtResource("2_theme")
 script = ExtResource("1_subtitle")
 
-[node name="Bar" type="PanelContainer" parent="."]
+[node name="Bar" type="PanelContainer" parent="." unique_id=339361867]
 visible = false
 layout_mode = 1
 anchors_preset = 7
@@ -38,7 +38,7 @@ grow_vertical = 0
 mouse_filter = 2
 theme_override_styles/panel = SubResource("Style_Bar")
 
-[node name="Text" type="RichTextLabel" parent="Bar"]
+[node name="Text" type="RichTextLabel" parent="Bar" unique_id=1276064878]
 layout_mode = 2
 mouse_filter = 2
 theme_override_font_sizes/normal_font_size = 20

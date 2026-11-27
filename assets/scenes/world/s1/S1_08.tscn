@@ -1,13 +1,13 @@
 [gd_scene format=4 uid="uid://7n51awjfruhl"]
 
-[ext_resource type="Script" path="res://assets/scripts/world/RoomRoot.cs" id="1_o5rf0"]
-[ext_resource type="PackedScene" path="res://addons/MetroidvaniaSystem/Nodes/RoomInstance.tscn" id="2_1r7ik"]
-[ext_resource type="TileSet" path="res://assets/data/world/world_tileset.tres" id="4_tffhd"]
-[ext_resource type="Script" path="res://assets/scripts/world/SpawnPoint.cs" id="5_o6d4f"]
-[ext_resource type="Script" path="res://assets/scripts/narrative/world/StoryTrigger.cs" id="n_story"]
-[ext_resource type="Script" path="res://assets/scripts/narrative/world/TabletPickup.cs" id="n_tablet"]
-[ext_resource type="Texture2D" path="res://assets/art/collectible/spr_collectible_prayer_statue_1x1.png" id="statue_art"]
-[ext_resource type="Texture2D" path="res://assets/art/collectible/spr_collectible_tablet_pit_1x1.png" id="art_tablet_pit"]
+[ext_resource type="Script" uid="uid://bp6qc4ftue0bq" path="res://assets/scripts/world/RoomRoot.cs" id="1_o5rf0"]
+[ext_resource type="PackedScene" uid="uid://bsg0351mx3b4u" path="res://addons/MetroidvaniaSystem/Nodes/RoomInstance.tscn" id="2_1r7ik"]
+[ext_resource type="TileSet" uid="uid://cjutdcfket0jk" path="res://assets/data/world/world_tileset.tres" id="4_tffhd"]
+[ext_resource type="Script" uid="uid://170bxbdwtr2a" path="res://assets/scripts/world/SpawnPoint.cs" id="5_o6d4f"]
+[ext_resource type="Texture2D" uid="uid://dyxx3cysof1o1" path="res://assets/art/collectible/spr_collectible_tablet_pit_1x1.png" id="art_tablet_pit"]
+[ext_resource type="Script" uid="uid://gcj5me3gasqr" path="res://assets/scripts/narrative/world/StoryTrigger.cs" id="n_story"]
+[ext_resource type="Script" uid="uid://bo6j7mpht131e" path="res://assets/scripts/narrative/world/TabletPickup.cs" id="n_tablet"]
+[ext_resource type="Texture2D" uid="uid://bnbu7xtcj7axw" path="res://assets/art/collectible/spr_collectible_prayer_statue_1x1.png" id="statue_art"]
 
 [sub_resource type="RectangleShape2D" id="Shape_Story_Reshape"]
 size = Vector2(96, 160)
@@ -58,7 +58,7 @@ PromptText = "触碰雕像"
 position = Vector2(0, -80)
 shape = SubResource("Shape_Story_Reshape")
 
-[node name="Art" type="Sprite2D" parent="Objects/Story_Reshape"]
+[node name="Art" type="Sprite2D" parent="Objects/Story_Reshape" unique_id=413465138]
 scale = Vector2(0.0996678, 0.0996678)
 texture = ExtResource("statue_art")
 offset = Vector2(0, -602)
@@ -72,7 +72,7 @@ TabletId = "divine_son"
 position = Vector2(0, -48)
 shape = SubResource("Shape_Tablet_divine_son")
 
-[node name="Art" type="Sprite2D" parent="Objects/Tablet_divine_son"]
+[node name="Art" type="Sprite2D" parent="Objects/Tablet_divine_son" unique_id=1356028508]
 scale = Vector2(0.13913, 0.13913)
 texture = ExtResource("art_tablet_pit")
 offset = Vector2(0, -172.5)
