@@ -41,6 +41,10 @@ project/assembly_name="SonOfMud"
 
 enabled=PackedStringArray("res://addons/MetroidvaniaSystem/plugin.cfg", "res://addons/juicee/plugin.cfg")
 
+[gui]
+
+theme/custom_font="res://assets/fonts/SiyinSong-Regular.otf"
+
 [input]
 
 move_left={
@@ -166,7 +170,3 @@ collection={
 rendering_device/driver.windows="d3d12"
 renderer/rendering_method="gl_compatibility"
 renderer/rendering_method.mobile="gl_compatibility"
-
-[gui]
-
-theme/custom_font="res://assets/fonts/SiyinSong-Regular.otf"

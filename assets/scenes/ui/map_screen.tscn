@@ -1,15 +1,15 @@
-[gd_scene load_steps=9 format=3]
+[gd_scene format=3 uid="uid://c743u4uxhqouq"]
 
-[ext_resource type="Script" path="res://assets/scripts/ui/MapScreen.cs" id="1_map"]
+[ext_resource type="Script" uid="uid://bcnuj3hlln7ra" path="res://assets/scripts/ui/MapScreen.cs" id="1_map"]
 [ext_resource type="PackedScene" path="res://assets/scenes/ui/map_pieces.tscn" id="2_pieces"]
-[ext_resource type="Theme" path="res://assets/data/ui/ui_theme.tres" id="3_theme"]
-[ext_resource type="Texture2D" path="res://assets/art/ui/tex_ui_map_border.png" id="4_border"]
-[ext_resource type="Texture2D" path="res://assets/art/ui/tex_ui_map_here.png" id="i_here"]
-[ext_resource type="Texture2D" path="res://assets/art/ui/tex_ui_map_save.png" id="i_save"]
-[ext_resource type="Texture2D" path="res://assets/art/ui/tex_ui_map_tablet.png" id="i_tablet"]
-[ext_resource type="Texture2D" path="res://assets/art/ui/tex_ui_map_death.png" id="i_death"]
+[ext_resource type="Theme" uid="uid://dcggxhi52el0x" path="res://assets/data/ui/ui_theme.tres" id="3_theme"]
+[ext_resource type="Texture2D" uid="uid://cv6m10oj1jc4e" path="res://assets/art/ui/tex_ui_map_border.png" id="4_border"]
+[ext_resource type="Texture2D" uid="uid://fgb22smhd31k" path="res://assets/art/ui/tex_ui_map_death.png" id="i_death"]
+[ext_resource type="Texture2D" uid="uid://viipjkq1lvbj" path="res://assets/art/ui/tex_ui_map_here.png" id="i_here"]
+[ext_resource type="Texture2D" uid="uid://e06rlbqfib2d" path="res://assets/art/ui/tex_ui_map_save.png" id="i_save"]
+[ext_resource type="Texture2D" uid="uid://b4b4pv3wpeb6x" path="res://assets/art/ui/tex_ui_map_tablet.png" id="i_tablet"]
 
-[node name="MapScreen" type="Control" node_paths=PackedStringArray("Layer")]
+[node name="MapScreen" type="Control" unique_id=92381513 node_paths=PackedStringArray("Layer")]
 process_mode = 3
 visible = false
 layout_mode = 3
@@ -22,7 +22,7 @@ theme = ExtResource("3_theme")
 script = ExtResource("1_map")
 Layer = NodePath("Pieces")
 
-[node name="Bg" type="ColorRect" parent="."]
+[node name="Bg" type="ColorRect" parent="." unique_id=1848570686]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -32,7 +32,7 @@ grow_vertical = 2
 mouse_filter = 2
 color = Color(0.451, 0.451, 0.451, 0.55)
 
-[node name="Border" type="TextureRect" parent="."]
+[node name="Border" type="TextureRect" parent="." unique_id=304660252]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -43,7 +43,7 @@ mouse_filter = 2
 texture = ExtResource("4_border")
 expand_mode = 1
 
-[node name="Title" type="Label" parent="."]
+[node name="Title" type="Label" parent="." unique_id=1983581568]
 layout_mode = 1
 anchors_preset = 5
 anchor_left = 0.5
@@ -58,7 +58,7 @@ theme_override_font_sizes/font_size = 26
 text = "地图"
 horizontal_alignment = 1
 
-[node name="Pieces" parent="." instance=ExtResource("2_pieces")]
+[node name="Pieces" parent="." unique_id=1072193432 instance=ExtResource("2_pieces")]
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
@@ -72,7 +72,7 @@ offset_bottom = 117.6
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="Legend" type="HBoxContainer" parent="."]
+[node name="Legend" type="HBoxContainer" parent="." unique_id=2100248694]
 layout_mode = 1
 anchors_preset = 7
 anchor_left = 0.5
@@ -89,7 +89,7 @@ mouse_filter = 2
 theme_override_constants/separation = 8
 alignment = 1
 
-[node name="Icon0" type="TextureRect" parent="Legend"]
+[node name="Icon0" type="TextureRect" parent="Legend" unique_id=1493632346]
 custom_minimum_size = Vector2(13.1, 22)
 layout_mode = 2
 size_flags_vertical = 4
@@ -98,19 +98,19 @@ texture = ExtResource("i_here")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="Text0" type="Label" parent="Legend"]
+[node name="Text0" type="Label" parent="Legend" unique_id=579038567]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.94, 0.9, 0.78, 1)
 theme_override_font_sizes/font_size = 16
 text = "你在这里"
 vertical_alignment = 1
 
-[node name="Gap0" type="Control" parent="Legend"]
+[node name="Gap0" type="Control" parent="Legend" unique_id=395929522]
 custom_minimum_size = Vector2(14, 0)
 layout_mode = 2
 mouse_filter = 2
 
-[node name="Icon1" type="TextureRect" parent="Legend"]
+[node name="Icon1" type="TextureRect" parent="Legend" unique_id=49545167]
 custom_minimum_size = Vector2(20.6, 22)
 layout_mode = 2
 size_flags_vertical = 4
@@ -119,19 +119,19 @@ texture = ExtResource("i_save")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="Text1" type="Label" parent="Legend"]
+[node name="Text1" type="Label" parent="Legend" unique_id=1022510744]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.94, 0.9, 0.78, 1)
 theme_override_font_sizes/font_size = 16
 text = "存档点"
 vertical_alignment = 1
 
-[node name="Gap1" type="Control" parent="Legend"]
+[node name="Gap1" type="Control" parent="Legend" unique_id=1818012473]
 custom_minimum_size = Vector2(14, 0)
 layout_mode = 2
 mouse_filter = 2
 
-[node name="Icon2" type="TextureRect" parent="Legend"]
+[node name="Icon2" type="TextureRect" parent="Legend" unique_id=948206399]
 custom_minimum_size = Vector2(18.9, 22)
 layout_mode = 2
 size_flags_vertical = 4
@@ -140,19 +140,19 @@ texture = ExtResource("i_tablet")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="Text2" type="Label" parent="Legend"]
+[node name="Text2" type="Label" parent="Legend" unique_id=1352347834]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.94, 0.9, 0.78, 1)
 theme_override_font_sizes/font_size = 16
 text = "泥板"
 vertical_alignment = 1
 
-[node name="Gap2" type="Control" parent="Legend"]
+[node name="Gap2" type="Control" parent="Legend" unique_id=2029224187]
 custom_minimum_size = Vector2(14, 0)
 layout_mode = 2
 mouse_filter = 2
 
-[node name="Icon3" type="TextureRect" parent="Legend"]
+[node name="Icon3" type="TextureRect" parent="Legend" unique_id=1578361874]
 custom_minimum_size = Vector2(23.4, 22)
 layout_mode = 2
 size_flags_vertical = 4
@@ -161,14 +161,14 @@ texture = ExtResource("i_death")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="Text3" type="Label" parent="Legend"]
+[node name="Text3" type="Label" parent="Legend" unique_id=1024190848]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.94, 0.9, 0.78, 1)
 theme_override_font_sizes/font_size = 16
 text = "上次倒下的地方"
 vertical_alignment = 1
 
-[node name="Hint" type="Label" parent="."]
+[node name="Hint" type="Label" parent="." unique_id=1772901746]
 layout_mode = 1
 anchors_preset = 7
 anchor_left = 0.5

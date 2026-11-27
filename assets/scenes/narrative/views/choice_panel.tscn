@@ -1,10 +1,10 @@
-[gd_scene load_steps=8 format=3]
+[gd_scene format=3 uid="uid://6p5xd4pwwwo3"]
 
-[ext_resource type="Script" path="res://assets/scripts/narrative/views/ChoicePanel.cs" id="1_choice"]
+[ext_resource type="Script" uid="uid://dmawhkn7d3l5a" path="res://assets/scripts/narrative/views/ChoicePanel.cs" id="1_choice"]
 [ext_resource type="Theme" path="res://assets/data/narrative/narrative_theme.tres" id="2_theme"]
-[ext_resource type="Texture2D" path="res://assets/art/ui/tex_ui_choice_focus.png" id="3_focus"]
-[ext_resource type="Texture2D" path="res://assets/art/ui/tex_ui_choice_normal.png" id="4_normal"]
-[ext_resource type="Texture2D" path="res://assets/art/ui/tex_ui_arrow_gold.png" id="5_arrow"]
+[ext_resource type="Texture2D" uid="uid://d0u6njmim5ti6" path="res://assets/art/ui/tex_ui_choice_focus.png" id="3_focus"]
+[ext_resource type="Texture2D" uid="uid://oa4xvyx1f1l7" path="res://assets/art/ui/tex_ui_choice_normal.png" id="4_normal"]
+[ext_resource type="Texture2D" uid="uid://dg4qpxrh77mwf" path="res://assets/art/ui/tex_ui_arrow_gold.png" id="5_arrow"]
 
 [sub_resource type="StyleBoxEmpty" id="Style_None"]
 
@@ -15,7 +15,7 @@ corner_radius_top_right = 36
 corner_radius_bottom_right = 36
 corner_radius_bottom_left = 36
 
-[node name="Choice" type="Control"]
+[node name="Choice" type="Control" unique_id=496525481]
 visible = false
 layout_mode = 3
 anchors_preset = 15
@@ -27,7 +27,7 @@ mouse_filter = 2
 theme = ExtResource("2_theme")
 script = ExtResource("1_choice")
 
-[node name="List" type="VBoxContainer" parent="."]
+[node name="List" type="VBoxContainer" parent="." unique_id=1210697938]
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
@@ -43,7 +43,7 @@ grow_vertical = 2
 mouse_filter = 2
 theme_override_constants/separation = 6
 
-[node name="OptionTemplate" type="Button" parent="."]
+[node name="OptionTemplate" type="Button" parent="." unique_id=328850148]
 visible = false
 custom_minimum_size = Vector2(360, 100)
 layout_mode = 0
@@ -51,17 +51,17 @@ offset_right = 360.0
 offset_bottom = 100.0
 focus_mode = 0
 theme_override_colors/font_color = Color(0.84, 0.8, 0.72, 1)
-theme_override_colors/font_hover_color = Color(0.84, 0.8, 0.72, 1)
-theme_override_colors/font_pressed_color = Color(1, 0.94, 0.78, 1)
 theme_override_colors/font_focus_color = Color(0.84, 0.8, 0.72, 1)
+theme_override_colors/font_pressed_color = Color(1, 0.94, 0.78, 1)
+theme_override_colors/font_hover_color = Color(0.84, 0.8, 0.72, 1)
 theme_override_styles/normal = SubResource("Style_None")
-theme_override_styles/hover = SubResource("Style_None")
 theme_override_styles/pressed = SubResource("Style_None")
-theme_override_styles/focus = SubResource("Style_None")
+theme_override_styles/hover = SubResource("Style_None")
 theme_override_styles/disabled = SubResource("Style_None")
+theme_override_styles/focus = SubResource("Style_None")
 text = "选项模板（每个选项复制一份，位置由 List 排）"
 
-[node name="Fill" type="Panel" parent="OptionTemplate"]
+[node name="Fill" type="Panel" parent="OptionTemplate" unique_id=348191495]
 show_behind_parent = true
 layout_mode = 1
 anchors_preset = 15
@@ -76,7 +76,7 @@ grow_vertical = 2
 mouse_filter = 2
 theme_override_styles/panel = SubResource("Style_Fill")
 
-[node name="FrameNormal" type="TextureRect" parent="OptionTemplate"]
+[node name="FrameNormal" type="TextureRect" parent="OptionTemplate" unique_id=1195264287]
 show_behind_parent = true
 layout_mode = 1
 anchors_preset = 15
@@ -89,7 +89,7 @@ texture = ExtResource("4_normal")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="FrameFocus" type="TextureRect" parent="OptionTemplate"]
+[node name="FrameFocus" type="TextureRect" parent="OptionTemplate" unique_id=233703075]
 visible = false
 show_behind_parent = true
 layout_mode = 1
@@ -103,7 +103,7 @@ texture = ExtResource("3_focus")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="Arrow" type="TextureRect" parent="OptionTemplate"]
+[node name="Arrow" type="TextureRect" parent="OptionTemplate" unique_id=812291650]
 visible = false
 layout_mode = 1
 anchors_preset = 4

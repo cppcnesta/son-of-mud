@@ -9,6 +9,7 @@
 [sub_resource type="StyleBoxEmpty" id="Style_Box"]
 
 [node name="Dialog" type="Control" unique_id=2019905760]
+visible = false
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -95,10 +96,10 @@ patch_margin_right = 123
 
 [node name="Name" type="Label" parent="Box" unique_id=1929165280]
 layout_mode = 0
-offset_left = 274.0
-offset_top = 34.0
-offset_right = 700.0
-offset_bottom = 66.0
+offset_left = 297.0
+offset_top = 40.0
+offset_right = 723.0
+offset_bottom = 72.0
 theme_override_colors/font_color = Color(0.94, 0.84, 0.59, 1)
 
 [node name="Body" type="RichTextLabel" parent="Box" unique_id=734001167]

@@ -1,10 +1,14 @@
 [gd_scene format=4 uid="uid://8xpg42dpmx2l"]
 
-[ext_resource type="Script" path="res://assets/scripts/world/RoomRoot.cs" id="1_m1cox"]
-[ext_resource type="PackedScene" path="res://addons/MetroidvaniaSystem/Nodes/RoomInstance.tscn" id="2_vd0rs"]
-[ext_resource type="TileSet" path="res://assets/data/world/world_tileset.tres" id="4_ayke3"]
-[ext_resource type="Script" path="res://assets/scripts/world/SpawnPoint.cs" id="5_0pihk"]
-[ext_resource type="Script" path="res://assets/scripts/narrative/world/StoryTrigger.cs" id="n_story"]
+[ext_resource type="Script" uid="uid://bp6qc4ftue0bq" path="res://assets/scripts/world/RoomRoot.cs" id="1_m1cox"]
+[ext_resource type="Texture2D" uid="uid://c5sdvpg640cqg" path="res://assets/art/world/bg/s4/tex_bg_s4_11_far_01.png" id="2_0pihk"]
+[ext_resource type="PackedScene" uid="uid://bsg0351mx3b4u" path="res://addons/MetroidvaniaSystem/Nodes/RoomInstance.tscn" id="2_vd0rs"]
+[ext_resource type="Texture2D" uid="uid://vm47oojj5j4k" path="res://assets/art/world/bg/s4/tex_bg_s4_11_far_02.png" id="3_xa4xe"]
+[ext_resource type="TileSet" uid="uid://cjutdcfket0jk" path="res://assets/data/world/world_tileset.tres" id="4_ayke3"]
+[ext_resource type="Texture2D" uid="uid://bwqlmyqoxy62e" path="res://assets/art/world/bg/s4/tex_bg_s4_11_far_03.png" id="4_yj2d5"]
+[ext_resource type="Script" uid="uid://170bxbdwtr2a" path="res://assets/scripts/world/SpawnPoint.cs" id="5_0pihk"]
+[ext_resource type="Texture2D" uid="uid://dwlcjhqnr02r5" path="res://assets/art/world/bg/s4/tex_bg_s4_11_far_04.png" id="5_26k62"]
+[ext_resource type="Script" uid="uid://gcj5me3gasqr" path="res://assets/scripts/narrative/world/StoryTrigger.cs" id="n_story"]
 
 [sub_resource type="RectangleShape2D" id="Shape_Story_Summit"]
 size = Vector2(3456, 2592)
@@ -16,6 +20,59 @@ size = Vector2(96, 160)
 script = ExtResource("1_m1cox")
 RoomId = "S4_11"
 DisplayName = "终末之室"
+
+[node name="Background" type="Node2D" parent="." unique_id=198625558]
+z_index = -100
+metadata/bg_version = 2
+
+[node name="Far" type="Node2D" parent="Background" unique_id=183288853]
+
+[node name="Far01" type="Parallax2D" parent="Background/Far" unique_id=1083633092]
+z_index = -100
+z_as_relative = false
+metadata/bg_piece = "far_01"
+
+[node name="Image" type="Sprite2D" parent="Background/Far/Far01" unique_id=928621478]
+position = Vector2(-16.99997, 305)
+scale = Vector2(0.51855046, 0.5774678)
+texture = ExtResource("2_0pihk")
+centered = false
+
+[node name="Far02" type="Parallax2D" parent="Background/Far" unique_id=729654937]
+z_index = -101
+z_as_relative = false
+scroll_scale = Vector2(0.95, 0.95)
+metadata/bg_piece = "far_02"
+
+[node name="Image" type="Sprite2D" parent="Background/Far/Far02" unique_id=1716139068]
+position = Vector2(133.2, 124.6)
+scale = Vector2(0.4250646, 0.51325005)
+texture = ExtResource("3_xa4xe")
+centered = false
+
+[node name="Far03" type="Parallax2D" parent="Background/Far" unique_id=591902260]
+z_index = -102
+z_as_relative = false
+scroll_scale = Vector2(0.95, 0.95)
+metadata/bg_piece = "far_03"
+
+[node name="Image" type="Sprite2D" parent="Background/Far/Far03" unique_id=561382116]
+position = Vector2(-187.79999, 98.599976)
+scale = Vector2(0.4826725, 0.5603002)
+texture = ExtResource("4_yj2d5")
+centered = false
+
+[node name="Far04" type="Parallax2D" parent="Background/Far" unique_id=982133842]
+z_index = -103
+z_as_relative = false
+scroll_scale = Vector2(0.15, 0.15)
+metadata/bg_piece = "far_04"
+
+[node name="Image" type="Sprite2D" parent="Background/Far/Far04" unique_id=1117454720]
+position = Vector2(-496.6, -517.80005)
+scale = Vector2(0.4564858, 0.5717326)
+texture = ExtResource("5_26k62")
+centered = false
 
 [node name="RoomInstance" parent="." unique_id=1246059462 instance=ExtResource("2_vd0rs")]
 
@@ -65,10 +122,3 @@ Once = true
 [node name="Shape" type="CollisionShape2D" parent="Objects/Story_FinalBoss" unique_id=2025807328]
 position = Vector2(0, -80)
 shape = SubResource("Shape_Story_FinalBoss")
-
-[node name="Placeholder" type="ColorRect" parent="Objects/Story_FinalBoss" unique_id=307181252]
-offset_left = -29.0
-offset_top = -128.0
-offset_right = 29.0
-mouse_filter = 2
-color = Color(0.55, 0.2, 0.2, 1)

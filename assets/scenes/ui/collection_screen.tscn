@@ -1,27 +1,27 @@
-[gd_scene format=3]
+[gd_scene format=3 uid="uid://cy2rp2ccb7svg"]
 
-[ext_resource type="Script" path="res://assets/scripts/ui/CollectionScreen.cs" id="s"]
-[ext_resource type="Theme" path="res://assets/data/ui/ui_theme.tres" id="theme"]
-[ext_resource type="Texture2D" path="res://assets/art/ui/collection/tex_ui_collection_bg.png" id="bg"]
-[ext_resource type="Texture2D" path="res://assets/art/ui/collection/tex_ui_collection_rays.png" id="rays"]
-[ext_resource type="Texture2D" path="res://assets/data/narrative/portrait/por_mul_tukul_full.png" id="portrait"]
-[ext_resource type="Texture2D" path="res://assets/art/ui/collection/tex_ui_collection_panel.png" id="panel"]
-[ext_resource type="Texture2D" path="res://assets/art/ui/collection/tex_ui_collection_divider.png" id="divider"]
-[ext_resource type="Texture2D" path="res://assets/art/ui/collection/tex_ui_collection_slot_item.png" id="slot_item"]
-[ext_resource type="Texture2D" path="res://assets/art/ui/collection/tex_ui_collection_slot_collectible.png" id="slot_col"]
-[ext_resource type="Texture2D" path="res://assets/art/ui/collection/tex_ui_collection_desc.png" id="desc"]
-[ext_resource type="Texture2D" path="res://assets/art/ui/collection/tex_ui_collection_frame.png" id="frame"]
-[ext_resource type="Texture2D" path="res://assets/art/item/spr_item_mud_bottle_1x1.png" id="icon_0"]
-[ext_resource type="Texture2D" path="res://assets/art/item/spr_item_mud_liver_1x1.png" id="icon_1"]
-[ext_resource type="Texture2D" path="res://assets/art/item/spr_item_life_bread_1x1.png" id="icon_2"]
-[ext_resource type="Texture2D" path="res://assets/art/collectible/spr_collectible_tablet_pit_1x1.png" id="icon_3"]
-[ext_resource type="Texture2D" path="res://assets/art/collectible/spr_collectible_tablet_temple_1x1.png" id="icon_4"]
-[ext_resource type="Texture2D" path="res://assets/art/collectible/spr_collectible_tablet_divination_1x1.png" id="icon_5"]
-[ext_resource type="Texture2D" path="res://assets/art/collectible/spr_collectible_tablet_summit_1x1.png" id="icon_6"]
-[ext_resource type="Texture2D" path="res://assets/art/collectible/spr_collectible_tablet_of_destiny_1x1.png" id="icon_7"]
-[ext_resource type="Texture2D" path="res://assets/art/collectible/spr_collectible_clay_figurine_1x1.png" id="icon_8"]
-[ext_resource type="Texture2D" path="res://assets/art/collectible/spr_collectible_shard_1x1.png" id="icon_9"]
-[ext_resource type="Texture2D" path="res://assets/art/collectible/spr_collectible_stone_1x1.png" id="icon_10"]
+[ext_resource type="Texture2D" uid="uid://ctptgeowi32dt" path="res://assets/art/ui/collection/tex_ui_collection_bg.png" id="bg"]
+[ext_resource type="Texture2D" uid="uid://ce5lor5douq2h" path="res://assets/art/ui/collection/tex_ui_collection_desc.png" id="desc"]
+[ext_resource type="Texture2D" uid="uid://bvtqgby6gureu" path="res://assets/art/ui/collection/tex_ui_collection_divider.png" id="divider"]
+[ext_resource type="Texture2D" uid="uid://c85cn01aekj1r" path="res://assets/art/ui/collection/tex_ui_collection_frame.png" id="frame"]
+[ext_resource type="Texture2D" uid="uid://b22q4in270f50" path="res://assets/art/item/spr_item_mud_bottle_1x1.png" id="icon_0"]
+[ext_resource type="Texture2D" uid="uid://c43q4ksotkli3" path="res://assets/art/item/spr_item_mud_liver_1x1.png" id="icon_1"]
+[ext_resource type="Texture2D" uid="uid://b45qnnoryfoui" path="res://assets/art/item/spr_item_life_bread_1x1.png" id="icon_2"]
+[ext_resource type="Texture2D" uid="uid://dyxx3cysof1o1" path="res://assets/art/collectible/spr_collectible_tablet_pit_1x1.png" id="icon_3"]
+[ext_resource type="Texture2D" uid="uid://x66s7oip4evj" path="res://assets/art/collectible/spr_collectible_tablet_temple_1x1.png" id="icon_4"]
+[ext_resource type="Texture2D" uid="uid://slplgup8w2gn" path="res://assets/art/collectible/spr_collectible_tablet_divination_1x1.png" id="icon_5"]
+[ext_resource type="Texture2D" uid="uid://crytns4vki0wr" path="res://assets/art/collectible/spr_collectible_tablet_summit_1x1.png" id="icon_6"]
+[ext_resource type="Texture2D" uid="uid://bikp1bmk7du8s" path="res://assets/art/collectible/spr_collectible_tablet_of_destiny_1x1.png" id="icon_7"]
+[ext_resource type="Texture2D" uid="uid://h8km3qao4bx4" path="res://assets/art/collectible/spr_collectible_clay_figurine_1x1.png" id="icon_8"]
+[ext_resource type="Texture2D" uid="uid://bssqwuqu83n1i" path="res://assets/art/collectible/spr_collectible_shard_1x1.png" id="icon_9"]
+[ext_resource type="Texture2D" uid="uid://bcb8i4h2h5kks" path="res://assets/art/collectible/spr_collectible_stone_1x1.png" id="icon_10"]
+[ext_resource type="Texture2D" uid="uid://5qljntepd31" path="res://assets/art/ui/collection/tex_ui_collection_panel.png" id="panel"]
+[ext_resource type="Texture2D" uid="uid://bjrel3ec5pbdh" path="res://assets/data/narrative/portrait/por_mul_tukul_full.png" id="portrait"]
+[ext_resource type="Texture2D" uid="uid://dkxb75xgl70q1" path="res://assets/art/ui/collection/tex_ui_collection_rays.png" id="rays"]
+[ext_resource type="Script" uid="uid://cjy3enjutld1d" path="res://assets/scripts/ui/CollectionScreen.cs" id="s"]
+[ext_resource type="Texture2D" uid="uid://cbhpbeifp4i55" path="res://assets/art/ui/collection/tex_ui_collection_slot_collectible.png" id="slot_col"]
+[ext_resource type="Texture2D" uid="uid://vmu662s1o81h" path="res://assets/art/ui/collection/tex_ui_collection_slot_item.png" id="slot_item"]
+[ext_resource type="Theme" uid="uid://dcggxhi52el0x" path="res://assets/data/ui/ui_theme.tres" id="theme"]
 
 [sub_resource type="StyleBoxFlat" id="Highlight"]
 draw_center = false
@@ -35,9 +35,8 @@ corner_radius_top_right = 4
 corner_radius_bottom_right = 4
 corner_radius_bottom_left = 4
 
-[node name="CollectionScreen" type="Control"]
+[node name="CollectionScreen" type="Control" unique_id=630826143]
 process_mode = 3
-visible = false
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -47,38 +46,36 @@ grow_vertical = 2
 theme = ExtResource("theme")
 script = ExtResource("s")
 
-[node name="Bg" type="TextureRect" parent="."]
+[node name="Bg" type="TextureRect" parent="." unique_id=10734604]
 layout_mode = 0
-offset_left = 0.0
-offset_top = 0.0
 offset_right = 1152.0
 offset_bottom = 648.0
 mouse_filter = 2
 texture = ExtResource("bg")
 expand_mode = 1
 
-[node name="Rays" type="TextureRect" parent="."]
+[node name="Rays" type="TextureRect" parent="." unique_id=1247770018]
 layout_mode = 0
-offset_left = 25.4
-offset_top = 48.2
-offset_right = 571.6
-offset_bottom = 592.6
+offset_left = 6.0
+offset_top = 28.0
+offset_right = 552.19995
+offset_bottom = 572.39996
 mouse_filter = 2
 texture = ExtResource("rays")
 expand_mode = 1
 
-[node name="Portrait" type="TextureRect" parent="."]
+[node name="Portrait" type="TextureRect" parent="." unique_id=1153889905]
 layout_mode = 0
-offset_left = 173.2
-offset_top = 54.0
-offset_right = 426.8
-offset_bottom = 614.0
+offset_left = 62.0
+offset_top = 14.0
+offset_right = 477.0
+offset_bottom = 667.0
 mouse_filter = 2
 texture = ExtResource("portrait")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="Panel" type="TextureRect" parent="."]
+[node name="Panel" type="TextureRect" parent="." unique_id=2063402647]
 layout_mode = 0
 offset_left = 528.8
 offset_top = 33.0
@@ -88,7 +85,7 @@ mouse_filter = 2
 texture = ExtResource("panel")
 expand_mode = 1
 
-[node name="Divider" type="TextureRect" parent="."]
+[node name="Divider" type="TextureRect" parent="." unique_id=1367724632]
 layout_mode = 0
 offset_left = 480.0
 offset_top = 29.8
@@ -98,13 +95,13 @@ mouse_filter = 2
 texture = ExtResource("divider")
 expand_mode = 1
 
-[node name="Slots" type="Control" parent="."]
-layout_mode = 0
+[node name="Slots" type="Control" parent="." unique_id=2089246359]
+anchors_preset = 0
 offset_right = 1152.0
 offset_bottom = 648.0
 mouse_filter = 2
 
-[node name="Item0" type="TextureRect" parent="Slots"]
+[node name="Item0" type="TextureRect" parent="Slots" unique_id=609831309]
 layout_mode = 0
 offset_left = 681.0
 offset_top = 98.0
@@ -113,31 +110,30 @@ offset_bottom = 209.0
 texture = ExtResource("slot_item")
 expand_mode = 1
 
-[node name="Icon" type="TextureRect" parent="Slots/Item0"]
+[node name="Icon" type="TextureRect" parent="Slots/Item0" unique_id=1621021058]
 layout_mode = 0
 offset_left = 18.9
 offset_top = 18.9
 offset_right = 92.1
 offset_bottom = 92.1
 mouse_filter = 2
+texture = ExtResource("icon_0")
 expand_mode = 1
 stretch_mode = 5
-texture = ExtResource("icon_0")
 
-[node name="Count" type="Label" parent="Slots/Item0"]
+[node name="Count" type="Label" parent="Slots/Item0" unique_id=272697469]
 visible = false
 layout_mode = 0
 offset_left = 38.8
 offset_top = 81.0
 offset_right = 103.0
 offset_bottom = 105.0
-mouse_filter = 2
 theme_override_colors/font_color = Color(0.29, 0.2, 0.12, 1)
 theme_override_font_sizes/font_size = 15
 horizontal_alignment = 2
 vertical_alignment = 2
 
-[node name="Highlight" type="Panel" parent="Slots/Item0"]
+[node name="Highlight" type="Panel" parent="Slots/Item0" unique_id=305187707]
 visible = false
 layout_mode = 0
 offset_left = -3.0
@@ -147,7 +143,7 @@ offset_bottom = 114.0
 mouse_filter = 2
 theme_override_styles/panel = SubResource("Highlight")
 
-[node name="Item1" type="TextureRect" parent="Slots"]
+[node name="Item1" type="TextureRect" parent="Slots" unique_id=987725596]
 layout_mode = 0
 offset_left = 808.0
 offset_top = 98.0
@@ -156,31 +152,30 @@ offset_bottom = 209.0
 texture = ExtResource("slot_item")
 expand_mode = 1
 
-[node name="Icon" type="TextureRect" parent="Slots/Item1"]
+[node name="Icon" type="TextureRect" parent="Slots/Item1" unique_id=538701904]
 layout_mode = 0
 offset_left = 18.9
 offset_top = 18.9
 offset_right = 92.1
 offset_bottom = 92.1
 mouse_filter = 2
+texture = ExtResource("icon_1")
 expand_mode = 1
 stretch_mode = 5
-texture = ExtResource("icon_1")
 
-[node name="Count" type="Label" parent="Slots/Item1"]
+[node name="Count" type="Label" parent="Slots/Item1" unique_id=831187047]
 visible = false
 layout_mode = 0
 offset_left = 38.8
 offset_top = 81.0
 offset_right = 103.0
 offset_bottom = 105.0
-mouse_filter = 2
 theme_override_colors/font_color = Color(0.29, 0.2, 0.12, 1)
 theme_override_font_sizes/font_size = 15
 horizontal_alignment = 2
 vertical_alignment = 2
 
-[node name="Highlight" type="Panel" parent="Slots/Item1"]
+[node name="Highlight" type="Panel" parent="Slots/Item1" unique_id=827614943]
 visible = false
 layout_mode = 0
 offset_left = -3.0
@@ -190,7 +185,7 @@ offset_bottom = 114.0
 mouse_filter = 2
 theme_override_styles/panel = SubResource("Highlight")
 
-[node name="Item2" type="TextureRect" parent="Slots"]
+[node name="Item2" type="TextureRect" parent="Slots" unique_id=1153871130]
 layout_mode = 0
 offset_left = 938.0
 offset_top = 98.0
@@ -199,31 +194,30 @@ offset_bottom = 209.0
 texture = ExtResource("slot_item")
 expand_mode = 1
 
-[node name="Icon" type="TextureRect" parent="Slots/Item2"]
+[node name="Icon" type="TextureRect" parent="Slots/Item2" unique_id=173275086]
 layout_mode = 0
 offset_left = 18.9
 offset_top = 18.9
 offset_right = 92.1
 offset_bottom = 92.1
 mouse_filter = 2
+texture = ExtResource("icon_2")
 expand_mode = 1
 stretch_mode = 5
-texture = ExtResource("icon_2")
 
-[node name="Count" type="Label" parent="Slots/Item2"]
+[node name="Count" type="Label" parent="Slots/Item2" unique_id=1716741952]
 visible = false
 layout_mode = 0
 offset_left = 38.8
 offset_top = 81.0
 offset_right = 103.0
 offset_bottom = 105.0
-mouse_filter = 2
 theme_override_colors/font_color = Color(0.29, 0.2, 0.12, 1)
 theme_override_font_sizes/font_size = 15
 horizontal_alignment = 2
 vertical_alignment = 2
 
-[node name="Highlight" type="Panel" parent="Slots/Item2"]
+[node name="Highlight" type="Panel" parent="Slots/Item2" unique_id=904050759]
 visible = false
 layout_mode = 0
 offset_left = -3.0
@@ -233,7 +227,7 @@ offset_bottom = 114.0
 mouse_filter = 2
 theme_override_styles/panel = SubResource("Highlight")
 
-[node name="Col0" type="TextureRect" parent="Slots"]
+[node name="Col0" type="TextureRect" parent="Slots" unique_id=1113348082]
 layout_mode = 0
 offset_left = 665.0
 offset_top = 217.0
@@ -242,31 +236,30 @@ offset_bottom = 309.0
 texture = ExtResource("slot_col")
 expand_mode = 1
 
-[node name="Icon" type="TextureRect" parent="Slots/Col0"]
+[node name="Icon" type="TextureRect" parent="Slots/Col0" unique_id=1430293177]
 layout_mode = 0
 offset_left = 15.6
 offset_top = 15.6
 offset_right = 76.4
 offset_bottom = 76.4
 mouse_filter = 2
-expand_mode = 1
-stretch_mode = 5
 texture = ExtResource("icon_3")
+expand_mode = 1
+stretch_mode = 5
 
-[node name="Count" type="Label" parent="Slots/Col0"]
+[node name="Count" type="Label" parent="Slots/Col0" unique_id=1696820345]
 visible = false
 layout_mode = 0
 offset_left = 32.2
 offset_top = 62.0
 offset_right = 84.0
 offset_bottom = 86.0
-mouse_filter = 2
 theme_override_colors/font_color = Color(0.29, 0.2, 0.12, 1)
 theme_override_font_sizes/font_size = 15
 horizontal_alignment = 2
 vertical_alignment = 2
 
-[node name="Highlight" type="Panel" parent="Slots/Col0"]
+[node name="Highlight" type="Panel" parent="Slots/Col0" unique_id=1897492362]
 visible = false
 layout_mode = 0
 offset_left = -3.0
@@ -276,7 +269,7 @@ offset_bottom = 95.0
 mouse_filter = 2
 theme_override_styles/panel = SubResource("Highlight")
 
-[node name="Col1" type="TextureRect" parent="Slots"]
+[node name="Col1" type="TextureRect" parent="Slots" unique_id=729809180]
 layout_mode = 0
 offset_left = 765.0
 offset_top = 217.0
@@ -285,31 +278,30 @@ offset_bottom = 309.0
 texture = ExtResource("slot_col")
 expand_mode = 1
 
-[node name="Icon" type="TextureRect" parent="Slots/Col1"]
+[node name="Icon" type="TextureRect" parent="Slots/Col1" unique_id=328269811]
 layout_mode = 0
 offset_left = 15.6
 offset_top = 15.6
 offset_right = 76.4
 offset_bottom = 76.4
 mouse_filter = 2
+texture = ExtResource("icon_4")
 expand_mode = 1
 stretch_mode = 5
-texture = ExtResource("icon_4")
 
-[node name="Count" type="Label" parent="Slots/Col1"]
+[node name="Count" type="Label" parent="Slots/Col1" unique_id=881938649]
 visible = false
 layout_mode = 0
 offset_left = 32.2
 offset_top = 62.0
 offset_right = 84.0
 offset_bottom = 86.0
-mouse_filter = 2
 theme_override_colors/font_color = Color(0.29, 0.2, 0.12, 1)
 theme_override_font_sizes/font_size = 15
 horizontal_alignment = 2
 vertical_alignment = 2
 
-[node name="Highlight" type="Panel" parent="Slots/Col1"]
+[node name="Highlight" type="Panel" parent="Slots/Col1" unique_id=1753553678]
 visible = false
 layout_mode = 0
 offset_left = -3.0
@@ -319,7 +311,7 @@ offset_bottom = 95.0
 mouse_filter = 2
 theme_override_styles/panel = SubResource("Highlight")
 
-[node name="Col2" type="TextureRect" parent="Slots"]
+[node name="Col2" type="TextureRect" parent="Slots" unique_id=1524685307]
 layout_mode = 0
 offset_left = 864.0
 offset_top = 217.0
@@ -328,31 +320,30 @@ offset_bottom = 309.0
 texture = ExtResource("slot_col")
 expand_mode = 1
 
-[node name="Icon" type="TextureRect" parent="Slots/Col2"]
+[node name="Icon" type="TextureRect" parent="Slots/Col2" unique_id=2007373537]
 layout_mode = 0
 offset_left = 15.6
 offset_top = 15.6
 offset_right = 76.4
 offset_bottom = 76.4
 mouse_filter = 2
+texture = ExtResource("icon_5")
 expand_mode = 1
 stretch_mode = 5
-texture = ExtResource("icon_5")
 
-[node name="Count" type="Label" parent="Slots/Col2"]
+[node name="Count" type="Label" parent="Slots/Col2" unique_id=1797860496]
 visible = false
 layout_mode = 0
 offset_left = 32.2
 offset_top = 62.0
 offset_right = 84.0
 offset_bottom = 86.0
-mouse_filter = 2
 theme_override_colors/font_color = Color(0.29, 0.2, 0.12, 1)
 theme_override_font_sizes/font_size = 15
 horizontal_alignment = 2
 vertical_alignment = 2
 
-[node name="Highlight" type="Panel" parent="Slots/Col2"]
+[node name="Highlight" type="Panel" parent="Slots/Col2" unique_id=5377531]
 visible = false
 layout_mode = 0
 offset_left = -3.0
@@ -362,7 +353,7 @@ offset_bottom = 95.0
 mouse_filter = 2
 theme_override_styles/panel = SubResource("Highlight")
 
-[node name="Col3" type="TextureRect" parent="Slots"]
+[node name="Col3" type="TextureRect" parent="Slots" unique_id=2078451125]
 layout_mode = 0
 offset_left = 964.0
 offset_top = 217.0
@@ -371,31 +362,30 @@ offset_bottom = 309.0
 texture = ExtResource("slot_col")
 expand_mode = 1
 
-[node name="Icon" type="TextureRect" parent="Slots/Col3"]
+[node name="Icon" type="TextureRect" parent="Slots/Col3" unique_id=1083189800]
 layout_mode = 0
 offset_left = 15.6
 offset_top = 15.6
 offset_right = 76.4
 offset_bottom = 76.4
 mouse_filter = 2
+texture = ExtResource("icon_6")
 expand_mode = 1
 stretch_mode = 5
-texture = ExtResource("icon_6")
 
-[node name="Count" type="Label" parent="Slots/Col3"]
+[node name="Count" type="Label" parent="Slots/Col3" unique_id=1631105956]
 visible = false
 layout_mode = 0
 offset_left = 32.2
 offset_top = 62.0
 offset_right = 84.0
 offset_bottom = 86.0
-mouse_filter = 2
 theme_override_colors/font_color = Color(0.29, 0.2, 0.12, 1)
 theme_override_font_sizes/font_size = 15
 horizontal_alignment = 2
 vertical_alignment = 2
 
-[node name="Highlight" type="Panel" parent="Slots/Col3"]
+[node name="Highlight" type="Panel" parent="Slots/Col3" unique_id=529434880]
 visible = false
 layout_mode = 0
 offset_left = -3.0
@@ -405,7 +395,7 @@ offset_bottom = 95.0
 mouse_filter = 2
 theme_override_styles/panel = SubResource("Highlight")
 
-[node name="Col4" type="TextureRect" parent="Slots"]
+[node name="Col4" type="TextureRect" parent="Slots" unique_id=715520295]
 layout_mode = 0
 offset_left = 665.0
 offset_top = 310.0
@@ -414,31 +404,30 @@ offset_bottom = 402.0
 texture = ExtResource("slot_col")
 expand_mode = 1
 
-[node name="Icon" type="TextureRect" parent="Slots/Col4"]
+[node name="Icon" type="TextureRect" parent="Slots/Col4" unique_id=1641128090]
 layout_mode = 0
 offset_left = 15.6
 offset_top = 15.6
 offset_right = 76.4
 offset_bottom = 76.4
 mouse_filter = 2
+texture = ExtResource("icon_7")
 expand_mode = 1
 stretch_mode = 5
-texture = ExtResource("icon_7")
 
-[node name="Count" type="Label" parent="Slots/Col4"]
+[node name="Count" type="Label" parent="Slots/Col4" unique_id=702367311]
 visible = false
 layout_mode = 0
 offset_left = 32.2
 offset_top = 62.0
 offset_right = 84.0
 offset_bottom = 86.0
-mouse_filter = 2
 theme_override_colors/font_color = Color(0.29, 0.2, 0.12, 1)
 theme_override_font_sizes/font_size = 15
 horizontal_alignment = 2
 vertical_alignment = 2
 
-[node name="Highlight" type="Panel" parent="Slots/Col4"]
+[node name="Highlight" type="Panel" parent="Slots/Col4" unique_id=717731054]
 visible = false
 layout_mode = 0
 offset_left = -3.0
@@ -448,7 +437,7 @@ offset_bottom = 95.0
 mouse_filter = 2
 theme_override_styles/panel = SubResource("Highlight")
 
-[node name="Col5" type="TextureRect" parent="Slots"]
+[node name="Col5" type="TextureRect" parent="Slots" unique_id=674736823]
 layout_mode = 0
 offset_left = 765.0
 offset_top = 310.0
@@ -457,31 +446,30 @@ offset_bottom = 402.0
 texture = ExtResource("slot_col")
 expand_mode = 1
 
-[node name="Icon" type="TextureRect" parent="Slots/Col5"]
+[node name="Icon" type="TextureRect" parent="Slots/Col5" unique_id=1356048344]
 layout_mode = 0
 offset_left = 15.6
 offset_top = 15.6
 offset_right = 76.4
 offset_bottom = 76.4
 mouse_filter = 2
+texture = ExtResource("icon_8")
 expand_mode = 1
 stretch_mode = 5
-texture = ExtResource("icon_8")
 
-[node name="Count" type="Label" parent="Slots/Col5"]
+[node name="Count" type="Label" parent="Slots/Col5" unique_id=1846996073]
 visible = false
 layout_mode = 0
 offset_left = 32.2
 offset_top = 62.0
 offset_right = 84.0
 offset_bottom = 86.0
-mouse_filter = 2
 theme_override_colors/font_color = Color(0.29, 0.2, 0.12, 1)
 theme_override_font_sizes/font_size = 15
 horizontal_alignment = 2
 vertical_alignment = 2
 
-[node name="Highlight" type="Panel" parent="Slots/Col5"]
+[node name="Highlight" type="Panel" parent="Slots/Col5" unique_id=877120303]
 visible = false
 layout_mode = 0
 offset_left = -3.0
@@ -491,7 +479,7 @@ offset_bottom = 95.0
 mouse_filter = 2
 theme_override_styles/panel = SubResource("Highlight")
 
-[node name="Col6" type="TextureRect" parent="Slots"]
+[node name="Col6" type="TextureRect" parent="Slots" unique_id=301908714]
 layout_mode = 0
 offset_left = 864.0
 offset_top = 310.0
@@ -500,31 +488,30 @@ offset_bottom = 402.0
 texture = ExtResource("slot_col")
 expand_mode = 1
 
-[node name="Icon" type="TextureRect" parent="Slots/Col6"]
+[node name="Icon" type="TextureRect" parent="Slots/Col6" unique_id=1690793348]
 layout_mode = 0
 offset_left = 15.6
 offset_top = 15.6
 offset_right = 76.4
 offset_bottom = 76.4
 mouse_filter = 2
+texture = ExtResource("icon_9")
 expand_mode = 1
 stretch_mode = 5
-texture = ExtResource("icon_9")
 
-[node name="Count" type="Label" parent="Slots/Col6"]
+[node name="Count" type="Label" parent="Slots/Col6" unique_id=1714173544]
 visible = false
 layout_mode = 0
 offset_left = 32.2
 offset_top = 62.0
 offset_right = 84.0
 offset_bottom = 86.0
-mouse_filter = 2
 theme_override_colors/font_color = Color(0.29, 0.2, 0.12, 1)
 theme_override_font_sizes/font_size = 15
 horizontal_alignment = 2
 vertical_alignment = 2
 
-[node name="Highlight" type="Panel" parent="Slots/Col6"]
+[node name="Highlight" type="Panel" parent="Slots/Col6" unique_id=1133702655]
 visible = false
 layout_mode = 0
 offset_left = -3.0
@@ -534,7 +521,7 @@ offset_bottom = 95.0
 mouse_filter = 2
 theme_override_styles/panel = SubResource("Highlight")
 
-[node name="Col7" type="TextureRect" parent="Slots"]
+[node name="Col7" type="TextureRect" parent="Slots" unique_id=924195277]
 layout_mode = 0
 offset_left = 964.0
 offset_top = 310.0
@@ -543,31 +530,30 @@ offset_bottom = 402.0
 texture = ExtResource("slot_col")
 expand_mode = 1
 
-[node name="Icon" type="TextureRect" parent="Slots/Col7"]
+[node name="Icon" type="TextureRect" parent="Slots/Col7" unique_id=74995321]
 layout_mode = 0
 offset_left = 15.6
 offset_top = 15.6
 offset_right = 76.4
 offset_bottom = 76.4
 mouse_filter = 2
+texture = ExtResource("icon_10")
 expand_mode = 1
 stretch_mode = 5
-texture = ExtResource("icon_10")
 
-[node name="Count" type="Label" parent="Slots/Col7"]
+[node name="Count" type="Label" parent="Slots/Col7" unique_id=16504702]
 visible = false
 layout_mode = 0
 offset_left = 32.2
 offset_top = 62.0
 offset_right = 84.0
 offset_bottom = 86.0
-mouse_filter = 2
 theme_override_colors/font_color = Color(0.29, 0.2, 0.12, 1)
 theme_override_font_sizes/font_size = 15
 horizontal_alignment = 2
 vertical_alignment = 2
 
-[node name="Highlight" type="Panel" parent="Slots/Col7"]
+[node name="Highlight" type="Panel" parent="Slots/Col7" unique_id=2138056988]
 visible = false
 layout_mode = 0
 offset_left = -3.0
@@ -577,7 +563,7 @@ offset_bottom = 95.0
 mouse_filter = 2
 theme_override_styles/panel = SubResource("Highlight")
 
-[node name="Desc" type="TextureRect" parent="."]
+[node name="Desc" type="TextureRect" parent="." unique_id=1098912183]
 layout_mode = 0
 offset_left = 643.0
 offset_top = 424.6
@@ -587,7 +573,7 @@ mouse_filter = 2
 texture = ExtResource("desc")
 expand_mode = 1
 
-[node name="Name" type="Label" parent="Desc"]
+[node name="Name" type="Label" parent="Desc" unique_id=628266541]
 layout_mode = 0
 offset_left = 44.0
 offset_top = 16.0
@@ -597,23 +583,21 @@ theme_override_colors/font_color = Color(0.24, 0.15, 0.08, 1)
 theme_override_constants/outline_size = 0
 theme_override_font_sizes/font_size = 20
 
-[node name="Body" type="Label" parent="Desc"]
+[node name="Body" type="Label" parent="Desc" unique_id=1160060231]
 layout_mode = 0
 offset_left = 44.0
 offset_top = 46.0
 offset_right = 393.6
 offset_bottom = 138.0
 theme_override_colors/font_color = Color(0.22, 0.15, 0.09, 1)
-theme_override_constants/outline_size = 0
 theme_override_constants/line_spacing = 1
+theme_override_constants/outline_size = 0
 theme_override_font_sizes/font_size = 16
 autowrap_mode = 3
 text_overrun_behavior = 3
 
-[node name="Frame" type="TextureRect" parent="."]
+[node name="Frame" type="TextureRect" parent="." unique_id=1874407797]
 layout_mode = 0
-offset_left = 0.0
-offset_top = 0.0
 offset_right = 1152.0
 offset_bottom = 648.0
 mouse_filter = 2

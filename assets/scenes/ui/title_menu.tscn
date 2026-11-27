@@ -1,23 +1,27 @@
-[gd_scene format=3]
+[gd_scene format=3 uid="uid://b86f7h6n3wfbo"]
 
-[ext_resource type="Script" path="res://assets/scripts/ui/TitleMenu.cs" id="1_title"]
-[ext_resource type="Theme" path="res://assets/data/ui/ui_theme.tres" id="2_theme"]
-[ext_resource type="Texture2D" path="res://assets/art/ui/title/tex_ui_title_bg.png" id="t_bg"]
-[ext_resource type="Texture2D" path="res://assets/art/ui/title/tex_ui_title_figure.png" id="t_figure"]
-[ext_resource type="Texture2D" path="res://assets/art/ui/title/tex_ui_title_frame.png" id="t_frame"]
-[ext_resource type="Texture2D" path="res://assets/art/ui/title/tex_ui_title_hand_left.png" id="t_hand_left"]
-[ext_resource type="Texture2D" path="res://assets/art/ui/title/tex_ui_title_hand_right.png" id="t_hand_right"]
-[ext_resource type="Texture2D" path="res://assets/art/ui/title/tex_ui_title_title.png" id="t_title"]
-[ext_resource type="Texture2D" path="res://assets/art/ui/title/tex_ui_title_title_glow.png" id="t_title_glow"]
-[ext_resource type="Texture2D" path="res://assets/art/ui/title/tex_ui_title_language.png" id="t_language"]
-[ext_resource type="Texture2D" path="res://assets/art/ui/title/tex_ui_title_dust.png" id="t_dust"]
-[ext_resource type="Texture2D" path="res://assets/art/ui/title/tex_ui_title_btn_wake.png" id="t_btn_wake"]
-[ext_resource type="Texture2D" path="res://assets/art/ui/title/tex_ui_title_btn_continue.png" id="t_btn_continue"]
-[ext_resource type="Texture2D" path="res://assets/art/ui/title/tex_ui_title_btn_settings.png" id="t_btn_settings"]
-[ext_resource type="Texture2D" path="res://assets/art/ui/title/tex_ui_title_btn_credits.png" id="t_btn_credits"]
-[ext_resource type="Texture2D" path="res://assets/art/ui/title/tex_ui_title_btn_quit.png" id="t_btn_quit"]
-[ext_resource type="Texture2D" path="res://assets/art/ui/tex_ui_dialog_fill.png" id="d_fill"]
-[ext_resource type="Texture2D" path="res://assets/art/ui/tex_ui_dialog_frame.png" id="d_frame"]
+[ext_resource type="Script" uid="uid://mf2wsawy384i" path="res://assets/scripts/ui/TitleMenu.cs" id="1_title"]
+[ext_resource type="Theme" uid="uid://dcggxhi52el0x" path="res://assets/data/ui/ui_theme.tres" id="2_theme"]
+[ext_resource type="Texture2D" uid="uid://mcfcrdm6vq4p" path="res://assets/art/ui/tex_ui_dialog_fill.png" id="d_fill"]
+[ext_resource type="Texture2D" uid="uid://5hr65q87et84" path="res://assets/art/ui/tex_ui_dialog_frame.png" id="d_frame"]
+[ext_resource type="Texture2D" uid="uid://cj3oxd3qxenkc" path="res://assets/art/ui/title/tex_ui_title_bg.png" id="t_bg"]
+[ext_resource type="Texture2D" uid="uid://bhfs0nm0sdjs8" path="res://assets/art/ui/title/tex_ui_title_btn_continue.png" id="t_btn_continue"]
+[ext_resource type="Texture2D" uid="uid://dp3v8awj4te2s" path="res://assets/art/ui/title/tex_ui_title_btn_credits.png" id="t_btn_credits"]
+[ext_resource type="Texture2D" uid="uid://c8khjju2kpbp7" path="res://assets/art/ui/title/tex_ui_title_btn_quit.png" id="t_btn_quit"]
+[ext_resource type="Texture2D" uid="uid://cdf4se6b5yxc0" path="res://assets/art/ui/title/tex_ui_title_btn_settings.png" id="t_btn_settings"]
+[ext_resource type="Texture2D" uid="uid://sfcmo7vgfkxu" path="res://assets/art/ui/title/tex_ui_title_btn_wake.png" id="t_btn_wake"]
+[ext_resource type="Texture2D" uid="uid://d1r3egnlox3bp" path="res://assets/art/ui/title/tex_ui_title_dust.png" id="t_dust"]
+[ext_resource type="Texture2D" uid="uid://bcvtpsba472yh" path="res://assets/art/ui/title/tex_ui_title_figure.png" id="t_figure"]
+[ext_resource type="Texture2D" uid="uid://dhu5k4lwk5ppl" path="res://assets/art/ui/title/tex_ui_title_frame.png" id="t_frame"]
+[ext_resource type="Texture2D" uid="uid://coqt1dr5to3uu" path="res://assets/art/ui/title/tex_ui_title_hand_left.png" id="t_hand_left"]
+[ext_resource type="Texture2D" uid="uid://cgb4qn5gq8i17" path="res://assets/art/ui/title/tex_ui_title_hand_right.png" id="t_hand_right"]
+[ext_resource type="Texture2D" uid="uid://cqcgqyjbqvj8q" path="res://assets/art/ui/title/tex_ui_title_language.png" id="t_language"]
+[ext_resource type="Texture2D" uid="uid://dfhjyfyqqpkbn" path="res://assets/art/ui/title/tex_ui_title_title.png" id="t_title"]
+[ext_resource type="Texture2D" uid="uid://dq088u25ru1jo" path="res://assets/art/ui/title/tex_ui_title_title_glow.png" id="t_title_glow"]
+
+[sub_resource type="Gradient" id="Dust_Fade"]
+offsets = PackedFloat32Array(0, 0.2, 0.75, 1)
+colors = PackedColorArray(1, 1, 1, 0, 1, 1, 1, 0.9, 1, 1, 1, 0.6, 1, 1, 1, 0)
 
 [sub_resource type="Animation" id="Anim_idle"]
 resource_name = "idle"
@@ -45,7 +49,7 @@ tracks/1/keys = {
 "times": PackedFloat32Array(0, 2, 4),
 "transitions": PackedFloat32Array(1, 1, 1),
 "update": 0,
-"values": [Vector2(0.0, 243.6), Vector2(0.0, 238.6), Vector2(0.0, 243.6)]
+"values": [Vector2(0, 243.6), Vector2(0, 238.6), Vector2(0, 243.6)]
 }
 tracks/2/type = "value"
 tracks/2/imported = false
@@ -77,23 +81,19 @@ _data = {
 &"idle": SubResource("Anim_idle")
 }
 
-[sub_resource type="Gradient" id="Dust_Fade"]
-offsets = PackedFloat32Array(0, 0.2, 0.75, 1)
-colors = PackedColorArray(1, 1, 1, 0, 1, 1, 1, 0.9, 1, 1, 1, 0.6, 1, 1, 1, 0)
-
 [sub_resource type="StyleBoxFlat" id="Style_Error"]
+content_margin_left = 16.0
+content_margin_top = 12.0
+content_margin_right = 16.0
+content_margin_bottom = 12.0
 bg_color = Color(0.12, 0.08, 0.06, 0.92)
 border_width_left = 2
 border_width_top = 2
 border_width_right = 2
 border_width_bottom = 2
 border_color = Color(0.8, 0.62, 0.35, 1)
-content_margin_left = 16.0
-content_margin_top = 12.0
-content_margin_right = 16.0
-content_margin_bottom = 12.0
 
-[node name="TitleMenu" type="Control" node_paths=PackedStringArray("NewGameButton", "ContinueButton", "QuitButton", "SettingsButton", "CreditsButton", "Overlay", "SettingsPanel", "CreditsPanel", "MusicSlider", "SfxSlider", "SettingsBack", "CreditsBack", "ErrorPopup", "ErrorTitle", "ErrorText", "ErrorOkButton")]
+[node name="TitleMenu" type="Control" unique_id=1607507737 node_paths=PackedStringArray("NewGameButton", "ContinueButton", "QuitButton", "SettingsButton", "CreditsButton", "Overlay", "SettingsPanel", "CreditsPanel", "MusicSlider", "SfxSlider", "SettingsBack", "CreditsBack", "ErrorPopup", "ErrorTitle", "ErrorText", "ErrorOkButton")]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -119,7 +119,7 @@ ErrorTitle = NodePath("ErrorPopup/Items/Title")
 ErrorText = NodePath("ErrorPopup/Items/Text")
 ErrorOkButton = NodePath("ErrorPopup/Items/Ok")
 
-[node name="Background" type="TextureRect" parent="."]
+[node name="Background" type="TextureRect" parent="." unique_id=1117791491]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -131,7 +131,7 @@ texture = ExtResource("t_bg")
 expand_mode = 1
 stretch_mode = 6
 
-[node name="Figure" type="TextureRect" parent="."]
+[node name="Figure" type="TextureRect" parent="." unique_id=88293747]
 layout_mode = 0
 offset_left = 394.8
 offset_top = 130.2
@@ -141,7 +141,7 @@ mouse_filter = 2
 texture = ExtResource("t_figure")
 expand_mode = 1
 
-[node name="Frame" type="TextureRect" parent="."]
+[node name="Frame" type="TextureRect" parent="." unique_id=858634899]
 layout_mode = 0
 offset_left = 29.7
 offset_top = 11.3
@@ -151,9 +151,8 @@ mouse_filter = 2
 texture = ExtResource("t_frame")
 expand_mode = 1
 
-[node name="HandLeft" type="TextureRect" parent="."]
+[node name="HandLeft" type="TextureRect" parent="." unique_id=400805498]
 layout_mode = 0
-offset_left = 0.0
 offset_top = 243.6
 offset_right = 378.1
 offset_bottom = 648.1
@@ -161,7 +160,7 @@ mouse_filter = 2
 texture = ExtResource("t_hand_left")
 expand_mode = 1
 
-[node name="HandRight" type="TextureRect" parent="."]
+[node name="HandRight" type="TextureRect" parent="." unique_id=1917566165]
 layout_mode = 0
 offset_left = 790.1
 offset_top = 227.4
@@ -171,12 +170,12 @@ mouse_filter = 2
 texture = ExtResource("t_hand_right")
 expand_mode = 1
 
-[node name="Dust" type="CPUParticles2D" parent="."]
+[node name="Dust" type="CPUParticles2D" parent="." unique_id=1612657480]
 position = Vector2(576, 660)
 amount = 45
+texture = ExtResource("t_dust")
 lifetime = 9.0
 preprocess = 9.0
-texture = ExtResource("t_dust")
 emission_shape = 3
 emission_rect_extents = Vector2(576, 10)
 direction = Vector2(0, -1)
@@ -188,7 +187,7 @@ scale_amount_min = 0.12
 scale_amount_max = 0.3
 color_ramp = SubResource("Dust_Fade")
 
-[node name="Buttons" type="Control" parent="."]
+[node name="Buttons" type="Control" parent="." unique_id=2012148059]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -197,25 +196,24 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 
-[node name="Wake" type="TextureButton" parent="Buttons"]
+[node name="Wake" type="TextureButton" parent="Buttons" unique_id=1253585147]
 layout_mode = 0
 offset_left = 446.6
 offset_top = 308.9
 offset_right = 705.4
 offset_bottom = 442.9
-pivot_offset = Vector2(129.4, 67.0)
+pivot_offset = Vector2(129.4, 67)
 texture_normal = ExtResource("t_btn_wake")
 ignore_texture_size = true
 stretch_mode = 5
 
-[node name="Label" type="Label" parent="Buttons/Wake"]
+[node name="Label" type="Label" parent="Buttons/Wake" unique_id=2118538268]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-mouse_filter = 2
 theme_override_colors/font_color = Color(0.28, 0.16, 0.08, 1)
 theme_override_constants/outline_size = 0
 theme_override_font_sizes/font_size = 26
@@ -223,7 +221,7 @@ text = "醒来"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="Continue" type="TextureButton" parent="Buttons"]
+[node name="Continue" type="TextureButton" parent="Buttons" unique_id=509044911]
 layout_mode = 0
 offset_left = 301.9
 offset_top = 447.7
@@ -234,14 +232,13 @@ texture_normal = ExtResource("t_btn_continue")
 ignore_texture_size = true
 stretch_mode = 5
 
-[node name="Label" type="Label" parent="Buttons/Continue"]
+[node name="Label" type="Label" parent="Buttons/Continue" unique_id=1101587832]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-mouse_filter = 2
 theme_override_colors/font_color = Color(0.28, 0.16, 0.08, 1)
 theme_override_constants/outline_size = 0
 theme_override_font_sizes/font_size = 18
@@ -249,7 +246,7 @@ text = "再续征程"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="Settings" type="TextureButton" parent="Buttons"]
+[node name="Settings" type="TextureButton" parent="Buttons" unique_id=1447059898]
 layout_mode = 0
 offset_left = 690.8
 offset_top = 447.2
@@ -260,14 +257,13 @@ texture_normal = ExtResource("t_btn_settings")
 ignore_texture_size = true
 stretch_mode = 5
 
-[node name="Label" type="Label" parent="Buttons/Settings"]
+[node name="Label" type="Label" parent="Buttons/Settings" unique_id=977483857]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-mouse_filter = 2
 theme_override_colors/font_color = Color(0.28, 0.16, 0.08, 1)
 theme_override_constants/outline_size = 0
 theme_override_font_sizes/font_size = 20
@@ -275,7 +271,7 @@ text = "设置"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="Credits" type="TextureButton" parent="Buttons"]
+[node name="Credits" type="TextureButton" parent="Buttons" unique_id=151735411]
 layout_mode = 0
 offset_left = 498.5
 offset_top = 458.5
@@ -286,14 +282,13 @@ texture_normal = ExtResource("t_btn_credits")
 ignore_texture_size = true
 stretch_mode = 5
 
-[node name="Label" type="Label" parent="Buttons/Credits"]
+[node name="Label" type="Label" parent="Buttons/Credits" unique_id=243207837]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-mouse_filter = 2
 theme_override_colors/font_color = Color(0.28, 0.16, 0.08, 1)
 theme_override_constants/outline_size = 0
 theme_override_font_sizes/font_size = 13
@@ -301,7 +296,7 @@ text = "制作人员名单"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="Quit" type="TextureButton" parent="Buttons"]
+[node name="Quit" type="TextureButton" parent="Buttons" unique_id=2084698666]
 layout_mode = 0
 offset_left = 496.3
 offset_top = 531.4
@@ -312,14 +307,13 @@ texture_normal = ExtResource("t_btn_quit")
 ignore_texture_size = true
 stretch_mode = 5
 
-[node name="Label" type="Label" parent="Buttons/Quit"]
+[node name="Label" type="Label" parent="Buttons/Quit" unique_id=2140479242]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-mouse_filter = 2
 theme_override_colors/font_color = Color(0.28, 0.16, 0.08, 1)
 theme_override_constants/outline_size = 0
 theme_override_font_sizes/font_size = 20
@@ -327,7 +321,8 @@ text = "退出"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="TitleGlow" type="TextureRect" parent="."]
+[node name="TitleGlow" type="TextureRect" parent="." unique_id=117187247]
+modulate = Color(1, 1, 1, 0.6)
 layout_mode = 0
 offset_left = 130.7
 offset_top = 2.7
@@ -336,9 +331,8 @@ offset_bottom = 269.0
 mouse_filter = 2
 texture = ExtResource("t_title_glow")
 expand_mode = 1
-modulate = Color(1, 1, 1, 0.6)
 
-[node name="Title" type="TextureRect" parent="."]
+[node name="Title" type="TextureRect" parent="." unique_id=1931219894]
 layout_mode = 0
 offset_left = 152.3
 offset_top = 24.3
@@ -348,7 +342,7 @@ mouse_filter = 2
 texture = ExtResource("t_title")
 expand_mode = 1
 
-[node name="Language" type="TextureRect" parent="."]
+[node name="Language" type="TextureRect" parent="." unique_id=781714782]
 layout_mode = 0
 offset_left = 961.9
 offset_top = 37.8
@@ -358,13 +352,11 @@ mouse_filter = 2
 texture = ExtResource("t_language")
 expand_mode = 1
 
-[node name="Idle" type="AnimationPlayer" parent="."]
-libraries = {
-&"": SubResource("AnimLib")
-}
-autoplay = "idle"
+[node name="Idle" type="AnimationPlayer" parent="." unique_id=944687132]
+libraries/ = SubResource("AnimLib")
+autoplay = &"idle"
 
-[node name="Overlay" type="ColorRect" parent="."]
+[node name="Overlay" type="ColorRect" parent="." unique_id=384147279]
 visible = false
 layout_mode = 1
 anchors_preset = 15
@@ -374,7 +366,7 @@ grow_horizontal = 2
 grow_vertical = 2
 color = Color(0, 0, 0, 0.55)
 
-[node name="SettingsPanel" type="Control" parent="."]
+[node name="SettingsPanel" type="Control" parent="." unique_id=242972752]
 visible = false
 layout_mode = 1
 anchors_preset = 8
@@ -389,157 +381,146 @@ offset_bottom = 150.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="Frame" type="Control" parent="SettingsPanel"]
-layout_mode = 0
+[node name="Frame" type="Control" parent="SettingsPanel" unique_id=1296423232]
+anchors_preset = 0
 offset_right = 960.0
 offset_bottom = 400.0
-scale = Vector2(0.7500, 0.7500)
+scale = Vector2(0.75, 0.75)
 mouse_filter = 2
 
-[node name="Fill" type="Control" parent="SettingsPanel/Frame"]
+[node name="Fill" type="Control" parent="SettingsPanel/Frame" unique_id=2066238157]
 modulate = Color(0.353, 0.353, 0.353, 0.85)
-layout_mode = 0
+anchors_preset = 0
 offset_right = 960.0
 offset_bottom = 400.0
 mouse_filter = 2
 
-[node name="Left" type="NinePatchRect" parent="SettingsPanel/Frame/Fill"]
+[node name="Left" type="NinePatchRect" parent="SettingsPanel/Frame/Fill" unique_id=2087225688]
 layout_mode = 0
 offset_right = 480.0
 offset_bottom = 400.0
-mouse_filter = 2
 texture = ExtResource("d_fill")
 region_rect = Rect2(0, 0, 704, 400)
 patch_margin_left = 123
 patch_margin_right = 73
 
-[node name="Right" type="NinePatchRect" parent="SettingsPanel/Frame/Fill"]
+[node name="Right" type="NinePatchRect" parent="SettingsPanel/Frame/Fill" unique_id=1980407328]
 layout_mode = 0
 offset_left = 480.0
 offset_right = 960.0
 offset_bottom = 400.0
-mouse_filter = 2
 texture = ExtResource("d_fill")
 region_rect = Rect2(704, 0, 682, 400)
 patch_margin_left = 73
 patch_margin_right = 123
 
-[node name="Lines" type="Control" parent="SettingsPanel/Frame"]
-layout_mode = 0
+[node name="Lines" type="Control" parent="SettingsPanel/Frame" unique_id=122410405]
+anchors_preset = 0
 offset_right = 960.0
 offset_bottom = 400.0
 mouse_filter = 2
 
-[node name="Left" type="NinePatchRect" parent="SettingsPanel/Frame/Lines"]
+[node name="Left" type="NinePatchRect" parent="SettingsPanel/Frame/Lines" unique_id=877751718]
 layout_mode = 0
 offset_right = 480.0
 offset_bottom = 400.0
-mouse_filter = 2
 texture = ExtResource("d_frame")
 region_rect = Rect2(0, 0, 704, 400)
 patch_margin_left = 123
 patch_margin_right = 73
 
-[node name="Right" type="NinePatchRect" parent="SettingsPanel/Frame/Lines"]
+[node name="Right" type="NinePatchRect" parent="SettingsPanel/Frame/Lines" unique_id=1782034583]
 layout_mode = 0
 offset_left = 480.0
 offset_right = 960.0
 offset_bottom = 400.0
-mouse_filter = 2
 texture = ExtResource("d_frame")
 region_rect = Rect2(704, 0, 682, 400)
 patch_margin_left = 73
 patch_margin_right = 123
 
-[node name="Title" type="Label" parent="SettingsPanel"]
+[node name="Title" type="Label" parent="SettingsPanel" unique_id=1891243236]
 layout_mode = 0
-offset_left = 110
-offset_top = 44
-offset_right = 610
-offset_bottom = 80
+offset_left = 102.0
+offset_top = 58.0
+offset_right = 602.0
+offset_bottom = 94.0
 theme_override_colors/font_color = Color(0.96, 0.86, 0.6, 1)
 theme_override_font_sizes/font_size = 26
 text = "设置"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="Music" type="Control" parent="SettingsPanel"]
-layout_mode = 0
+[node name="Music" type="Control" parent="SettingsPanel" unique_id=1656051059]
+anchors_preset = 0
 offset_left = 130.0
-offset_top = 100
-offset_right = 590
-offset_bottom = 140
+offset_top = 100.0
+offset_right = 590.0
+offset_bottom = 140.0
 mouse_filter = 2
 
-[node name="Label" type="Label" parent="SettingsPanel/Music"]
+[node name="Label" type="Label" parent="SettingsPanel/Music" unique_id=154457612]
 layout_mode = 0
-offset_left = 0
-offset_top = 0
-offset_right = 130
-offset_bottom = 40
+offset_right = 130.0
+offset_bottom = 40.0
 theme_override_colors/font_color = Color(0.95, 0.9, 0.8, 1)
 theme_override_font_sizes/font_size = 20
 text = "音乐音量"
-horizontal_alignment = 0
 vertical_alignment = 1
 
-[node name="Slider" type="HSlider" parent="SettingsPanel/Music"]
+[node name="Slider" type="HSlider" parent="SettingsPanel/Music" unique_id=357794091]
 layout_mode = 0
 offset_left = 140.0
 offset_top = 8.0
-offset_right = 460
+offset_right = 460.0
 offset_bottom = 32.0
 value = 100.0
 rounded = true
 
-[node name="Sfx" type="Control" parent="SettingsPanel"]
-layout_mode = 0
+[node name="Sfx" type="Control" parent="SettingsPanel" unique_id=1837536519]
+anchors_preset = 0
 offset_left = 130.0
-offset_top = 150
-offset_right = 590
-offset_bottom = 190
+offset_top = 150.0
+offset_right = 590.0
+offset_bottom = 190.0
 mouse_filter = 2
 
-[node name="Label" type="Label" parent="SettingsPanel/Sfx"]
+[node name="Label" type="Label" parent="SettingsPanel/Sfx" unique_id=473857160]
 layout_mode = 0
-offset_left = 0
-offset_top = 0
-offset_right = 130
-offset_bottom = 40
+offset_right = 130.0
+offset_bottom = 40.0
 theme_override_colors/font_color = Color(0.95, 0.9, 0.8, 1)
 theme_override_font_sizes/font_size = 20
 text = "音效音量"
-horizontal_alignment = 0
 vertical_alignment = 1
 
-[node name="Slider" type="HSlider" parent="SettingsPanel/Sfx"]
+[node name="Slider" type="HSlider" parent="SettingsPanel/Sfx" unique_id=53514885]
 layout_mode = 0
 offset_left = 140.0
 offset_top = 8.0
-offset_right = 460
+offset_right = 460.0
 offset_bottom = 32.0
 value = 100.0
 rounded = true
 
-[node name="Back" type="TextureButton" parent="SettingsPanel"]
+[node name="Back" type="TextureButton" parent="SettingsPanel" unique_id=1079138348]
 layout_mode = 0
 offset_left = 295.0
-offset_top = 204
+offset_top = 204.0
 offset_right = 425.0
-offset_bottom = 266
-pivot_offset = Vector2(65.0, 31.0)
+offset_bottom = 266.0
+pivot_offset = Vector2(65, 31)
 texture_normal = ExtResource("t_btn_quit")
 ignore_texture_size = true
 stretch_mode = 5
 
-[node name="Label" type="Label" parent="SettingsPanel/Back"]
+[node name="Label" type="Label" parent="SettingsPanel/Back" unique_id=553747744]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-mouse_filter = 2
 theme_override_colors/font_color = Color(0.28, 0.16, 0.08, 1)
 theme_override_constants/outline_size = 0
 theme_override_font_sizes/font_size = 18
@@ -547,7 +528,7 @@ text = "返回"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="CreditsPanel" type="Control" parent="."]
+[node name="CreditsPanel" type="Control" parent="." unique_id=798594784]
 visible = false
 layout_mode = 1
 anchors_preset = 8
@@ -562,85 +543,81 @@ offset_bottom = 150.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="Frame" type="Control" parent="CreditsPanel"]
-layout_mode = 0
+[node name="Frame" type="Control" parent="CreditsPanel" unique_id=1410459709]
+anchors_preset = 0
 offset_right = 960.0
 offset_bottom = 400.0
-scale = Vector2(0.7500, 0.7500)
+scale = Vector2(0.75, 0.75)
 mouse_filter = 2
 
-[node name="Fill" type="Control" parent="CreditsPanel/Frame"]
+[node name="Fill" type="Control" parent="CreditsPanel/Frame" unique_id=349261695]
 modulate = Color(0.353, 0.353, 0.353, 0.85)
-layout_mode = 0
+anchors_preset = 0
 offset_right = 960.0
 offset_bottom = 400.0
 mouse_filter = 2
 
-[node name="Left" type="NinePatchRect" parent="CreditsPanel/Frame/Fill"]
+[node name="Left" type="NinePatchRect" parent="CreditsPanel/Frame/Fill" unique_id=758942436]
 layout_mode = 0
 offset_right = 480.0
 offset_bottom = 400.0
-mouse_filter = 2
 texture = ExtResource("d_fill")
 region_rect = Rect2(0, 0, 704, 400)
 patch_margin_left = 123
 patch_margin_right = 73
 
-[node name="Right" type="NinePatchRect" parent="CreditsPanel/Frame/Fill"]
+[node name="Right" type="NinePatchRect" parent="CreditsPanel/Frame/Fill" unique_id=2040130069]
 layout_mode = 0
 offset_left = 480.0
 offset_right = 960.0
 offset_bottom = 400.0
-mouse_filter = 2
 texture = ExtResource("d_fill")
 region_rect = Rect2(704, 0, 682, 400)
 patch_margin_left = 73
 patch_margin_right = 123
 
-[node name="Lines" type="Control" parent="CreditsPanel/Frame"]
-layout_mode = 0
+[node name="Lines" type="Control" parent="CreditsPanel/Frame" unique_id=738456621]
+anchors_preset = 0
 offset_right = 960.0
 offset_bottom = 400.0
 mouse_filter = 2
 
-[node name="Left" type="NinePatchRect" parent="CreditsPanel/Frame/Lines"]
+[node name="Left" type="NinePatchRect" parent="CreditsPanel/Frame/Lines" unique_id=36060607]
 layout_mode = 0
 offset_right = 480.0
 offset_bottom = 400.0
-mouse_filter = 2
 texture = ExtResource("d_frame")
 region_rect = Rect2(0, 0, 704, 400)
 patch_margin_left = 123
 patch_margin_right = 73
 
-[node name="Right" type="NinePatchRect" parent="CreditsPanel/Frame/Lines"]
+[node name="Right" type="NinePatchRect" parent="CreditsPanel/Frame/Lines" unique_id=2111669507]
 layout_mode = 0
 offset_left = 480.0
 offset_right = 960.0
 offset_bottom = 400.0
-mouse_filter = 2
 texture = ExtResource("d_frame")
 region_rect = Rect2(704, 0, 682, 400)
 patch_margin_left = 73
 patch_margin_right = 123
 
-[node name="Title" type="Label" parent="CreditsPanel"]
+[node name="Title" type="Label" parent="CreditsPanel" unique_id=144827163]
 layout_mode = 0
-offset_left = 110
-offset_top = 44
-offset_right = 610
-offset_bottom = 80
+offset_left = 109.0
+offset_top = 64.0
+offset_right = 609.0
+offset_bottom = 100.0
 theme_override_colors/font_color = Color(0.96, 0.86, 0.6, 1)
 theme_override_font_sizes/font_size = 26
 text = "制作人员名单"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="Text" type="Label" parent="CreditsPanel"]
+[node name="Text" type="Label" parent="CreditsPanel" unique_id=344709736]
 layout_mode = 0
-offset_left = 130.0
+offset_left = 136.0
 offset_top = 90.0
-offset_right = 590
+offset_right = 596.0
 offset_bottom = 200.0
 theme_override_colors/font_color = Color(0.95, 0.9, 0.8, 1)
 theme_override_font_sizes/font_size = 18
@@ -649,25 +626,24 @@ horizontal_alignment = 1
 vertical_alignment = 1
 autowrap_mode = 3
 
-[node name="Back" type="TextureButton" parent="CreditsPanel"]
+[node name="Back" type="TextureButton" parent="CreditsPanel" unique_id=1068242140]
 layout_mode = 0
 offset_left = 295.0
-offset_top = 204
+offset_top = 204.0
 offset_right = 425.0
-offset_bottom = 266
-pivot_offset = Vector2(65.0, 31.0)
+offset_bottom = 266.0
+pivot_offset = Vector2(65, 31)
 texture_normal = ExtResource("t_btn_quit")
 ignore_texture_size = true
 stretch_mode = 5
 
-[node name="Label" type="Label" parent="CreditsPanel/Back"]
+[node name="Label" type="Label" parent="CreditsPanel/Back" unique_id=968101023]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-mouse_filter = 2
 theme_override_colors/font_color = Color(0.28, 0.16, 0.08, 1)
 theme_override_constants/outline_size = 0
 theme_override_font_sizes/font_size = 18
@@ -675,7 +651,7 @@ text = "返回"
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="ErrorPopup" type="PanelContainer" parent="."]
+[node name="ErrorPopup" type="PanelContainer" parent="." unique_id=872121980]
 visible = false
 layout_mode = 1
 anchors_preset = 1
@@ -688,20 +664,20 @@ offset_bottom = 290.0
 grow_horizontal = 0
 theme_override_styles/panel = SubResource("Style_Error")
 
-[node name="Items" type="VBoxContainer" parent="ErrorPopup"]
+[node name="Items" type="VBoxContainer" parent="ErrorPopup" unique_id=428172484]
 layout_mode = 2
 theme_override_constants/separation = 10
 
-[node name="Title" type="Label" parent="ErrorPopup/Items"]
+[node name="Title" type="Label" parent="ErrorPopup/Items" unique_id=355675447]
 layout_mode = 2
 text = "无法开始旅程"
 
-[node name="Text" type="Label" parent="ErrorPopup/Items"]
+[node name="Text" type="Label" parent="ErrorPopup/Items" unique_id=1579457980]
 custom_minimum_size = Vector2(480, 0)
 layout_mode = 2
 autowrap_mode = 3
 
-[node name="Ok" type="Button" parent="ErrorPopup/Items"]
+[node name="Ok" type="Button" parent="ErrorPopup/Items" unique_id=1256058215]
 custom_minimum_size = Vector2(160, 44)
 layout_mode = 2
 size_flags_horizontal = 8
