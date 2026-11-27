@@ -11,8 +11,12 @@
 [ext_resource type="PackedScene" path="res://assets/scenes/enemy/devout.tscn" id="e_devout"]
 [ext_resource type="PackedScene" path="res://assets/scenes/enemy/prayer.tscn" id="e_prayer"]
 [ext_resource type="Script" uid="uid://gcj5me3gasqr" path="res://assets/scripts/narrative/world/StoryTrigger.cs" id="n_story"]
+[ext_resource type="Script" uid="uid://u32l3axuqp6h" path="res://assets/scripts/narrative/world/TutorialZone.cs" id="n_tutorial"]
 
 [sub_resource type="RectangleShape2D" id="Shape_Story_Pilgrims"]
+size = Vector2(128, 256)
+
+[sub_resource type="RectangleShape2D" id="Shape_Tutorial_Attack"]
 size = Vector2(128, 256)
 
 [node name="S1_03" type="Node2D" unique_id=727550247]
@@ -144,3 +148,12 @@ position = Vector2(1378, 938)
 
 [node name="Devout2" parent="Objects" unique_id=2000088531 instance=ExtResource("e_devout")]
 position = Vector2(1339, 947)
+
+[node name="Tutorial_Attack" type="Area2D" parent="Objects" unique_id=485670266]
+position = Vector2(400, 944)
+script = ExtResource("n_tutorial")
+Label = "攻击"
+
+[node name="Shape" type="CollisionShape2D" parent="Objects/Tutorial_Attack" unique_id=967114872]
+position = Vector2(0, -118)
+shape = SubResource("Shape_Tutorial_Attack")

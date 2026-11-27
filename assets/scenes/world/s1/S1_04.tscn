@@ -12,12 +12,16 @@
 [ext_resource type="Texture2D" uid="uid://c6f8nvrcj1d8j" path="res://assets/art/world/bg/s1/tex_bg_s1_04_far_03.png" id="bg_4_0sopn"]
 [ext_resource type="Texture2D" uid="uid://c7kbjxgg52q63" path="res://assets/art/world/bg/s1/tex_bg_s1_04_front.png" id="bg_5_0sopn"]
 [ext_resource type="Script" uid="uid://gcj5me3gasqr" path="res://assets/scripts/narrative/world/StoryTrigger.cs" id="n_story"]
+[ext_resource type="Script" uid="uid://u32l3axuqp6h" path="res://assets/scripts/narrative/world/TutorialZone.cs" id="n_tutorial"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_5gylj"]
 size = Vector2(106, 52)
 
 [sub_resource type="RectangleShape2D" id="Shape_Story_Offering"]
 size = Vector2(96, 96)
+
+[sub_resource type="RectangleShape2D" id="Shape_Tutorial_Block"]
+size = Vector2(128, 256)
 
 [node name="S1_04" type="Node2D" unique_id=704448756]
 script = ExtResource("1_u5ry8")
@@ -165,3 +169,12 @@ position = Vector2(778, 606)
 
 [node name="Devout2" parent="Objects" unique_id=981436510 instance=ExtResource("12_5gylj")]
 position = Vector2(739, 615)
+
+[node name="Tutorial_Block" type="Area2D" parent="Objects" unique_id=1809134608]
+position = Vector2(260, 627)
+script = ExtResource("n_tutorial")
+Label = "格挡"
+
+[node name="Shape" type="CollisionShape2D" parent="Objects/Tutorial_Block" unique_id=1322114766]
+position = Vector2(0, -118)
+shape = SubResource("Shape_Tutorial_Block")

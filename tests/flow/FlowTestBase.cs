@@ -35,6 +35,9 @@ public abstract partial class FlowTestBase : Node
     /// <summary>房间里“走进去自动触发”的剧情（Enter 模式的 StoryTrigger）。默认关掉，理由同上；剧情测试（NarrativeFlowBase）打开。</summary>
     protected virtual bool AutoStories => false;
 
+    /// <summary>新手引导提示（TutorialHints）开不开。默认关：别的流程测试路过引导区时不会多出字幕；测引导的测试打开。</summary>
+    protected virtual bool TutorialHintsOn => false;
+
     /// <summary>
     /// 写完结果文件之后要做的收尾，例如用真实按键按游戏里的“退出”按钮，由游戏自己结束进程。
     /// 为 null 时测试自己退出。不为 null 时，进程的退出码由 Run_Tests 逐场景检查：正常退出必须是 0。
@@ -69,6 +72,7 @@ public abstract partial class FlowTestBase : Node
             if (GetTree().CurrentScene == this) GetTree().CurrentScene = null;
             NarrativeDirector.AutoOpeningEnabled = NarrativeOpening;
             SonOfMud.Narrative.World.StoryTrigger.AutoEnterEnabled = AutoStories;
+            TutorialHints.Enabled = TutorialHintsOn;
             BackupSave();
             Check(Events.Instance != null && MetSysApi.Available, "前提：Events 和 MetSys autoload 都在");
             Events.Instance.GameStartFinished += OnGameStartFinished;

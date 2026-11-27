@@ -109,7 +109,7 @@ try {
     # 结果写到 tests/output/narrative_unit_results.json 和 flow_narrative_<名字>_results.json
     $narrativeCode = 0
     if ($Suite -eq 'all' -or $Suite -eq 'narrative' -or $Suite -eq 'new') {
-        $narrativeScenes = @('tests/narrative/narrative_unit.tscn', 'tests/narrative/narrative_dialog.tscn', 'tests/narrative/narrative_choice.tscn', 'tests/narrative/narrative_map1.tscn', 'tests/narrative/narrative_map4.tscn', 'tests/narrative/narrative_trial.tscn', 'tests/narrative/narrative_story.tscn', 'tests/narrative/narrative_restart.tscn', 'tests/narrative/animated_cg_test.tscn')
+        $narrativeScenes = @('tests/narrative/narrative_unit.tscn', 'tests/narrative/narrative_dialog.tscn', 'tests/narrative/narrative_choice.tscn', 'tests/narrative/narrative_map1.tscn', 'tests/narrative/narrative_tutorial.tscn', 'tests/narrative/narrative_map4.tscn', 'tests/narrative/narrative_trial.tscn', 'tests/narrative/narrative_story.tscn', 'tests/narrative/narrative_restart.tscn', 'tests/narrative/animated_cg_test.tscn')
         foreach ($narrativeScene in $narrativeScenes) {
             $narrativeName = [System.IO.Path]::GetFileNameWithoutExtension($narrativeScene)
             $narrativeArguments = @('--path', $projectPath, '--scene', "res://$narrativeScene", '--audio-driver', 'Dummy', '--fixed-fps', '60', '--log-file', (Join-Path $outputPath "$narrativeName.log"))
