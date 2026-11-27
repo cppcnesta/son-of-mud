@@ -19,6 +19,8 @@ using GDictionary = Godot.Collections.Dictionary;
 /// ④ 真实流程（CP2）：真实打死祈祷泥人、按 E 捡起 → 泥片格亮、1/2、说明对 → 存档、从正式入口继续 → 仍是 1/2。
 ///    真实碰到泥瓶 → 泥瓶格亮。
 /// ⑤ 旧存档的泥肝（CP1）：存档里有 count.泥肝 = 3、没有 obtained.泥肝 → 继续 → 泥肝格 3/5 → 真实按 R 扔完 → 仍亮 0/5 → 存读档仍亮。
+/// ⑥ 人物页（排在 ③ 之后）：一开始只有主角一页、没有箭头和页码；talked.igi 成立后两页，真实点鼠标左右箭头翻页（到头接回来），方向键不翻页；
+///    在 S3_03 存档、读档后还是两页。
 /// </summary>
 public partial class CollectionScreenTest : EnemyFlowBase
 {
@@ -42,6 +44,7 @@ public partial class CollectionScreenTest : EnemyFlowBase
             await KeyChecks();
             await EmptyAndNavigationChecks();
             await LayoutChecks();
+            await PeopleChecks();
             await RealPickupChecks();
             await OldSaveLiverChecks();
         }
@@ -226,9 +229,9 @@ public partial class CollectionScreenTest : EnemyFlowBase
         return info;
     }
 
-    private async Task SaveAndContinue()
+    private async Task SaveAndContinue(string room = "S1_04")
     {
-        await Teleport("S1_04", SpawnPoint.SaveId);
+        await Teleport(room, SpawnPoint.SaveId);
         await KeyTap(RealKeys.Interact);
         await Frames(3);
         await EnterMainGame(StartMode.Continue);
@@ -326,5 +329,86 @@ public partial class CollectionScreenTest : EnemyFlowBase
         await SaveAndContinue();
         info = await SlotAfterTab(1);
         Check(info.StartsWith("True|0/5|泥肝|"), $"存档、读档后：泥肝格仍亮（{info}）");
+    }
+
+    // ---------- ⑥ 人物页 ----------
+
+    private const string MulPortrait = "res://assets/data/narrative/portrait/por_mul_tukul_full.png";
+    private const string IgiPortrait = "res://assets/data/narrative/portrait/por_igi_full.png";
+
+    private string PersonInfo() =>
+        $"{Screen.CurrentPerson}|{Screen.PersonName?.Text}|{Screen.PortraitRect?.Texture?.ResourcePath}|{(Screen.PersonPage is { Visible: true } p ? p.Text : "")}|{Screen.PrevPerson?.IsVisibleInTree() == true}|{Screen.NextPerson?.IsVisibleInTree() == true}";
+
+    private async Task ClickAt(Vector2 position)
+    {
+        foreach (bool pressed in new[] { true, false })
+        {
+            Input.ParseInputEvent(new InputEventMouseButton { ButtonIndex = MouseButton.Left, Pressed = pressed, Position = position, GlobalPosition = position });
+            await Frames(2);
+        }
+    }
+
+    private async Task Click(Control button)
+    {
+        Vector2 pos = button.GetGlobalRect().GetCenter();
+        GetViewport().PushInput(new InputEventMouseMotion { Position = pos, GlobalPosition = pos }, true);
+        await Frames(1);
+        await ClickAt(pos);
+    }
+
+    /// <summary>截一张收集页的图到 tests/output（人工看布局用，不做判断）。</summary>
+    private void Snapshot(string name)
+    {
+        Image image = GetViewport().GetTexture()?.GetImage();
+        if (image == null) return;
+        DirAccess.MakeDirRecursiveAbsolute(ProjectSettings.GlobalizePath("res://tests/output"));
+        image.SavePng(ProjectSettings.GlobalizePath($"res://tests/output/collection_people_{name}.png"));
+    }
+
+    private async Task PeopleChecks()
+    {
+        GameSession.Progress.SetVar("talked.igi", false);
+        await Tab();
+        await Frames(2);
+        string info = PersonInfo();
+        Check(Screen.IsOpen && info == $"mul_tukul|穆尔图库尔|{MulPortrait}||False|False", $"人物页：还没遇到伊吉，只有主角一页，没有箭头和页码（{info}）");
+        Snapshot("1_only_hero");
+        await Tab();
+        await Frames(2);
+
+        // 伊吉第一次说完话时剧本设 talked.igi（见 c_city.orph「伊吉」），这里直接设同一个变量
+        GameSession.Progress.SetVar("talked.igi", true);
+        await Tab();
+        await Frames(2);
+        info = PersonInfo();
+        Check(info == $"mul_tukul|穆尔图库尔|{MulPortrait}|1 / 2|True|True", $"talked.igi 成立后：两页，先显示主角，出现左右箭头和页码 1 / 2（{info}）");
+        Snapshot("2_hero_of_two");
+
+        int selected = Screen.Selected;
+        await Click(Screen.NextPerson);
+        info = PersonInfo();
+        Check(info == $"igi|伊吉|{IgiPortrait}|2 / 2|True|True" && Screen.Selected == selected, $"鼠标点右箭头：翻到伊吉，全身立绘换成伊吉，2 / 2；右边选中的格子不变（{info}）");
+        Snapshot("3_igi");
+        await Click(Screen.NextPerson);
+        string wrapped = PersonInfo();
+        await Click(Screen.PrevPerson);
+        info = PersonInfo();
+        Check(wrapped.StartsWith("mul_tukul|") && wrapped.EndsWith("|1 / 2|True|True") && info.StartsWith("igi|伊吉|"), $"再点右箭头回到主角，点左箭头又到伊吉（{wrapped} → {info}）");
+
+        await KeyTap(Key.Left);
+        await Frames(1);
+        await KeyTap(Key.Right);
+        await Frames(1);
+        Check(Screen.CurrentPerson == "igi", $"方向键只选格子，不翻人物页（{Screen.CurrentPerson}）");
+        await Tab();
+        await Frames(2);
+
+        await SaveAndContinue("S3_03");
+        await Tab();
+        await Frames(2);
+        info = PersonInfo();
+        Check(GameSession.Progress.Flag("talked.igi") && (info.EndsWith("|1 / 2|True|True") || info.EndsWith("|2 / 2|True|True")), $"存档、读档后：仍是两页（{info}）");
+        await Tab();
+        await Frames(2);
     }
 }
