@@ -142,7 +142,10 @@ public partial class NarrativeMap1Test : NarrativeFlowBase
         await WaitUntil(() => Narr.MainActive, 10);
         await Frames(2);
         Check(atStatue && Narr.MainLabel == "七夜" && Narr.Cg.CurrentId == "seven_nights", "S1_06：触碰七夜雕像，播 CG1");
-        Check(await FinishDialog(), "S1_06：CG1 和对话播完");
+        bool cgDone = await WaitUntil(() => !Narr.MainActive, 1800);   // CG1 是动画 CG（约 23 秒），播完自己结束
+        await WaitUntil(() => !PauseService.IsPaused, 60);
+        await Frames(3);
+        Check(cgDone && NoPauseOrLock(), "S1_06：CG1 动画播完");
 
         // S1_06 → S1_07：两河源头（字幕）
         bool inS107 = await CrossEdge("S1_06", "From_S1_07", "S1_07");

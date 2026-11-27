@@ -1,0 +1,721 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://assets/scripts/narrative/views/AnimatedCg.cs" id="s_cg"]
+[ext_resource type="Script" path="res://assets/scripts/narrative/data/CgSubtitle.cs" id="s_sub"]
+[ext_resource type="Shader" path="res://assets/shaders/cg_hair_wave.gdshader" id="sh_hair"]
+[ext_resource type="FontFile" path="res://assets/fonts/SiyinSong-Regular.otf" id="font"]
+[ext_resource type="Texture2D" path="res://assets/art/cg/seven_nights/tex_cg_seven_nights_bg.png" id="t_bg"]
+[ext_resource type="Texture2D" path="res://assets/art/cg/seven_nights/tex_cg_seven_nights_rays.png" id="t_rays"]
+[ext_resource type="Texture2D" path="res://assets/art/cg/seven_nights/tex_cg_seven_nights_drops1.png" id="t_drops1"]
+[ext_resource type="Texture2D" path="res://assets/art/cg/seven_nights/tex_cg_seven_nights_drops2.png" id="t_drops2"]
+[ext_resource type="Texture2D" path="res://assets/art/cg/seven_nights/tex_cg_seven_nights_body.png" id="t_body"]
+[ext_resource type="Texture2D" path="res://assets/art/cg/seven_nights/tex_cg_seven_nights_hair.png" id="t_hair"]
+[ext_resource type="Texture2D" path="res://assets/art/cg/seven_nights/tex_cg_seven_nights_eye_l_closed.png" id="t_eye_l_closed"]
+[ext_resource type="Texture2D" path="res://assets/art/cg/seven_nights/tex_cg_seven_nights_eye_l_half.png" id="t_eye_l_half"]
+[ext_resource type="Texture2D" path="res://assets/art/cg/seven_nights/tex_cg_seven_nights_eye_l_open.png" id="t_eye_l_open"]
+[ext_resource type="Texture2D" path="res://assets/art/cg/seven_nights/tex_cg_seven_nights_eye_r_squint.png" id="t_eye_r_squint"]
+[ext_resource type="Texture2D" path="res://assets/art/cg/seven_nights/tex_cg_seven_nights_eye_r_open.png" id="t_eye_r_open"]
+[ext_resource type="Texture2D" path="res://assets/art/cg/seven_nights/tex_cg_seven_nights_eye_star.png" id="t_eye_star"]
+[ext_resource type="Texture2D" path="res://assets/art/cg/seven_nights/tex_cg_seven_nights_fog.png" id="t_fog"]
+[ext_resource type="Texture2D" path="res://assets/art/cg/seven_nights/tex_cg_seven_nights_drops3.png" id="t_drops3"]
+[ext_resource type="Texture2D" path="res://assets/art/cg/seven_nights/tex_cg_seven_nights_lite.png" id="t_lite"]
+
+[sub_resource type="ShaderMaterial" id="Mat_Hair"]
+shader = ExtResource("sh_hair")
+shader_parameter/root = Vector2(0.497, 0.181)
+shader_parameter/amp_y = 0.012
+shader_parameter/amp_x = 0.006
+shader_parameter/speed = 1.0
+
+[sub_resource type="CanvasItemMaterial" id="Mat_Add"]
+blend_mode = 1
+
+[sub_resource type="Gradient" id="Glow_Grad"]
+offsets = PackedFloat32Array(0, 0.3, 1)
+colors = PackedColorArray(1, 0.98, 0.88, 1, 1, 0.9, 0.6, 0.6, 1, 0.86, 0.55, 0)
+
+[sub_resource type="GradientTexture2D" id="Glow_Tex"]
+gradient = SubResource("Glow_Grad")
+width = 64
+height = 64
+fill = 1
+fill_from = Vector2(0.5, 0.5)
+fill_to = Vector2(1, 0.5)
+
+[sub_resource type="Gradient" id="Trail_Ramp"]
+offsets = PackedFloat32Array(0, 1)
+colors = PackedColorArray(1, 0.93, 0.67, 0.5, 1, 0.9, 0.6, 0)
+
+[sub_resource type="Gradient" id="Vignette_Grad"]
+offsets = PackedFloat32Array(0, 0.55, 1)
+colors = PackedColorArray(0, 0.02, 0.08, 0, 0, 0.02, 0.08, 0, 0, 0.024, 0.08, 0.55)
+
+[sub_resource type="GradientTexture2D" id="Vignette_Tex"]
+gradient = SubResource("Vignette_Grad")
+width = 256
+height = 256
+fill = 1
+fill_from = Vector2(0.5, 0.45)
+fill_to = Vector2(1.2, 0.45)
+
+[sub_resource type="FontVariation" id="Italic"]
+base_font = ExtResource("font")
+variation_transform = Transform2D(1, 0, 0.22, 1, 0, 0)
+
+[sub_resource type="Resource" id="Sub_0"]
+script = ExtResource("s_sub")
+Speaker = "旁白"
+Text = "伊姆杜跪在海底，用拇指一寸一寸按出他的身体。"
+Start = 1.6
+End = 5.8
+
+[sub_resource type="Resource" id="Sub_1"]
+script = ExtResource("s_sub")
+Speaker = "旁白"
+Text = "七个日夜就此轮转。"
+Start = 6.1
+End = 8.5
+
+[sub_resource type="Resource" id="Sub_2"]
+script = ExtResource("s_sub")
+Speaker = "旁白"
+Text = "第七夜，他睁开眼，"
+Start = 8.8
+End = 11.4
+
+[sub_resource type="Resource" id="Sub_3"]
+script = ExtResource("s_sub")
+Speaker = "旁白"
+Text = "一颗星从海面上落下。"
+Start = 11.7
+End = 15.5
+
+[sub_resource type="Resource" id="Sub_4"]
+script = ExtResource("s_sub")
+Speaker = "伊姆杜"
+Text = "穆尔图库尔"
+Start = 15.8
+End = 18.2
+
+[sub_resource type="Resource" id="Sub_5"]
+script = ExtResource("s_sub")
+Speaker = "伊姆杜"
+Text = "我的儿子"
+Start = 18.5
+End = 21.1
+
+[sub_resource type="Animation" id="Anim_Timeline"]
+resource_name = "play"
+length = 22.6
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Curtain:modulate")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.1, 1.9, 22.6),
+"transitions": PackedFloat32Array(1, 1, 1, 1),
+"update": 0,
+"values": [Color(1, 1, 1, 1), Color(1, 1, 1, 1), Color(1, 1, 1, 0), Color(1, 1, 1, 0)]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("Camera:scale")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0, 2.1, 3.4, 6.1, 6.75, 8.8, 9.6, 11.7, 12.4, 15.2, 15.8, 17.1, 22.6),
+"transitions": PackedFloat32Array(1, 1.6, 0.45, 1.6, 0.45, 1.6, 0.45, 1.6, 0.45, 0.45, -1.8, 1, 1),
+"update": 0,
+"values": [Vector2(1.35, 1.35), Vector2(1.35, 1.35), Vector2(1.35, 1.35), Vector2(1.42, 1.42), Vector2(1.68, 1.68), Vector2(1.78, 1.78), Vector2(1.95, 1.95), Vector2(2.03, 2.03), Vector2(1.45, 1.45), Vector2(1.48, 1.48), Vector2(1.52, 1.52), Vector2(1.04, 1.04), Vector2(1.04, 1.04)]
+}
+tracks/2/type = "value"
+tracks/2/imported = false
+tracks/2/enabled = true
+tracks/2/path = NodePath("Camera:position")
+tracks/2/interp = 1
+tracks/2/loop_wrap = true
+tracks/2/keys = {
+"times": PackedFloat32Array(0, 2.1, 3.4, 6.1, 6.75, 8.8, 9.6, 11.7, 12.4, 15.2, 15.8, 17.1, 22.6),
+"transitions": PackedFloat32Array(1, 1.6, 0.45, 1.6, 0.45, 1.6, 0.45, 1.6, 0.45, 0.45, -1.8, 1, 1),
+"update": 0,
+"values": [Vector2(-0, -113.4), Vector2(-0, -113.4), Vector2(15.552, 34.992), Vector2(16.358, 55.21), Vector2(38.707, 97.978), Vector2(41.011, 115.344), Vector2(-11.583, 133.029), Vector2(-12.058, 138.487), Vector2(-0, 122.148), Vector2(-0, 124.675), Vector2(34.747, 108.619), Vector2(11.981, 12.96), Vector2(11.981, 12.96)]
+}
+tracks/3/type = "value"
+tracks/3/imported = false
+tracks/3/enabled = true
+tracks/3/path = NodePath("Camera/Scene/EyeLClosed:modulate")
+tracks/3/interp = 1
+tracks/3/loop_wrap = true
+tracks/3/keys = {
+"times": PackedFloat32Array(0, 9.3, 9.45, 9.8, 9.95, 10.2, 10.35, 22.6),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1, 1, 1),
+"update": 0,
+"values": [Color(1, 1, 1, 1), Color(1, 1, 1, 1), Color(1, 1, 1, 0), Color(1, 1, 1, 0), Color(1, 1, 1, 1), Color(1, 1, 1, 1), Color(1, 1, 1, 0), Color(1, 1, 1, 0)]
+}
+tracks/4/type = "value"
+tracks/4/imported = false
+tracks/4/enabled = true
+tracks/4/path = NodePath("Camera/Scene/EyeLHalf:modulate")
+tracks/4/interp = 1
+tracks/4/loop_wrap = true
+tracks/4/keys = {
+"times": PackedFloat32Array(0, 9.3, 9.45, 9.8, 9.95, 10.2, 10.35, 10.7, 10.85, 22.6),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1, 1, 1, 1, 1),
+"update": 0,
+"values": [Color(1, 1, 1, 0), Color(1, 1, 1, 0), Color(1, 1, 1, 1), Color(1, 1, 1, 1), Color(1, 1, 1, 0), Color(1, 1, 1, 0), Color(1, 1, 1, 1), Color(1, 1, 1, 1), Color(1, 1, 1, 0), Color(1, 1, 1, 0)]
+}
+tracks/5/type = "value"
+tracks/5/imported = false
+tracks/5/enabled = true
+tracks/5/path = NodePath("Camera/Scene/EyeLOpen:modulate")
+tracks/5/interp = 1
+tracks/5/loop_wrap = true
+tracks/5/keys = {
+"times": PackedFloat32Array(0, 10.7, 10.85, 22.6),
+"transitions": PackedFloat32Array(1, 1, 1, 1),
+"update": 0,
+"values": [Color(1, 1, 1, 0), Color(1, 1, 1, 0), Color(1, 1, 1, 1), Color(1, 1, 1, 1)]
+}
+tracks/6/type = "value"
+tracks/6/imported = false
+tracks/6/enabled = true
+tracks/6/path = NodePath("Camera/Scene/EyeRSquint:modulate")
+tracks/6/interp = 1
+tracks/6/loop_wrap = true
+tracks/6/keys = {
+"times": PackedFloat32Array(0, 10.7, 10.85, 22.6),
+"transitions": PackedFloat32Array(1, 1, 1, 1),
+"update": 0,
+"values": [Color(1, 1, 1, 1), Color(1, 1, 1, 1), Color(1, 1, 1, 0), Color(1, 1, 1, 0)]
+}
+tracks/7/type = "value"
+tracks/7/imported = false
+tracks/7/enabled = true
+tracks/7/path = NodePath("Camera/Scene/EyeROpen:modulate")
+tracks/7/interp = 1
+tracks/7/loop_wrap = true
+tracks/7/keys = {
+"times": PackedFloat32Array(0, 10.7, 10.85, 22.6),
+"transitions": PackedFloat32Array(1, 1, 1, 1),
+"update": 0,
+"values": [Color(1, 1, 1, 0), Color(1, 1, 1, 0), Color(1, 1, 1, 1), Color(1, 1, 1, 1)]
+}
+tracks/8/type = "value"
+tracks/8/imported = false
+tracks/8/enabled = true
+tracks/8/path = NodePath("Camera/Scene/Falling:position")
+tracks/8/interp = 1
+tracks/8/loop_wrap = true
+tracks/8/keys = {
+"times": PackedFloat32Array(0, 12, 12.2, 12.4, 12.6, 12.8, 13, 13.2, 13.4, 13.6, 13.8, 14, 14.2, 14.4, 14.6, 14.8, 15, 15.2),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1),
+"update": 0,
+"values": [Vector2(760.5, -38.88), Vector2(760.5, -38.88), Vector2(759.703, -35.135), Vector2(757.232, -24.636), Vector2(752.748, -8.571), Vector2(745.763, 11.816), Vector2(735.793, 35.28), Vector2(722.484, 60.627), Vector2(705.705, 86.751), Vector2(685.62, 112.657), Vector2(662.73, 137.482), Vector2(637.884, 160.495), Vector2(612.268, 181.097), Vector2(587.363, 198.802), Vector2(564.873, 213.21), Vector2(546.632, 223.971), Vector2(534.478, 230.736), Vector2(530.1, 233.1)]
+}
+tracks/9/type = "value"
+tracks/9/imported = false
+tracks/9/enabled = true
+tracks/9/path = NodePath("Camera/Scene/Falling:modulate")
+tracks/9/interp = 1
+tracks/9/loop_wrap = true
+tracks/9/keys = {
+"times": PackedFloat32Array(0, 12, 12.2, 15.1, 15.35),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1),
+"update": 0,
+"values": [Color(1, 1, 1, 0), Color(1, 1, 1, 0), Color(1, 1, 1, 1), Color(1, 1, 1, 1), Color(1, 1, 1, 0)]
+}
+tracks/10/type = "value"
+tracks/10/imported = false
+tracks/10/enabled = true
+tracks/10/path = NodePath("Camera/Scene/Falling/Trail:emitting")
+tracks/10/interp = 1
+tracks/10/loop_wrap = true
+tracks/10/keys = {
+"times": PackedFloat32Array(0, 12, 15.2),
+"transitions": PackedFloat32Array(1, 1, 1),
+"update": 1,
+"values": [false, true, false]
+}
+tracks/11/type = "value"
+tracks/11/imported = false
+tracks/11/enabled = true
+tracks/11/path = NodePath("Camera/Scene/EyeStar:scale")
+tracks/11/interp = 1
+tracks/11/loop_wrap = true
+tracks/11/keys = {
+"times": PackedFloat32Array(0, 15.2, 15.97, 17.4, 19, 20.6, 22.2),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1, 1),
+"update": 0,
+"values": [Vector2(0.2, 0.2), Vector2(0.2, 0.2), Vector2(1.6, 1.6), Vector2(1, 1), Vector2(1.15, 1.15), Vector2(1, 1), Vector2(1.15, 1.15)]
+}
+tracks/12/type = "value"
+tracks/12/imported = false
+tracks/12/enabled = true
+tracks/12/path = NodePath("Camera/Scene/EyeStar:rotation")
+tracks/12/interp = 1
+tracks/12/loop_wrap = true
+tracks/12/keys = {
+"times": PackedFloat32Array(0, 15.2, 15.97, 17.4),
+"transitions": PackedFloat32Array(1, 1, 1, 1),
+"update": 0,
+"values": [-0.524, -0.524, 0.14, 0.0]
+}
+tracks/13/type = "value"
+tracks/13/imported = false
+tracks/13/enabled = true
+tracks/13/path = NodePath("Camera/Scene/EyeStar:modulate")
+tracks/13/interp = 1
+tracks/13/loop_wrap = true
+tracks/13/keys = {
+"times": PackedFloat32Array(0, 15.2, 15.97, 17.4, 19, 20.6, 22.2),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1, 1),
+"update": 0,
+"values": [Color(3, 3, 3, 0), Color(3, 3, 3, 0), Color(2.2, 2.2, 2.2, 1), Color(1.2, 1.2, 1.2, 1), Color(1.5, 1.5, 1.5, 1), Color(1.2, 1.2, 1.2, 0.85), Color(1.5, 1.5, 1.5, 1)]
+}
+tracks/14/type = "value"
+tracks/14/imported = false
+tracks/14/enabled = true
+tracks/14/path = NodePath("Camera/Scene:modulate")
+tracks/14/interp = 1
+tracks/14/loop_wrap = true
+tracks/14/keys = {
+"times": PackedFloat32Array(0, 15.8, 20.8),
+"transitions": PackedFloat32Array(1, -1.6, 1),
+"update": 0,
+"values": [Color(1, 1, 1, 1), Color(1, 1, 1, 1), Color(1.38, 1.38, 1.38, 1)]
+}
+
+[sub_resource type="AnimationLibrary" id="Anim_Timeline_Lib"]
+_data = {
+&"play": SubResource("Anim_Timeline")
+}
+
+[sub_resource type="Animation" id="Anim_D1"]
+resource_name = "loop"
+length = 16
+loop_mode = 1
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Camera/Scene/Drops1:position")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 16),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [Vector2(-214.2, -428.106), Vector2(-202.339, -481.38)]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("Camera/Scene/Drops1:modulate")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0, 2.4, 13.6, 16),
+"transitions": PackedFloat32Array(1, 1, 1, 1),
+"update": 0,
+"values": [Color(1, 1, 1, 0), Color(1, 1, 1, 1), Color(1, 1, 1, 1), Color(1, 1, 1, 0)]
+}
+
+[sub_resource type="AnimationLibrary" id="Anim_D1_Lib"]
+_data = {
+&"loop": SubResource("Anim_D1")
+}
+
+[sub_resource type="Animation" id="Anim_D2"]
+resource_name = "loop"
+length = 21
+loop_mode = 1
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Camera/Scene/Drops2:position")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 21),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [Vector2(60, 13.587), Vector2(53.297, -20.832)]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("Camera/Scene/Drops2:modulate")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0, 4.2, 16.8, 21),
+"transitions": PackedFloat32Array(1, 1, 1, 1),
+"update": 0,
+"values": [Color(1, 1, 1, 0), Color(1, 1, 1, 1), Color(1, 1, 1, 1), Color(1, 1, 1, 0)]
+}
+
+[sub_resource type="AnimationLibrary" id="Anim_D2_Lib"]
+_data = {
+&"loop": SubResource("Anim_D2")
+}
+
+[sub_resource type="Animation" id="Anim_D3"]
+resource_name = "loop"
+length = 12
+loop_mode = 1
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Camera/Scene/Drops3:position")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 6, 12),
+"transitions": PackedFloat32Array(-1.5, -1.5, 1),
+"update": 0,
+"values": [Vector2(441.6, 28.2), Vector2(442.718, 25.003), Vector2(441.6, 28.2)]
+}
+tracks/1/type = "value"
+tracks/1/imported = false
+tracks/1/enabled = true
+tracks/1/path = NodePath("Camera/Scene/Drops3:modulate")
+tracks/1/interp = 1
+tracks/1/loop_wrap = true
+tracks/1/keys = {
+"times": PackedFloat32Array(0, 6, 12),
+"transitions": PackedFloat32Array(-1.5, -1.5, 1),
+"update": 0,
+"values": [Color(1, 1, 1, 0.87), Color(1, 1, 1, 0.61), Color(1, 1, 1, 0.87)]
+}
+
+[sub_resource type="AnimationLibrary" id="Anim_D3_Lib"]
+_data = {
+&"loop": SubResource("Anim_D3")
+}
+
+[sub_resource type="Animation" id="Anim_Fog"]
+resource_name = "loop"
+length = 36
+loop_mode = 1
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Camera/Scene/Fog:position")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 18, 36),
+"transitions": PackedFloat32Array(-1.5, -1.5, 1),
+"update": 0,
+"values": [Vector2(-13.824, -3.6), Vector2(13.824, -3.6), Vector2(-13.824, -3.6)]
+}
+
+[sub_resource type="AnimationLibrary" id="Anim_Fog_Lib"]
+_data = {
+&"loop": SubResource("Anim_Fog")
+}
+
+[node name="CgSevenNights" type="Control" node_paths=PackedStringArray("Timeline", "Who", "Line")]
+process_mode = 3
+clip_contents = true
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("s_cg")
+Timeline = NodePath("Timeline")
+TimelineAnimation = "play"
+Subtitles = Array[ExtResource("s_sub")]([SubResource("Sub_0"), SubResource("Sub_1"), SubResource("Sub_2"), SubResource("Sub_3"), SubResource("Sub_4"), SubResource("Sub_5")])
+Who = NodePath("Subtitle/Who")
+Line = NodePath("Subtitle/Line")
+NarrationFont = SubResource("Italic")
+
+[node name="Camera" type="Control" parent="."]
+layout_mode = 0
+offset_right = 1152.0
+offset_bottom = 648.0
+pivot_offset = Vector2(576, 324)
+mouse_filter = 2
+
+[node name="Scene" type="Control" parent="Camera"]
+layout_mode = 0
+offset_right = 1152.0
+offset_bottom = 648.0
+mouse_filter = 2
+
+[node name="Bg" type="TextureRect" parent="Camera/Scene"]
+layout_mode = 0
+offset_left = 0
+offset_top = 0
+offset_right = 1152
+offset_bottom = 648
+mouse_filter = 2
+texture = ExtResource("t_bg")
+expand_mode = 1
+
+[node name="Rays" type="TextureRect" parent="Camera/Scene"]
+layout_mode = 0
+offset_left = 0
+offset_top = 0
+offset_right = 1152
+offset_bottom = 648
+mouse_filter = 2
+texture = ExtResource("t_rays")
+expand_mode = 1
+modulate = Color(1, 1, 1, 0.6)
+material = SubResource("Mat_Add")
+
+[node name="Drops1" type="TextureRect" parent="Camera/Scene"]
+layout_mode = 0
+offset_left = -214.2
+offset_top = -440.4
+offset_right = 1268.4
+offset_bottom = 379.2
+mouse_filter = 2
+texture = ExtResource("t_drops1")
+expand_mode = 1
+
+[node name="Drops2" type="TextureRect" parent="Camera/Scene"]
+layout_mode = 0
+offset_left = 60
+offset_top = 4.2
+offset_right = 1177.2
+offset_bottom = 630
+mouse_filter = 2
+texture = ExtResource("t_drops2")
+expand_mode = 1
+
+[node name="Body" type="TextureRect" parent="Camera/Scene"]
+layout_mode = 0
+offset_left = 224.4
+offset_top = 129
+offset_right = 840
+offset_bottom = 648
+mouse_filter = 2
+texture = ExtResource("t_body")
+expand_mode = 1
+
+[node name="Hair" type="TextureRect" parent="Camera/Scene"]
+layout_mode = 0
+offset_left = 48.6
+offset_top = 85.2
+offset_right = 1146.6
+offset_bottom = 707.4
+mouse_filter = 2
+texture = ExtResource("t_hair")
+expand_mode = 1
+material = SubResource("Mat_Hair")
+
+[node name="EyeLClosed" type="TextureRect" parent="Camera/Scene"]
+layout_mode = 0
+offset_left = 508.8
+offset_top = 221.4
+offset_right = 555
+offset_bottom = 247.8
+mouse_filter = 2
+texture = ExtResource("t_eye_l_closed")
+expand_mode = 1
+
+[node name="EyeLHalf" type="TextureRect" parent="Camera/Scene"]
+layout_mode = 0
+offset_left = 505.2
+offset_top = 225.6
+offset_right = 556.2
+offset_bottom = 250.8
+mouse_filter = 2
+texture = ExtResource("t_eye_l_half")
+expand_mode = 1
+modulate = Color(1, 1, 1, 0)
+
+[node name="EyeLOpen" type="TextureRect" parent="Camera/Scene"]
+layout_mode = 0
+offset_left = 506.4
+offset_top = 213
+offset_right = 553.8
+offset_bottom = 253.2
+mouse_filter = 2
+texture = ExtResource("t_eye_l_open")
+expand_mode = 1
+modulate = Color(1, 1, 1, 0)
+
+[node name="EyeRSquint" type="TextureRect" parent="Camera/Scene"]
+layout_mode = 0
+offset_left = 579.6
+offset_top = 214.8
+offset_right = 631.2
+offset_bottom = 253.8
+mouse_filter = 2
+texture = ExtResource("t_eye_r_squint")
+expand_mode = 1
+
+[node name="EyeROpen" type="TextureRect" parent="Camera/Scene"]
+layout_mode = 0
+offset_left = 580.2
+offset_top = 219
+offset_right = 629.4
+offset_bottom = 257.4
+mouse_filter = 2
+texture = ExtResource("t_eye_r_open")
+expand_mode = 1
+modulate = Color(1, 1, 1, 0)
+
+[node name="EyeStar" type="TextureRect" parent="Camera/Scene"]
+layout_mode = 0
+offset_left = 506.4
+offset_top = 213
+offset_right = 553.8
+offset_bottom = 253.2
+mouse_filter = 2
+texture = ExtResource("t_eye_star")
+expand_mode = 1
+pivot_offset = Vector2(22.752, 18.09)
+modulate = Color(1, 1, 1, 0)
+
+[node name="Fog" type="TextureRect" parent="Camera/Scene"]
+layout_mode = 0
+offset_left = 0
+offset_top = -3.6
+offset_right = 1152
+offset_bottom = 648
+mouse_filter = 2
+texture = ExtResource("t_fog")
+expand_mode = 1
+modulate = Color(1, 1, 1, 0.71)
+
+[node name="Drops3" type="TextureRect" parent="Camera/Scene"]
+layout_mode = 0
+offset_left = 441.6
+offset_top = 28.2
+offset_right = 721.2
+offset_bottom = 294.6
+mouse_filter = 2
+texture = ExtResource("t_drops3")
+expand_mode = 1
+modulate = Color(1, 1, 1, 0.87)
+
+[node name="Lite" type="TextureRect" parent="Camera/Scene"]
+layout_mode = 0
+offset_left = 0
+offset_top = 0
+offset_right = 1152
+offset_bottom = 648
+mouse_filter = 2
+texture = ExtResource("t_lite")
+expand_mode = 1
+
+[node name="Falling" type="Node2D" parent="Camera/Scene"]
+position = Vector2(760.5, -38.88)
+modulate = Color(1, 1, 1, 0)
+
+[node name="Trail" type="CPUParticles2D" parent="Camera/Scene/Falling"]
+material = SubResource("Mat_Add")
+emitting = false
+amount = 48
+lifetime = 0.6
+local_coords = false
+texture = SubResource("Glow_Tex")
+gravity = Vector2(0, 0)
+scale_amount_min = 0.12
+scale_amount_max = 0.28
+color_ramp = SubResource("Trail_Ramp")
+
+[node name="Glow" type="Sprite2D" parent="Camera/Scene/Falling"]
+material = SubResource("Mat_Add")
+scale = Vector2(0.95, 0.95)
+texture = SubResource("Glow_Tex")
+
+[node name="Vignette" type="TextureRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = SubResource("Vignette_Tex")
+expand_mode = 1
+
+[node name="Subtitle" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 69.0
+offset_top = -150.0
+offset_right = -69.0
+offset_bottom = -39.0
+grow_horizontal = 2
+grow_vertical = 0
+mouse_filter = 2
+
+[node name="Who" type="Label" parent="Subtitle"]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_bottom = 26.0
+grow_horizontal = 2
+theme_override_colors/font_color = Color(0.91, 0.76, 0.48, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 0.85)
+theme_override_constants/outline_size = 5
+theme_override_font_sizes/font_size = 17
+horizontal_alignment = 1
+
+[node name="Line" type="Label" parent="Subtitle"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = 28.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(0.93, 0.95, 0.97, 1)
+theme_override_colors/font_outline_color = Color(0, 0, 0, 0.9)
+theme_override_constants/outline_size = 6
+theme_override_font_sizes/font_size = 21
+horizontal_alignment = 1
+autowrap_mode = 3
+
+[node name="Curtain" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0, 0, 0, 1)
+
+[node name="Timeline" type="AnimationPlayer" parent="."]
+libraries = {
+&"": SubResource("Anim_Timeline_Lib")
+}
+
+[node name="Drops1Loop" type="AnimationPlayer" parent="."]
+libraries = {
+&"": SubResource("Anim_D1_Lib")
+}
+autoplay = "loop"
+
+[node name="Drops2Loop" type="AnimationPlayer" parent="."]
+libraries = {
+&"": SubResource("Anim_D2_Lib")
+}
+autoplay = "loop"
+
+[node name="Drops3Loop" type="AnimationPlayer" parent="."]
+libraries = {
+&"": SubResource("Anim_D3_Lib")
+}
+autoplay = "loop"
+
+[node name="FogLoop" type="AnimationPlayer" parent="."]
+libraries = {
+&"": SubResource("Anim_Fog_Lib")
+}
+autoplay = "loop"

@@ -1,9 +1,11 @@
-[gd_resource type="Resource" script_class="CgData" load_steps=2 format=3]
+[gd_resource type="Resource" script_class="CgData" format=3]
 
 [ext_resource type="Script" path="res://assets/scripts/narrative/data/CgData.cs" id="1_cg"]
+[ext_resource type="PackedScene" path="res://assets/scenes/narrative/cg/cg_seven_nights.tscn" id="2_scene"]
 
 [resource]
 script = ExtResource("1_cg")
 Id = "seven_nights"
 Title = "CG1「七夜」"
 PlaceholderColor = Color(0.1, 0.12, 0.2, 1)
+AnimatedScene = ExtResource("2_scene")

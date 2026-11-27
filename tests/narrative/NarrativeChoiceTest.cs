@@ -151,18 +151,19 @@ public partial class NarrativeChoiceTest : NarrativeFlowBase
         if (!atStatue) return;
         await KeyTap(Key.E);
         await WaitUntil(() => Narr.MainActive, 10);
-        await Frames(2);
-        Check(Narr.Cg.IsShowing && Narr.Cg.CurrentId == "seven_nights" && Narr.Cg.CurrentCaption == "CG1「七夜」", $"七夜：触碰雕像播 CG1「七夜」（占位标题 {Narr.Cg.CurrentCaption}）");
-        Check(!Narr.Dialog.NameVisible && Narr.Dialog.CurrentText.StartsWith("伊姆杜跪在海底"), $"七夜：CG 上先是旁白“伊姆杜跪在海底……”（{Narr.Dialog.CurrentText}）");
-        await WaitUntil(ReadyForKey, 120);
-        await KeyTap(Key.E);
-        await Frames(2);
-        Check(Narr.Dialog.CurrentName == "伊姆杜" && Narr.Dialog.CurrentText == "穆尔图库尔" && !Narr.Dialog.PortraitVisible, "七夜：CG 上叠对话“伊姆杜：穆尔图库尔”（伊姆杜没有立绘）");
-        await WaitUntil(ReadyForKey, 120);
-        await KeyTap(Key.E);
-        await Frames(2);
-        Check(Narr.Dialog.CurrentName == "伊姆杜" && Narr.Dialog.CurrentText == "我的儿子" && Narr.Cg.IsShowing, "七夜：第二句“伊姆杜：我的儿子”，CG 还在");
-        await AdvanceUntil(() => !Narr.MainActive, 5);
+        // CG1「七夜」是动画 CG：台词是动画里的字幕，对话框不出现，播完才继续
+        bool animated = await WaitUntil(() => Narr.Cg.Animated != null, 120);
+        var cg = Narr.Cg.Animated;
+        Check(animated && Narr.Cg.CurrentId == "seven_nights" && !Narr.Dialog.IsOpen, "七夜：触碰雕像播 CG1「七夜」动画（对话框不出现）");
+        var lines = new System.Collections.Generic.List<string>();
+        for (int i = 0; i < 1800 && Narr.MainActive; i++)
+        {
+            if (GodotObject.IsInstanceValid(cg) && cg.ShownIndex >= 0 && (lines.Count == 0 || lines[^1] != $"{cg.Who.Text}|{cg.Line.Text}"))
+                lines.Add($"{cg.Who.Text}|{cg.Line.Text}");
+            await Frames(1);
+        }
+        Check(lines.Count == 6 && lines[0].StartsWith("|伊姆杜跪在海底") && lines[4] == "伊姆杜|穆尔图库尔" && lines[5] == "伊姆杜|我的儿子",
+            $"七夜：字幕按顺序出现，旁白不显示名字，最后是“伊姆杜：穆尔图库尔”“伊姆杜：我的儿子”（{string.Join(" / ", lines)}）");
         await Frames(30);
         Check(!Narr.Cg.IsShowing && !Narr.Cg.Visible && GameSession.Progress.Flag("seen.m_pit.七夜"), "七夜：播完 CG 关掉");
 
