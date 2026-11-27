@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://rxd8j4trhiyw"
-path.s3tc="res://.godot/imported/spr_enemy_keeper_tail_aim_6x6.png-d2238cbe4c57da08b9d0fdf532c221dc.s3tc.ctex"
+uid="uid://brm8yepus6ixm"
+path.s3tc="res://.godot/imported/spr_enemy_dragon_dormant_6x11.png-860bffa6e6073c5e7a768b267509d72b.s3tc.ctex"
 metadata={
 "imported_formats": ["s3tc_bptc"],
 "vram_texture": true
@@ -11,8 +11,8 @@ metadata={
 
 [deps]
 
-source_file="res://assets/art/enemy/spr_enemy_keeper_tail_aim_6x6.png"
-dest_files=["res://.godot/imported/spr_enemy_keeper_tail_aim_6x6.png-d2238cbe4c57da08b9d0fdf532c221dc.s3tc.ctex"]
+source_file="res://assets/art/enemy/spr_enemy_dragon_dormant_6x11.png"
+dest_files=["res://.godot/imported/spr_enemy_dragon_dormant_6x11.png-860bffa6e6073c5e7a768b267509d72b.s3tc.ctex"]
 
 [params]
 
