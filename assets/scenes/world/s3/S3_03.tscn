@@ -10,6 +10,7 @@
 [ext_resource type="Script" uid="uid://170bxbdwtr2a" path="res://assets/scripts/world/SpawnPoint.cs" id="5_q508u"]
 [ext_resource type="Script" uid="uid://8xspa70en46t" path="res://assets/scripts/save/SavePoint.cs" id="6_bdiqw"]
 [ext_resource type="Script" uid="uid://b4i1n1sxdxq8y" path="res://assets/scripts/narrative/world/NpcTalk.cs" id="n_npc"]
+[ext_resource type="Script" uid="uid://cijlj6y2mp3t0" path="res://assets/scripts/narrative/world/NpcArt.cs" id="n_art"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_dq6j5"]
 size = Vector2(96, 128)
@@ -158,3 +159,8 @@ offset_top = -115.0
 offset_right = 29.0
 mouse_filter = 2
 color = Color(0.5, 0.45, 0.35, 1)
+
+[node name="Art" type="Node2D" parent="Objects/Npc_Igi" unique_id=1840226517]
+script = ExtResource("n_art")
+ArtId = "igi"
+FaceLeft = true

@@ -184,8 +184,13 @@ public partial class NarrativeStoryTest : NarrativeFlowBase
         Check(relief && reliefLog.SequenceEqual(new[] { "泥板「浮雕铭文」" }), $"S3_02 按 E 查看浮雕铭文（{Show(reliefLog)}）");
 
         await Enter("S3_03");
+        var igiArt = Obj("Npc_Igi")?.GetNodeOrNull<SonOfMud.Narrative.World.NpcArt>("Art");
+        Check(igiArt?.Sprite != null && igiArt.Current == "idle" && igiArt.FacingLeft && Obj("Npc_Igi").GetNodeOrNull<CanvasItem>("Placeholder")?.Visible == false &&
+              igiArt.Sprite.SpriteFrames.HasAnimation("walk") && igiArt.Sprite.SpriteFrames.HasAnimation("show_liver"),
+            "S3_03 伊吉换成序列帧：待机、朝左，占位色块藏起来；走路、出示泥肝的动画都在");
         bool igi = await Use("Npc_Igi", "交谈");
         List<string> meet = await Play();
+        Check(igiArt.Current == "show_liver", $"S3_03 肝占卜时伊吉出示泥肝（现在播 {igiArt.Current}）");
         Check(igi && meet.Contains("伊吉：我是伊吉，祂的伽拉。") && meet.LastOrDefault() == "穆尔图库尔：塔姆图？" && Flag("talked.igi"),
             $"S3_03 和伊吉对话：神殿相遇接肝占卜，talked.igi 成立（{meet.Count} 句）");
         bool again = await Use("Npc_Igi", "交谈");

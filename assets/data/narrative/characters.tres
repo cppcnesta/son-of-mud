@@ -3,6 +3,7 @@
 [ext_resource type="Script" uid="uid://d2gnv3xf23ch2" path="res://assets/scripts/narrative/data/CharacterDatabase.cs" id="1_db"]
 [ext_resource type="Script" uid="uid://o20rj3t7e24q" path="res://assets/scripts/narrative/data/CharacterData.cs" id="2_char"]
 [ext_resource type="Texture2D" uid="uid://r4wm47f27xf3" path="res://assets/data/narrative/portrait/por_mul_tukul.png" id="2_yeabn"]
+[ext_resource type="Texture2D" uid="uid://rcujuiculs2g" path="res://assets/data/narrative/portrait/por_igi.png" id="3_igi"]
 
 [sub_resource type="Resource" id="char_mul_tukul"]
 script = ExtResource("2_char")
@@ -42,6 +43,7 @@ Id = "igi"
 DisplayName = "伊吉"
 NameColor = Color(0.8, 0.8, 0.7, 1)
 HasPortrait = true
+Portrait = ExtResource("3_igi")
 PortraitColor = Color(0.38, 0.36, 0.3, 1)
 
 [sub_resource type="Resource" id="char_keeper"]
