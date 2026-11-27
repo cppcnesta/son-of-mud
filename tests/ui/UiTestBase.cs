@@ -23,7 +23,7 @@ public abstract partial class UiTestBase : FlowTestBase
     protected GameUi Ui => MainGame?.GetNodeOrNull<GameUi>("GameUi");
 
     /// <summary>切到新主菜单并等它就绪。</summary>
-    protected async Task<TitleMenu> OpenTitleMenu()
+    protected async Task<TitleMenu> OpenTitleMenu(bool skipIntro = true)
     {
         ReleaseInputs();
         Error error = GetTree().ChangeSceneToFile(TitleMenuScene);
@@ -32,16 +32,22 @@ public abstract partial class UiTestBase : FlowTestBase
             Check(false, $"切到 {TitleMenuScene} 失败：{error}");
             return null;
         }
-        return await WaitForTitleMenu();
+        return await WaitForTitleMenu(skipIntro: skipIntro);
     }
 
-    /// <summary>等新主菜单成为当前场景并就绪（GameBoot 回主菜单之后用）。</summary>
-    protected async Task<TitleMenu> WaitForTitleMenu(int maxFrames = 240)
+    /// <summary>等新主菜单成为当前场景并就绪（GameBoot 回主菜单之后用）。默认跳过开场动画，按钮马上能点。</summary>
+    protected async Task<TitleMenu> WaitForTitleMenu(int maxFrames = 240, bool skipIntro = true)
     {
         await WaitUntil(() => GetTree().CurrentScene is TitleMenu menu && menu.IsNodeReady(), maxFrames);
         await Frames(3);
         BindMainGame();
-        return GetTree().CurrentScene as TitleMenu;
+        var title = GetTree().CurrentScene as TitleMenu;
+        if (skipIntro && title != null && title.IntroPlaying)
+        {
+            title.SkipIntro();
+            await Frames(2);
+        }
+        return title;
     }
 
     /// <summary>

@@ -26,6 +26,7 @@ public partial class TitleMenuTest : UiTestBase
         // ① 没有存档
         DeleteSave();
         GameSession.LastStartError = "";
+        await IntroChecks();
         TitleMenu menu = await OpenTitleMenu();
         Check(menu != null, "新主菜单能打开");
         if (menu == null) return;
@@ -92,6 +93,52 @@ public partial class TitleMenuTest : UiTestBase
         if (menu == null) return;
         await Frames(5);
         Check(SameBytes(saved, ReadSaveBytes()), "整个流程里存档文件没有被主菜单改动");
+    }
+
+    // ---------- 开场动画（没有存档时） ----------
+
+    private async Task IntroChecks()
+    {
+        TitleMenu menu = await OpenTitleMenu(skipIntro: false);
+        if (menu == null) return;
+        var anim = menu.GetNodeOrNull<AnimationPlayer>("Idle");
+        var bg = menu.GetNode<CanvasItem>("Background");
+        var title = menu.GetNode<CanvasItem>("Title");
+        var frame = menu.GetNode<CanvasItem>("Frame");
+        Check(menu.IntroPlaying && anim != null && anim.CurrentAnimation == TitleMenu.IntroAnimation,
+            "进主页面先播开场动画 intro");
+        Check(bg.Modulate.R < 0.3f && title.Modulate.A < 0.05f && frame.Modulate.A > 0.99f && menu.GetNode<CanvasItem>("Figure").Modulate.A < 0.05f
+              && menu.GetNode<Control>("HandLeft").Position.X < -100f && menu.NewGameButton.Modulate.A < 0.05f,
+            $"开场第一帧：黑底，只有边框（背景亮度 {bg.Modulate.R:0.00}，标题透明度 {title.Modulate.A:0.00}），双手在画面外、按钮没出现");
+        int starts = Starts.Count;
+        bool sent = await Activate(menu.NewGameButton);
+        await Frames(2);
+        Check(!sent && menu.MainButtons.All(b => b.Disabled && b.FocusMode == Control.FocusModeEnum.None) && Starts.Count == starts
+              && GetTree().CurrentScene == menu, "开场中 5 个按钮不能点、不能获得焦点");
+
+        // 播完自动接待机
+        bool done = await WaitUntil(() => !menu.IntroPlaying, 300);
+        await Frames(2);
+        Check(done && anim.CurrentAnimation == TitleMenu.IdleAnimation && anim.IsPlaying(), "开场播完自动接待机 idle 循环");
+        Check(bg.Modulate.R > 0.99f && title.Modulate.A > 0.99f && Mathf.Abs(menu.GetNode<Control>("HandLeft").Position.X) < 0.5f
+              && menu.MainButtons.All(b => b.Modulate.A > 0.99f), "开场结束：背景、标题、双手、按钮都到位");
+        Check(menu.NewGameButton.HasFocus() && !menu.NewGameButton.Disabled && menu.ContinueButton.Disabled,
+            "开场结束后按钮能点，焦点在“醒来”（没有存档，“再续征程”仍置灰）");
+
+        // 按键跳过：再进一次主页面，开场中按空格（也是确认键）只跳过开场，不会开新游戏
+        menu = await OpenTitleMenu(skipIntro: false);
+        if (menu == null) return;
+        await Frames(10);
+        bool wasPlaying = menu.IntroPlaying;
+        starts = Starts.Count;
+        await PressKey(Key.Space);
+        await Frames(3);
+        anim = menu.GetNode<AnimationPlayer>("Idle");
+        Check(wasPlaying && !menu.IntroPlaying && anim.CurrentAnimation == TitleMenu.IdleAnimation
+              && menu.GetNode<CanvasItem>("Title").Modulate.A > 0.99f && menu.MainButtons.All(b => b.Modulate.A > 0.99f),
+            "开场中按任意键：直接跳到开场结尾，接待机");
+        Check(Starts.Count == starts && GameSession.PendingStart == StartMode.None && GetTree().CurrentScene == menu && menu.NewGameButton.HasFocus(),
+            "跳过开场的那一下按键不会顺带按下“醒来”");
     }
 
     // ---------- 美术、5 个按钮、设置 / 名单面板（没有存档时） ----------
