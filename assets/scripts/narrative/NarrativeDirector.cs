@@ -20,6 +20,7 @@ namespace SonOfMud.Narrative;
 /// - 收到 RoomEntered(开场房间) 且变量 seen.opening 还没设过 → 播开场；
 /// - 推进键（dialog_advance：E、空格、鼠标左键）每帧读一次：泥板界面开着 → 关掉；选项开着 → 上下移动 / 确认；否则交给执行器。
 ///   打开对话的那一下按键会被吞掉（必须松开再按才算推进）。
+/// - 新手引导由子节点 TutorialHints 负责：等没有剧情、字幕条空着时，把该播的提示当字幕请求过来。
 /// 本节点和执行器的 ProcessMode 都是 Always，游戏暂停时照常运行。
 /// </summary>
 [GlobalClass]
@@ -51,6 +52,8 @@ public partial class NarrativeDirector : CanvasLayer
     public CgLayer Cg { get; private set; }
     public FadeLayer Fade { get; private set; }
     public NarrativeAudio Audio { get; private set; }
+    /// <summary>新手引导：等空了再播提示（见 TutorialHints）。</summary>
+    public TutorialHints Tutorial { get; private set; }
     public OrphLibrary Library => OrphLibrary.Shared;
 
     /// <summary>对话框剧情正在进行（从开始到播完）。</summary>
@@ -112,6 +115,8 @@ public partial class NarrativeDirector : CanvasLayer
         Audio.Settings = Settings;
         Main = Ensure<VNRunner>("MainRunner");
         Bark = Ensure<VNRunner>("BarkRunner");
+        Tutorial = Ensure<TutorialHints>("Tutorial");
+        Tutorial.Director = this;
 
         MainContext = new VNContext
         {

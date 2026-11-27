@@ -7,6 +7,13 @@
 [ext_resource type="Texture2D" uid="uid://dqjoct3pldfm5" path="res://assets/art/world/bg/s1/tex_bg_s1_01_front.png" id="4_56hyv"]
 [ext_resource type="TileSet" uid="uid://cjutdcfket0jk" path="res://assets/data/world/world_tileset.tres" id="4_eurea"]
 [ext_resource type="Script" uid="uid://170bxbdwtr2a" path="res://assets/scripts/world/SpawnPoint.cs" id="5_2kp1i"]
+[ext_resource type="Script" uid="uid://u32l3axuqp6h" path="res://assets/scripts/narrative/world/TutorialZone.cs" id="n_tutorial"]
+
+[sub_resource type="RectangleShape2D" id="Shape_Tutorial_Move"]
+size = Vector2(420, 200)
+
+[sub_resource type="RectangleShape2D" id="Shape_Tutorial_Dodge"]
+size = Vector2(96, 200)
 
 [node name="S1_01" type="Node2D" unique_id=639998933]
 script = ExtResource("1_1sa62")
@@ -77,3 +84,21 @@ script = ExtResource("5_2kp1i")
 SpawnId = &"From_S1_02"
 
 [node name="Objects" type="Node2D" parent="." unique_id=874509399]
+
+[node name="Tutorial_Move" type="Area2D" parent="Objects" unique_id=1169319061]
+position = Vector2(656, 587)
+script = ExtResource("n_tutorial")
+Label = "移动"
+
+[node name="Shape" type="CollisionShape2D" parent="Objects/Tutorial_Move" unique_id=435314258]
+position = Vector2(0, -90)
+shape = SubResource("Shape_Tutorial_Move")
+
+[node name="Tutorial_Dodge" type="Area2D" parent="Objects" unique_id=649082140]
+position = Vector2(980, 587)
+script = ExtResource("n_tutorial")
+Label = "闪避"
+
+[node name="Shape" type="CollisionShape2D" parent="Objects/Tutorial_Dodge" unique_id=305282263]
+position = Vector2(0, -90)
+shape = SubResource("Shape_Tutorial_Dodge")
