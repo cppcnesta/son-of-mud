@@ -17,6 +17,8 @@ namespace SonOfMud.Narrative.World;
 /// - <c>跟上</c>（follow）：转向主角，走到主角身边（隔 <see cref="FollowGap"/> 像素，最多走 <see cref="MaxFollow"/> 像素）再待机；走完台词才继续。
 /// - <c>待机</c>（idle）：回到待机；<c>看向</c>（face）：转向主角。
 /// </summary>
+/// 编辑器里也会运行（[Tool]）：打开场景就能看到待机动画、占位色块藏起来；编辑器里不登记舞台效果、不走路，加的动画节点不存进场景。
+[Tool]
 [GlobalClass]
 public partial class NpcArt : Node2D, IStageEffect, IBlockingStageEffect
 {
@@ -56,11 +58,13 @@ public partial class NpcArt : Node2D, IStageEffect, IBlockingStageEffect
 
 	public override void _EnterTree()
 	{
+		if (Engine.IsEditorHint()) return;
 		if (!string.IsNullOrEmpty(ArtId)) VNRegistry.Register((IStageEffect)this);
 	}
 
 	public override void _ExitTree()
 	{
+		if (Engine.IsEditorHint()) return;
 		if (!string.IsNullOrEmpty(ArtId)) VNRegistry.Unregister((IStageEffect)this);
 		FinishWalk();
 	}
@@ -70,6 +74,8 @@ public partial class NpcArt : Node2D, IStageEffect, IBlockingStageEffect
 		SpriteFrames frames = FramesFor(ArtId, out _ground);
 		if (frames == null || !frames.HasAnimation(Idle)) return;
 		if (GetParent()?.GetNodeOrNull<CanvasItem>("Placeholder") is { } placeholder) placeholder.Visible = false;
+		// 编辑器里重新加载脚本时 _Ready 会再跑一次：先去掉上一次加的动画节点
+		GetNodeOrNull("Sprite")?.Free();
 		Sprite = new AnimatedSprite2D { Name = "Sprite", SpriteFrames = frames, FlipH = FaceLeft };
 		Sprite.AnimationFinished += OnAnimationFinished;
 		AddChild(Sprite);
@@ -175,6 +181,7 @@ public partial class NpcArt : Node2D, IStageEffect, IBlockingStageEffect
 
 	public override void _Process(double delta)
 	{
+		if (Engine.IsEditorHint()) return;
 		if (_walkTarget is not float target) return;
 		Vector2 pos = Body.GlobalPosition;
 		float step = WalkSpeed * (float)delta;
