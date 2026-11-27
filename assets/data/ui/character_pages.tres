@@ -1,0 +1,23 @@
+[gd_resource type="Resource" script_class="CharacterPageTable" format=3]
+
+[ext_resource type="Script" path="res://assets/scripts/ui/CharacterPageTable.cs" id="table"]
+[ext_resource type="Script" path="res://assets/scripts/ui/CharacterPage.cs" id="page"]
+[ext_resource type="Texture2D" uid="uid://bjrel3ec5pbdh" path="res://assets/data/narrative/portrait/por_mul_tukul_full.png" id="por_mul_tukul"]
+[ext_resource type="Texture2D" uid="uid://dvhsnc6mb6f1u" path="res://assets/data/narrative/portrait/por_igi_full.png" id="por_igi"]
+
+[sub_resource type="Resource" id="P_mul_tukul"]
+script = ExtResource("page")
+Id = "mul_tukul"
+DisplayName = "穆尔图库尔"
+Portrait = ExtResource("por_mul_tukul")
+
+[sub_resource type="Resource" id="P_igi"]
+script = ExtResource("page")
+Id = "igi"
+DisplayName = "伊吉"
+Portrait = ExtResource("por_igi")
+MetFlag = &"talked.igi"
+
+[resource]
+script = ExtResource("table")
+Pages = Array[ExtResource("page")]([SubResource("P_mul_tukul"), SubResource("P_igi")])

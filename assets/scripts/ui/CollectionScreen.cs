@@ -6,7 +6,9 @@ using SonOfMud.Core;
 namespace SonOfMud.UI;
 
 /// <summary>
-/// 收集页（Tab）：左边主角立绘，右边上排 3 个道具格、下面 2 × 4 共 8 个收集品格，最下面是说明栏。
+/// 收集页（Tab）：左边人物页（全身立绘），右边上排 3 个道具格、下面 2 × 4 共 8 个收集品格，最下面是说明栏。
+/// 人物页来自 CharacterPageTable（assets/data/ui/character_pages.tres）：遇到过的人物才有一页（主角一开始就有，伊吉第一次说完话后加上），
+/// 用鼠标点左右箭头翻页（到头了接着从另一头开始），只有一页时不显示箭头和页码；键盘不翻页（方向键用来选格子）。
 /// 格子内容来自 CollectionTable（assets/data/ui/collection_entries.tres），每次打开时按当前进度刷新：
 /// 得到过的显示图（图存在场景里每格的 Icon 上，编辑器里看得到、能换；泥肝写「现有 / 5」，有几件的类别写「已得到 / 总数」），没得到过的是空格。
 /// 打开时 PauseService.Request(Collection, true)，关闭时释放；ProcessMode = Always。开关和互斥由 GameUi 决定。
@@ -28,6 +30,7 @@ public partial class CollectionScreen : Control
     /// <summary>可调数值；不导出，统一用 UiSettings.Shared。测试可以替换。</summary>
     public UiSettings Settings { get; set; }
     public CollectionTable Table { get; set; }
+    public CharacterPageTable People { get; set; }
 
     public bool IsOpen { get; private set; }
     public int Selected { get; private set; }
@@ -40,10 +43,26 @@ public partial class CollectionScreen : Control
     private readonly List<Control> _slots = new();
     private readonly List<CollectionEntry> _entries = new();
 
+    public TextureRect PortraitRect { get; private set; }
+    public Label PersonName { get; private set; }
+    public Label PersonPage { get; private set; }
+    public BaseButton PrevPerson { get; private set; }
+    public BaseButton NextPerson { get; private set; }
+    /// <summary>现在显示的人物编号（CharacterPage.Id）。</summary>
+    public string CurrentPerson { get; private set; } = "";
+
     public override void _Ready()
     {
         Settings ??= UiSettings.Shared;
         Table ??= GD.Load<CollectionTable>(CollectionTable.DefaultPath);
+        People ??= GD.Load<CharacterPageTable>(CharacterPageTable.DefaultPath);
+        PortraitRect = GetNodeOrNull<TextureRect>("Portrait");
+        PersonName = GetNodeOrNull<Label>("People/Name");
+        PersonPage = GetNodeOrNull<Label>("People/Page");
+        PrevPerson = GetNodeOrNull<BaseButton>("People/Prev");
+        NextPerson = GetNodeOrNull<BaseButton>("People/Next");
+        if (PrevPerson != null) PrevPerson.Pressed += () => TurnPerson(-1);
+        if (NextPerson != null) NextPerson.Pressed += () => TurnPerson(1);
         ProcessMode = ProcessModeEnum.Always;
         Visible = false;
         NameLabel = GetNodeOrNull<Label>("Desc/Name");
@@ -90,9 +109,51 @@ public partial class CollectionScreen : Control
         PauseService.Request(PauseService.Collection, false);
     }
 
-    /// <summary>按当前进度刷新 11 个格子。</summary>
+    /// <summary>遇到过的人物（按表里的顺序）。</summary>
+    public List<CharacterPage> MetPeople()
+    {
+        var list = new List<CharacterPage>();
+        if (People == null) return list;
+        foreach (CharacterPage page in People.Pages)
+            if (page != null && page.Met(GameSession.Progress)) list.Add(page);
+        return list;
+    }
+
+    /// <summary>翻页：step = -1 上一个、+1 下一个，到头了从另一头接着翻。</summary>
+    public void TurnPerson(int step)
+    {
+        List<CharacterPage> met = MetPeople();
+        if (met.Count == 0) return;
+        int at = met.FindIndex(p => p.Id == CurrentPerson);
+        if (at < 0) at = 0;
+        CurrentPerson = met[((at + step) % met.Count + met.Count) % met.Count].Id;
+        ShowPerson();
+    }
+
+    /// <summary>显示 CurrentPerson 的立绘和名字（不在遇到过的人物里时显示第一个）；一页时藏起箭头和页码。</summary>
+    private void ShowPerson()
+    {
+        List<CharacterPage> met = MetPeople();
+        int at = met.FindIndex(p => p.Id == CurrentPerson);
+        if (at < 0 && met.Count > 0) at = 0;
+        CharacterPage page = at >= 0 ? met[at] : null;
+        CurrentPerson = page?.Id ?? "";
+        if (PortraitRect != null && page?.Portrait != null) PortraitRect.Texture = page.Portrait;
+        if (PersonName != null) PersonName.Text = page?.DisplayName ?? "";
+        bool many = met.Count > 1;
+        if (PersonPage != null)
+        {
+            PersonPage.Text = many ? $"{at + 1} / {met.Count}" : "";
+            PersonPage.Visible = many;
+        }
+        if (PrevPerson != null) PrevPerson.Visible = many;
+        if (NextPerson != null) NextPerson.Visible = many;
+    }
+
+    /// <summary>按当前进度刷新人物页和 11 个格子。</summary>
     public void Refresh()
     {
+        ShowPerson();
         ProgressStore progress = GameSession.Progress;
         for (int i = 0; i < _slots.Count; i++)
         {
