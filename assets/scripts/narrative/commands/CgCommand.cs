@@ -1,4 +1,5 @@
 using System;
+using SonOfMud.Core;
 using SonOfMud.Narrative.Data;
 using SonOfMud.Narrative.Runtime;
 using SonOfMud.Narrative.Views;
@@ -10,6 +11,8 @@ namespace SonOfMud.Narrative.Commands;
 /// [CG id 淡入秒数 单独展示秒数]：先收起对话框，让画面单独停这么久再继续。
 /// [CG 无 淡出秒数]：关掉 CG。CG 数据在 assets/data/narrative/cg/cg_&lt;id&gt;.tres。
 /// 动画 CG（CG 数据里填了 AnimatedScene）：收起对话框、从头播到尾（不能跳过，台词是场景里的字幕），播完才继续往下走。
+/// CG 真的显示出来时记进主页面「收集」（CollectionRecord.MarkCg）：静态 CG 交给 CG 层之后、动画 CG 开播成功之后；
+/// 自动推进、没有 CG 层、找不到 CG 数据、动画开播失败都不记。
 /// </summary>
 public class CgCommand : VNCommand
 {
@@ -36,6 +39,7 @@ public class CgCommand : VNCommand
             return;
         }
         ctx.Cg?.Show(data, ctx.Runner.AutoAdvance ? 0f : fade);
+        if (ctx.Cg != null && !ctx.Runner.AutoAdvance) CollectionRecord.MarkCg(data.Id);
         float alone = FloatArg(args, 2, 0f);
         if (alone <= 0f || ctx.Runner.AutoAdvance)
         {
@@ -107,6 +111,7 @@ public class CgCommand : VNCommand
             Finish(false, "播放失败：" + e.Message);
             return;
         }
+        CollectionRecord.MarkCg(data.Id);   // 开播成功才算解锁
         // ⑤ 超时保险：正常播完后 completed 已经是 true，这个回调走到第一行就返回
         ctx.Runner.After(playback.Duration + fade + TimeoutMargin, () => Finish(false, "超时没有播完"));
     }

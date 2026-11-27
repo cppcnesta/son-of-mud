@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="CgData" format=3]
+
+[ext_resource type="Script" path="res://assets/scripts/narrative/data/CgData.cs" id="1_cg"]
+[ext_resource type="PackedScene" path="res://tests/ui/fixtures/cg/broken_anim.tscn" id="2_scene"]
+
+[resource]
+script = ExtResource("1_cg")
+Id = "broken_anim"
+Title = "测试坏动画（根节点不是动画 CG）"
+AnimatedScene = ExtResource("2_scene")
