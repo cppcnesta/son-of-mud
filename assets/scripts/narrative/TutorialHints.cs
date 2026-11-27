@@ -8,8 +8,8 @@ namespace SonOfMud.Narrative;
 /// <summary>
 /// 新手引导：剧本 tutorial.orph 里每条提示一个标签（第一行 [字幕]），用底部字幕条显示，不暂停、不锁操作。
 /// 提示不在条件满足的那一刻播，而是「先记下该播，等空了再播」：
-/// - 条件：引导区（TutorialZone）写的 tutorial.due.&lt;标签&gt;，或者现成的进度变量（捡到过泥板 tablet.*、obtained.泥肝、obtained.泥瓶），
-///   以及第一次贴到能爬的墙（本节点看到后写 tutorial.due.攀墙）。这些都在进度里，跟着存档走。
+/// - 条件：引导区（TutorialZone）写的 tutorial.due.&lt;标签&gt;，或者现成的进度变量（捡到过泥板 tablet.*、obtained.泥肝、obtained.泥瓶）。
+///   这些都在进度里，跟着存档走。
 /// - 要播的提示 = 条件成立 且 还没看过（seen.tutorial.&lt;标签&gt;，字幕正常播完时剧情层写）。每次都从进度重新算，不另存队列，
 ///   所以换房间、存读档以后结果一样；播到一半被主剧情打断、被别的字幕顶掉都不算看过，空下来后重播。
 /// - 什么时候播：没有主剧情（也没有排队的）、字幕条空着、游戏没暂停、没有输入锁，并且这样空闲了 <see cref="Gap"/> 秒，
@@ -20,7 +20,6 @@ public partial class TutorialHints : Node
 {
     public const string ScriptId = "tutorial";
     public const string DuePrefix = "tutorial.due.";
-    public const string Climb = "攀墙";
 
     /// <summary>总开关，默认开。流程测试默认关掉（和 AutoOpeningEnabled 一样），只有测引导的测试打开。</summary>
     public static bool Enabled { get; set; } = true;
@@ -36,7 +35,7 @@ public partial class TutorialHints : Node
     public static readonly Hint[] Hints =
     {
         new("移动", Source.Zone),
-        new(Climb, Source.Zone),
+        new("攀墙", Source.Zone),
         new("闪避", Source.Zone),
         new("攻击", Source.Zone),
         new("格挡", Source.Zone),
@@ -104,8 +103,6 @@ public partial class TutorialHints : Node
         if (Director == null) return;
         if (Playing != "" && !(Director.Bark.IsPlaying && Director.BarkScript == ScriptId && Director.BarkLabel == Playing)) Playing = "";
         if (!Enabled) return;
-
-        if (PlayerRegistry.Current is IWallSensor wall && !PauseService.IsPaused && wall.TouchingClimbableWall) MarkDue(Climb);
 
         if (!Idle())
         {

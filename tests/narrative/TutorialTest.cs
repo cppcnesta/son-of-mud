@@ -59,6 +59,7 @@ public partial class TutorialTest : NarrativeFlowBase
             await OpeningThenMove();
             await DodgeAndTablet();
             await AttackInterrupted();
+            await ClimbZone();
             await BlockAndLiver();
             await BottleSaveLoad();
 
@@ -186,7 +187,7 @@ public partial class TutorialTest : NarrativeFlowBase
         await WaitAllQuiet();
         bool inS103 = await CrossEdge("S1_02", "From_S1_03", "S1_03");
         Check(inS103, "S1_02 → S1_03");
-        // 入口往右不远有一面墙（攀墙提示就是在这里第一次出现的），像玩家一样按住右和上爬过去、隔一会儿跳一下
+        // 入口往右不远有一级台阶，像玩家一样按住右和上、隔一会儿跳一下
         bool due = await ClimbRightUntil(() => P.Flag(TutorialHints.DueKey("攻击")), 900);
         bool occupied = Narr.Bark.IsPlaying;
         Check(due && occupied && !_hints.Contains("攻击") && Requests.Contains("m_pit:朝圣者之路"),
@@ -210,6 +211,24 @@ public partial class TutorialTest : NarrativeFlowBase
         Check(Narr.MainActive && !Narr.Bark.IsPlaying && !Narr.Subtitle.IsShowing && !Seen("攻击"), "6：主剧情开始，字幕收起，攻击提示不算看过");
         Check(await FinishDialog(), "6：播完这段对话");
         Check(await WaitUntil(() => Count("攻击") == 3, 600) && await WaitUntil(() => Seen("攻击"), 900), "6：剧情结束后攻击提示再出现并正常播完");
+    }
+
+    // ---------- 攀墙：S1_03 右边台阶底下（去 S1_04 要爬墙的地方） ----------
+
+    private async Task ClimbZone()
+    {
+        Check(!P.Flag(TutorialHints.DueKey("攀墙")) && !_hints.Contains("攀墙"), "攀墙：在 S1_01～S1_03 前半段贴过墙、跳过台阶，都还没有攀墙提示");
+        await WaitAllQuiet();
+        await Teleport("S1_03", "Default");
+        Player.GlobalPosition = World.CurrentRoom.GlobalPosition + new Vector2(2900, 900);
+        await Frames(10);
+        bool due = await ClimbRightUntil(() => P.Flag(TutorialHints.DueKey("攀墙")), 600);  // 台阶一两格高，要跳上去
+        Check(due, $"攀墙：走到 S1_03 右边台阶底下记下攀墙提示（玩家 x {LocalX:0}）");
+        await Teleport("S1_01", "Default");
+        bool shown = await WaitUntil(() => Narr.Tutorial.Playing == "攀墙", 300);
+        await WaitUntil(() => Narr.Subtitle.CurrentText.StartsWith("贴着墙"), 240);
+        Check(shown && Narr.Subtitle.CurrentText == "贴着墙，按住朝墙的方向和 W 往上爬；爬的时候按空格蹬墙跳。", $"攀墙：字幕条出现攀墙提示（{Narr.Subtitle.CurrentText}）" + Diag());
+        Check(await WaitUntil(() => Seen("攀墙"), 900) && Count("攀墙") == 1, "攀墙：正常播完，只播一次");
     }
 
     // ---------- 3 和 4：格挡、泥肝接连触发，泥肝在字幕条被占着时得到 ----------
