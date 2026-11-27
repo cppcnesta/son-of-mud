@@ -1,14 +1,20 @@
 [gd_scene format=4 uid="uid://bvy2eyo75srok"]
 
-[ext_resource type="Script" path="res://assets/scripts/world/RoomRoot.cs" id="1_4wph7"]
-[ext_resource type="PackedScene" path="res://addons/MetroidvaniaSystem/Nodes/RoomInstance.tscn" id="2_v87k5"]
-[ext_resource type="TileSet" path="res://assets/data/world/world_tileset.tres" id="4_2l4lm"]
-[ext_resource type="Script" path="res://assets/scripts/world/SpawnPoint.cs" id="5_51bnd"]
-[ext_resource type="Script" path="res://assets/scripts/world/RoomDoor.cs" id="6_kwyix"]
-[ext_resource type="Script" path="res://assets/scripts/narrative/world/StoryTrigger.cs" id="n_story"]
+[ext_resource type="Script" uid="uid://bp6qc4ftue0bq" path="res://assets/scripts/world/RoomRoot.cs" id="1_4wph7"]
+[ext_resource type="Texture2D" uid="uid://bubj6211cafam" path="res://assets/art/world/bg/s3/tex_bg_s3_08_far_01.png" id="2_p43pj"]
+[ext_resource type="PackedScene" uid="uid://bsg0351mx3b4u" path="res://addons/MetroidvaniaSystem/Nodes/RoomInstance.tscn" id="2_v87k5"]
+[ext_resource type="Texture2D" uid="uid://ba2ccpvx80rvb" path="res://assets/art/world/bg/s3/tex_bg_s3_08_far_02.png" id="3_3ppe4"]
+[ext_resource type="TileSet" uid="uid://cjutdcfket0jk" path="res://assets/data/world/world_tileset.tres" id="4_2l4lm"]
+[ext_resource type="Texture2D" uid="uid://dpl240jg3bpfk" path="res://assets/art/world/bg/s3/tex_bg_s3_08_far_03.png" id="4_htjvc"]
+[ext_resource type="Script" uid="uid://170bxbdwtr2a" path="res://assets/scripts/world/SpawnPoint.cs" id="5_51bnd"]
+[ext_resource type="Texture2D" uid="uid://d3axm648mup21" path="res://assets/art/world/bg/s3/tex_bg_s3_08_far_04.png" id="5_g7q0l"]
+[ext_resource type="Script" uid="uid://cgnjd0envrt0u" path="res://assets/scripts/world/RoomDoor.cs" id="6_kwyix"]
+[ext_resource type="Texture2D" uid="uid://bpn6qu0jv6f0i" path="res://assets/art/world/bg/s3/tex_bg_s3_08_mid_02.png" id="6_l6oaq"]
+[ext_resource type="Texture2D" uid="uid://coya6dqhw3w1x" path="res://assets/art/world/bg/s4/tex_bg_s4_02_front_02.png" id="11_7hdw3"]
+[ext_resource type="Script" uid="uid://gcj5me3gasqr" path="res://assets/scripts/narrative/world/StoryTrigger.cs" id="n_story"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_p43pj"]
-size = Vector2(112, 176)
+size = Vector2(123, 72)
 
 [sub_resource type="RectangleShape2D" id="Shape_Story_Ascend"]
 size = Vector2(2304, 1296)
@@ -18,9 +24,77 @@ script = ExtResource("1_4wph7")
 RoomId = "S3_08"
 DisplayName = "登塔入口"
 
+[node name="Background" type="Node2D" parent="." unique_id=1366515972]
+z_index = -100
+metadata/bg_version = 2
+
+[node name="Far" type="Node2D" parent="Background" unique_id=1049718575]
+
+[node name="Far01" type="Parallax2D" parent="Background/Far" unique_id=1478246283]
+z_index = -100
+z_as_relative = false
+metadata/bg_piece = "far_01"
+
+[node name="Image" type="Sprite2D" parent="Background/Far/Far01" unique_id=1814449485]
+position = Vector2(-3.6000001, 414.00003)
+scale = Vector2(0.41461286, 0.7020056)
+texture = ExtResource("2_p43pj")
+centered = false
+
+[node name="Far02" type="Parallax2D" parent="Background/Far" unique_id=352751399]
+z_index = -101
+z_as_relative = false
+scroll_scale = Vector2(0.15, 0.15)
+metadata/bg_piece = "far_02"
+
+[node name="Image" type="Sprite2D" parent="Background/Far/Far02" unique_id=1763957818]
+position = Vector2(-3.6000001, 197.99998)
+scale = Vector2(0.2983543, 0.33402064)
+texture = ExtResource("3_3ppe4")
+centered = false
+
+[node name="Far03" type="Parallax2D" parent="Background/Far" unique_id=895131239]
+z_index = -102
+z_as_relative = false
+scroll_scale = Vector2(0.15, 0.15)
+metadata/bg_piece = "far_03"
+
+[node name="Image" type="Sprite2D" parent="Background/Far/Far03" unique_id=1560698994]
+position = Vector2(-86, 247.00002)
+scale = Vector2(0.3401097, 0.5504052)
+texture = ExtResource("4_htjvc")
+centered = false
+
+[node name="Far04" type="Parallax2D" parent="Background/Far" unique_id=164291096]
+z_index = -103
+z_as_relative = false
+scroll_scale = Vector2(0.15, 0.15)
+metadata/bg_piece = "far_04"
+
+[node name="Image" type="Sprite2D" parent="Background/Far/Far04" unique_id=1404051925]
+position = Vector2(-466.00003, -212.00002)
+scale = Vector2(0.46800002, 0.50339997)
+texture = ExtResource("5_g7q0l")
+centered = false
+
+[node name="Mid" type="Node2D" parent="Background" unique_id=528665814]
+
+[node name="Mid02" type="Parallax2D" parent="Background/Mid" unique_id=712697054]
+z_index = -81
+z_as_relative = false
+scroll_scale = Vector2(0.5, 0.5)
+metadata/bg_piece = "mid_02"
+
+[node name="Image" type="Sprite2D" parent="Background/Mid/Mid02" unique_id=1803924660]
+position = Vector2(-283, 62)
+scale = Vector2(0.42884803, 0.43446243)
+texture = ExtResource("6_l6oaq")
+centered = false
+
 [node name="RoomInstance" parent="." unique_id=1246059462 instance=ExtResource("2_v87k5")]
 
 [node name="Geometry" type="TileMapLayer" parent="." unique_id=1242692955]
+visible = false
 position = Vector2(0, -16)
 tile_map_data = PackedByteArray("AAAAAAkAAAAAAAAAAAAAAAAAAAAAAAAAAAARAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAIAAAAAAAAAAAAAAAMAAAAAAAAAAAAAAAQAAAAAAAAAAAABAAAAAAAAAAAAAAACAAAAAAAAAAAAAAADAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAFAAAAAAAAAAAAAAAGAAAAAAAAAAAAAAAHAAAAAAAAAAAAAAAIAAAAAAAAAAAAAAAJAAAAAAAAAAAAAAAKAAAAAAAAAAAAAAALAAAAAAAAAAAAAAAMAAAAAAAAAAAAAAANAAAAAAAAAAAAAAAOAAAAAAAAAAAAAAAPAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAASAAAAAAAAAAAAAAATAAAAAAAAAAAAAAAUAAAAAAAAAAAAAAAVAAAAAAAAAAAAAAAWAAAAAAAAAAAAAAAXAAAAAAAAAAAAAAAYAAAAAAAAAAAAAAAZAAAAAAAAAAAAAAAaAAAAAAAAAAAAAAAbAAAAAAAAAAAAAAAcAAAAAAAAAAAAAAAdAAAAAAAAAAAAAAAeAAAAAAAAAAAAAAAfAAAAAAAAAAAAAAAgAAAAAAAAAAAAAAAhAAAAAAAAAAAAAAAiAAAAAAAAAAAAAAAjAAAAAAAAAAAAAAABAAEAAAAAAAAAAAAiAAEAAAAAAAAAAAAjAAEAAAAAAAAAAAABAAIAAAAAAAAAAAAiAAIAAAAAAAAAAAAjAAIAAAAAAAAAAAABAAMAAAAAAAAAAAAiAAMAAAAAAAAAAAAjAAMAAAAAAAAAAAABAAQAAAAAAAAAAAAiAAQAAAAAAAAAAAAjAAQAAAAAAAAAAAAAAAUAAAAAAAAAAAABAAUAAAAAAAAAAAAiAAUAAAAAAAAAAAAjAAUAAAAAAAAAAAAAAAYAAAAAAAAAAAABAAYAAAAAAAAAAAAiAAYAAAAAAAAAAAAjAAYAAAAAAAAAAAAAAAcAAAAAAAAAAAABAAcAAAAAAAAAAAAiAAcAAAAAAAAAAAAjAAcAAAAAAAAAAAAAAAgAAAAAAAAAAAABAAgAAAAAAAAAAAAiAAgAAAAAAAAAAAAjAAgAAAAAAAAAAAAiAAkAAAAAAAAAAAAjAAkAAAAAAAAAAAAiAAoAAAAAAAAAAAAjAAoAAAAAAAAAAAAiAAsAAAAAAAAAAAAjAAsAAAAAAAAAAAAiAAwAAAAAAAAAAAAjAAwAAAAAAAAAAAAiAA0AAAAAAAAAAAAjAA0AAAAAAAAAAAAiAA4AAAAAAAAAAAAjAA4AAAAAAAAAAAAiAA8AAAAAAAAAAAAjAA8AAAAAAAAAAAAiABAAAAAAAAAAAAAjABAAAAAAAAAAAAAAABEAAAAAAAAAAAABABEAAAAAAAAAAAACABEAAAAAAAAAAAADABEAAAAAAAAAAAAEABEAAAAAAAAAAAAFABEAAAAAAAAAAAAGABEAAAAAAAAAAAAHABEAAAAAAAAAAAAIABEAAAAAAAAAAAAJABEAAAAAAAAAAAAKABEAAAAAAAAAAAALABEAAAAAAAAAAAAMABEAAAAAAAAAAAANABEAAAAAAAAAAAAOABEAAAAAAAAAAAAPABEAAAAAAAAAAAAQABEAAAAAAAAAAAARABEAAAAAAAAAAAASABEAAAAAAAAAAAATABEAAAAAAAAAAAAUABEAAAAAAAAAAAAVABEAAAAAAAAAAAAWABEAAAAAAAAAAAAXABEAAAAAAAAAAAAYABEAAAAAAAAAAAAZABEAAAAAAAAAAAAaABEAAAAAAAAAAAAbABEAAAAAAAAAAAAcABEAAAAAAAAAAAAdABEAAAAAAAAAAAAeABEAAAAAAAAAAAAfABEAAAAAAAAAAAAgABEAAAAAAAAAAAAhABEAAAAAAAAAAAAiABEAAAAAAAAAAAAjABEAAAAAAAAAAAAAABIAAAAAAAAAAAABABIAAAAAAAAAAAACABIAAAAAAAAAAAADABIAAAAAAAAAAAAEABIAAAAAAAAAAAAFABIAAAAAAAAAAAAGABIAAAAAAAAAAAAHABIAAAAAAAAAAAAIABIAAAAAAAAAAAAJABIAAAAAAAAAAAAKABIAAAAAAAAAAAALABIAAAAAAAAAAAAMABIAAAAAAAAAAAANABIAAAAAAAAAAAAOABIAAAAAAAAAAAAPABIAAAAAAAAAAAAQABIAAAAAAAAAAAARABIAAAAAAAAAAAASABIAAAAAAAAAAAATABIAAAAAAAAAAAAUABIAAAAAAAAAAAAVABIAAAAAAAAAAAAWABIAAAAAAAAAAAAXABIAAAAAAAAAAAAYABIAAAAAAAAAAAAZABIAAAAAAAAAAAAaABIAAAAAAAAAAAAbABIAAAAAAAAAAAAcABIAAAAAAAAAAAAdABIAAAAAAAAAAAAeABIAAAAAAAAAAAAfABIAAAAAAAAAAAAgABIAAAAAAAAAAAAhABIAAAAAAAAAAAAiABIAAAAAAAAAAAAjABIAAAAAAAAAAAAAABMAAAAAAAAAAAABABMAAAAAAAAAAAACABMAAAAAAAAAAAADABMAAAAAAAAAAAAEABMAAAAAAAAAAAAFABMAAAAAAAAAAAAGABMAAAAAAAAAAAAHABMAAAAAAAAAAAAIABMAAAAAAAAAAAAJABMAAAAAAAAAAAAKABMAAAAAAAAAAAALABMAAAAAAAAAAAAMABMAAAAAAAAAAAANABMAAAAAAAAAAAAOABMAAAAAAAAAAAAPABMAAAAAAAAAAAAQABMAAAAAAAAAAAARABMAAAAAAAAAAAASABMAAAAAAAAAAAATABMAAAAAAAAAAAAUABMAAAAAAAAAAAAVABMAAAAAAAAAAAAWABMAAAAAAAAAAAAXABMAAAAAAAAAAAAYABMAAAAAAAAAAAAZABMAAAAAAAAAAAAaABMAAAAAAAAAAAAbABMAAAAAAAAAAAAcABMAAAAAAAAAAAAdABMAAAAAAAAAAAAeABMAAAAAAAAAAAAfABMAAAAAAAAAAAAgABMAAAAAAAAAAAAhABMAAAAAAAAAAAAiABMAAAAAAAAAAAAjABMAAAAAAAAAAAAAABQAAAAAAAAAAAABABQAAAAAAAAAAAACABQAAAAAAAAAAAADABQAAAAAAAAAAAAEABQAAAAAAAAAAAAFABQAAAAAAAAAAAAGABQAAAAAAAAAAAAHABQAAAAAAAAAAAAIABQAAAAAAAAAAAAJABQAAAAAAAAAAAAKABQAAAAAAAAAAAALABQAAAAAAAAAAAAMABQAAAAAAAAAAAANABQAAAAAAAAAAAAOABQAAAAAAAAAAAAPABQAAAAAAAAAAAAQABQAAAAAAAAAAAARABQAAAAAAAAAAAASABQAAAAAAAAAAAATABQAAAAAAAAAAAAUABQAAAAAAAAAAAAVABQAAAAAAAAAAAAWABQAAAAAAAAAAAAXABQAAAAAAAAAAAAYABQAAAAAAAAAAAAZABQAAAAAAAAAAAAaABQAAAAAAAAAAAAbABQAAAAAAAAAAAAcABQAAAAAAAAAAAAdABQAAAAAAAAAAAAeABQAAAAAAAAAAAAfABQAAAAAAAAAAAAgABQAAAAAAAAAAAAhABQAAAAAAAAAAAAiABQAAAAAAAAAAAAjABQAAAAAAAAAAAA=")
 tile_set = ExtResource("4_2l4lm")
@@ -57,15 +131,14 @@ TargetRoom = "S4_01"
 TargetSpawn = &"From_S3_08"
 
 [node name="Shape" type="CollisionShape2D" parent="Objects/DoorToS4_01" unique_id=1136478635]
-position = Vector2(0, -88)
+position = Vector2(128, -117)
 shape = SubResource("RectangleShape2D_p43pj")
 
-[node name="Placeholder" type="ColorRect" parent="Objects/DoorToS4_01" unique_id=1031573058]
-offset_left = -48.0
-offset_top = -160.0
-offset_right = 48.0
-mouse_filter = 2
-color = Color(0.25, 0.4, 0.8, 0.8)
+[node name="Image" type="Sprite2D" parent="Objects/DoorToS4_01" unique_id=1765074307]
+position = Vector2(-932.00006, -660)
+scale = Vector2(0.46129033, 0.46129033)
+texture = ExtResource("11_7hdw3")
+centered = false
 
 [node name="Story_Ascend" type="Area2D" parent="Objects" unique_id=1403306025]
 position = Vector2(656, 528)
@@ -76,4 +149,5 @@ Mode = 1
 Once = true
 
 [node name="Shape" type="CollisionShape2D" parent="Objects/Story_Ascend" unique_id=1190128569]
+visible = false
 shape = SubResource("Shape_Story_Ascend")
